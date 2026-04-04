@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meshcore Drenthe — Unit Tests</title>
+  <style>
+    :root {
+      --pass: #2d6a4f;
+      --fail: #e76f51;
+      --skip: #f4a261;
+      --bg: #fafaf5;
+      --text: #2b2b2b;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    .summary { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-weight: 600; }
+    .summary--pass { background: #d8f3dc; color: var(--pass); }
+    .summary--fail { background: #fce4e4; color: var(--fail); }
+    .suite { margin-bottom: 1.5rem; }
+    .suite__name { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 2px solid #ddd; }
+    .test { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.35rem 0; font-size: 0.9rem; }
+    .test__status { font-weight: 700; min-width: 3rem; }
+    .test__status--pass { color: var(--pass); }
+    .test__status--fail { color: var(--fail); }
+    .test__error { color: var(--fail); font-size: 0.85rem; padding-left: 3.5rem; white-space: pre-wrap; font-family: monospace; }
+    .duration { color: #999; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <h1>Meshcore Drenthe — Unit Tests</h1>
+  <div id="summary" class="summary">Bezig met testen…</div>
+  <div id="results"></div>
+
+  <script>
+    /**
+     * TestRunner — Minimale test runner, geen externe dependencies.
+     * Draait in de browser, geen ES Modules nodig.
+     */
+    class TestRunner {
+      constructor() {
+        this.suites = [];
+        this.currentSuite = null;
+      }
+
+      describe(name, fn) {
+        this.currentSuite = { name, tests: [] };
+        this.suites.push(this.currentSuite);
+        fn();
+        this.currentSuite = null;
+      }
+
+      it(name, fn) {
+        if (!this.currentSuite) throw new Error('it() must be called inside describe()');
+        this.currentSuite.tests.push({ name, fn });
+      }
+
+      async run() {
+        const results = [];
+        let passed = 0;
+        let failed = 0;
+        const t0 = performance.now();
+
+        for (const suite of this.suites) {
+          const suiteResults = [];
+          for (const test of suite.tests) {
+            try {
+              await test.fn();
+              suiteResults.push({ name: test.name, pass: true });
+              passed++;
+            } catch (err) {
+              suiteResults.push({ name: test.name, pass: false, error: err.message || String(err) });
+              failed++;
+            }
+          }
+          results.push({ name: suite.name, tests: suiteResults });
+        }
+
+        const duration = (performance.now() - t0).toFixed(1);
+        this.render(results, passed, failed, duration);
+      }
+
+      render(results, passed, failed, duration) {
+        const summary = document.getElementById('summary');
+        const container = document.getElementById('results');
+        const total = passed + failed;
+
+        summary.textContent = `${passed}/${total} geslaagd — ${failed} gefaald — ${duration} ms`;
+        summary.className = `summary ${failed === 0 ? 'summary--pass' : 'summary--fail'}`;
+
+        container.innerHTML = '';
+        for (const suite of results) {
+          const div = document.createElement('div');
+          div.className = 'suite';
+          div.innerHTML = `<div class="suite__name">${suite.name}</div>`;
+          for (const test of suite.tests) {
+            const status = test.pass ? 'pass' : 'fail';
+            div.innerHTML += `
+              <div class="test">
+                <span class="test__status test__status--${status}">${test.pass ? '✓' : '✗'}</span>
+                <span>${test.name}</span>
+              </div>
+              ${test.error ? `<div class="test__error">${test.error}</div>` : ''}`;
+          }
+          container.appendChild(div);
+        }
+
+        // Console output for CI/automation
+        console.log(`\n=== Test Results: ${passed}/${total} passed (${duration} ms) ===`);
+        if (failed > 0) {
+          console.error(`${failed} test(s) FAILED`);
+        }
+      }
+    }
+
+    // ─── Global test helpers ───
+    var runner = new TestRunner();
+    var describe = function(name, fn) { runner.describe(name, fn); };
+    var it = function(name, fn) { runner.it(name, fn); };
+
+    var assert = {
+      equal: function(actual, expected, msg) {
+        msg = msg || '';
+        if (actual !== expected) {
+          throw new Error((msg ? msg + ': ' : '') + 'Expected ' + JSON.stringify(expected) + ', got ' + JSON.stringify(actual));
+        }
+      },
+      notEqual: function(actual, notExpected, msg) {
+        msg = msg || '';
+        if (actual === notExpected) {
+          throw new Error((msg ? msg + ': ' : '') + 'Expected value to differ from ' + JSON.stringify(notExpected));
+        }
+      },
+      ok: function(value, msg) {
+        msg = msg || '';
+        if (!value) {
+          throw new Error((msg ? msg + ': ' : '') + 'Expected truthy value, got ' + JSON.stringify(value));
+        }
+      },
+      throws: function(fn, msg) {
+        msg = msg || '';
+        var threw = false;
+        try { fn(); } catch(e) { threw = true; }
+        if (!threw) throw new Error((msg ? msg + ': ' : '') + 'Expected function to throw');
+      },
+      includes: function(haystack, needle, msg) {
+        msg = msg || '';
+        if (typeof haystack === 'string' && haystack.indexOf(needle) === -1) {
+          throw new Error((msg ? msg + ': ' : '') + 'Expected "' + haystack + '" to include "' + needle + '"');
+        }
+        if (Array.isArray(haystack) && haystack.indexOf(needle) === -1) {
+          throw new Error((msg ? msg + ': ' : '') + 'Expected array to include ' + JSON.stringify(needle));
+        }
+      },
+      isElement: function(el, msg) {
+        msg = msg || '';
+        if (!(el instanceof Element)) {
+          throw new Error((msg ? msg + ': ' : '') + 'Expected a DOM Element, got ' + typeof el);
+        }
+      },
+    };
+  </script>
+
+  <!-- Source files (zelfde volgorde als in index.html) -->
+  <script src="../js/config/settings.js"></script>
+  <script src="../js/config/nodes.js"></script>
+  <script src="../js/utils/dom.js"></script>
+  <script src="../js/utils/svg.js"></script>
+  <script src="../js/components/page-shell.js"></script>
+  <script src="../js/components/theme-toggle.js"></script>
+  <script src="../js/components/navigation.js"></script>
+  <script src="../js/components/map-interactive.js"></script>
+
+  <!-- Test suites -->
+  <script src="unit/page-shell.test.js"></script>
+  <script src="unit/theme-toggle.test.js"></script>
+  <script src="unit/navigation.test.js"></script>
+  <script src="unit/dom.test.js"></script>
+  <script src="unit/map-interactive.test.js"></script>
+
+  <!-- Run all tests after everything is loaded -->
+  <script>runner.run();</script>
+</body>
+</html>

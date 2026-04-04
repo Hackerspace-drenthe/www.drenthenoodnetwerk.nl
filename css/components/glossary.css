@@ -1,0 +1,65 @@
+/* ==========================================================================
+   Glossary Component — Woordenlijst styling
+   ========================================================================== */
+
+.glossary-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-xl);
+}
+
+.glossary-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  transition: background-color var(--transition-fast);
+}
+
+.glossary-nav a:hover {
+  background: var(--color-bg-alt);
+}
+
+.glossary-letter {
+  margin-top: var(--space-2xl);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-xs);
+  border-bottom: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+}
+
+.glossary-list {
+  list-style: none;
+  padding: 0;
+}
+
+.glossary-list li {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.glossary-list li:last-child {
+  border-bottom: none;
+}
+
+.glossary-term {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+}
+
+.glossary-def {
+  margin-top: var(--space-xs);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-base);
+}

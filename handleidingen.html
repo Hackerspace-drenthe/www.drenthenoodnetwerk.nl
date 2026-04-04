@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handleidingen — Meshcore Drenthe</title>
+  <meta name="description" content="Stap-voor-stap handleidingen voor het bouwen, configureren en plaatsen van Meshcore nodes. Van firmware flashen tot zonnepaneel aansluiten.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Handleidingen — Meshcore Drenthe">
+  <meta property="og:description" content="Stap-voor-stap handleidingen voor het bouwen en configureren van Meshcore nodes.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/interactive.css">
+  <link rel="stylesheet" href="css/pages/handleidingen.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container container--narrow">
+      <h1>Handleidingen</h1>
+      <p style="color:var(--color-text-muted);margin-bottom:var(--space-2xl);max-width:65ch;">Stap-voor-stap handleidingen om je eigen <a href="woordenlijst.html#node">node</a> te bouwen, configureren en plaatsen. Geen programmeerkennis nodig. Tijdens de <a href="planning.html">hak-avonden</a> helpen we je op weg.</p>
+
+      <div class="guide-list">
+        <!-- Guide 1 -->
+        <details class="guide-card">
+          <summary>
+            <span class="guide-card__number">1</span>
+            <div>
+              <h2>Firmware flashen op een LoRa-board</h2>
+              <p>Installeer de <a href="woordenlijst.html#meshtastic">Meshtastic</a>-<a href="woordenlijst.html#firmware">firmware</a> op je LoRa-board, direct vanuit je webbrowser. Geen programmeerkennis nodig.</p>
+              <div class="guide-card__tags">
+                <span class="guide-tag">Beginner</span>
+                <span class="guide-tag">~15 minuten</span>
+                <span class="guide-tag">USB-kabel nodig</span>
+              </div>
+            </div>
+          </summary>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-step__num">1</span>
+              <p>Sluit je LoRa-board (bijv. Heltec V3 of T-Beam) aan op je computer met een USB-C kabel.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">2</span>
+              <p>Open <code>flasher.meshtastic.org</code> in Chrome of Edge (andere browsers ondersteunen Web Serial niet).</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">3</span>
+              <p>Klik op <strong>"Flash"</strong> en selecteer je board-type in het dropdown-menu. De website herkent de meeste boards automatisch.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">4</span>
+              <p>Kies de nieuwste stabiele firmware-versie (niet "alpha" of "nightly"). Klik op <strong>"Flash"</strong> en wacht tot het proces klaar is (1-2 minuten).</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">5</span>
+              <p>Je ziet een groen vinkje als het gelukt is. Het board herstart automatisch. Je kunt nu door naar handleiding 2.</p>
+            </div>
+            <div class="guide-tip">
+              <strong>Tip:</strong> Werkt het niet? Houd de BOOT-knop op het board ingedrukt terwijl je de USB-kabel aansluit. Dit zet het board in programmeermodus.
+            </div>
+          </div>
+        </details>
+
+        <!-- Guide 2 -->
+        <details class="guide-card">
+          <summary>
+            <span class="guide-card__number">2</span>
+            <div>
+              <h2>Je eerste MeshCore-node configureren</h2>
+              <p>Na het <a href="woordenlijst.html#flashen">flashen</a> stel je je node in via de <a href="https://meshcore.co.uk/apps.html" rel="noopener noreferrer">MeshCore companion-app</a> op je telefoon.</p>
+              <div class="guide-card__tags">
+                <span class="guide-tag">Beginner</span>
+                <span class="guide-tag">~20 minuten</span>
+                <span class="guide-tag">Smartphone nodig</span>
+              </div>
+            </div>
+          </summary>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-step__num">1</span>
+              <p>Download de <strong>MeshCore companion-app</strong> via de <a href="https://meshcore.co.uk/apps.html" rel="noopener noreferrer">MeshCore Apps pagina</a> (beschikbaar voor Android, iOS, Windows, Mac en Linux).</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">2</span>
+              <p>Zet Bluetooth aan op je telefoon. Open de app en tik op <strong>"+"</strong> om een nieuw apparaat toe te voegen.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">3</span>
+              <p>Selecteer je node in de lijst. De standaard BLE-koppelingscode is <strong>123456</strong>. Koppel via Bluetooth.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">4</span>
+              <p>Ga naar <strong>Instellingen → Apparaat</strong>. Geef je node een naam (bijv. "Rein-Coevorden") en kies de regio <strong>"EU_868"</strong>.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">5</span>
+              <p>Ga naar <strong>Kanalen</strong>. Voeg het Meshcore Drenthe kanaal toe met de gedeelde sleutel die je op de hak-avond krijgt. Dit zorgt ervoor dat je node met het netwerk kan communiceren.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">6</span>
+              <p>Stuur een testbericht: tik op het chatscherm en typ "Hallo mesh!". Als andere nodes in de buurt zijn, zie je het bericht verschijnen.</p>
+            </div>
+            <div class="guide-tip">
+              <strong>Tip:</strong> Stel onder <strong>Instellingen → LoRa</strong> de rol in op "Client" als dit je persoonlijke node is, of "Router" als de node op een vaste hoge plek komt.
+            </div>
+          </div>
+        </details>
+
+        <!-- Guide 3 -->
+        <details class="guide-card">
+          <summary>
+            <span class="guide-card__number">3</span>
+            <div>
+              <h2>Behuizing <a href="woordenlijst.html#3d-printen">3D-printen</a></h2>
+              <p>Download de STL-bestanden en print een weerbestendige behuizing voor je node.</p>
+              <div class="guide-card__tags">
+                <span class="guide-tag">Gemiddeld</span>
+                <span class="guide-tag">~2–4 uur printtijd</span>
+                <span class="guide-tag">3D-printer nodig</span>
+              </div>
+            </div>
+          </summary>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-step__num">1</span>
+              <p>Download het juiste STL-bestand voor jouw board. De Hackerspace Drenthe heeft ontwerpen voor Heltec V3, T-Beam en RAK WisBlock. Vraag op de hak-avond naar de link.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">2</span>
+              <p>Open het bestand in je slicer-software (bijv. Cura of PrusaSlicer). Gebruik deze instellingen: <code>PETG</code> materiaal, <code>0.2mm</code> laagdikte, <code>20%</code> infill, <code>3</code> wanden.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">3</span>
+              <p>PETG is beter dan PLA voor buitengebruik — het is bestand tegen regen, UV-licht en temperatuurschommelingen.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">4</span>
+              <p>Controleer dat het board, de antenne-connector en de USB-poort passen. Het ontwerp heeft openingen voor een SMA-connector (antenne) en een USB-C poort.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">5</span>
+              <p>Sluit de behuizing met RVS-schroefjes (M3). Gebruik een rubber O-ring bij de deksel voor waterdichtheid, of een streep siliconenkit.</p>
+            </div>
+            <div class="guide-tip">
+              <strong>Tip:</strong> Geen 3D-printer? De Hackerspace heeft er een. Kom langs op woensdagavond en we printen je behuizing terwijl je de andere stappen doet.
+            </div>
+          </div>
+        </details>
+
+        <!-- Guide 4 -->
+        <details class="guide-card">
+          <summary>
+            <span class="guide-card__number">4</span>
+            <div>
+              <h2>Zonnepaneel-laadcircuit aansluiten</h2>
+              <p>Sluit een klein zonnepaneel aan op een laadmodule en een 18650-batterij voor dag-en-nacht werking.</p>
+              <div class="guide-card__tags">
+                <span class="guide-tag">Gemiddeld</span>
+                <span class="guide-tag">~30 minuten</span>
+                <span class="guide-tag">Soldeerbout nodig</span>
+              </div>
+            </div>
+          </summary>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-step__num">1</span>
+              <p><strong>Materialen:</strong> 1× zonnepaneel (5V, 1-6W), 1× TP4056-laadmodule (met beschermcircuit), 1× 18650 Li-ion batterij (3000+ mAh) en batterijhouder, dunne draden, soldeerbout.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">2</span>
+              <p>Soldeer de draden van het zonnepaneel aan de <strong>IN+</strong> en <strong>IN-</strong> pads van de TP4056. Let op polariteit: rood = plus, zwart = min.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">3</span>
+              <p>Plaats de 18650-batterij in de houder en sluit de houder aan op <strong>BAT+</strong> en <strong>BAT-</strong> van de TP4056.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">4</span>
+              <p>Sluit de <strong>OUT+</strong> en <strong>OUT-</strong> van de TP4056 aan op de voedingspins van je LoRa-board. Check de documentatie van je board voor de juiste spanning (meestal 3.3V of 5V).</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">5</span>
+              <p>Test: leg het paneel in de zon. Het rode ledje op de TP4056 gaat branden als de batterij oplaadt. Blauw betekent: batterij vol.</p>
+            </div>
+            <div class="guide-tip">
+              <strong>Let op:</strong> Werk altijd met een TP4056 mét ingebouwd beschermcircuit (DW01A chip). Dit beschermt de batterij tegen overladen en diepontladen. Koop geen kale TP4056 modules.
+            </div>
+          </div>
+        </details>
+
+        <!-- Guide 5 -->
+        <details class="guide-card">
+          <summary>
+            <span class="guide-card__number">5</span>
+            <div>
+              <h2>Node monteren en plaatsen</h2>
+              <p>Tips voor het kiezen van de beste locatie en het bevestigen van je node voor maximaal bereik.</p>
+              <div class="guide-card__tags">
+                <span class="guide-tag">Beginner</span>
+                <span class="guide-tag">~1 uur</span>
+                <span class="guide-tag">Buitenlocatie</span>
+              </div>
+            </div>
+          </summary>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-step__num">1</span>
+              <p><strong>Hoogte is alles.</strong> Hoe hoger de antenne, hoe verder het bereik. Een node op 5 meter hoogte reikt twee keer zo ver als op grondniveau. Denk aan: schuurdak, schoorsteenpijp, lantaarnpaal, of een hoge boom.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">2</span>
+              <p><strong>Vrij zicht.</strong> De antenne werkt het best met zo min mogelijk obstakels in de richting van andere nodes. Vermijd plaatsing direct achter een muur of onder een metalen dak.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">3</span>
+              <p><strong>Zon voor het paneel.</strong> Richt het zonnepaneel naar het zuiden (in Nederland). Zorg dat geen bomen of gebouwen schaduw werpen, vooral niet 's winters wanneer de zon laag staat.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">4</span>
+              <p><strong>Bevestiging.</strong> Gebruik RVS buisklemmen of tiewraps om de node aan een paal te bevestigen. Zorg dat de behuizing stevig zit en niet kan ronddraaien in de wind.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">5</span>
+              <p><strong>Test direct.</strong> Stuur een bericht vanaf je telefoon en loop weg om het bereik te testen (zie handleiding 6). Noteer de positie in de Meshcore Drenthe kaart.</p>
+            </div>
+            <div class="guide-tip">
+              <strong>Tip:</strong> Vraag toestemming aan de eigenaar van het gebouw. De meeste mensen vinden het prima als je uitlegt dat het een buurtproject is voor noodcommunicatie.
+            </div>
+          </div>
+        </details>
+
+        <!-- Guide 6 -->
+        <details class="guide-card">
+          <summary>
+            <span class="guide-card__number">6</span>
+            <div>
+              <h2>Verbinding testen met de MeshCore-app</h2>
+              <p>Open de app, zoek je node, en stuur je eerste testbericht. Controleer het bereik.</p>
+              <div class="guide-card__tags">
+                <span class="guide-tag">Beginner</span>
+                <span class="guide-tag">~10 minuten</span>
+                <span class="guide-tag">Smartphone nodig</span>
+              </div>
+            </div>
+          </summary>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="guide-step__num">1</span>
+              <p>Open de MeshCore companion-app en controleer dat je verbonden bent met je node (Bluetooth-icoon moet groen zijn).</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">2</span>
+              <p>Ga naar het chatscherm en stuur een bericht naar het Meshcore Drenthe kanaal. Typ bijv. "Test vanuit [jouw locatie]".</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">3</span>
+              <p>Vraag iemand anders in het netwerk om te bevestigen dat ze het bericht hebben ontvangen. Of check de <strong>Node-lijst</strong> in de app om te zien welke andere nodes zichtbaar zijn.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">4</span>
+              <p><strong>Bereiktest:</strong> loop of fiets weg van je node met je telefoon. Stuur elke 100 meter een berichtje. Noteer bij welke afstand het bericht niet meer aankomt — dat is je praktijkbereik.</p>
+            </div>
+            <div class="guide-step">
+              <span class="guide-step__num">5</span>
+              <p>Check in de app onder <strong>Node-info</strong> de signaalsterkte (SNR en RSSI). Hoe hoger de SNR, hoe beter de verbinding.</p>
+            </div>
+            <div class="guide-tip">
+              <strong>Tip:</strong> Maak een klein logboekje: datum, locatie, afstand, SNR-waarde. Dit helpt bij het optimaliseren van de antenne-positie en het plannen van het netwerk.
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Note -->
+      <div class="scenario" style="margin-top:var(--space-3xl)">
+        <strong>Community-bijdragen welkom</strong>
+        <p>Deze handleidingen worden doorlopend verbeterd op basis van ervaringen tijdens de hak-avonden. Heb je een stap onduidelijk gevonden, of een betere methode ontdekt? Laat het ons weten op <a href="meedoen.html">woensdagavond</a> of via Telegram — zo maken we de instructies elke week een beetje beter.</p>
+      </div>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Nog geen hardware?</h2>
+        <p class="cta-banner__text">Vergelijk alle MeshCore-apparaten en bestel direct bij betrouwbare webshops. Vanaf €20 bouw je je eerste node.</p>
+        <div class="cta-banner__actions">
+          <a href="apparaten.html" class="cta-banner__btn cta-banner__btn--primary">Bekijk apparaten →</a>
+          <a href="meedoen.html" class="cta-banner__btn cta-banner__btn--secondary">Hulp nodig? Doe mee</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

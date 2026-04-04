@@ -1,0 +1,17 @@
+{
+  "name": "Meshcore Drenthe",
+  "short_name": "Meshcore",
+  "description": "Een decentraal mesh-communicatienetwerk op LoRa-technologie voor de provincie Drenthe.",
+  "lang": "nl",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fafaf5",
+  "theme_color": "#2d6a4f",
+  "icons": [
+    {
+      "src": "assets/svg/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+/* ==========================================================================
+   FAQ Component — Accordion met details/summary
+   ========================================================================== */
+
+.faq-list {
+  max-width: var(--container-narrow);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-lg) 0;
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  list-style: none;
+  transition: color var(--transition-fast);
+}
+
+/* Remove default marker */
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::marker { display: none; content: ''; }
+
+.faq-item summary:hover {
+  color: var(--color-primary);
+}
+
+/* Chevron indicator */
+.faq-item summary::after {
+  content: '';
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--transition-fast);
+}
+
+.faq-item[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.faq-item .faq-answer {
+  padding: 0 0 var(--space-lg);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-base);
+}
+
+.faq-answer p {
+  margin-bottom: var(--space-sm);
+}
+
+.faq-answer p:last-child {
+  margin-bottom: 0;
+}

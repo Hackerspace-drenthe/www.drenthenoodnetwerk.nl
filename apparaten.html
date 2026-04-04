@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apparaten — Meshcore Drenthe</title>
+  <meta name="description" content="Overzicht van alle MeshCore-compatibele apparaten met specificaties, prijsindicatie en kooplinks. Kies het juiste apparaat voor jouw rol in het mesh-netwerk.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Apparaten — Meshcore Drenthe">
+  <meta property="og:description" content="Vergelijk MeshCore-compatibele apparaten: specs, prijzen en kooplinks.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/card.css">
+  <link rel="stylesheet" href="css/pages/apparaten.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="apparaten.html">Apparaten</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container">
+      <h1>MeshCore Apparaten</h1>
+      <p class="page-intro">Welk apparaat past bij jou? Hieronder vind je alle MeshCore-compatibele hardware, onderverdeeld in drie categorieën. Gebruik de <a href="#specs-matrix">vergelijkingstabel</a> om snel het juiste apparaat te kiezen.</p>
+
+      <!-- ============================================================
+           Categorie toelichting
+           ============================================================ -->
+      <section class="device-categories" aria-label="Apparaat categorieën uitleg">
+        <div class="category-card">
+          <div class="category-card__icon" aria-hidden="true">📱</div>
+          <h2 class="category-card__title">Companion Nodes</h2>
+          <p>Kleine LoRa-radio's die je via Bluetooth of USB koppelt aan je telefoon of computer. Ideaal als instapmodel.</p>
+        </div>
+        <div class="category-card">
+          <div class="category-card__icon" aria-hidden="true">📡</div>
+          <h2 class="category-card__title">Repeater Nodes</h2>
+          <p>Apparaten die je op een hoog punt plaatst om het netwerk<wbr>bereik te vergroten. Vaak op zonne-energie.</p>
+        </div>
+        <div class="category-card">
+          <div class="category-card__icon" aria-hidden="true">⌨️</div>
+          <h2 class="category-card__title">Standalone Nodes</h2>
+          <p>Apparaten met eigen scherm en toetsenbord — geen telefoon nodig. Draaien op MeshOS of Ripple Ultra firmware.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Companion Nodes
+           ============================================================ -->
+      <section aria-labelledby="heading-companion">
+        <h2 id="heading-companion" class="section-heading">Companion Nodes</h2>
+        <p class="section-desc">Verbind via Bluetooth of USB met de <a href="https://meshcore.co.uk/apps.html" rel="noopener noreferrer">MeshCore app</a> op je telefoon of computer.</p>
+
+        <div class="device-grid">
+          <!-- Heltec V3 -->
+          <article class="device-card">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/HELTEC_V3.png" alt="Heltec V3" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">Heltec</span>
+              <h3>Heltec V3</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> ESP32-S3</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 0.96″ OLED</li>
+                <li><strong>GPS:</strong> Nee</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / battery</li>
+              </ul>
+              <p class="device-card__note">Populairste instapmodel. Klein, goedkoop en bewezen. BLE-bereik is beperkt (kleine antenne op PCB).</p>
+              <div class="device-card__actions">
+                <a href="https://amzn.to/4bBWF35" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €20</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- RAK WisBlock 4631 -->
+          <article class="device-card">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/rak_wismesh_tag.png" alt="RAK WisMesh Tag" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">RAK Wireless</span>
+              <h3>RAK WisMesh Tag</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> nRF52840</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> Nee</li>
+                <li><strong>GPS:</strong> Ja (ingebouwd)</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / battery</li>
+              </ul>
+              <p class="device-card__note">Compacte tracker, IP66 waterdicht. Ideaal als draagbare companion of als basis voor een weerbestendige repeater.</p>
+              <div class="device-card__actions">
+                <a href="https://store.rakwireless.com/products/wismesh-tag-meshtastic-gps-lora-tracker-ip66" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €30</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Wio Tracker L1 Pro -->
+          <article class="device-card">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/WIO_TRACKER_L1_PRO.png" alt="Wio Tracker L1 Pro" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">SeeedStudio</span>
+              <h3>Wio Tracker L1 Pro</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> nRF52840</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 1.3″ TFT</li>
+                <li><strong>GPS:</strong> Ja (L1 + L5)</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / 1100 mAh accu</li>
+              </ul>
+              <p class="device-card__note">Krachtige companion met scherm en nauwkeurige dual-band GPS. Goede allrounder.</p>
+              <div class="device-card__actions">
+                <a href="https://www.seeedstudio.com/Wio-Tracker-L1-Pro-for-Meshcore-p-6717.html?sensecap_affiliate=lLZqP0c&referring_service=meshcore.io" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €40</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ThinkNode M1 -->
+          <article class="device-card">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/THINKNODE_M1.png" alt="ThinkNode M1" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">Elecrow</span>
+              <h3>ThinkNode M1</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> nRF52840</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 1.54″ E-Ink</li>
+                <li><strong>GPS:</strong> Ja</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / battery</li>
+              </ul>
+              <p class="device-card__note">E-Ink scherm is goed leesbaar in zonlicht en zeer zuinig. GPS en BLE ingebouwd.</p>
+              <div class="device-card__actions">
+                <a href="https://www.elecrow.com/thinknode-m1-meshtastic-lora-signal-transceiver-powered-by-nrf52840-with-154-screen-support-gps.html" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €35</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Heltec T114 -->
+          <article class="device-card">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/HELTEC_V3.png" alt="Heltec Mesh Node T114 (afbeelding: Heltec V3)" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">Heltec</span>
+              <h3>Heltec Mesh Node T114</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> nRF52840</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 1.14″ TFT</li>
+                <li><strong>GPS:</strong> Ja</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / battery</li>
+              </ul>
+              <p class="device-card__note">Compact nRF52-board met kleurenscherm en GPS. Zuiniger dan ESP32-gebaseerde boards.</p>
+              <div class="device-card__actions">
+                <a href="https://heltec.org/project/mesh-node-t114/" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €25</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Repeater Nodes
+           ============================================================ -->
+      <section aria-labelledby="heading-repeater">
+        <h2 id="heading-repeater" class="section-heading">Repeater Nodes</h2>
+        <p class="section-desc">Plaats een repeater op een hoog punt (dak, mast, toren) om het netwerkbereik fors uit te breiden. De meeste companion-apparaten kunnen ook als repeater worden geflasht.</p>
+
+        <div class="device-grid">
+          <!-- SenseCAP Solar Node P1 Pro -->
+          <article class="device-card device-card--repeater">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/SOLAR_NODE_P1_PRO.png" alt="SenseCAP Solar Node P1 Pro" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">SeeedStudio</span>
+              <h3>SenseCAP Solar Node P1 Pro</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> nRF52840</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> Nee</li>
+                <li><strong>GPS:</strong> Ja</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Zonnepaneel:</strong> Ja (ingebouwd)</li>
+                <li><strong>Voeding:</strong> Solar / 5000 mAh accu</li>
+                <li><strong>Behuizing:</strong> IP65, weerbestendig</li>
+              </ul>
+              <p class="device-card__note">De ideale repeater: plug-and-play met zonnepaneel, weerbestendige behuizing en grote accu. Kan maandenlang autonoom draaien.</p>
+              <div class="device-card__actions">
+                <a href="https://www.seeedstudio.com/SenseCAP-Solar-Node-P1-Pro-for-Meshtastic-LoRa-p-6412.html?sensecap_affiliate=lLZqP0c&referring_service=meshcore.io" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €70</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Heltec V3 als repeater -->
+          <article class="device-card device-card--repeater">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/HELTEC_V3.png" alt="Heltec V3 als repeater" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">Heltec</span>
+              <h3>Heltec V3 (als repeater)</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> ESP32-S3</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 0.96″ OLED</li>
+                <li><strong>GPS:</strong> Nee</li>
+                <li><strong>Voeding:</strong> USB-C / battery / solar</li>
+              </ul>
+              <p class="device-card__note">Goedkoopste repeater-optie. Flash met repeater-firmware via de <a href="https://flasher.meshcore.co.uk/" rel="noopener noreferrer">Web Flasher</a>. Combineer met een zonnepaneel en waterdichte behuizing voor buitengebruik.</p>
+              <div class="device-card__actions">
+                <a href="https://amzn.to/4bBWF35" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €20</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- RAK WisBlock 19007 -->
+          <article class="device-card device-card--repeater">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/rak_wismesh_tag.png" alt="RAK WisBlock" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">RAK Wireless</span>
+              <h3>RAK WisBlock (4631)</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> nRF52840</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> Nee (modulair)</li>
+                <li><strong>GPS:</strong> Optioneel (module)</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / battery / solar</li>
+              </ul>
+              <p class="device-card__note">Modulair systeem: kies je eigen sensoren, GPS, scherm en behuizing. Populair bij ervaren bouwers. Zuinig nRF52-platform.</p>
+              <div class="device-card__actions">
+                <a href="https://store.rakwireless.com/collections/wisblock" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €25–50</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Standalone Nodes
+           ============================================================ -->
+      <section aria-labelledby="heading-standalone">
+        <h2 id="heading-standalone" class="section-heading">Standalone Nodes</h2>
+        <p class="section-desc">Compleet onafhankelijke mesh-apparaten met eigen scherm en toetsenbord. Geen telefoon nodig — draaien op <a href="https://meshcore.co.uk/meshos.html" rel="noopener noreferrer">MeshOS</a> of Ripple Ultra firmware.</p>
+
+        <div class="device-grid">
+          <!-- T-Deck Plus -->
+          <article class="device-card device-card--standalone">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/lilygo_tdeck_plus.png" alt="LilyGO T-Deck Plus" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">LilyGO</span>
+              <h3>T-Deck Plus</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> ESP32-S3</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 2.8″ TFT touchscreen</li>
+                <li><strong>GPS:</strong> Ja</li>
+                <li><strong>Toetsenbord:</strong> Ja (QWERTY)</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>SD-kaart:</strong> Ja (voor maps)</li>
+                <li><strong>Voeding:</strong> USB-C / 2000 mAh accu</li>
+              </ul>
+              <p class="device-card__note">Het populairste standalone apparaat. Volledig zelfstandig berichten sturen, kaarten bekijken en repeaters beheren. Registratie ontgrendelt extra functies.</p>
+              <div class="device-card__actions">
+                <a href="https://www.lilygo.cc/utb1aw" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €75</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- T-Deck Pro -->
+          <article class="device-card device-card--standalone">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/lilygo_tdeck_pro.png" alt="LilyGO T-Deck Pro" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">LilyGO</span>
+              <h3>T-Deck Pro</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> ESP32-S3</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 3.7″ TFT touchscreen</li>
+                <li><strong>GPS:</strong> Ja</li>
+                <li><strong>Toetsenbord:</strong> Ja (QWERTY)</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>SD-kaart:</strong> Ja</li>
+                <li><strong>Voeding:</strong> USB-C / accu</li>
+              </ul>
+              <p class="device-card__note">Groter scherm dan de T-Deck Plus. Premium standalone optie met verbeterde hardware.</p>
+              <div class="device-card__actions">
+                <a href="https://lilygo.cc/products/t-deck-pro" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €95</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- T-LoRa Pager -->
+          <article class="device-card device-card--standalone">
+            <div class="device-card__img">
+              <img src="https://meshcore.co.uk/images/devices/lilygo_tlora_pager.png" alt="LilyGO T-LoRa Pager" loading="lazy" width="300" height="225">
+            </div>
+            <div class="device-card__body">
+              <span class="device-card__brand">LilyGO</span>
+              <h3>T-LoRa Pager</h3>
+              <ul class="device-card__specs">
+                <li><strong>Chip:</strong> ESP32-S3</li>
+                <li><strong>LoRa:</strong> SX1262, 868 MHz</li>
+                <li><strong>Scherm:</strong> 2.1″ TFT</li>
+                <li><strong>GPS:</strong> Ja</li>
+                <li><strong>Toetsenbord:</strong> Ja (compact)</li>
+                <li><strong>Bluetooth:</strong> BLE 5.0</li>
+                <li><strong>Voeding:</strong> USB-C / accu</li>
+              </ul>
+              <p class="device-card__note">Compact pager-formaat. Past makkelijk in je broekzak. Ideaal voor onderweg.</p>
+              <div class="device-card__actions">
+                <a href="https://lilygo.cc/products/t-lora-pager?variant=52196460167349" rel="noopener noreferrer" class="btn btn--shop">Kopen</a>
+                <span class="device-card__price">± €60</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Specificatie-vergelijkingstabel
+           ============================================================ -->
+      <section aria-labelledby="heading-specs" id="specs-matrix">
+        <h2 id="heading-specs" class="section-heading">Vergelijkingstabel</h2>
+        <p class="section-desc">Alle apparaten naast elkaar. Scroll horizontaal op kleine schermen.</p>
+
+        <div class="table-wrapper">
+          <table class="specs-table">
+            <thead>
+              <tr>
+                <th scope="col">Apparaat</th>
+                <th scope="col">Type</th>
+                <th scope="col">Chip</th>
+                <th scope="col">LoRa</th>
+                <th scope="col">Scherm</th>
+                <th scope="col">GPS</th>
+                <th scope="col">BLE</th>
+                <th scope="col">Toetsenbord</th>
+                <th scope="col">Prijs (ca.)</th>
+                <th scope="col">Kopen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Heltec V3</strong></td>
+                <td>Companion / Repeater</td>
+                <td>ESP32-S3</td>
+                <td>SX1262</td>
+                <td>0.96″ OLED</td>
+                <td>❌</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€20</td>
+                <td><a href="https://amzn.to/4bBWF35" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr>
+                <td><strong>Heltec T114</strong></td>
+                <td>Companion / Repeater</td>
+                <td>nRF52840</td>
+                <td>SX1262</td>
+                <td>1.14″ TFT</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€25</td>
+                <td><a href="https://heltec.org/project/mesh-node-t114/" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr>
+                <td><strong>RAK WisMesh Tag</strong></td>
+                <td>Companion / Repeater</td>
+                <td>nRF52840</td>
+                <td>SX1262</td>
+                <td>❌</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€30</td>
+                <td><a href="https://store.rakwireless.com/products/wismesh-tag-meshtastic-gps-lora-tracker-ip66" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr>
+                <td><strong>ThinkNode M1</strong></td>
+                <td>Companion</td>
+                <td>nRF52840</td>
+                <td>SX1262</td>
+                <td>1.54″ E-Ink</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€35</td>
+                <td><a href="https://www.elecrow.com/thinknode-m1-meshtastic-lora-signal-transceiver-powered-by-nrf52840-with-154-screen-support-gps.html" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr>
+                <td><strong>Wio Tracker L1 Pro</strong></td>
+                <td>Companion</td>
+                <td>nRF52840</td>
+                <td>SX1262</td>
+                <td>1.3″ TFT</td>
+                <td>✅ (L1+L5)</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€40</td>
+                <td><a href="https://www.seeedstudio.com/Wio-Tracker-L1-Pro-for-Meshcore-p-6717.html?sensecap_affiliate=lLZqP0c&referring_service=meshcore.io" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr>
+                <td><strong>RAK WisBlock 4631</strong></td>
+                <td>Companion / Repeater</td>
+                <td>nRF52840</td>
+                <td>SX1262</td>
+                <td>Optioneel</td>
+                <td>Optioneel</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€25–50</td>
+                <td><a href="https://store.rakwireless.com/collections/wisblock" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr class="specs-table__highlight">
+                <td><strong>SenseCAP Solar P1 Pro</strong></td>
+                <td>Repeater</td>
+                <td>nRF52840</td>
+                <td>SX1262</td>
+                <td>❌</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>❌</td>
+                <td>€70</td>
+                <td><a href="https://www.seeedstudio.com/SenseCAP-Solar-Node-P1-Pro-for-Meshtastic-LoRa-p-6412.html?sensecap_affiliate=lLZqP0c&referring_service=meshcore.io" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr class="specs-table__highlight">
+                <td><strong>T-LoRa Pager</strong></td>
+                <td>Standalone</td>
+                <td>ESP32-S3</td>
+                <td>SX1262</td>
+                <td>2.1″ TFT</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>€60</td>
+                <td><a href="https://lilygo.cc/products/t-lora-pager?variant=52196460167349" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr class="specs-table__highlight">
+                <td><strong>T-Deck Plus</strong></td>
+                <td>Standalone</td>
+                <td>ESP32-S3</td>
+                <td>SX1262</td>
+                <td>2.8″ TFT</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>✅ (QWERTY)</td>
+                <td>€75</td>
+                <td><a href="https://www.lilygo.cc/utb1aw" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+              <tr class="specs-table__highlight">
+                <td><strong>T-Deck Pro</strong></td>
+                <td>Standalone</td>
+                <td>ESP32-S3</td>
+                <td>SX1262</td>
+                <td>3.7″ TFT</td>
+                <td>✅</td>
+                <td>✅</td>
+                <td>✅ (QWERTY)</td>
+                <td>€95</td>
+                <td><a href="https://lilygo.cc/products/t-deck-pro" rel="noopener noreferrer">Shop</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Keuzehulp
+           ============================================================ -->
+      <section aria-labelledby="heading-advies" class="advice-section">
+        <h2 id="heading-advies" class="section-heading">Welk apparaat past bij mij?</h2>
+        <div class="advice-grid">
+          <div class="advice-card">
+            <h3>🆕 Beginners</h3>
+            <p>Start met een <strong>Heltec V3</strong> (€20). Goedkoop, makkelijk te flashen en groot community-support. Koppel via BLE aan je telefoon met de MeshCore app.</p>
+          </div>
+          <div class="advice-card">
+            <h3>📡 Netwerk-uitbreiders</h3>
+            <p>Kies de <strong>SenseCAP Solar P1 Pro</strong> (€70) als kant-en-klare repeater. Weerbestendig, op zonne-energie — hang het op en vergeet het. Budget-optie: een Heltec V3 met repeater-firmware in een waterdichte doos.</p>
+          </div>
+          <div class="advice-card">
+            <h3>⌨️ Standalone-gebruikers</h3>
+            <p>Wil je geen telefoon nodig hebben? Pak de <strong>T-Deck Plus</strong> (€75). Volledig toetsenbord, GPS, kaarten op SD-kaart. Het is een complete communicatietool op zichzelf.</p>
+          </div>
+          <div class="advice-card">
+            <h3>🧪 Gevorderden &amp; bouwers</h3>
+            <p>Kies de <strong>RAK WisBlock</strong>-serie. Modulair, low-power nRF52-platform. Voeg zelf modules toe (GPS, sensoren, displays). Ideaal voor custom repeaters en IoT-projecten.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           Links
+           ============================================================ -->
+      <section aria-labelledby="heading-links">
+        <h2 id="heading-links" class="section-heading">Handige links</h2>
+        <ul class="link-list">
+          <li><a href="https://flasher.meshcore.co.uk/" rel="noopener noreferrer">MeshCore Web Flasher</a> — flash firmware direct vanuit je browser</li>
+          <li><a href="https://meshcore.co.uk/apps.html" rel="noopener noreferrer">MeshCore Apps</a> — companion apps voor Android, iOS, Windows, Mac en Linux</li>
+          <li><a href="https://store.meshcore.co.uk/" rel="noopener noreferrer">MeshCore Officiële Store</a> — licenties en accessoires</li>
+          <li><a href="https://meshcore.co.uk/wiki.html" rel="noopener noreferrer">MeshCore Wiki / FAQ</a> — uitgebreide documentatie en veelgestelde vragen</li>
+          <li><a href="handleidingen.html">Onze handleidingen</a> — stap-voor-stap instructies (NL)</li>
+          <li><a href="meedoen.html">Meedoen met Meshcore Drenthe</a></li>
+        </ul>
+      </section>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Apparaat besteld? Flash en bouw!</h2>
+        <p class="cta-banner__text">Volg onze Nederlandstalige handleidingen om je firmware te flashen, je node te configureren en op te hangen. Klaar binnen een uur.</p>
+        <div class="cta-banner__actions">
+          <a href="handleidingen.html" class="cta-banner__btn cta-banner__btn--primary">Naar de handleidingen →</a>
+          <a href="planning.html" class="cta-banner__btn cta-banner__btn--secondary">Kom langs op de hak-avond</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script defer src="js/config/settings.js"></script>
+  <script defer src="js/utils/dom.js"></script>
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

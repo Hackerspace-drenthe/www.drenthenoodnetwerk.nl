@@ -1,0 +1,100 @@
+/* ==========================================================================
+   Footer — Site footer
+   ========================================================================== */
+
+.site-footer {
+  background-color: var(--color-bg-alt);
+  border-top: 1px solid var(--color-border);
+  padding-block: var(--space-2xl);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+
+.site-footer__inner {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-padding);
+  display: grid;
+  gap: var(--space-xl);
+}
+
+/* --- Logo en beschrijving --- */
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.site-footer__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  text-decoration: none;
+}
+
+.site-footer__logo img,
+.site-footer__logo svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.site-footer__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  max-width: 40ch;
+}
+
+/* --- Links kolommen --- */
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xl);
+}
+
+.site-footer__column h4 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-block-end: var(--space-sm);
+}
+
+.site-footer__column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.site-footer__column li {
+  margin-block-end: var(--space-xs);
+}
+
+.site-footer__column a {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.site-footer__column a:hover {
+  color: var(--color-primary);
+}
+
+/* --- Copyright bar --- */
+.site-footer__bottom {
+  border-top: 1px solid var(--color-border);
+  padding-block-start: var(--space-lg);
+  margin-block-start: var(--space-lg);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+/* --- Responsive --- */
+@media (min-width: 768px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr 2fr;
+  }
+}

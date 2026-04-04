@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Woordenlijst — Meshcore Drenthe</title>
+  <meta name="description" content="Alle termen rondom Meshcore, LoRa en mesh-netwerken op één plek uitgelegd. Van node tot firmware, van ISM-band tot duty cycle.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Woordenlijst — Meshcore Drenthe">
+  <meta property="og:description" content="Alle termen rondom Meshcore, LoRa en mesh-netwerken op één plek uitgelegd.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/glossary.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <section aria-labelledby="glossary-heading">
+      <div class="container container--narrow">
+        <h1 id="glossary-heading">Woordenlijst</h1>
+        <p>Alle termen rondom Meshcore, LoRa en mesh-netwerken op één plek. Klik op een letter om direct te springen.</p>
+
+        <!-- Alfabetische navigatie -->
+        <nav class="glossary-nav" aria-label="Alfabet">
+          <a href="#letter-a">A</a>
+          <a href="#letter-b">B</a>
+          <a href="#letter-d">D</a>
+          <a href="#letter-e">E</a>
+          <a href="#letter-f">F</a>
+          <a href="#letter-g">G</a>
+          <a href="#letter-h">H</a>
+          <a href="#letter-i">I</a>
+          <a href="#letter-l">L</a>
+          <a href="#letter-m">M</a>
+          <a href="#letter-n">N</a>
+          <a href="#letter-r">R</a>
+          <a href="#letter-s">S</a>
+          <a href="#letter-t">T</a>
+        </nav>
+
+        <!-- A -->
+        <h2 class="glossary-letter" id="letter-a">A</h2>
+        <ul class="glossary-list">
+          <li id="aes-256">
+            <strong class="glossary-term">AES-256</strong>
+            <p class="glossary-def">Advanced Encryption Standard met een sleutellengte van 256 bits. Een van de sterkste versleutelingsmethoden die momenteel bestaan. Meshtastic gebruikt AES-256 om alle berichten in het mesh-netwerk te versleutelen, zodat alleen nodes met dezelfde kanaalsleutel ze kunnen lezen.</p>
+          </li>
+          <li id="antenne">
+            <strong class="glossary-term">Antenne</strong>
+            <p class="glossary-def">Het onderdeel van een node dat radiosignalen verzendt en ontvangt. De keuze en plaatsing van de antenne is de belangrijkste factor voor het bereik. Een goede buitenantenne op hoogte kan het bereik verdubbelen of verdrievoudigen ten opzichte van de ingebouwde antenne.</p>
+          </li>
+        </ul>
+
+        <!-- B -->
+        <h2 class="glossary-letter" id="letter-b">B</h2>
+        <ul class="glossary-list">
+          <li id="bluetooth">
+            <strong class="glossary-term">Bluetooth</strong>
+            <p class="glossary-def">Draadloze technologie voor korte afstanden (tot ~10 meter). Wordt gebruikt om je telefoon te verbinden met je LoRa-node. Via Bluetooth stuur je berichten naar de node, die ze vervolgens via LoRa het mesh-netwerk in stuurt.</p>
+          </li>
+        </ul>
+
+        <!-- D -->
+        <h2 class="glossary-letter" id="letter-d">D</h2>
+        <ul class="glossary-list">
+          <li id="3d-printen">
+            <strong class="glossary-term">3D-printen</strong>
+            <p class="glossary-def">Objecten laag voor laag opbouwen uit kunststof. Wordt bij Meshcore gebruikt om weerbestendige behuizingen voor nodes te maken.</p>
+          </li>
+          <li id="duty-cycle">
+            <strong class="glossary-term">Duty cycle</strong>
+            <p class="glossary-def">De maximale zendtijd per tijdseenheid. In Europa mag je op de ISM-band (868 MHz) maar 1% van de tijd zenden — dat is maximaal 36 seconden per uur. Dit is een wettelijke beperking om de frequentieband eerlijk te delen.</p>
+          </li>
+        </ul>
+
+        <!-- E -->
+        <h2 class="glossary-letter" id="letter-e">E</h2>
+        <ul class="glossary-list">
+          <li id="encryptie">
+            <strong class="glossary-term">Encryptie (versleuteling)</strong>
+            <p class="glossary-def">Het omzetten van leesbare berichten naar onleesbare code, zodat alleen de bedoelde ontvanger ze kan ontcijferen. Meshtastic gebruikt <a href="#aes-256">AES-256</a> encryptie. Vergelijk het met een brief in een afgesloten envelop: iedereen kan zien dat er een brief is, maar alleen wie de sleutel heeft kan hem lezen.</p>
+          </li>
+        </ul>
+
+        <!-- F -->
+        <h2 class="glossary-letter" id="letter-f">F</h2>
+        <ul class="glossary-list">
+          <li id="firmware">
+            <strong class="glossary-term">Firmware</strong>
+            <p class="glossary-def">Software die direct op de hardware-chip van een apparaat draait. Bij mesh-nodes bevat de firmware alle instructies voor communicatie, routering en energiebeheer.</p>
+          </li>
+          <li id="flashen">
+            <strong class="glossary-term">Flashen</strong>
+            <p class="glossary-def">Het installeren van firmware op een apparaat, meestal via een USB-kabel en een computer. Vergelijkbaar met het updaten van je telefoon, maar dan voor een LoRa-board.</p>
+          </li>
+        </ul>
+
+        <!-- G -->
+        <h2 class="glossary-letter" id="letter-g">G</h2>
+        <ul class="glossary-list">
+          <li id="gps">
+            <strong class="glossary-term">GPS</strong>
+            <p class="glossary-def">Global Positioning System — plaatsbepaling via satellieten. Mesh-nodes met een GPS-module kunnen hun locatie delen, handig voor het in kaart brengen van het netwerk.</p>
+          </li>
+        </ul>
+
+        <!-- H -->
+        <h2 class="glossary-letter" id="letter-h">H</h2>
+        <ul class="glossary-list">
+          <li id="hop">
+            <strong class="glossary-term">Hop</strong>
+            <p class="glossary-def">Eén sprong van een bericht van de ene node naar de volgende. Een bericht kan meerdere hops maken om zijn bestemming te bereiken, net als een estafettestokje dat van loper naar loper gaat.</p>
+          </li>
+        </ul>
+
+        <!-- I -->
+        <h2 class="glossary-letter" id="letter-i">I</h2>
+        <ul class="glossary-list">
+          <li id="ism-band">
+            <strong class="glossary-term">ISM-band</strong>
+            <p class="glossary-def">Industrial, Scientific and Medical band — een radiofrequentie die vrij gebruikt mag worden zonder vergunning. In Europa is dat 868 MHz. Denk aan het als een openbare weg: iedereen mag er gebruik van maken, zolang je je aan de verkeersregels (duty cycle) houdt.</p>
+          </li>
+        </ul>
+
+        <!-- L -->
+        <h2 class="glossary-letter" id="letter-l">L</h2>
+        <ul class="glossary-list">
+          <li id="lora">
+            <strong class="glossary-term">LoRa</strong>
+            <p class="glossary-def">Long Range — een radiotechnologie ontworpen voor communicatie over grote afstanden (1 tot 15+ kilometer) met heel weinig stroom. LoRa is de "stem" waarmee nodes met elkaar praten.</p>
+          </li>
+        </ul>
+
+        <!-- M -->
+        <h2 class="glossary-letter" id="letter-m">M</h2>
+        <ul class="glossary-list">
+          <li id="mesh">
+            <strong class="glossary-term">Mesh</strong>
+            <p class="glossary-def">Een netwerktopologie waarbij elk punt (node) met meerdere andere punten verbonden is. Als één verbinding uitvalt, vinden berichten een alternatieve route — net als water dat om een steen heen stroomt.</p>
+          </li>
+          <li id="meshcore">
+            <strong class="glossary-term">Meshcore</strong>
+            <p class="glossary-def">Een zelfstandig firmware-project voor LoRa-hardware, gemaakt door Scott van Ripple Radios. Meshcore draait op dezelfde boards als Meshtastic maar is een apart systeem met eigen routering (flood + direct pad), AES-256 encryptie met ondertekende advertenties, en gescheiden client/repeater-rollen. Open source onder MIT-licentie.</p>
+          </li>
+          <li id="meshtastic">
+            <strong class="glossary-term">Meshtastic</strong>
+            <p class="glossary-def">Open-source software die LoRa-hardware gebruiksvriendelijk maakt. Meshtastic regelt het versturen van berichten, versleuteling, routering en de verbinding met je telefoon-app.</p>
+          </li>
+        </ul>
+
+        <!-- N -->
+        <h2 class="glossary-letter" id="letter-n">N</h2>
+        <ul class="glossary-list">
+          <li id="node">
+            <strong class="glossary-term">Node</strong>
+            <p class="glossary-def">Een knooppunt in het mesh-netwerk. Elke node is een klein apparaat met een LoRa-radio dat berichten kan ontvangen, versturen en doorsturen. Vergelijk het met een brievenbus die post ook naar de volgende brievenbus kan brengen.</p>
+          </li>
+        </ul>
+
+        <!-- R -->
+        <h2 class="glossary-letter" id="letter-r">R</h2>
+        <ul class="glossary-list">
+          <li id="repeater">
+            <strong class="glossary-term">Repeater / Router</strong>
+            <p class="glossary-def">Een node die specifiek is ingesteld om berichten door te sturen naar andere nodes. Repeaters en routers vormen de ruggengraat van het mesh-netwerk. Ze staan vaak op hoge punten met een zonnepaneel voor continue werking.</p>
+          </li>
+          <li id="rssi">
+            <strong class="glossary-term">RSSI</strong>
+            <p class="glossary-def">Received Signal Strength Indicator — een meting van hoe sterk het ontvangen radiosignaal is, uitgedrukt in dBm (decibel-milliwatt). Hoe dichter bij 0, hoe sterker. Typische waarden: -60 dBm = uitstekend, -90 dBm = zwak, -120 dBm = onbruikbaar. Handig om te bepalen of je antenne goed gericht staat.</p>
+          </li>
+        </ul>
+
+        <!-- S -->
+        <h2 class="glossary-letter" id="letter-s">S</h2>
+        <ul class="glossary-list">
+          <li id="snr">
+            <strong class="glossary-term">SNR (Signal-to-Noise Ratio)</strong>
+            <p class="glossary-def">De verhouding tussen het nuttige signaal en de ruis (storing), uitgedrukt in decibel (dB). Een hogere SNR betekent een betere signaalkwaliteit. LoRa kan werken met een SNR tot -20 dB — dat betekent dat het signaal zelfs onder het ruisniveau nog gelezen kan worden. Dit maakt LoRa uitzonderlijk goed in het bereiken van grote afstanden.</p>
+          </li>
+          <li id="sma">
+            <strong class="glossary-term">SMA-connector</strong>
+            <p class="glossary-def">Een standaard schroefbare antenneconnector die veel gebruikt wordt op LoRa-boards. Hiermee kun je de ingebouwde antenne vervangen door een krachtigere buitenantenne. Let op: er bestaan SMA en RP-SMA (reverse polarity) — check welk type je board heeft voor je een antenne bestelt.</p>
+          </li>
+        </ul>
+
+        <!-- T -->
+        <h2 class="glossary-letter" id="letter-t">T</h2>
+        <ul class="glossary-list">
+          <li id="topologie">
+            <strong class="glossary-term">Topologie</strong>
+            <p class="glossary-def">De structuur of het patroon waarmee knooppunten in een netwerk met elkaar verbonden zijn. Bekende vormen zijn ster (alles via één centraal punt), ring (rondgaand), en mesh (iedereen met meerdere anderen). Mesh is de meest veerkrachtige topologie omdat er altijd alternatieve routes beschikbaar zijn.</p>
+          </li>
+          <li id="tp4056">
+            <strong class="glossary-term">TP4056</strong>
+            <p class="glossary-def">Een goedkoop maar effectief laadmodule-chipje voor Li-ion batterijen, vaak gebruikt in zonne-energie-projecten. De module regelt het laden en beschermt de batterij tegen overladen en diepontladen. Kost minder dan €1 per stuk en is de standaard keuze voor het voeden van buitennodes.</p>
+          </li>
+        </ul>
+
+        <!-- CTA Banner -->
+        <div class="cta-banner cta-banner--compact" style="margin-top:var(--space-3xl)">
+          <h2 class="cta-banner__heading">Klaar om te beginnen?</h2>
+          <p class="cta-banner__text">Nu je de termen kent, kun je aan de slag. Kies een apparaat, volg de handleiding en bouw je eerste node.</p>
+          <div class="cta-banner__actions">
+            <a href="hoe-werkt-het.html" class="cta-banner__btn cta-banner__btn--primary">Hoe werkt het? →</a>
+            <a href="apparaten.html" class="cta-banner__btn cta-banner__btn--secondary">Bekijk apparaten</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

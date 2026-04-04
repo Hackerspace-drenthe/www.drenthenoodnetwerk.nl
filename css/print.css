@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Print Stylesheet — Handleidingen & documentatie
+   ========================================================================== */
+
+@media print {
+  /* Verberg niet-relevante elementen */
+  .site-nav,
+  .site-footer,
+  .theme-toggle,
+  .skip-link,
+  .scroll-reveal {
+    display: none !important;
+  }
+
+  /* Reset achtergrond en kleur */
+  body {
+    color: #000;
+    background: #fff;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Geen achtergrondkleuren afdrukken */
+  * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Links: toon URL's */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  /* Interne links niet uitschrijven */
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
+  }
+
+  /* Voorkom pagebreaks in belangrijke blokken */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  img, svg, pre, blockquote {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hoofdcontent volle breedte */
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .main-content {
+    padding-block-start: 0;
+  }
+
+  /* Toon code netjes */
+  pre {
+    border: 1px solid #ccc;
+    padding: 1em;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+}

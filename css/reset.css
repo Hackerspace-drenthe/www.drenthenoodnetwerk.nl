@@ -1,0 +1,112 @@
+/* ==========================================================================
+   CSS Reset — Modern, minimaal
+   Gebaseerd op Josh Comeau's Modern CSS Reset + Andy Bell's reset.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  scroll-behavior: smooth;
+}
+
+/* Respecteer motion-voorkeur */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  min-height: 100vh;
+  line-height: var(--line-height-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+a {
+  color: inherit;
+  text-decoration-skip-ink: auto;
+}
+
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+/* Verwijder standaardlijststijl voor navigatie */
+nav ul,
+nav ol {
+  list-style: none;
+}
+
+/* Tabel reset */
+table {
+  border-collapse: collapse;
+}
+
+/* Focus stijl — zichtbaar en WCAG-compliant */
+:focus-visible {
+  outline: 3px solid var(--color-focus, #2d6a4f);
+  outline-offset: 2px;
+}
+
+/* Verberg focus ring bij muisklik */
+:focus:not(:focus-visible) {
+  outline: none;
+}

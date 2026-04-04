@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netwerk Kaart — Meshcore Drenthe</title>
+  <meta name="description" content="Interactieve kaart van het Meshcore Drenthe netwerk. Bekijk geplande en actieve node-locaties, verbindingen en dekkingsgebied.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Netwerk Kaart — Meshcore Drenthe">
+  <meta property="og:description" content="Interactieve kaart van het Meshcore netwerk in Drenthe met node-locaties en verbindingen.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/map.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container">
+      <h1>Netwerk Kaart Drenthe</h1>
+      <p style="color:var(--color-text-muted);margin-bottom:var(--space-xl);max-width:65ch;">Bekijk de geplande en actieve <a href="woordenlijst.html#node">nodes</a> in het Meshcore Drenthe netwerk. Klik op een node voor meer informatie.</p>
+
+      <!-- Live MeshCore Kaart -->
+      <div class="map-wrapper map-wrapper--live">
+        <div class="map-container map-container--iframe">
+          <iframe
+            src="https://map.meshcore.io/?lat=52.85&lon=6.55&zoom=10"
+            title="Interactieve MeshCore netwerk kaart — live nodes en verbindingen"
+            loading="lazy"
+            allow="geolocation"
+            referrerpolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          ></iframe>
+          <noscript>
+            <p class="map-fallback">De interactieve kaart vereist JavaScript. <a href="https://map.meshcore.io" rel="noopener noreferrer">Bekijk de kaart direct op map.meshcore.io</a>.</p>
+          </noscript>
+        </div>
+        <p class="map-source">Kaartdata geladen van <a href="https://map.meshcore.io" rel="noopener noreferrer">map.meshcore.io</a> — de officiële MeshCore node-kaart. Zoom in op Drenthe om lokale nodes te zien.</p>
+      </div>
+
+      <!-- Toelichting -->
+      <section style="margin-top:var(--space-2xl)">
+        <h2>Over de kaart</h2>
+        <p>Deze kaart toont de live <a href="woordenlijst.html#node">nodes</a> van het wereldwijde MeshCore netwerk. Zoom in op de provincie Drenthe om de lokale nodes te bekijken. De kaart wordt gevoed door <a href="https://map.meshcore.io" rel="noopener noreferrer">map.meshcore.io</a> en toont realtime data inclusief node-type, status en locatie.</p>
+
+        <h3 style="margin-top:var(--space-xl)">Wat zie je op de kaart?</h3>
+        <ul style="margin-top:var(--space-sm)">
+          <li><strong>Groene markers</strong> — actieve repeater- en companion-nodes die berichten doorsturen</li>
+          <li><strong>Lijnen tussen nodes</strong> — bevestigde verbindingen met signaaldata</li>
+          <li><strong>Klik op een node</strong> — bekijk type, eigenaar, batterijstatus en laatste activiteit</li>
+        </ul>
+
+        <h3 style="margin-top:var(--space-xl)">Doel voor Drenthe</h3>
+        <p>We bouwen aan een netwerk met minimaal <strong>twee routes</strong> tussen elk knooppunt, zodat communicatie betrouwbaar blijft — ook als een node uitvalt. Strategische locaties zijn kerktorens, watertorens en hooggelegen punten langs de Hondsrug.</p>
+
+        <p style="margin-top:var(--space-md)">Wil je met jouw node op de kaart verschijnen? Volg de <a href="https://github.com/meshcore-dev/MeshCore/blob/main/docs/faq.md#512-q-how-do-i-add-a-node-to-the-meshcore-map" rel="noopener noreferrer">instructies om je node toe te voegen</a>, of <a href="meedoen.html">doe mee</a> met het Meshcore Drenthe project.</p>
+      </section>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Jouw node op de kaart?</h2>
+        <p class="cta-banner__text">Met een apparaat van €25 en een gratis firmware-flash zet je jouw eigen node op de kaart. Hoe meer nodes, hoe sterker het netwerk.</p>
+        <div class="cta-banner__actions">
+          <a href="apparaten.html" class="cta-banner__btn cta-banner__btn--primary">Kies je apparaat →</a>
+          <a href="handleidingen.html" class="cta-banner__btn cta-banner__btn--secondary">Bouw-handleiding</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts: shared shell components -->
+  <script defer src="js/config/settings.js"></script>
+  <script defer src="js/utils/dom.js"></script>
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meedoen — Meshcore Drenthe</title>
+  <meta name="description" content="Doe mee met Meshcore Drenthe! Of je nu soldeert, 3D-print, documenteert of test — er is een rol voor iedereen. Bekijk wat je nodig hebt.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Meedoen — Meshcore Drenthe">
+  <meta property="og:description" content="Doe mee met het Meshcore Drenthe mesh-netwerk. Er is een rol voor iedereen.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/card.css">
+  <link rel="stylesheet" href="css/pages/info.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container container--narrow">
+      <h1>Meedoen</h1>
+      <p class="info-intro">Of je nu soldeer-ervaring hebt of voor het eerst een schroevendraaier vasthoudt — er is een rol voor iedereen. Het Meshcore Drenthe project draait op vrijwilligers.</p>
+
+      <!-- Rollen -->
+      <section class="info-section" aria-labelledby="rollen-heading">
+        <h2 id="rollen-heading">Rollen</h2>
+        <div class="grid grid--2">
+          <article class="highlight-card">
+            <h3>🔧 Hardware-scouts</h3>
+            <p>Onderzoek welke LoRa-boards, antennes en zonnepanelen het best werken. Test nieuwe hardware en deel je bevindingen.</p>
+          </article>
+          <article class="highlight-card">
+            <h3>🖨️ Designers</h3>
+            <p><a href="woordenlijst.html#3d-printen">3D-print</a> behuizingen ontwerpen die weerbestendig zijn en goed passen bij Drentse buitenlocaties.</p>
+          </article>
+          <article class="highlight-card">
+            <h3>📝 Documentatie-helden</h3>
+            <p>Tutorials, handleidingen en uitleg schrijven zodat iedereen kan meehelpen. Goede documentatie is het fundament.</p>
+          </article>
+          <article class="highlight-card">
+            <h3>🎤 Presentatie-tijgers</h3>
+            <p>Help mee met de kick-off en presentaties. Enthousiasme verspreiden en het project zichtbaar maken.</p>
+          </article>
+          <article class="highlight-card">
+            <h3>🔨 Bouwers</h3>
+            <p>Solderen, assembleren en monteren. De handen uit de mouwen: van losse onderdelen naar werkende <a href="woordenlijst.html#node">nodes</a>.</p>
+          </article>
+          <article class="highlight-card">
+            <h3>📡 Testers</h3>
+            <p>Het netwerk testen, bereik meten, problemen rapporteren. Met je telefoon en de Meshtastic-app kun je direct aan de slag.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Materiaal -->
+      <section class="info-section" aria-labelledby="materiaal-heading">
+        <h2 id="materiaal-heading">Wat heb je nodig?</h2>
+        <p style="margin-bottom:var(--space-lg)">Een complete node kost tussen de <strong>€20 en €100</strong>, afhankelijk van het type. Hier is een overzicht:</p>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:var(--font-size-sm)">
+            <thead>
+              <tr style="border-bottom:2px solid var(--color-border);text-align:left">
+                <th style="padding:var(--space-sm)">Onderdeel</th>
+                <th style="padding:var(--space-sm)">Voorbeeld</th>
+                <th style="padding:var(--space-sm)">Geschatte prijs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--color-border)">
+                <td style="padding:var(--space-sm)"><a href="woordenlijst.html#lora">LoRa</a>-board</td>
+                <td style="padding:var(--space-sm)">Heltec V3, TTGO T-Beam, RAK WisBlock</td>
+                <td style="padding:var(--space-sm)">€15 – €35</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--color-border)">
+                <td style="padding:var(--space-sm)">Antenne</td>
+                <td style="padding:var(--space-sm)">868 MHz antenne (beter bereik dan meegeleverd)</td>
+                <td style="padding:var(--space-sm)">€5 – €15</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--color-border)">
+                <td style="padding:var(--space-sm)">Behuizing</td>
+                <td style="padding:var(--space-sm)">3D-geprint (STL bestanden beschikbaar)</td>
+                <td style="padding:var(--space-sm)">€2 – €5 materiaal</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--color-border)">
+                <td style="padding:var(--space-sm)">Zonnepaneel</td>
+                <td style="padding:var(--space-sm)">1–6W paneel + laadmodule (TP4056)</td>
+                <td style="padding:var(--space-sm)">€5 – €15</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--color-border)">
+                <td style="padding:var(--space-sm)">Batterij</td>
+                <td style="padding:var(--space-sm)">18650 Li-ion cel (3000+ mAh)</td>
+                <td style="padding:var(--space-sm)">€3 – €8</td>
+              </tr>
+              <tr>
+                <td style="padding:var(--space-sm)">Overig</td>
+                <td style="padding:var(--space-sm)">USB-kabel, kabelbinders, bevestigingsmateriaal</td>
+                <td style="padding:var(--space-sm)">€5</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:2px solid var(--color-border);font-weight:var(--font-weight-semibold)">
+                <td style="padding:var(--space-sm)" colspan="2">Totaal basisnode</td>
+                <td style="padding:var(--space-sm)">€20 – €50</td>
+              </tr>
+              <tr style="font-weight:var(--font-weight-semibold)">
+                <td style="padding:var(--space-sm)" colspan="2">Totaal solar-node (compleet)</td>
+                <td style="padding:var(--space-sm)">€60 – €100</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section class="info-section" aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Contact & Locatie</h2>
+        <div class="grid grid--2" style="margin-top:var(--space-lg)">
+          <div style="padding:var(--space-lg);background:var(--color-bg-alt);border-radius:var(--radius-md)">
+            <h3 style="margin-bottom:var(--space-sm)">💬 Online</h3>
+            <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--space-xs)">
+              <li><strong>Telegram:</strong> Meshcore Drenthe groep</li>
+              <li><strong>Web:</strong> <a href="https://www.hackerspace-drenthe.nl/" rel="noopener noreferrer">hackerspace-drenthe.nl</a></li>
+            </ul>
+          </div>
+          <div style="padding:var(--space-lg);background:var(--color-bg-alt);border-radius:var(--radius-md)">
+            <h3 style="margin-bottom:var(--space-sm)">📍 In het echt</h3>
+            <p><strong>Hackerspace Drenthe</strong></p>
+            <p>De Nieuwe Veste<br>Graaf van Heiden Reinesteinlaan<br>Coevorden</p>
+            <p style="margin-top:var(--space-sm);color:var(--color-text-muted)">Elke woensdagavond 19:00 – 21:00</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="info-section" aria-labelledby="start-heading">
+        <h2 id="start-heading">Klaar om te beginnen?</h2>
+        <p>Bekijk de <a href="planning.html">planning</a> voor de komende activiteiten, of duik meteen in de <a href="handleidingen.html">handleidingen</a> om je eerste node te bouwen. Geen ervaring? Geen probleem — we helpen je op weg.</p>
+      </section>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Kom naar de kick-off op 6 mei!</h2>
+        <p class="cta-banner__text">De Nieuwe Veste, Coevorden — 19:00 tot 21:00. Neem je laptop mee, wij zorgen voor de hardware en begeleiding.</p>
+        <div class="cta-banner__actions">
+          <a href="planning.html" class="cta-banner__btn cta-banner__btn--primary">Bekijk de planning →</a>
+          <a href="apparaten.html" class="cta-banner__btn cta-banner__btn--secondary">Bekijk de apparaten</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

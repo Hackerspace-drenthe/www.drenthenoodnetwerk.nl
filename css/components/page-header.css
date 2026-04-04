@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Page Header — Decoratieve kop voor binnenpagina's
+   ========================================================================== */
+
+.page-header {
+  position: relative;
+  padding: var(--space-2xl) 0 var(--space-xl);
+  margin-bottom: var(--space-xl);
+  overflow: hidden;
+}
+
+/* Decorative gradient bar at top */
+.page-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light), var(--color-accent));
+  border-radius: 0 0 2px 2px;
+}
+
+/* Subtle background pattern */
+.page-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 40% 80% at 90% 20%, var(--color-primary), transparent 70%);
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-header .container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+.page-header h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  color: var(--color-text);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.page-header__subtitle {
+  margin-top: var(--space-xs);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  max-width: 55ch;
+  line-height: var(--line-height-base);
+}
+
+/* Decorative icon (right side on desktop) */
+.page-header__icon {
+  flex-shrink: 0;
+  display: none;
+  color: var(--color-primary);
+  opacity: 0.6;
+}
+
+@media (min-width: 768px) {
+  .page-header__icon {
+    display: block;
+  }
+  .page-header .container {
+    justify-content: space-between;
+  }
+}
+
+/* Breadcrumb-style back link */
+.page-header__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  margin-bottom: var(--space-sm);
+  transition: color var(--transition-fast);
+}
+
+.page-header__back:hover {
+  color: var(--color-primary);
+}

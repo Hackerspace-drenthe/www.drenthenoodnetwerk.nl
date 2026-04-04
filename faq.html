@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veelgestelde vragen — Meshcore Drenthe</title>
+  <meta name="description" content="Antwoorden op de meest gestelde vragen over Meshcore Drenthe: van kosten en bereik tot legaliteit en privacy.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Veelgestelde vragen — Meshcore Drenthe">
+  <meta property="og:description" content="Antwoorden op de meest gestelde vragen over Meshcore: kosten, bereik, legaliteit en privacy.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/faq.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container container--narrow">
+      <h1>Veelgestelde vragen</h1>
+      <p style="color:var(--color-text-muted);margin-bottom:var(--space-2xl);max-width:65ch;">Hier vind je antwoorden op de meest gestelde vragen over Meshcore Drenthe. Staat jouw vraag er niet bij? <a href="meedoen.html">Neem contact op</a>.</p>
+
+      <div class="faq-list">
+        <!-- 1 -->
+        <details class="faq-item">
+          <summary>Is het legaal om een mesh-netwerk te bouwen?</summary>
+          <div class="faq-answer">
+            <p>Ja. Meshcore gebruikt de <a href="woordenlijst.html#ism-band">ISM-band</a> (868 MHz in Europa). Dit is een vrije frequentieband waar je zonder vergunning op mag zenden, vergelijkbaar met wifi. Je moet je wel houden aan de <a href="woordenlijst.html#duty-cycle">duty cycle</a> — maximaal 1% zendtijd per uur.</p>
+          </div>
+        </details>
+
+        <!-- 2 -->
+        <details class="faq-item">
+          <summary>Hoe ver reikt een node?</summary>
+          <div class="faq-answer">
+            <p>Dat hangt af van de antenne, de hoogte en het terrein. In bebouwd gebied kun je rekenen op 1 tot 5 kilometer. In het vlakke, open landschap van Drenthe zijn afstanden van 10 tot 15+ kilometer realistisch.</p>
+            <p>En bedenk: via meerdere <a href="woordenlijst.html#hop">hops</a> kan een bericht veel verder reizen. Met 5 nodes in een keten kun je al 50+ kilometer overbruggen.</p>
+          </div>
+        </details>
+
+        <!-- 3 -->
+        <details class="faq-item">
+          <summary>Wat kost het om een node te bouwen?</summary>
+          <div class="faq-answer">
+            <p>Een basisnode kost tussen de €20 en €50, afhankelijk van het board dat je kiest. Een complete buitennode met zonnepaneel, batterij en behuizing komt op zo'n €60 tot €100. Dat is een eenmalige investering — daarna geen maandelijkse kosten.</p>
+            <p>Populaire boards: Heltec V3, TTGO T-Beam, RAK WisBlock.</p>
+          </div>
+        </details>
+
+        <!-- 4 -->
+        <details class="faq-item">
+          <summary>Kan ik gewoon teksten sturen?</summary>
+          <div class="faq-answer">
+            <p>Ja! Met de Meshtastic-app op je telefoon kun je tekstberichten versturen naar andere nodes in het netwerk. Je kunt ook je <a href="woordenlijst.html#gps">GPS-locatie</a> delen. Denk aan korte berichten zoals "alles goed hier" of "hulp nodig bij [locatie]".</p>
+            <p>Foto's of video's versturen kan niet — <a href="woordenlijst.html#lora">LoRa</a> is ontworpen voor kleine hoeveelheden data, niet voor grote bestanden.</p>
+          </div>
+        </details>
+
+        <!-- 5 -->
+        <details class="faq-item">
+          <summary>Hoe veilig en privé is de communicatie?</summary>
+          <div class="faq-answer">
+            <p>Meshtastic versleutelt alle berichten met AES-256 encryptie. Alleen nodes die dezelfde kanaalsleutel hebben, kunnen berichten ontsleutelen en lezen. Andere mensen kunnen de radiogolven wel opvangen, maar zonder de sleutel zijn het onleesbare gegevens.</p>
+            <p>Vergelijk het met een brief in een envelop: iedereen kan zien dat er een brief verstuurd wordt, maar alleen de ontvanger kan hem lezen.</p>
+          </div>
+        </details>
+
+        <!-- 6 -->
+        <details class="faq-item">
+          <summary>Werkt het ook zonder zon?</summary>
+          <div class="faq-answer">
+            <p>Ja. Nodes verbruiken zeer weinig stroom. Een volledig opgeladen batterij (bijv. 18650 Li-ion, 3000 mAh) kan een node 2 tot 7 dagen draaiende houden zonder zon, afhankelijk van de instellingen en het verkeer in het netwerk.</p>
+            <p>Met een klein zonnepaneel (1–6W) is de node praktisch onbeperkt zelfvoorzienend, zelfs in de winter als er genoeg daglicht is.</p>
+          </div>
+        </details>
+
+        <!-- 7 -->
+        <details class="faq-item">
+          <summary>Moet ik kunnen programmeren?</summary>
+          <div class="faq-answer">
+            <p>Nee! <a href="woordenlijst.html#flashen">Flashen</a> — het installeren van de <a href="woordenlijst.html#firmware">firmware</a> — doe je met een simpel programma via je webbrowser. Configureren kan via de Meshtastic-app op je telefoon. Geen code schrijven nodig.</p>
+            <p>Tijdens de <a href="planning.html">hak-avonden</a> bij Hackerspace Drenthe helpen we je stap voor stap. En in de <a href="handleidingen.html">handleidingen</a> staat alles uitgelegd met afbeeldingen.</p>
+          </div>
+        </details>
+
+        <!-- 8 -->
+        <details class="faq-item">
+          <summary>Welk LoRa-board moet ik kopen?</summary>
+          <div class="faq-answer">
+            <p>Voor beginners raden we de <strong>Heltec V3</strong> aan (rond €15-20). Dit board heeft LoRa, wifi, Bluetooth en een klein OLED-schermpje ingebouwd. Ideaal om mee te starten.</p>
+            <p>Wil je een buitennode met GPS? Dan is de <strong>TTGO T-Beam</strong> (€25-35) een goede keuze. Voor compacte, modulaire setups is de <strong>RAK WisBlock</strong> populair.</p>
+            <p>Bestel bij voorkeur via gerenommeerde webshops. Op de hak-avond kunnen we helpen bij het kiezen.</p>
+          </div>
+        </details>
+
+        <!-- 9 -->
+        <details class="faq-item">
+          <summary>Kan ik een node binnenshuis gebruiken?</summary>
+          <div class="faq-answer">
+            <p>Ja, maar het bereik is dan flink korter. Muren (vooral beton en metaal) dempen het signaal sterk. Een binnennode reikt typisch 500 meter tot 2 kilometer, afhankelijk van de bouwmaterialen.</p>
+            <p>Tip: plaats de node bij een raam, liefst op de bovenste verdieping. Of sluit een externe antenne aan die je buiten hangt — dat maakt een groot verschil.</p>
+          </div>
+        </details>
+
+        <!-- 10 -->
+        <details class="faq-item">
+          <summary>Hoeveel nodes zijn er nodig voor heel Drenthe?</summary>
+          <div class="faq-answer">
+            <p>Ons eerste doel is 12 strategisch geplaatste nodes die de belangrijkste plaatsen verbinden. In de praktijk heb je voor goede dekking over de hele provincie zo'n 20 tot 30 nodes nodig.</p>
+            <p>Maar onthoud: iedere extra node vergroot het netwerk. Zelfs één node op een kerktoren in een klein dorp kan twee andere dorpen met elkaar verbinden die anders buiten bereik zouden liggen.</p>
+          </div>
+        </details>
+
+        <!-- 11 -->
+        <details class="faq-item">
+          <summary>Wat is het verschil tussen Meshtastic en Meshcore?</summary>
+          <div class="faq-answer">
+            <p><a href="woordenlijst.html#meshtastic">Meshtastic</a> en <a href="woordenlijst.html#meshcore">Meshcore</a> zijn twee verschillende firmware-projecten die op dezelfde LoRa-hardware draaien. Meshtastic is geschikt voor persoonlijk gebruik, Meshcore is specifiek ontworpen voor betrouwbare community-netwerken.</p>
+            <p>Belangrijke verschillen: Meshcore scheidt client- en repeater-rollen strikt (clients herhalen geen berichten), gebruikt slimme routering (eerst flooding, daarna direct pad), en heeft end-to-end AES-256 encryptie met ondertekende advertenties tegen spoofing. Lees meer op de <a href="hoe-werkt-het.html#meshcore-heading">technische uitleg</a>.</p>
+          </div>
+        </details>
+
+        <!-- 12 -->
+        <details class="faq-item">
+          <summary>Kan ik ook helpen zonder technische kennis?</summary>
+          <div class="faq-answer">
+            <p>Absoluut! We zoeken niet alleen bouwers, maar ook mensen die kunnen helpen met documentatie, fotografie, locaties scouten, of het project presenteren aan de buurt. Bekijk alle <a href="meedoen.html">rollen</a> — er is voor iedereen iets.</p>
+          </div>
+        </details>
+
+        <!-- 13 -->
+        <details class="faq-item">
+          <summary>Stoort het netwerk andere apparaten?</summary>
+          <div class="faq-answer">
+            <p>Nee. LoRa zendt op 868 MHz met heel weinig vermogen (maximaal 25 mW) en houdt zich aan de wettelijke <a href="woordenlijst.html#duty-cycle">duty cycle</a> van 1%. Dit is vergelijkbaar met een draadloze deurbel of weerstation. Je buren zullen niets merken.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Meer vragen? Kom langs!</h2>
+        <p class="cta-banner__text">Elke woensdagavond beantwoorden we vragen en helpen we je op weg met je eerste node. Geen vraag is te simpel.</p>
+        <div class="cta-banner__actions">
+          <a href="meedoen.html" class="cta-banner__btn cta-banner__btn--primary">Contact & locatie →</a>
+          <a href="wat-is-meshcore.html" class="cta-banner__btn cta-banner__btn--secondary">Wat is Meshcore?</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

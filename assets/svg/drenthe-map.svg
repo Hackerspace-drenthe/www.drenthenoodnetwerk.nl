@@ -1,0 +1,89 @@
+<!--
+  Drenthe Province Map — Simplified SVG
+  Based on CBS/PDOK open geodata (gemeentegrenzen).
+  Coordinate system: viewBox 0 0 500 600
+  Municipalities: 12 gemeenten van Drenthe
+
+  License: Public domain (overheidsdata, Wet hergebruik overheidsinformatie)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600">
+  <defs>
+    <style>
+      .gemeente { fill: var(--color-bg-alt, #f0f0e8); stroke: var(--color-border, #ccc); stroke-width: 1.5; transition: fill 0.2s; }
+      .gemeente:hover { fill: var(--color-primary-light, #d4edda); }
+      .gemeente-label { font-size: 10px; fill: var(--color-text-muted, #666); text-anchor: middle; pointer-events: none; }
+    </style>
+  </defs>
+
+  <!-- Provinciale buitengrens (vereenvoudigd) -->
+  <g id="drenthe-gemeenten">
+
+    <!-- Noordenveld (noordwest) -->
+    <path id="gem-noordenveld" class="gemeente" data-gemeente="Noordenveld"
+      d="M80,30 L175,20 L210,45 L200,100 L170,130 L130,140 L75,120 L55,80 Z"/>
+    <text class="gemeente-label" x="135" y="80">Noordenveld</text>
+
+    <!-- Tynaarlo (noord-midden) -->
+    <path id="gem-tynaarlo" class="gemeente" data-gemeente="Tynaarlo"
+      d="M210,45 L310,25 L330,60 L320,120 L280,140 L200,130 L200,100 Z"/>
+    <text class="gemeente-label" x="265" y="85">Tynaarlo</text>
+
+    <!-- Aa en Hunze (noordoost) -->
+    <path id="gem-aa-en-hunze" class="gemeente" data-gemeente="Aa en Hunze"
+      d="M330,60 L410,30 L445,60 L450,140 L430,200 L370,210 L320,180 L280,140 L320,120 Z"/>
+    <text class="gemeente-label" x="380" y="130">Aa en Hunze</text>
+
+    <!-- Westerveld (west) -->
+    <path id="gem-westerveld" class="gemeente" data-gemeente="Westerveld"
+      d="M20,110 L75,120 L130,140 L140,200 L120,260 L70,280 L25,260 L10,190 Z"/>
+    <text class="gemeente-label" x="80" y="200">Westerveld</text>
+
+    <!-- Midden-Drenthe (midden) -->
+    <path id="gem-midden-drenthe" class="gemeente" data-gemeente="Midden-Drenthe"
+      d="M130,140 L170,130 L200,130 L280,140 L320,180 L300,240 L250,260 L190,260 L140,240 L140,200 Z"/>
+    <text class="gemeente-label" x="225" y="200">Midden-Drenthe</text>
+
+    <!-- Borger-Odoorn (oost) -->
+    <path id="gem-borger-odoorn" class="gemeente" data-gemeente="Borger-Odoorn"
+      d="M320,180 L370,210 L430,200 L460,260 L450,340 L400,370 L350,340 L310,290 L300,240 Z"/>
+    <text class="gemeente-label" x="385" y="285">Borger-Odoorn</text>
+
+    <!-- De Wolden (zuidwest) -->
+    <path id="gem-de-wolden" class="gemeente" data-gemeente="De Wolden"
+      d="M25,260 L70,280 L120,260 L140,240 L160,300 L140,370 L100,400 L40,380 L15,320 Z"/>
+    <text class="gemeente-label" x="85" y="330">De Wolden</text>
+
+    <!-- Hoogeveen (zuid-midden-west) -->
+    <path id="gem-hoogeveen" class="gemeente" data-gemeente="Hoogeveen"
+      d="M140,240 L190,260 L210,310 L200,370 L140,370 L160,300 Z"/>
+    <text class="gemeente-label" x="175" y="320">Hoogeveen</text>
+
+    <!-- Coevorden (zuidoost) -->
+    <path id="gem-coevorden" class="gemeente" data-gemeente="Coevorden"
+      d="M200,370 L260,370 L310,400 L330,460 L300,520 L230,530 L180,490 L160,430 L140,370 L200,370 Z"/>
+    <text class="gemeente-label" x="245" y="460">Coevorden</text>
+
+    <!-- Emmen (oost-zuid) -->
+    <path id="gem-emmen" class="gemeente" data-gemeente="Emmen"
+      d="M310,290 L350,340 L400,370 L420,430 L400,500 L340,530 L300,520 L330,460 L310,400 L260,370 L210,310 L250,260 L300,240 Z"/>
+    <text class="gemeente-label" x="340" y="410">Emmen</text>
+
+    <!-- Meppel (uiterste zuidwest) -->
+    <path id="gem-meppel" class="gemeente" data-gemeente="Meppel"
+      d="M40,380 L100,400 L110,450 L90,490 L45,480 L25,430 Z"/>
+    <text class="gemeente-label" x="70" y="445">Meppel</text>
+
+    <!-- Assen (noord-midden, stad) -->
+    <path id="gem-assen" class="gemeente" data-gemeente="Assen"
+      d="M200,100 L200,130 L190,260 L240,260 L250,260 L280,140 L200,130 Z"
+      style="fill: var(--color-bg-alt, #f0f0e8)"/>
+    <text class="gemeente-label" x="235" y="175" style="font-weight:600">Assen</text>
+
+  </g>
+
+  <!-- Overlay groep voor node-markers (gevuld door JS) -->
+  <g id="node-markers"></g>
+
+  <!-- Overlay groep voor verbindingslijnen (gevuld door JS) -->
+  <g id="connection-lines"></g>
+</svg>

@@ -1,0 +1,199 @@
+/* ==========================================================================
+   Home — Pagina-specifieke styling voor index.html
+   ========================================================================== */
+
+/* ─── Highlights-sectie ─── */
+.highlights {
+  padding: var(--space-3xl) 0;
+  position: relative;
+}
+
+/* ─── Kick-off-sectie ─── */
+.kickoff {
+  padding: var(--space-3xl) 0;
+  background: var(--color-bg-alt);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.kickoff__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xl);
+}
+
+.kickoff__content {
+  flex: 1;
+}
+
+.kickoff__visual {
+  flex-shrink: 0;
+  display: none;
+}
+
+.kickoff h2 {
+  color: var(--color-primary);
+  font-size: var(--font-size-2xl);
+}
+
+.kickoff p {
+  margin-top: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.kickoff__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: var(--space-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+  padding: 0.5rem 1.25rem;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.kickoff__cta:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .kickoff__visual {
+    display: block;
+  }
+}
+
+/* ─── How-preview (3-step uitleg) ─── */
+.how-preview {
+  padding: var(--space-3xl) 0;
+}
+
+.how-preview h2 {
+  text-align: center;
+  color: var(--color-primary);
+  font-size: var(--font-size-2xl);
+}
+
+.how-preview__intro {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  max-width: 50ch;
+  margin: var(--space-md) auto var(--space-2xl);
+}
+
+.step-card {
+  position: relative;
+  text-align: center;
+  padding: var(--space-xl) var(--space-lg);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.step-card__number {
+  position: absolute;
+  top: -0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.step-card__icon {
+  margin: var(--space-md) auto var(--space-sm);
+}
+
+.step-card h3 {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-xs);
+}
+
+.step-card p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.how-preview__cta {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.how-preview__cta:hover {
+  border-bottom-color: var(--color-primary);
+}
+
+/* ─── About-sectie ─── */
+.about {
+  padding: var(--space-3xl) 0;
+  background: var(--color-bg-alt);
+  border-top: 1px solid var(--color-border);
+}
+
+.about__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xl);
+}
+
+.about__visual {
+  flex-shrink: 0;
+  display: none;
+}
+
+.about__content {
+  flex: 1;
+}
+
+.about h2 {
+  color: var(--color-primary);
+  font-size: var(--font-size-2xl);
+}
+
+.about p {
+  margin-top: var(--space-md);
+  color: var(--color-text-muted);
+}
+
+.about a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: var(--space-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.about a:hover {
+  border-bottom-color: var(--color-primary);
+}
+
+@media (min-width: 768px) {
+  .about__visual {
+    display: block;
+  }
+  .about__inner {
+    flex-direction: row-reverse;
+  }
+}

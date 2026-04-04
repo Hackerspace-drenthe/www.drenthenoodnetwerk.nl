@@ -1,0 +1,126 @@
+/* ==========================================================================
+   Info Page — Shared styles for informational content pages
+   ========================================================================== */
+
+.info-intro {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2xl);
+  max-width: 65ch;
+}
+
+.info-section {
+  margin-bottom: var(--space-3xl);
+}
+
+.info-section h2 {
+  margin-bottom: var(--space-md);
+}
+
+.info-section h3 {
+  margin-bottom: var(--space-sm);
+}
+
+/* Voordelen list */
+.voordelen-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-md);
+}
+
+.voordelen-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+}
+
+.voordelen-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 1.25rem;
+}
+
+.voordelen-list strong {
+  display: block;
+  margin-bottom: var(--space-2xs);
+}
+
+/* Comparison infographic */
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  margin: var(--space-xl) 0;
+}
+
+@media (max-width: 600px) {
+  .comparison {
+    grid-template-columns: 1fr;
+  }
+}
+
+.comparison__panel {
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.comparison__panel h3 {
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-md);
+}
+
+.comparison__panel svg {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin: 0 auto var(--space-md);
+  display: block;
+}
+
+.comparison__panel--mesh {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+}
+
+/* SVG animation container */
+.svg-demo {
+  margin: var(--space-xl) 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-alt);
+  padding: var(--space-md);
+}
+
+.svg-demo svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Scenario block */
+.scenario {
+  padding: var(--space-lg);
+  background: var(--color-bg-alt);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--space-xl) 0;
+}
+
+.scenario strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+  color: var(--color-accent);
+}

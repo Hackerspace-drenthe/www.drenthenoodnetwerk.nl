@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wat is Meshcore? — Meshcore Drenthe</title>
+  <meta name="description" content="Meshcore uitgelegd in gewone taal. Denk aan een estafette van walkietalkies: berichten springen van punt naar punt, zonder internet of provider.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Wat is Meshcore? — Meshcore Drenthe">
+  <meta property="og:description" content="Meshcore uitgelegd in gewone taal. Berichten springen van punt naar punt, zonder internet of provider.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/interactive.css">
+  <link rel="stylesheet" href="css/pages/info.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container container--narrow">
+      <h1>Wat is Meshcore?</h1>
+      <p class="info-intro">Stel je voor: een estafette van walkietalkies. Elk apparaat geeft berichten door aan het volgende, totdat het bericht aankomt. Geen zendmast nodig, geen abonnement, geen internet. Dát is Meshcore.</p>
+
+      <!-- SVG animatie: bericht springt van node naar node -->
+      <section class="info-section" aria-labelledby="demo-heading">
+        <h2 id="demo-heading" class="sr-only">Hoe een bericht door het netwerk reist</h2>
+        <div class="svg-demo">
+          <svg viewBox="0 0 700 200" aria-label="Animatie: een bericht reist van node naar node door het mesh-netwerk">
+            <!-- Verbindingslijnen -->
+            <line x1="80" y1="100" x2="240" y2="60" stroke="var(--color-border)" stroke-width="2"/>
+            <line x1="240" y1="60" x2="400" y2="100" stroke="var(--color-border)" stroke-width="2"/>
+            <line x1="400" y1="100" x2="560" y2="60" stroke="var(--color-border)" stroke-width="2"/>
+            <line x1="560" y1="60" x2="640" y2="100" stroke="var(--color-border)" stroke-width="2"/>
+            <!-- Extra paden -->
+            <line x1="80" y1="100" x2="240" y2="150" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4"/>
+            <line x1="240" y1="150" x2="400" y2="100" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4"/>
+
+            <!-- Nodes -->
+            <circle cx="80" cy="100" r="12" fill="var(--color-primary)" opacity="0.9"/>
+            <circle cx="240" cy="60" r="10" fill="var(--color-primary)" opacity="0.7"/>
+            <circle cx="400" cy="100" r="10" fill="var(--color-primary)" opacity="0.7"/>
+            <circle cx="560" cy="60" r="10" fill="var(--color-primary)" opacity="0.7"/>
+            <circle cx="640" cy="100" r="12" fill="var(--color-primary)" opacity="0.9"/>
+            <circle cx="240" cy="150" r="8" fill="var(--color-primary)" opacity="0.4"/>
+
+            <!-- Labels -->
+            <text x="80" y="135" text-anchor="middle" fill="var(--color-text)" font-size="12">Verzender</text>
+            <text x="640" y="135" text-anchor="middle" fill="var(--color-text)" font-size="12">Ontvanger</text>
+
+            <!-- Animated message dot -->
+            <circle r="6" fill="var(--color-accent)">
+              <animateMotion dur="4s" repeatCount="indefinite" keyPoints="0;0.25;0.5;0.75;1" keyTimes="0;0.25;0.5;0.75;1" calcMode="linear">
+                <mpath href="#message-path"/>
+              </animateMotion>
+            </circle>
+            <path id="message-path" d="M80,100 L240,60 L400,100 L560,60 L640,100" fill="none" stroke="none"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Scenario -->
+      <section class="info-section" aria-labelledby="scenario-heading">
+        <h2 id="scenario-heading">Waarom een noodnetwerk?</h2>
+        <div class="scenario">
+          <strong>Stel je voor…</strong>
+          <p>Een hevige storm trekt over Drenthe. De stroom valt uit, je mobiel heeft geen bereik meer. Hoe laat je je buren weten dat het goed gaat? Hoe bereik je de hulpdiensten? Met een mesh-netwerk kunnen berichten van dorp naar dorp reizen — ook als alle zendmasten plat liggen.</p>
+        </div>
+        <p>Meshcore is bedoeld als aanvulling op gewone communicatie. Niet als vervanging, maar als vangnet. Een netwerk dat er is wanneer al het andere wegvalt.</p>
+      </section>
+
+      <!-- Voordelen -->
+      <section class="info-section" aria-labelledby="voordelen-heading">
+        <h2 id="voordelen-heading">Vier voordelen</h2>
+        <ul class="voordelen-list">
+          <li>
+            <span class="voordelen-icon" aria-hidden="true">💰</span>
+            <div>
+              <strong>Geen abonnement nodig</strong>
+              <p>Meshcore gebruikt de vrije <a href="woordenlijst.html#ism-band">ISM-band</a>. Net als wifi heeft niemand een vergunning of abonnement nodig.</p>
+            </div>
+          </li>
+          <li>
+            <span class="voordelen-icon" aria-hidden="true">🌐</span>
+            <div>
+              <strong>Werkt zonder internet</strong>
+              <p><a href="woordenlijst.html#node">Nodes</a> praten rechtstreeks met elkaar via radiogolven. Geen server, geen provider, geen cloud.</p>
+            </div>
+          </li>
+          <li>
+            <span class="voordelen-icon" aria-hidden="true">📡</span>
+            <div>
+              <strong>Lange afstand</strong>
+              <p>Dankzij <a href="woordenlijst.html#lora">LoRa</a>-technologie kan één node tot 15 kilometer ver reiken. En via meerdere <a href="woordenlijst.html#hop">hops</a> nog veel verder.</p>
+            </div>
+          </li>
+          <li>
+            <span class="voordelen-icon" aria-hidden="true">☀️</span>
+            <div>
+              <strong>Draait op zonneenergie</strong>
+              <p>Nodes gebruiken heel weinig stroom. Een klein zonnepaneel en een batterij zijn genoeg om een node dag en nacht te laten draaien.</p>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Vergelijking -->
+      <section class="info-section" aria-labelledby="vergelijking-heading">
+        <h2 id="vergelijking-heading">Gewoon netwerk vs. mesh-netwerk</h2>
+        <div class="comparison">
+          <div class="comparison__panel">
+            <h3>Normaal netwerk</h3>
+            <svg viewBox="0 0 200 200" aria-label="Diagram: centraal netwerk met één zendmast">
+              <!-- Central tower -->
+              <rect x="90" y="30" width="20" height="60" rx="2" fill="var(--color-text-muted)"/>
+              <circle cx="100" cy="25" r="8" fill="var(--color-text-muted)"/>
+              <!-- Devices -->
+              <circle cx="40"  cy="150" r="8" fill="var(--color-border)"/>
+              <circle cx="100" cy="170" r="8" fill="var(--color-border)"/>
+              <circle cx="160" cy="150" r="8" fill="var(--color-border)"/>
+              <circle cx="60"  cy="120" r="8" fill="var(--color-border)"/>
+              <circle cx="140" cy="120" r="8" fill="var(--color-border)"/>
+              <!-- Lines to tower -->
+              <line x1="100" y1="90" x2="40"  y2="150" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="100" y1="90" x2="100" y2="170" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="100" y1="90" x2="160" y2="150" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="100" y1="90" x2="60"  y2="120" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="100" y1="90" x2="140" y2="120" stroke="var(--color-border)" stroke-width="1.5"/>
+            </svg>
+            <p>Alle apparaten zijn afhankelijk van één zendmast. Valt die uit? Dan is iedereen offline.</p>
+          </div>
+          <div class="comparison__panel comparison__panel--mesh">
+            <h3>Mesh-netwerk</h3>
+            <svg viewBox="0 0 200 200" aria-label="Diagram: mesh-netwerk zonder centraal punt">
+              <!-- Nodes -->
+              <circle cx="40"  cy="60"  r="8" fill="var(--color-primary)"/>
+              <circle cx="100" cy="40"  r="8" fill="var(--color-primary)"/>
+              <circle cx="160" cy="60"  r="8" fill="var(--color-primary)"/>
+              <circle cx="30"  cy="130" r="8" fill="var(--color-primary)"/>
+              <circle cx="100" cy="150" r="8" fill="var(--color-primary)"/>
+              <circle cx="170" cy="130" r="8" fill="var(--color-primary)"/>
+              <!-- Mesh connections -->
+              <line x1="40"  y1="60"  x2="100" y2="40"  stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="100" y1="40"  x2="160" y2="60"  stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="40"  y1="60"  x2="30"  y2="130" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="40"  y1="60"  x2="100" y2="150" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="100" y1="40"  x2="170" y2="130" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="100" y1="40"  x2="100" y2="150" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="160" y1="60"  x2="170" y2="130" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="30"  y1="130" x2="100" y2="150" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="100" y1="150" x2="170" y2="130" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+              <line x1="40"  y1="60"  x2="160" y2="60"  stroke="var(--color-primary)" stroke-width="1" opacity="0.3"/>
+              <line x1="30"  y1="130" x2="170" y2="130" stroke="var(--color-primary)" stroke-width="1" opacity="0.3"/>
+            </svg>
+            <p>Alle punten zijn verbonden. Valt er één weg? Dan vindt het bericht een andere route.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Kennis Check -->
+      <section class="info-section" aria-labelledby="quiz-heading">
+        <h2 id="quiz-heading">Test je kennis</h2>
+        <p>Hoe goed heb je het begrepen? Beantwoord deze vijf vragen.</p>
+
+        <div class="quiz" role="region" aria-label="Kennisquiz over mesh-netwerken">
+          <div class="quiz-progress">Vraag 1 van 5</div>
+
+          <!-- Q1 -->
+          <div class="quiz-question">
+            <h4>Wat is een mesh-netwerk?</h4>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="false" data-explanation="Een centraal punt is juist wat mesh-netwerken niet hebben.">Een netwerk met één centraal punt dat alles regelt</button>
+              <button class="quiz-option" data-correct="true" data-explanation="In een mesh-netwerk is elk punt met meerdere andere punten verbonden.">Een netwerk waarbij elk punt berichten kan doorsturen naar anderen</button>
+              <button class="quiz-option" data-correct="false" data-explanation="Mesh-netwerken werken juist zonder internet.">Een sneller soort wifi-netwerk</button>
+            </div>
+            <div class="quiz-feedback" hidden></div>
+            <button class="quiz-next" hidden>Volgende vraag →</button>
+          </div>
+
+          <!-- Q2 -->
+          <div class="quiz-question" hidden>
+            <h4>Wat is een "hop" in een mesh-netwerk?</h4>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="false" data-explanation="Een hop is geen apparaat, maar een sprong van het bericht.">Een speciaal type node</button>
+              <button class="quiz-option" data-correct="false" data-explanation="Versleuteling heet encryptie, niet een hop.">De versleutelingsmethode voor berichten</button>
+              <button class="quiz-option" data-correct="true" data-explanation="Elke hop is één sprong tussen twee nodes.">Eén sprong van een bericht van de ene naar de volgende node</button>
+            </div>
+            <div class="quiz-feedback" hidden></div>
+            <button class="quiz-next" hidden>Volgende vraag →</button>
+          </div>
+
+          <!-- Q3 -->
+          <div class="quiz-question" hidden>
+            <h4>Wat gebeurt er als één node in een mesh-netwerk uitvalt?</h4>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="false" data-explanation="Dat zou bij een ster-netwerk het geval zijn, niet bij mesh.">Het hele netwerk stopt</button>
+              <button class="quiz-option" data-correct="true" data-explanation="Mesh-netwerken vinden automatisch een alternatieve route.">Berichten zoeken een andere route via andere nodes</button>
+              <button class="quiz-option" data-correct="false" data-explanation="Mesh-netwerken zijn juist veerkrachtig ontworpen.">Alle berichten gaan verloren</button>
+            </div>
+            <div class="quiz-feedback" hidden></div>
+            <button class="quiz-next" hidden>Volgende vraag →</button>
+          </div>
+
+          <!-- Q4 -->
+          <div class="quiz-question" hidden>
+            <h4>Welke frequentie gebruikt LoRa in Europa?</h4>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="false" data-explanation="2.4 GHz is wifi, niet LoRa.">2.4 GHz (zoals wifi)</button>
+              <button class="quiz-option" data-correct="true" data-explanation="868 MHz is de vrije ISM-band in Europa voor LoRa.">868 MHz (ISM-band)</button>
+              <button class="quiz-option" data-correct="false" data-explanation="5G is een mobiel netwerk, niet LoRa.">5G (3.5 GHz)</button>
+            </div>
+            <div class="quiz-feedback" hidden></div>
+            <button class="quiz-next" hidden>Volgende vraag →</button>
+          </div>
+
+          <!-- Q5 -->
+          <div class="quiz-question" hidden>
+            <h4>Hoe ver kan een LoRa-node in vlak terrein reiken?</h4>
+            <div class="quiz-options">
+              <button class="quiz-option" data-correct="false" data-explanation="100 meter is te kort, dat is meer Bluetooth-bereik.">Ongeveer 100 meter</button>
+              <button class="quiz-option" data-correct="false" data-explanation="1 kilometer is aan de lage kant, zelfs in bebouwd gebied.">Maximaal 1 kilometer</button>
+              <button class="quiz-option" data-correct="true" data-explanation="In vlak, open terrein zoals Drenthe is 10-15 km realistisch.">10 tot 15+ kilometer</button>
+            </div>
+            <div class="quiz-feedback" hidden></div>
+            <button class="quiz-next" hidden>Volgende vraag →</button>
+          </div>
+
+          <!-- Result -->
+          <div class="quiz-result" hidden>
+            <div class="quiz-score"></div>
+            <p class="quiz-result__message"></p>
+            <button class="quiz-restart">Opnieuw proberen</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="info-section" aria-labelledby="volgende-heading">
+        <h2 id="volgende-heading">Wil je meer weten?</h2>
+        <p>Benieuwd naar de techniek erachter? Lees hoe <a href="hoe-werkt-het.html">LoRa, Meshtastic en Meshcore samenwerken</a>. Of bekijk de <a href="woordenlijst.html">woordenlijst</a> als je een term tegenkomt die je niet kent.</p>
+      </section>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Overtuigd? Begin vandaag nog.</h2>
+        <p class="cta-banner__text">Een Meshcore-node kost minder dan een pizzabestelling en beschermt je communicatie wanneer het er écht toe doet.</p>
+        <div class="cta-banner__actions">
+          <a href="apparaten.html" class="cta-banner__btn cta-banner__btn--primary">Bekijk apparaten →</a>
+          <a href="meedoen.html" class="cta-banner__btn cta-banner__btn--secondary">Doe mee met het project</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/components/quiz.js"></script>
+  <script defer src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof initQuiz === 'function') initQuiz();
+    });
+  </script>
+</body>
+</html>

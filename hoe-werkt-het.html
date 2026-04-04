@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoe werkt het? — Meshcore Drenthe</title>
+  <meta name="description" content="Van LoRa-radiogolven tot Meshtastic-protocollen: stap voor stap begrijpen hoe het mesh-netwerk van Meshcore Drenthe werkt.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Hoe werkt het? — Meshcore Drenthe">
+  <meta property="og:description" content="Van LoRa-radiogolven tot Meshtastic-protocollen: stap voor stap begrijpen hoe het mesh-netwerk werkt.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/code-block.css">
+  <link rel="stylesheet" href="css/components/interactive.css">
+  <link rel="stylesheet" href="css/pages/info.css">
+  <link rel="stylesheet" href="css/components/cta-banner.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="woordenlijst.html">Woordenlijst</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container container--narrow">
+      <h1>Hoe werkt het?</h1>
+      <p class="info-intro">Van simpel naar diepgaand. Begin bij de basis en scroll verder als je meer wilt weten over de techniek achter Meshcore.</p>
+
+      <!-- ============================================================
+           SECTIE A — De basis (iedereen)
+           ============================================================ -->
+      <section class="info-section" aria-labelledby="basis-heading">
+        <h2 id="basis-heading">A — De basis</h2>
+
+        <h3>Wat is een node?</h3>
+        <p>Een <a href="woordenlijst.html#node">node</a> is een klein apparaat — niet groter dan een pakje kaarten — met een radio-chip en een antenne. Elke node kan berichten ontvangen, versturen en doorsturen naar andere nodes in de buurt.</p>
+
+        <h3>Hoe praten nodes met elkaar?</h3>
+        <p>In een <a href="woordenlijst.html#mesh">mesh-netwerk</a> is er geen centraal punt. Elke node kan met meerdere buren praten. Als je een bericht verstuurt, geeft de dichtstbijzijnde node het door aan de volgende — net als een estafette. Dit heet een <a href="woordenlijst.html#hop">hop</a>.</p>
+
+        <!-- SVG: Topologievergelijking -->
+        <div class="svg-demo">
+          <svg viewBox="0 0 700 220" aria-label="Diagram: mesh-topologie vergeleken met ster- en ring-topologie">
+            <!-- Star topology -->
+            <text x="117" y="20" text-anchor="middle" fill="var(--color-text)" font-size="13" font-weight="600">Ster</text>
+            <circle cx="117" cy="90" r="10" fill="var(--color-text-muted)"/>
+            <circle cx="60"  cy="50" r="7" fill="var(--color-border)"/>
+            <circle cx="170" cy="50" r="7" fill="var(--color-border)"/>
+            <circle cx="60"  cy="140" r="7" fill="var(--color-border)"/>
+            <circle cx="170" cy="140" r="7" fill="var(--color-border)"/>
+            <circle cx="117" cy="170" r="7" fill="var(--color-border)"/>
+            <line x1="117" y1="90" x2="60"  y2="50"  stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="117" y1="90" x2="170" y2="50"  stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="117" y1="90" x2="60"  y2="140" stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="117" y1="90" x2="170" y2="140" stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="117" y1="90" x2="117" y2="170" stroke="var(--color-border)" stroke-width="1.5"/>
+            <text x="117" y="205" text-anchor="middle" fill="var(--color-text-muted)" font-size="11">Één punt faalt = alles stopt</text>
+
+            <!-- Ring topology -->
+            <text x="350" y="20" text-anchor="middle" fill="var(--color-text)" font-size="13" font-weight="600">Ring</text>
+            <circle cx="350" cy="55" r="7" fill="var(--color-border)"/>
+            <circle cx="300" cy="90" r="7" fill="var(--color-border)"/>
+            <circle cx="400" cy="90" r="7" fill="var(--color-border)"/>
+            <circle cx="300" cy="140" r="7" fill="var(--color-border)"/>
+            <circle cx="400" cy="140" r="7" fill="var(--color-border)"/>
+            <circle cx="350" cy="170" r="7" fill="var(--color-border)"/>
+            <line x1="350" y1="55" x2="400" y2="90"  stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="400" y1="90" x2="400" y2="140" stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="400" y1="140" x2="350" y2="170" stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="350" y1="170" x2="300" y2="140" stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="300" y1="140" x2="300" y2="90"  stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="300" y1="90" x2="350" y2="55"   stroke="var(--color-border)" stroke-width="1.5"/>
+            <text x="350" y="205" text-anchor="middle" fill="var(--color-text-muted)" font-size="11">Eén breuk = hele ring verstoord</text>
+
+            <!-- Mesh topology -->
+            <text x="583" y="20" text-anchor="middle" fill="var(--color-text)" font-size="13" font-weight="600">Mesh</text>
+            <circle cx="533" cy="55"  r="7" fill="var(--color-primary)"/>
+            <circle cx="633" cy="55"  r="7" fill="var(--color-primary)"/>
+            <circle cx="500" cy="110" r="7" fill="var(--color-primary)"/>
+            <circle cx="583" cy="110" r="7" fill="var(--color-primary)"/>
+            <circle cx="666" cy="110" r="7" fill="var(--color-primary)"/>
+            <circle cx="533" cy="170" r="7" fill="var(--color-primary)"/>
+            <circle cx="633" cy="170" r="7" fill="var(--color-primary)"/>
+            <!-- Mesh connections -->
+            <line x1="533" y1="55"  x2="633" y2="55"  stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="533" y1="55"  x2="500" y2="110" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="533" y1="55"  x2="583" y2="110" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="633" y1="55"  x2="583" y2="110" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="633" y1="55"  x2="666" y2="110" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="500" y1="110" x2="583" y2="110" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="583" y1="110" x2="666" y2="110" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="500" y1="110" x2="533" y2="170" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="583" y1="110" x2="533" y2="170" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="583" y1="110" x2="633" y2="170" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="666" y1="110" x2="633" y2="170" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <line x1="533" y1="170" x2="633" y2="170" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.5"/>
+            <text x="583" y="205" text-anchor="middle" fill="var(--color-primary)" font-size="11" font-weight="600">Meerdere routes = veerkrachtig</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Interactive mesh simulator -->
+      <section class="info-section" aria-labelledby="simulator-heading">
+        <h3 id="simulator-heading">Probeer het zelf: stuur een bericht</h3>
+        <p>Klik op twee nodes om te zien hoe een bericht via het mesh-netwerk reist. Het bericht vindt automatisch de kortste route.</p>
+
+        <div class="sim-container" id="mesh-simulator">
+          <svg viewBox="0 0 700 280" aria-label="Interactieve mesh-netwerk simulator">
+            <!-- Nodes and connections worden door mesh-simulator.js getekend -->
+          </svg>
+          <div class="sim-controls">
+            <span class="sim-status">Klik op twee nodes om een bericht te sturen.</span>
+            <span class="sim-hop-count"></span>
+            <button class="sim-reset" type="button">Opnieuw</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE B — LoRa Protocol
+           ============================================================ -->
+      <section class="info-section" aria-labelledby="lora-heading">
+        <h2 id="lora-heading">B — LoRa: de radiotechnologie</h2>
+
+        <h3>Wat is LoRa?</h3>
+        <p><a href="woordenlijst.html#lora">LoRa</a> staat voor Long Range. Het is een radiotechnologie die speciaal ontworpen is om kleine hoeveelheden data over grote afstanden te versturen — met minimaal stroomverbruik.</p>
+
+        <dl class="tech-detail">
+          <dt>Frequentie</dt>
+          <dd>868 MHz (Europa, <a href="woordenlijst.html#ism-band">ISM-band</a>) — vrij te gebruiken, geen vergunning nodig.</dd>
+
+          <dt>Bereik</dt>
+          <dd>1 tot 15+ kilometer, afhankelijk van antenne-hoogte, terrein en bebouwing. In het vlakke Drenthe zijn afstanden van 10+ km haalbaar.</dd>
+
+          <dt>Duty cycle</dt>
+          <dd>Maximaal 1% zendtijd per uur (36 seconden). Dit is een <a href="woordenlijst.html#duty-cycle">wettelijke beperking</a> om de frequentie eerlijk te delen.</dd>
+
+          <dt>Snelheid</dt>
+          <dd>Langzaam maar zeker: genoeg voor korte tekstberichten en GPS-coördinaten, niet geschikt voor foto's of video.</dd>
+        </dl>
+
+        <!-- SVG: radiogolven -->
+        <div class="svg-demo">
+          <svg viewBox="0 0 600 160" aria-label="Illustratie: LoRa-radiogolven reiken ver met weinig stroom">
+            <!-- Antenna -->
+            <rect x="50" y="50" width="6" height="60" rx="1" fill="var(--color-text)"/>
+            <circle cx="53" cy="45" r="5" fill="var(--color-primary)"/>
+            <!-- Radio waves -->
+            <path d="M70,80 Q90,40 70,0" fill="none" stroke="var(--color-primary)" stroke-width="2" opacity="0.8"/>
+            <path d="M85,90 Q120,30 85,-10" fill="none" stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
+            <path d="M100,100 Q150,20 100,-20" fill="none" stroke="var(--color-primary)" stroke-width="1.5" opacity="0.4"/>
+            <path d="M115,110 Q180,10 115,-30" fill="none" stroke="var(--color-primary)" stroke-width="1" opacity="0.2"/>
+            <!-- Distance markers -->
+            <line x1="180" y1="130" x2="550" y2="130" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="4"/>
+            <text x="200" y="150" fill="var(--color-text-muted)" font-size="11">1 km</text>
+            <text x="300" y="150" fill="var(--color-text-muted)" font-size="11">5 km</text>
+            <text x="400" y="150" fill="var(--color-text-muted)" font-size="11">10 km</text>
+            <text x="500" y="150" fill="var(--color-text-muted)" font-size="11">15 km</text>
+            <!-- Signal dots -->
+            <circle cx="200" cy="130" r="3" fill="var(--color-primary)" opacity="0.8"/>
+            <circle cx="300" cy="130" r="3" fill="var(--color-primary)" opacity="0.6"/>
+            <circle cx="400" cy="130" r="3" fill="var(--color-primary)" opacity="0.4"/>
+            <circle cx="500" cy="130" r="3" fill="var(--color-primary)" opacity="0.2"/>
+            <!-- Label -->
+            <text x="350" y="25" text-anchor="middle" fill="var(--color-text)" font-size="13">LoRa bereik in vlak terrein</text>
+          </svg>
+        </div>
+
+        <!-- Interactive Range Calculator -->
+        <div class="range-calc" id="range-calculator">
+          <h3>Bereik schatten: pas de waarden aan</h3>
+          <p style="color:var(--color-text-muted);margin-bottom:var(--space-md);font-size:var(--font-size-sm);">Verschuif de antennehoogte en kies een terreintype om te zien hoe ver je LoRa-signaal reikt.</p>
+
+          <div class="range-controls">
+            <div class="range-field">
+              <label for="range-height">Antennehoogte: <span class="range-height-label">5 m</span></label>
+              <input type="range" id="range-height" min="1" max="20" value="5" step="1">
+              <span style="font-size:var(--font-size-xs);color:var(--color-text-muted);">1 m (grond) — 20 m (kerktoren)</span>
+            </div>
+            <div class="range-field">
+              <label for="range-terrain">Terreintype</label>
+              <select id="range-terrain">
+                <option value="flat">Vlak (weiland, heide)</option>
+                <option value="rural" selected>Landelijk (bomen, boerderijen)</option>
+                <option value="suburb">Dorpskern (lage bebouwing)</option>
+                <option value="urban">Stad (hoge bebouwing)</option>
+                <option value="forest">Dicht bos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="range-result">
+            <span class="range-result__value">5.9 km</span>
+            <div class="range-result__bar">
+              <div class="range-result__bar-fill" style="width:29.5%"></div>
+            </div>
+          </div>
+
+          <div class="range-visual">
+            <svg viewBox="0 0 600 180" aria-label="Visualisatie van antenne en bereik">
+              <!-- Ground -->
+              <line x1="0" y1="150" x2="600" y2="150" stroke="var(--color-border)" stroke-width="1"/>
+              <!-- Terrain -->
+              <path class="range-terrain" d="M0,150 Q75,140 150,150 Q225,135 300,150 Q375,140 450,150 Q525,140 600,150" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" opacity="0.5"/>
+              <!-- Antenna base -->
+              <rect x="47" y="100" width="6" height="50" rx="1" fill="var(--color-text)"/>
+              <!-- Antenna line (dynamic) -->
+              <line class="range-antenna" x1="50" y1="100" x2="50" y2="150" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round"/>
+              <!-- Antenna tip (dynamic) -->
+              <circle class="range-tip" cx="50" cy="100" r="5" fill="var(--color-primary)"/>
+              <!-- Range ellipse (dynamic) -->
+              <ellipse class="range-circle" cx="50" cy="150" rx="150" ry="25" fill="var(--color-primary)" opacity="0.1" stroke="var(--color-primary)" stroke-width="1" stroke-dasharray="4 2"/>
+              <!-- Range label -->
+              <text class="range-label" x="300" y="170" text-anchor="middle" fill="var(--color-text-muted)" font-size="12">5.9 km</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE C — Meshtastic Protocol
+           ============================================================ -->
+      <section class="info-section" aria-labelledby="meshtastic-heading">
+        <h2 id="meshtastic-heading">C — Meshtastic: de software</h2>
+
+        <h3>Wat is Meshtastic?</h3>
+        <p><a href="woordenlijst.html#meshtastic">Meshtastic</a> is open-source software die op LoRa-hardware draait. Het regelt alles wat bovenop de radio komt: berichten versturen, versleutelen, routeren, en verbinding maken met een telefoon-app.</p>
+
+        <h3>De relatie: LoRa → Meshtastic → Meshcore</h3>
+        <p>Denk aan lagen:</p>
+
+        <!-- Protocol Stack -->
+        <div class="protocol-stack" role="img" aria-label="Protocol-stack: Meshcore bovenop Meshtastic bovenop LoRa bovenop Hardware">
+          <div class="protocol-stack__layer protocol-stack__layer--app">Meshcore — extra functies</div>
+          <div class="protocol-stack__layer protocol-stack__layer--mesh">Meshtastic — berichten, encryptie, routering</div>
+          <div class="protocol-stack__layer protocol-stack__layer--lora">LoRa — lange-afstand radio</div>
+          <div class="protocol-stack__layer protocol-stack__layer--hw">Hardware — chip, antenne, batterij</div>
+        </div>
+
+        <h3>Node-rollen</h3>
+        <p>Niet elke node doet hetzelfde. In Meshtastic kun je rollen toewijzen:</p>
+        <dl class="tech-detail">
+          <dt>Client</dt>
+          <dd>Een gewone gebruikersnode. Verstuurt en ontvangt berichten, maar stuurt ze niet door.</dd>
+
+          <dt>Router</dt>
+          <dd>Stuurt berichten door van andere nodes. Vormt de ruggengraat van het netwerk. Staat idealiter op een hoog punt.</dd>
+
+          <dt><a href="woordenlijst.html#repeater">Repeater</a></dt>
+          <dd>Nog stiller dan een router: only but forward, stuurt berichten door met minimaal eigen verkeer. Ideaal voor onbemande zonne-energie-nodes.</dd>
+        </dl>
+
+        <h3>Kanalen en encryptie</h3>
+        <p>Meshtastic gebruikt kanalen — vergelijkbaar met groepschats. Elk kanaal heeft een versleutelingssleutel. Alleen apparaten met dezelfde sleutel kunnen berichten lezen. Zo blijft communicatie privé, zelfs als iedereen dezelfde radiogolven kan opvangen.</p>
+      </section>
+
+      <!-- ============================================================
+           SECTIE D — Meshcore specifiek
+           ============================================================ -->
+      <section class="info-section" aria-labelledby="meshcore-heading">
+        <h2 id="meshcore-heading">D — Meshcore: de volgende stap</h2>
+
+        <h3>Wat is Meshcore?</h3>
+        <p><a href="woordenlijst.html#meshcore">Meshcore</a> is een <strong>zelfstandig firmware-project</strong> voor dezelfde LoRa-hardware. Het is gemaakt door Scott van Ripple Radios en draait op boards als de Heltec V3, RAK WisBlock en T-Deck. Meshcore is geen uitbreiding van Meshtastic, maar een apart systeem met een eigen aanpak van routering, versleuteling en netwerkbeheer.</p>
+
+        <h3>Waarom Meshcore in plaats van Meshtastic?</h3>
+        <p>Meshtastic is fantastisch voor persoonlijk gebruik. Maar voor een betrouwbaar community-netwerk dat een hele provincie dekt, biedt Meshcore gerichte verbeteringen:</p>
+
+        <dl class="tech-detail">
+          <dt>Slimme routering (flood + direct)</dt>
+          <dd>Het eerste bericht naar een nieuwe ontvanger wordt via <em>flooding</em> verstuurd — alle nodes geven het door. Zodra een ontvangstbevestiging terugkomt, kent het netwerk de snelste route en worden vervolgberichten direct afgeleverd. Dit bespaart bandbreedte en verlaagt de latency.</dd>
+
+          <dt>AES-256 end-to-end encryptie met ondertekende advertenties</dt>
+          <dd>Alle berichten zijn versleuteld met <a href="woordenlijst.html#aes-256">AES-256</a>. Daarnaast zijn node-advertenties cryptografisch ondertekend, waardoor spoofing (je voordoen als een andere node) onmogelijk is.</dd>
+
+          <dt>Gescheiden rollen: client vs. repeater</dt>
+          <dd>In Meshcore herhalen <strong>clients geen berichten</strong> — alleen repeaters en room servers doen dat. Dit voorkomt ongewenste loops en maakt het netwerk voorspelbaarder. Elke node heeft een duidelijke firmware: BLE Companion, USB Serial Companion, Repeater, Room Server of Standalone.</dd>
+
+          <dt>Tot 64 hops</dt>
+          <dd>Meshcore ondersteunt intern tot 64 hops (knooppunten) per bericht. Dat is ruim genoeg om heel Drenthe te bereiken, zelfs via omwegen.</dd>
+
+          <dt>Eigen companion-app</dt>
+          <dd>Meshcore heeft een eigen app (ontwikkeld door Liam Cottle), beschikbaar voor Android, iOS, Windows, Mac en Linux. Koppel via Bluetooth of USB, stuur berichten en bekijk je netwerk — alles in één app.</dd>
+        </dl>
+
+        <h3>Open source en gratis</h3>
+        <p>Meshcore-firmware is open source onder de MIT-licentie. De companion-app en het T-Deck standalone-firmware zijn freemium: basis-functies zijn gratis, geavanceerde functies optioneel betaald.</p>
+
+        <h3>Van experiment naar betrouwbaar netwerk</h3>
+        <p>Het doel van Meshcore Drenthe is niet "even een walkietalkie-experiment", maar een netwerk dat je kunt vertrouwen als het er écht op aankomt. Dat betekent:</p>
+
+        <ul>
+          <li><strong>Redundantie</strong> — minimaal twee routes tussen elk knooppunt, zodat het netwerk blijft werken als een node uitvalt</li>
+          <li><strong>Zelfvoorzienend</strong> — elke buitennode draait op zonne-energie met batterijbuffer voor meerdere bewolkte dagen</li>
+          <li><strong>Getest</strong> — regelmatige netwerk-tests waarbij we opzettelijk nodes uitschakelen om te controleren of het netwerk zichzelf herstelt</li>
+          <li><strong>Gedocumenteerd</strong> — elke node heeft een configuratie-document en een contactpersoon</li>
+        </ul>
+      </section>
+
+      <!-- CTA -->
+      <section class="info-section" aria-labelledby="volgende-heading">
+        <h2 id="volgende-heading">Klaar om mee te doen?</h2>
+        <p>Nu je weet hoe het werkt, kun je <a href="meedoen.html">meedoen</a> aan het project. Bekijk ook de <a href="faq.html">veelgestelde vragen</a> of de <a href="handleidingen.html">handleidingen</a> om zelf een node te bouwen.</p>
+      </section>
+
+      <!-- CTA Banner -->
+      <div class="cta-banner cta-banner--compact">
+        <h2 class="cta-banner__heading">Van theorie naar praktijk</h2>
+        <p class="cta-banner__text">Kies een apparaat, flash de firmware, en je eerste LoRa-berichten vliegen binnen een kwartier door de Drentse lucht.</p>
+        <div class="cta-banner__actions">
+          <a href="apparaten.html" class="cta-banner__btn cta-banner__btn--primary">Kies je apparaat →</a>
+          <a href="handleidingen.html" class="cta-banner__btn cta-banner__btn--secondary">Lees de handleidingen</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/components/mesh-simulator.js"></script>
+  <script defer src="js/components/range-calculator.js"></script>
+  <script defer src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof initMeshSimulator === 'function') initMeshSimulator();
+      if (typeof initRangeCalculator === 'function') initRangeCalculator();
+    });
+  </script>
+</body>
+</html>

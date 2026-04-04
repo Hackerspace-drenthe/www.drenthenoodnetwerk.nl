@@ -1,0 +1,292 @@
+/* ==========================================================================
+   Hero Component — Landing-sectie met mesh-animatie achtergrond
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 6rem 0 5rem;
+  margin-top: calc(-1 * var(--space-xl));
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 40%, rgba(82, 183, 136, 0.35) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 75% 60%, rgba(0, 180, 216, 0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(244, 162, 97, 0.1) 0%, transparent 50%),
+    linear-gradient(160deg, #0d2818 0%, #1b4332 30%, #2d6a4f 60%, #1a3a4a 100%);
+  color: #fff;
+}
+
+/* Topographic grid pattern overlay */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Bottom glow edge */
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, var(--color-bg), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero .container {
+  position: relative;
+  z-index: 3;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+  color: #fff;
+  max-width: 18ch;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero__subtitle {
+  font-size: var(--font-size-lg);
+  max-width: 50ch;
+  margin-top: var(--space-lg);
+  opacity: 0.9;
+  line-height: var(--line-height-base);
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-2xl);
+}
+
+/* CTA buttons */
+.hero__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  text-decoration: none;
+  transition: transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background var(--transition-fast);
+}
+
+.hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.hero__cta:not(.hero__cta--secondary) {
+  background: var(--color-accent);
+  color: #1b4332;
+}
+
+.hero__cta:not(.hero__cta--secondary):hover {
+  background: #f5b37a;
+}
+
+.hero__cta--secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(4px);
+}
+
+.hero__cta--secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─── SVG mesh achtergrond ─── */
+.hero__mesh {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero__mesh svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Connection lines */
+.hero__mesh .conn {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+  fill: none;
+}
+
+/* Animated signal travelling along connections */
+.hero__mesh .signal {
+  stroke-width: 1.5;
+  fill: none;
+  stroke-dasharray: 8 250;
+  stroke-dashoffset: 0;
+  animation: signal-travel 6s linear infinite;
+}
+
+.hero__mesh .signal:nth-child(2n)  { animation-delay: -1s; stroke-dasharray: 12 300; }
+.hero__mesh .signal:nth-child(3n)  { animation-delay: -2.5s; }
+.hero__mesh .signal:nth-child(5n)  { animation-delay: -4s; stroke-dasharray: 6 200; }
+.hero__mesh .signal:nth-child(7n)  { animation-delay: -0.5s; }
+
+@keyframes signal-travel {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -500; }
+}
+
+/* Node dots with glow */
+.hero__mesh .node {
+  fill: #fff;
+  filter: url(#glow);
+  animation: node-breathe 4s ease-in-out infinite;
+}
+
+.hero__mesh .node--active {
+  fill: var(--color-accent);
+  filter: url(#glow-warm);
+  animation: node-ping 3s ease-in-out infinite;
+}
+
+.hero__mesh .node--lg {
+  animation: node-ping 3s ease-in-out infinite;
+  fill: rgba(82, 183, 136, 1);
+  filter: url(#glow-green);
+}
+
+/* Range circles */
+.hero__mesh .range {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 1;
+  animation: range-expand 6s ease-in-out infinite;
+}
+
+.hero__mesh .range:nth-child(2n) { animation-delay: -3s; }
+
+@keyframes range-expand {
+  0%, 100% { opacity: 0.4; transform-origin: center; }
+  50%      { opacity: 0.8; }
+}
+
+/* Data packet dots moving along paths */
+.hero__mesh .packet {
+  r: 2.5;
+  fill: var(--color-accent);
+  filter: url(#glow-warm);
+}
+
+@keyframes node-breathe {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+@keyframes node-ping {
+  0%, 100% { opacity: 0.7; r: 4; }
+  50%      { opacity: 1;   r: 6; }
+}
+
+/* ─── Badge ─── */
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  margin-bottom: var(--space-lg);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+}
+
+.hero__badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #52b788;
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 0.5; box-shadow: 0 0 0 0 rgba(82, 183, 136, 0.4); }
+  50%      { opacity: 1;   box-shadow: 0 0 0 6px rgba(82, 183, 136, 0); }
+}
+
+/* ─── Stats bar ─── */
+.hero__stats {
+  display: flex;
+  gap: var(--space-xl);
+  margin-top: var(--space-3xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hero__stat {
+  text-align: left;
+}
+
+.hero__stat-value {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: #fff;
+  line-height: 1;
+}
+
+.hero__stat-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.25rem;
+}
+
+/* ─── Responsive ─── */
+@media (min-width: 768px) {
+  .hero {
+    padding: 8rem 0 6rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero__stats {
+    flex-wrap: wrap;
+    gap: var(--space-lg);
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero__mesh .node,
+  .hero__mesh .node--active,
+  .hero__mesh .node--lg,
+  .hero__mesh .signal,
+  .hero__mesh .range,
+  .hero__badge-dot {
+    animation: none;
+  }
+  .hero__mesh .packet {
+    display: none;
+  }
+}

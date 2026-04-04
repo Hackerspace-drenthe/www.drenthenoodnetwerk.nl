@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Design Tokens — Meshcore Drenthe
+   Centrale bron voor alle kleuren, spacing, typografie en animatie-waarden.
+   ========================================================================== */
+
+:root {
+  /* --- Kleuren: Light mode --- */
+  --color-primary: #2d6a4f;
+  --color-primary-light: #52b788;
+  --color-secondary: #1b4332;
+  --color-accent: #f4a261;
+  --color-bg: #fafaf5;
+  --color-bg-alt: #f0f0ea;
+  --color-text: #2b2b2b;
+  --color-text-muted: #666666;
+  --color-node: #e76f51;
+  --color-signal: #00b4d8;
+  --color-border: #d4d4c8;
+  --color-focus: #2d6a4f;
+
+  /* --- Typografie --- */
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 2.5rem;
+  --font-size-4xl: 3rem;
+
+  --line-height-tight: 1.2;
+  --line-height-base: 1.6;
+  --line-height-loose: 1.8;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* --- Spacing --- */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+
+  /* --- Layout --- */
+  --container-max: 1200px;
+  --container-narrow: 800px;
+  --container-padding: var(--space-lg);
+  --nav-height: 4rem;
+
+  /* --- Borders & Radius --- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+
+  /* --- Schaduwen --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* --- Animatie --- */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* --- Breakpoints (referentie, gebruik in media queries) --- */
+  /* Mobiel: 320px – 767px */
+  /* Tablet: 768px – 1023px */
+  /* Desktop: 1024px – 1440px */
+  /* Breed: 1441px+ */
+}
+
+/* --- Dark mode --- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #74c69d;
+    --color-primary-light: #95d5b2;
+    --color-secondary: #b7e4c7;
+    --color-accent: #f4a261;
+    --color-bg: #1a1a2e;
+    --color-bg-alt: #22223a;
+    --color-text: #e0e0e0;
+    --color-text-muted: #a0a0a0;
+    --color-node: #f4845f;
+    --color-signal: #48cae4;
+    --color-border: #3a3a50;
+    --color-focus: #74c69d;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Handmatige dark mode via data-theme attribuut */
+[data-theme="dark"] {
+  --color-primary: #74c69d;
+  --color-primary-light: #95d5b2;
+  --color-secondary: #b7e4c7;
+  --color-accent: #f4a261;
+  --color-bg: #1a1a2e;
+  --color-bg-alt: #22223a;
+  --color-text: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-node: #f4845f;
+  --color-signal: #48cae4;
+  --color-border: #3a3a50;
+  --color-focus: #74c69d;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+}

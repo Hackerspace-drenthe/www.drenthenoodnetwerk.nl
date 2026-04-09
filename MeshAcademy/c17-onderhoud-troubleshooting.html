@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 17: Onderhoud &amp; Troubleshooting — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🛠️</span>
+    <div class="course-info">
+      <h1>Cursus 17: <span>Onderhoud &amp; Troubleshooting</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gevorderd</span>
+        <span class="meta-tag tag-course">Cursus 17 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie"></nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ═══ SECTIE 1: Regulier Onderhoud ═══ -->
+  <section class="lesson-section" data-section="0" data-label="Regulier Onderhoud">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Regulier <span>Onderhoud</span></h2>
+    <p>Een mesh-netwerk draait niet vanzelf. Net als elk ander systeem heeft het regelmatig onderhoud nodig om betrouwbaar te blijven. Preventief onderhoud voorkomt dat kleine problemen uitgroeien tot complete uitval.</p>
+
+    <h3>Onderhoudstaken</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📦</div>
+        <h4>Firmware-updates</h4>
+        <p>Controleer regelmatig de GitHub-releases van MeshCore. Nieuwe versies bevatten bugfixes, beveiligingspatches en verbeterde prestaties.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔋</div>
+        <h4>Batterijgezondheid</h4>
+        <p>Monitor spanning en capaciteitsdegradatie. Li-ion batterijen verliezen na ~500 cycli merkbaar capaciteit. Vervang preventief.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>Antenne-inspectie</h4>
+        <p>Controleer connectoren op corrosie, kabels op breuk en waterdichtheid van buitenverbindingen. Losse connectoren verlagen je bereik drastisch.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">☀️</div>
+        <h4>Zonnepaneel reiniging</h4>
+        <p>Vuil, bladeren en vogelpoep verminderen de opbrengst. Reinig panelen van buiten-nodes elk seizoen met water en een zachte doek.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💾</div>
+        <h4>Configuratie-backup</h4>
+        <p>Exporteer configuratie als JSON (geleerd in C07). Bewaar backups op meerdere locaties. Zo herstel je snel na een defect of reset.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📋</div>
+        <h4>Log review</h4>
+        <p>Bekijk seriële logs op fouten, onverwachte reboots en waarschuwingen. Patronen in logs verraden problemen voordat ze kritiek worden.</p>
+      </div>
+    </div>
+
+    <h3>Onderhoudsschema</h3>
+    <table class="comp-table" aria-label="Aanbevolen onderhoudsschema">
+      <thead><tr><th>Frequentie</th><th>Taken</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Wekelijks</strong></td><td>Batterijniveaus controleren, foutmeldingen reviewen, node-bereikbaarheid testen</td></tr>
+        <tr><td><strong>Maandelijks</strong></td><td>Firmware-updates controleren op GitHub, visuele antenne-inspectie, BLE-verbinding testen</td></tr>
+        <tr><td><strong>Per seizoen</strong></td><td>Zonnepanelen reinigen, weatherproofing controleren, kabels en connectoren inspecteren</td></tr>
+        <tr><td><strong>Jaarlijks</strong></td><td>Volledige hardware-inspectie, kabels vervangen indien nodig, batterijcapaciteitstest, configuratie-backup vernieuwen</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">📝</span>
+      <div class="callout-text"><strong>Documenteer alles:</strong> Houd een logboek bij van alle wijzigingen, updates en onderhoud per node. Dit helpt enorm bij troubleshooting — je kunt problemen direct traceren naar recente wijzigingen.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 2: Troubleshooting ═══ -->
+  <section class="lesson-section" data-section="1" data-label="Troubleshooting">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Troubleshooting <span>Veelvoorkomende Problemen</span></h2>
+    <p>Effectief troubleshooten begint met een systematische aanpak. Spring niet meteen naar oplossingen — volg het proces:</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Systematische aanpak:</strong> <em>Observeer</em> de symptomen → <em>Hypothese</em> formuleren → <em>Test</em> uitvoeren → <em>Fix</em> toepassen. Verander nooit meerdere dingen tegelijk — anders weet je niet wat het probleem was.</div>
+    </div>
+
+    <h3>Veelvoorkomende problemen &amp; oplossingen</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔇</div>
+        <h4>Node niet bereikbaar</h4>
+        <p>Controleer stroomvoorziening (LED aan?). Controleer antenne-aansluiting. Verifieer dat frequentie-instellingen overeenkomen met het netwerk.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📏</div>
+        <h4>Korte range</h4>
+        <p>Antenne-probleem (SWR te hoog), obstakels in de weg, verkeerde SF/BW-instellingen, of te veel kabelverlies tussen radio en antenne.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📵</div>
+        <h4>Geen berichten ontvangen</h4>
+        <p>Verkeerde kanaalinstellingen, firmware-versie mismatch tussen nodes, of een defecte radiochip. Controleer of alle nodes dezelfde configuratie delen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📉</div>
+        <h4>Hoge packet loss</h4>
+        <p>Interferentie van andere 868 MHz-apparaten, duty cycle uitgeput (1% limiet bereikt), of slechte antenne-afstemming.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💥</div>
+        <h4>Firmware crash / reboot loops</h4>
+        <p>Corrupte flash: reflash de firmware volledig. Controleer ook de stabiliteit van de stroomvoorziening — spanningspieken veroorzaken crashes.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📱</div>
+        <h4>BLE-verbinding faalt</h4>
+        <p>Herstart de companion-app. Vergeet het BLE-apparaat in je telefooninstellingen en koppel opnieuw. Check BLE-compatibiliteit van je telefoon.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🪫</div>
+        <h4>Batterij snel leeg</h4>
+        <p>GPS continu actief? OLED-scherm altijd aan? Verkeerde sleep-instellingen? Of een verouderde batterij die capaciteit heeft verloren.</p>
+      </div>
+    </div>
+
+    <h3>Diagnostische gereedschappen</h3>
+    <table class="comp-table" aria-label="Diagnostische tools">
+      <thead><tr><th>Tool</th><th>Gebruik</th><th>Wanneer</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Seriële monitor (USB)</strong></td><td>Debug-output lezen, foutmeldingen en statusberichten</td><td>Node gedraagt zich vreemd, crash-diagnose</td></tr>
+        <tr><td><strong>PING/TRACE packets</strong></td><td>Netwerk-connectiviteit testen, hop-routes traceren</td><td>Bereikbaarheidsproblemen, route-analyse</td></tr>
+        <tr><td><strong>NanoVNA / SWR-meter</strong></td><td>Antenne-resonantie en SWR meten (geleerd in C08)</td><td>Bereikproblemen, nieuwe antenne valideren</td></tr>
+        <tr><td><strong>Multimeter</strong></td><td>Spanning, stroom en continuïteit meten</td><td>Stroomproblemen, batterijdiagnose, kabelbreuk</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Documenteer elke troubleshooting-sessie. Noteer het probleem, wat je getest hebt, en de oplossing. Dit bouwt een kennisbank op voor het hele team.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 3: Monitoring & Netwerkgroei ═══ -->
+  <section class="lesson-section" data-section="2" data-label="Monitoring & Netwerkgroei">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Monitoring &amp; <span>Netwerkgroei</span></h2>
+    <p>Een netwerk bouwen is stap één. Het monitoren, onderhouden en laten groeien is de echte uitdaging.</p>
+
+    <h3>Monitoring</h3>
+    <p>Houd de gezondheid van je mesh-netwerk continu in de gaten met deze metrieken:</p>
+    <ul>
+      <li><strong>Node-status dashboard</strong> — Welke nodes zijn online? Hoe lang is elke node al actief (uptime)?</li>
+      <li><strong>Batterijniveaus</strong> — Monitor spanning van alle nodes in het netwerk, vooral zonne-repeaters. Vervang batterijen preventief.</li>
+      <li><strong>Berichtbezorging</strong> — Meet het percentage berichten dat succesvol aankomt. Stuur periodiek test-berichten.</li>
+      <li><strong>Hop-counts</strong> — Hoeveel hops heeft een bericht nodig om de bestemming te bereiken? Stijgende hop-counts wijzen op uitgevallen tussennodes.</li>
+      <li><strong>RSSI/SNR tracking</strong> — Houd signaalkwaliteit bij over tijd. Seizoensveranderingen (bladgroei in de lente) beïnvloeden het signaal merkbaar.</li>
+    </ul>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">📊</span>
+      <div class="callout-text"><strong>Packet loss metingen:</strong> Stuur wekelijks test-berichten over het netwerk en meet het leveringspercentage. Een plotselinge stijging van packet loss wijst op een probleem dat aandacht nodig heeft.</div>
+    </div>
+
+    <h3>Netwerk laten groeien</h3>
+    <p>Een groeiend netwerk wordt sterker en betrouwbaarder. Plan de groei strategisch:</p>
+    <ol>
+      <li><strong>Dekkingsgaten identificeren</strong> — Analyseer waar berichten niet aankomen. Gebruik hop-count data en RSSI-metingen om zwakke plekken te vinden.</li>
+      <li><strong>Strategische node-plaatsing</strong> — Plaats nieuwe nodes op hoge punten om gaten te vullen. Prioriteer locaties die meerdere zwakke gebieden tegelijk bedienen.</li>
+      <li><strong>Redundante paden toevoegen</strong> — Streef naar N+1 dekking (geleerd in C10): elke verbinding heeft minstens één alternatief pad bij uitval.</li>
+      <li><strong>Capaciteitsplanning</strong> — Hoeveel nodes kan het netwerk aan voordat het verzadigt? Houd rekening met duty cycle beperkingen en kanaalcapaciteit.</li>
+      <li><strong>Community-groei</strong> — Organiseer workshops voor nieuwe leden, help hen met hun eerste node, en bouw een actieve gemeenschap die het netwerk draagt.</li>
+    </ol>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">🌱</span>
+      <div class="callout-text"><strong>Groeiplan voorbeeld:</strong> <em>Fase 1:</em> 3–5 backbone-repeaters op hoge punten. <em>Fase 2:</em> Randnetwerk voor buitengebieden. <em>Fase 3:</em> Community-workshops en nieuwe leden. <em>Fase 4:</em> Integratie met andere netwerken in de regio.</div>
+    </div>
+  </section>
+
+  <!-- ═══ QUIZ ═══ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Minimaal 70% nodig om verder te gaan.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  {
+    question: 'Hoe vaak moet je firmware-updates controleren?',
+    options: ['Dagelijks', 'Maandelijks', 'Alleen bij problemen', 'Eén keer per jaar'],
+    correct: 1,
+    explanation: 'Maandelijks firmware-updates controleren op GitHub is een goede balans tussen up-to-date blijven en niet te veel werk.'
+  },
+  {
+    question: 'Wat is de eerste stap bij troubleshooting?',
+    options: ['Firmware opnieuw flashen', 'De symptomen observeren', 'Alle instellingen resetten', 'Een nieuwe node plaatsen'],
+    correct: 1,
+    explanation: 'Begin altijd met het observeren van de symptomen. Zonder goed begrip van het probleem kun je het niet systematisch oplossen.'
+  },
+  {
+    question: 'Wat kan een korte range veroorzaken?',
+    options: ['Te veel nodes in het netwerk', 'Antenne-probleem, obstakels of verkeerde SF/BW-instellingen', 'Verkeerde node-naam', 'Te hoge batterijspanning'],
+    correct: 1,
+    explanation: 'Korte range wordt meestal veroorzaakt door antenneproblemen, fysieke obstakels of verkeerde radio-instellingen (SF/BW).'
+  },
+  {
+    question: 'Welk gereedschap helpt bij het debuggen van node-problemen via USB?',
+    options: ['NanoVNA', 'Seriële monitor', 'Multimeter', 'Spectrum analyzer'],
+    correct: 1,
+    explanation: 'De seriële monitor (via USB) toont debug-output, foutmeldingen en statusberichten direct van de node.'
+  },
+  {
+    question: 'Waarom is het belangrijk om alle wijzigingen te documenteren?',
+    options: ['Voor de verzekering', 'Het helpt problemen te traceren naar recente wijzigingen', 'Het is wettelijk verplicht', 'Om de firmware te kunnen updaten'],
+    correct: 1,
+    explanation: 'Documentatie helpt je problemen te traceren naar recente wijzigingen. Zonder logboek is het zoeken naar de oorzaak als zoeken naar een speld in een hooiberg.'
+  },
+  {
+    question: 'Wat veroorzaakt snelle batterijontlading?',
+    options: ['Te sterke antenne', 'GPS continu actief, OLED altijd aan, of verkeerde sleep-instellingen', 'Te veel berichten ontvangen', 'Verkeerde frequentie'],
+    correct: 1,
+    explanation: 'GPS, een altijd-aan scherm en verkeerde sleep-instellingen zijn de grootste energievreters. Schakel onnodige functies uit voor langere batterijduur.'
+  },
+  {
+    question: 'Hoe test je de prestaties van een antenne?',
+    options: ['Door de range te schatten', 'Met een NanoVNA of SWR-meter', 'Door naar de specificaties te kijken', 'Door de kleur van de LED te controleren'],
+    correct: 1,
+    explanation: 'Een NanoVNA of SWR-meter meet objectief de resonantiefrequentie en SWR van je antenne, waardoor je problemen kunt detecteren.'
+  },
+  {
+    question: 'Wat moet je controleren als een node niet bereikbaar is?',
+    options: ['De naam van de node', 'Stroom, antenne en frequentie-instellingen', 'Het type behuizing', 'De kleur van het apparaat'],
+    correct: 1,
+    explanation: 'Controleer eerst de basisvoorwaarden: heeft de node stroom, is de antenne aangesloten, en komen de frequentie-instellingen overeen met het netwerk?'
+  },
+  {
+    question: 'Welke metriek toont de signaalkwaliteit?',
+    options: ['Hop count', 'RSSI/SNR', 'Batterijpercentage', 'Firmware-versie'],
+    correct: 1,
+    explanation: 'RSSI (Received Signal Strength Indicator) en SNR (Signal-to-Noise Ratio) zijn de standaardmetrieken voor signaalkwaliteit in een LoRa-netwerk.'
+  },
+  {
+    question: 'Hoe identificeer je dekkingsgaten in het netwerk?',
+    options: ['Door de kaart te bekijken', 'Door te controleren waar berichten niet aankomen en hop-counts te monitoren', 'Door alle nodes tegelijk te resetten', 'Door de firmware te downgraden'],
+    correct: 1,
+    explanation: 'Monitor waar berichten niet aankomen en analyseer hop-count data. Gebieden met hoge packet loss of geen bereik zijn dekkingsgaten die nieuwe nodes nodig hebben.'
+  }
+];
+
+initCourse('c-onderhoud', quizQuestions);
+</script>
+</body>
+</html>

@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeshCore Apparaten Matrix — Hackerspace Drenthe</title>
+<style>
+:root {
+  --green:#00ff88; --cyan:#00e5ff; --orange:#ff6b00; --purple:#c864ff;
+  --dark:#050d1a; --mid:#0a1628; --card:#0d1f3c; --card2:#112240;
+  --text:#e0eaff; --dim:#7090b0; --border:rgba(0,229,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);min-height:100vh;padding-bottom:80px;}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── HEADER ── */
+.site-header{
+  background:linear-gradient(180deg,#071530 0%,var(--dark) 100%);
+  border-bottom:1px solid var(--border);
+  padding:22px 32px;
+  display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.header-text h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:900;}
+.header-text h1 span{color:var(--green);}
+.header-text p{color:var(--dim);font-size:.9rem;margin-top:5px;}
+.header-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.header-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.07em;}
+.ht-devices {background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.ht-source  {background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.back-btn{
+  background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);
+  color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;
+  transition:background .2s;white-space:nowrap;
+}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ── FILTER BAR ── */
+#filter-bar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(5,13,26,.97);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:12px 32px;
+  display:flex;flex-direction:column;gap:9px;
+}
+.filter-row{display:flex;align-items:center;flex-wrap:wrap;gap:7px;}
+.filter-lbl{font-size:.75rem;color:var(--dim);min-width:72px;flex-shrink:0;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+#search-input{
+  background:rgba(0,229,255,.07);border:1px solid var(--border);
+  color:var(--text);padding:7px 14px;border-radius:20px;
+  font-size:.88rem;width:200px;outline:none;transition:border-color .2s;
+}
+#search-input:focus{border-color:var(--cyan);}
+#search-input::placeholder{color:var(--dim);}
+#sort-select{
+  background:rgba(0,229,255,.07);border:1px solid var(--border);
+  color:var(--text);padding:7px 12px;border-radius:20px;
+  font-size:.82rem;cursor:pointer;outline:none;
+}
+.pill{
+  padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;
+  cursor:pointer;border:1px solid rgba(0,229,255,.22);background:transparent;
+  color:var(--dim);user-select:none;transition:all .18s;
+}
+.pill:hover{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan);}
+.pill.active{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);}
+.pill.rp-companion.active{background:rgba(0,255,136,.12);border-color:var(--green);color:var(--green);}
+.pill.rp-repeater.active{background:rgba(255,107,0,.12);border-color:var(--orange);color:var(--orange);}
+.pill.rp-standalone.active{background:rgba(200,100,255,.12);border-color:var(--purple);color:var(--purple);}
+.pill.budget.active{background:rgba(255,208,96,.12);border-color:#ffd060;color:#ffd060;}
+.pill.chip.active{background:rgba(0,229,255,.18);border-color:var(--cyan);color:var(--cyan);}
+.feat-toggle{
+  padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:600;
+  cursor:pointer;border:1px solid rgba(255,255,255,.1);background:transparent;
+  color:var(--dim);transition:all .18s;user-select:none;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.feat-toggle:hover{border-color:rgba(0,255,136,.4);color:rgba(0,255,136,.7);}
+.feat-toggle.on{background:rgba(0,255,136,.12);border-color:var(--green);color:var(--green);}
+
+/* ── RESULTS BAR ── */
+#results-bar{
+  padding:10px 32px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+#results-count{color:var(--dim);font-size:.88rem;}
+#results-count strong{color:var(--text);}
+.clear-all{
+  background:none;border:none;color:var(--dim);font-size:.78rem;cursor:pointer;
+  text-decoration:underline;
+}
+.clear-all:hover{color:#ff8888;}
+
+/* ── CARDS GRID ── */
+#cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:18px;
+  padding:0 32px 32px;
+}
+.no-results{
+  grid-column:1/-1;text-align:center;padding:60px 20px;
+  color:var(--dim);font-size:1.1rem;
+}
+
+/* ── DEVICE CARD ── */
+.device-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  position:relative;
+  transition:border-color .25s,box-shadow .25s,transform .2s;
+}
+.device-card:hover{
+  border-color:rgba(0,229,255,.35);
+  box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 18px rgba(0,229,255,.07);
+  transform:translateY(-3px);
+}
+.device-card.recommended{border-color:rgba(0,255,136,.3);}
+.device-card.recommended:hover{border-color:var(--green);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 22px rgba(0,255,136,.1);}
+.rec-badge{
+  position:absolute;top:11px;right:11px;
+  background:var(--green);color:#050d1a;
+  font-size:.65rem;font-weight:900;padding:3px 9px;
+  border-radius:20px;letter-spacing:.06em;text-transform:uppercase;z-index:2;
+}
+
+/* Card header */
+.card-head{
+  display:flex;gap:12px;padding:16px 16px 12px;
+  background:linear-gradient(135deg,rgba(0,229,255,.04),transparent);
+  border-bottom:1px solid var(--border);
+}
+.dev-img-wrap{
+  width:84px;height:84px;min-width:84px;
+  background:linear-gradient(135deg,#0f2545,#091a35);
+  border-radius:10px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.06);
+}
+.dev-img-wrap img{max-width:88%;max-height:88%;object-fit:contain;display:block;}
+.img-fb{font-size:1.3rem;font-weight:900;color:rgba(0,229,255,.45);display:none;text-align:center;}
+.card-title{flex:1;min-width:0;}
+.brand-lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:3px;}
+.dev-name{font-size:.95rem;font-weight:800;color:var(--text);line-height:1.25;margin-bottom:7px;}
+.role-strip{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px;}
+.rpill{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.04em;}
+.rpill-companion {background:rgba(0,255,136,.14);color:var(--green);}
+.rpill-repeater  {background:rgba(255,107,0,.14);color:var(--orange);}
+.rpill-standalone{background:rgba(200,100,255,.14);color:var(--purple);}
+.price-stars{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.price{font-size:1.05rem;font-weight:800;color:#ffd060;}
+.stars{letter-spacing:1px;font-size:.85rem;}
+
+/* Feature strip */
+.feat-strip{
+  display:flex;flex-wrap:wrap;gap:4px;
+  padding:9px 16px;border-bottom:1px solid var(--border);
+}
+.fb{font-size:.7rem;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;font-weight:600;}
+.fb-yes{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.fb-no {background:rgba(255,255,255,.04);color:var(--dim);border:1px solid rgba(255,255,255,.07);}
+.fb-opt{background:rgba(255,208,96,.08);color:#ffd060;border:1px solid rgba(255,208,96,.18);}
+
+/* Specs chips */
+.spec-row{
+  display:flex;flex-wrap:wrap;gap:5px;
+  padding:7px 16px;border-bottom:1px solid var(--border);
+}
+.sc{font-size:.7rem;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.13);border-radius:7px;padding:2px 7px;color:var(--cyan);}
+
+/* Pros/Cons */
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
+.pc-col{padding:10px 12px;}
+.pc-col:first-child{border-right:1px solid var(--border);}
+.pc-title{font-size:.65rem;text-transform:uppercase;font-weight:700;letter-spacing:.08em;margin-bottom:5px;}
+.pc-pros .pc-title{color:var(--green);}
+.pc-cons .pc-title{color:#ff8888;}
+.pc-col ul{list-style:none;padding:0;}
+.pc-col li{font-size:.73rem;color:var(--text);line-height:1.4;margin-bottom:3px;padding-left:13px;position:relative;}
+.pc-pros li::before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:700;}
+.pc-cons li::before{content:'✗';position:absolute;left:0;color:#ff8888;}
+
+/* Best for */
+.best-for{padding:8px 16px;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--dim);}
+.best-for strong{color:var(--cyan);}
+
+/* Firmware */
+.firmware-row{display:flex;flex-wrap:wrap;gap:4px;padding:6px 16px;border-bottom:1px solid var(--border);}
+.fw-chip{font-size:.67rem;background:rgba(200,100,255,.1);border:1px solid rgba(200,100,255,.2);color:var(--purple);padding:2px 7px;border-radius:7px;font-weight:600;}
+
+/* Buy buttons */
+.buy-section{padding:10px 16px 14px;}
+.buy-lbl{font-size:.65rem;text-transform:uppercase;font-weight:700;letter-spacing:.08em;color:var(--dim);margin-bottom:7px;}
+.buy-grid{display:flex;flex-wrap:wrap;gap:5px;}
+.bbtn{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 10px;border-radius:8px;font-size:.72rem;font-weight:600;
+  text-decoration:none;transition:all .18s;white-space:nowrap;
+}
+.bbtn:hover{transform:scale(1.05);text-decoration:none;}
+.bbtn-off {background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.22);}
+.bbtn-amz {background:rgba(255,153,0,.1);color:#ff9900;border:1px solid rgba(255,153,0,.22);}
+.bbtn-ali {background:rgba(255,60,0,.1);color:#ff6644;border:1px solid rgba(255,60,0,.18);}
+.bbtn-tt  {background:rgba(0,200,100,.1);color:#00c864;border:1px solid rgba(0,200,100,.2);}
+.bbtn-kiwi{background:rgba(100,220,50,.1);color:#7ad348;border:1px solid rgba(100,220,50,.2);}
+.bbtn-off:hover {background:rgba(0,229,255,.2);}
+.bbtn-amz:hover {background:rgba(255,153,0,.2);}
+.bbtn-ali:hover {background:rgba(255,60,0,.18);}
+.bbtn-tt:hover  {background:rgba(0,200,100,.2);}
+.bbtn-kiwi:hover{background:rgba(100,220,50,.2);}
+
+/* Compare button */
+.cmp-btn{
+  position:absolute;top:11px;right:11px;
+  background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.18);
+  color:var(--dim);font-size:.68rem;padding:4px 9px;border-radius:7px;
+  cursor:pointer;transition:all .18s;
+}
+.cmp-btn.sel{background:rgba(0,229,255,.18);border-color:var(--cyan);color:var(--cyan);}
+.cmp-btn:hover{color:var(--cyan);border-color:var(--cyan);}
+.has-rec-badge .cmp-btn{top:36px;}
+
+/* ── SECTION ── */
+.sec-head{padding:36px 32px 18px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.sec-head h2{font-size:clamp(1.2rem,2.5vw,1.7rem);font-weight:800;}
+.sec-head p{color:var(--dim);font-size:.88rem;}
+hr.sec{border:none;border-top:1px solid var(--border);margin:0 32px;}
+
+/* ── MATRIX TABLE ── */
+.tbl-wrap{overflow-x:auto;padding:0 32px 32px;}
+#spec-tbl{width:100%;border-collapse:collapse;font-size:.8rem;min-width:1050px;}
+#spec-tbl thead th{
+  background:rgba(0,229,255,.07);color:var(--cyan);
+  padding:9px 10px;text-align:left;font-weight:700;font-size:.7rem;
+  text-transform:uppercase;letter-spacing:.07em;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;white-space:nowrap;user-select:none;
+}
+#spec-tbl thead th:hover{background:rgba(0,229,255,.13);}
+#spec-tbl thead th.sa::after{content:' ↑';}
+#spec-tbl thead th.sd::after{content:' ↓';}
+#spec-tbl tbody td{padding:9px 10px;border-bottom:1px solid rgba(0,229,255,.06);white-space:nowrap;}
+#spec-tbl tbody tr:hover td{background:rgba(0,229,255,.04);}
+.tc-name{font-weight:700;color:var(--text);}
+.tc-yes{color:var(--green);font-weight:700;}
+.tc-no {color:var(--dim);}
+.tc-opt{color:#ffd060;}
+.tc-price{color:#ffd060;font-weight:700;}
+.tc-mcu-nrf{color:var(--cyan);}
+.tc-mcu-esp{color:var(--orange);}
+
+/* ── WIZARD ── */
+#wizard{padding:36px 32px;}
+#wizard h2{font-size:1.6rem;font-weight:800;}
+#wizard .wz-sub{color:var(--dim);font-size:.9rem;margin-top:6px;margin-bottom:22px;}
+.wz-steps{display:flex;flex-direction:column;gap:16px;max-width:700px;}
+.wz-step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;}
+.wz-step h3{font-size:.95rem;font-weight:700;color:var(--cyan);margin-bottom:10px;}
+.wz-opts{display:flex;flex-wrap:wrap;gap:7px;}
+.wzo{
+  padding:7px 16px;border-radius:20px;cursor:pointer;
+  border:1px solid rgba(0,229,255,.18);background:transparent;
+  color:var(--dim);font-size:.85rem;font-weight:600;transition:all .18s;user-select:none;
+}
+.wzo.sel{background:rgba(0,255,136,.12);border-color:var(--green);color:var(--green);}
+.wzo:hover:not(.sel){background:rgba(0,229,255,.08);border-color:var(--cyan);color:var(--cyan);}
+#wz-result{
+  margin-top:20px;padding:20px 22px;
+  background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.25);
+  border-radius:14px;display:none;
+}
+#wz-result h3{color:var(--green);font-size:1rem;font-weight:800;margin-bottom:12px;}
+.wz-recs{display:flex;flex-wrap:wrap;gap:10px;}
+.wz-rec{
+  background:var(--card2);border:1px solid rgba(0,229,255,.18);
+  border-radius:12px;padding:12px 16px;flex:1;min-width:150px;max-width:240px;
+}
+.wz-rec .wr-name{font-weight:800;font-size:.9rem;color:var(--text);margin-bottom:3px;}
+.wz-rec .wr-price{color:#ffd060;font-size:.82rem;font-weight:700;margin-bottom:5px;}
+.wz-rec .wr-why{font-size:.74rem;color:var(--dim);}
+
+/* ── COMPARE TRAY ── */
+#cmp-tray{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(10,22,40,.97);border-top:2px solid var(--cyan);
+  padding:10px 32px;
+  display:none;align-items:center;gap:14px;flex-wrap:wrap;
+  z-index:200;backdrop-filter:blur(14px);
+}
+#cmp-tray.on{display:flex;}
+.cmp-slot{
+  background:rgba(0,229,255,.07);border:1px dashed rgba(0,229,255,.25);
+  border-radius:9px;padding:6px 12px;min-width:130px;font-size:.8rem;color:var(--dim);
+}
+.cmp-slot.filled{border-style:solid;border-color:var(--cyan);color:var(--cyan);}
+#cmp-go{
+  background:var(--cyan);color:#050d1a;padding:9px 22px;
+  border-radius:20px;font-weight:800;cursor:pointer;border:none;
+  font-size:.85rem;transition:background .2s;
+}
+#cmp-go:hover{background:#33eeff;}
+#cmp-clr{
+  background:transparent;border:1px solid rgba(255,255,255,.15);
+  color:var(--dim);padding:7px 14px;border-radius:20px;
+  cursor:pointer;font-size:.8rem;transition:all .2s;
+}
+#cmp-clr:hover{border-color:#ff8888;color:#ff8888;}
+
+/* ── COMPARE MODAL ── */
+#cmp-modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:300;display:none;align-items:center;justify-content:center;padding:16px;
+}
+#cmp-modal.on{display:flex;}
+.cmp-inner{
+  background:var(--mid);border:1px solid var(--cyan);
+  border-radius:18px;padding:24px;max-width:98vw;width:100%;
+  max-height:92vh;overflow-y:auto;position:relative;
+}
+.cmp-inner h2{font-size:1.2rem;font-weight:800;color:var(--cyan);margin-bottom:16px;}
+.cmp-x{
+  position:absolute;top:14px;right:18px;
+  background:none;border:none;color:var(--dim);font-size:1.5rem;
+  cursor:pointer;line-height:1;
+}
+.cmp-x:hover{color:var(--text);}
+.cmp-table{width:100%;border-collapse:collapse;font-size:.8rem;min-width:400px;}
+.cmp-table th{background:rgba(0,229,255,.07);color:var(--cyan);padding:9px 12px;text-align:left;font-weight:700;font-size:.73rem;text-transform:uppercase;width:25%;}
+.cmp-table td{padding:9px 12px;border-bottom:1px solid var(--border);}
+.cmp-table tr:hover td{background:rgba(0,229,255,.03);}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:24px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;color:var(--dim);font-size:.8rem;margin-top:20px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:680px){
+  .site-header,#filter-bar,#results-bar,#cards-grid,.sec-head,.tbl-wrap,#wizard{padding-left:14px;padding-right:14px;}
+  #cards-grid{grid-template-columns:1fr;}
+  .pros-cons{grid-template-columns:1fr;}
+  .pc-col:first-child{border-right:none;border-bottom:1px solid var(--border);}
+  hr.sec{margin:0 14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="site-header">
+  <div>
+    <div class="header-text">
+      <h1>MeshCore <span>Apparaten Matrix</span></h1>
+      <p>Vergelijk alle ondersteunde hardware — kies het apparaat dat perfect bij jou past.</p>
+    </div>
+    <div class="header-meta">
+      <span class="header-tag ht-devices">14 apparaten</span>
+      <span class="header-tag ht-source">meshcore.co.uk · drenthenoodnetwerk.nl · 2026</span>
+    </div>
+  </div>
+  <a class="back-btn" href="course-hub.html">← Terug naar Course Hub</a>
+</header>
+
+<!-- ══ FILTER BAR ══ -->
+<div id="filter-bar">
+  <div class="filter-row">
+    <span class="filter-lbl">Zoeken</span>
+    <input id="search-input" type="text" placeholder="Apparaatnaam…" oninput="applyFilters()">
+    <span class="filter-lbl" style="margin-left:12px">Sorteren</span>
+    <select id="sort-select" onchange="applyFilters()">
+      <option value="rec">⭐ Aanbevolen</option>
+      <option value="price-asc">💶 Prijs laag → hoog</option>
+      <option value="price-desc">💶 Prijs hoog → laag</option>
+      <option value="name">🔤 Naam A–Z</option>
+    </select>
+  </div>
+  <div class="filter-row">
+    <span class="filter-lbl">Rol</span>
+    <span class="pill rp-companion" data-filter="role" data-val="companion" onclick="togglePill(this)">📱 Companion</span>
+    <span class="pill rp-repeater"  data-filter="role" data-val="repeater"  onclick="togglePill(this)">📡 Repeater</span>
+    <span class="pill rp-standalone" data-filter="role" data-val="standalone" onclick="togglePill(this)">⌨️ Standalone</span>
+  </div>
+  <div class="filter-row">
+    <span class="filter-lbl">Functies</span>
+    <span class="feat-toggle" data-feat="gps"        onclick="toggleFeat(this)">📍 GPS</span>
+    <span class="feat-toggle" data-feat="screen"     onclick="toggleFeat(this)">🖥️ Scherm</span>
+    <span class="feat-toggle" data-feat="solar"      onclick="toggleFeat(this)">☀️ Zonne-energie</span>
+    <span class="feat-toggle" data-feat="waterproof" onclick="toggleFeat(this)">💧 Waterdicht</span>
+    <span class="feat-toggle" data-feat="keyboard"   onclick="toggleFeat(this)">⌨️ Toetsenbord</span>
+    <span class="feat-toggle" data-feat="wifi"       onclick="toggleFeat(this)">📶 WiFi</span>
+    <span class="feat-toggle" data-feat="nfc"        onclick="toggleFeat(this)">📟 NFC</span>
+  </div>
+  <div class="filter-row">
+    <span class="filter-lbl">Budget</span>
+    <span class="pill budget" data-filter="budget" data-val="30"  onclick="togglePill(this)">Tot €30</span>
+    <span class="pill budget" data-filter="budget" data-val="50"  onclick="togglePill(this)">Tot €50</span>
+    <span class="pill budget" data-filter="budget" data-val="75"  onclick="togglePill(this)">Tot €75</span>
+    <span class="pill budget" data-filter="budget" data-val="100" onclick="togglePill(this)">Tot €100</span>
+    <span class="pill budget" data-filter="budget" data-val="999" onclick="togglePill(this)">Boven €100</span>
+    <span class="filter-lbl" style="margin-left:12px">Chip</span>
+    <span class="pill chip" data-filter="chip" data-val="nRF52840"  onclick="togglePill(this)">nRF52840 (zuinig)</span>
+    <span class="pill chip" data-filter="chip" data-val="ESP32-S3"  onclick="togglePill(this)">ESP32-S3 (krachtig)</span>
+  </div>
+</div>
+
+<!-- ══ RESULTS BAR ══ -->
+<div id="results-bar">
+  <div id="results-count">Alle <strong>14</strong> apparaten weergegeven</div>
+  <button class="clear-all" onclick="clearFilters()">Filters wissen</button>
+</div>
+
+<!-- ══ CARDS GRID ══ -->
+<div id="cards-grid"></div>
+
+<!-- ══ SPEC TABLE ══ -->
+<hr class="sec">
+<div class="sec-head">
+  <div>
+    <h2>📋 Volledige Specificatietabel</h2>
+    <p>Klik op een kolomkop om te sorteren</p>
+  </div>
+</div>
+<div class="tbl-wrap">
+<table id="spec-tbl">
+  <thead>
+    <tr>
+      <th onclick="sortTable(0)">Apparaat</th>
+      <th onclick="sortTable(1)">Chipmerk</th>
+      <th onclick="sortTable(2)">MCU</th>
+      <th onclick="sortTable(3)">LoRa</th>
+      <th onclick="sortTable(4)">Scherm</th>
+      <th onclick="sortTable(5)">GPS</th>
+      <th onclick="sortTable(6)">BLE</th>
+      <th onclick="sortTable(7)">WiFi</th>
+      <th onclick="sortTable(8)">Solar</th>
+      <th onclick="sortTable(9)">IP</th>
+      <th onclick="sortTable(10)">Toetsenbord</th>
+      <th onclick="sortTable(11)">NFC</th>
+      <th onclick="sortTable(12)">Prijs</th>
+      <th onclick="sortTable(13)">Firmware</th>
+    </tr>
+  </thead>
+  <tbody id="tbl-body"></tbody>
+</table>
+</div>
+
+<!-- ══ WIZARD ══ -->
+<hr class="sec">
+<div id="wizard">
+  <h2>🧭 Welk apparaat past bij mij?</h2>
+  <p class="wz-sub">Beantwoord vier vragen — we adviseren het beste apparaat voor jouw situatie.</p>
+  <div class="wz-steps">
+    <div class="wz-step">
+      <h3>1. Wat wordt de hoofdrol van het apparaat?</h3>
+      <div class="wz-opts">
+        <span class="wzo" data-q="role" data-v="companion" onclick="selectWz(this)">📱 Mobiele companion (koppelen aan telefoon)</span>
+        <span class="wzo" data-q="role" data-v="repeater"  onclick="selectWz(this)">📡 Vaste repeater (op dak/mast)</span>
+        <span class="wzo" data-q="role" data-v="standalone" onclick="selectWz(this)">⌨️ Standalone (zelfstandig, geen telefoon)</span>
+      </div>
+    </div>
+    <div class="wz-step">
+      <h3>2. Hoe belangrijk is een lange batterijduur?</h3>
+      <div class="wz-opts">
+        <span class="wzo" data-q="battery" data-v="low"  onclick="selectWz(this)">🔌 Niet belangrijk (thuis of op stroom)</span>
+        <span class="wzo" data-q="battery" data-v="mid"  onclick="selectWz(this)">🔋 Gemiddeld (dagtrip, paar dagen)</span>
+        <span class="wzo" data-q="battery" data-v="max"  onclick="selectWz(this)">☀️ Maximaal (weken op zonne-energie)</span>
+      </div>
+    </div>
+    <div class="wz-step">
+      <h3>3. Heb je GPS/locatie nodig?</h3>
+      <div class="wz-opts">
+        <span class="wzo" data-q="gps" data-v="no"  onclick="selectWz(this)">❌ Nee, alleen berichten</span>
+        <span class="wzo" data-q="gps" data-v="yes" onclick="selectWz(this)">📍 Ja, locatie delen is belangrijk</span>
+      </div>
+    </div>
+    <div class="wz-step">
+      <h3>4. Wat is je budget?</h3>
+      <div class="wz-opts">
+        <span class="wzo" data-q="budget" data-v="30"  onclick="selectWz(this)">💶 Tot €30</span>
+        <span class="wzo" data-q="budget" data-v="60"  onclick="selectWz(this)">💶 €30–€60</span>
+        <span class="wzo" data-q="budget" data-v="100" onclick="selectWz(this)">💶 €60–€100</span>
+        <span class="wzo" data-q="budget" data-v="200" onclick="selectWz(this)">💶 Meer dan €100</span>
+      </div>
+    </div>
+  </div>
+  <div id="wz-result">
+    <h3>🏆 Onze aanbevelingen voor jou:</h3>
+    <div class="wz-recs" id="wz-recs"></div>
+  </div>
+</div>
+
+<!-- ══ COMPARE TRAY ══ -->
+<div id="cmp-tray">
+  <span style="font-size:.8rem;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Vergelijk:</span>
+  <span class="cmp-slot" id="cs0">Sleuf 1 — klik Vergelijk</span>
+  <span class="cmp-slot" id="cs1">Sleuf 2</span>
+  <span class="cmp-slot" id="cs2">Sleuf 3</span>
+  <button id="cmp-go" onclick="openCompare()">Vergelijk nu →</button>
+  <button id="cmp-clr" onclick="clearCompare()">Wissen</button>
+</div>
+
+<!-- ══ COMPARE MODAL ══ -->
+<div id="cmp-modal">
+  <div class="cmp-inner">
+    <button class="cmp-x" onclick="closeCompare()">×</button>
+    <h2>⚖️ Vergelijking</h2>
+    <div style="overflow-x:auto">
+      <table class="cmp-table" id="cmp-table"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <span>MeshCore Apparaten Matrix — Hackerspace Drenthe · Mei 2026</span>
+  <span>Bronnen: <a href="https://drenthenoodnetwerk.nl/apparaten.html" target="_blank">drenthenoodnetwerk.nl</a> · <a href="https://meshcore.co.uk" target="_blank">meshcore.co.uk</a></span>
+</footer>
+
+<script>
+/* ════════ DATA ════════ */
+const D = [
+  {
+    id:'heltec-v3', name:'Heltec WiFi LoRa 32 V3', brand:'Heltec',
+    img:'https://meshcore.co.uk/images/devices/HELTEC_V3.png',
+    roles:['companion','repeater'],
+    mcu:'ESP32-S3', lora:'SX1262', freq:'868 MHz',
+    screen:'0.96″ OLED', gps:false, ble:true, wifi:true, solar:false,
+    waterproof:false, keyboard:false, nfc:false,
+    battery:'Li-Po via connector',
+    pMin:18, pMax:25, label:'€18–25', score:4, highlight:false,
+    pros:['Goedkoopste instapmodel (€18–25)','Grote community, veel handleidingen','Direct te flashen via browser (Web Flasher)','OLED-scherm ingebouwd'],
+    cons:['Hoog stroomverbruik — max 24u op batterij','Geen GPS ingebouwd','BLE-bereik beperkt (kleine PCB-antenne)','Niet waterdicht'],
+    bestFor:'Beginners en eerste experimenten',
+    firmware:['BLE Companion','USB Serial','Repeater','Room Server'],
+    shops:{
+      off:['https://heltec.org/project/wifi-lora-32/','Heltec.org'],
+      amz:['https://www.amazon.nl/s?k=Heltec+WiFi+LoRa+32+V3+868','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-heltec-lora-v3-868.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=heltec+lora+v3','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'heltec-t114', name:'Heltec Mesh Node T114', brand:'Heltec',
+    img:'https://heltec.org/wp-content/uploads/2024/08/T114.png',
+    roles:['companion','repeater'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:'1.14″ TFT kleur', gps:true, ble:true, wifi:false, solar:true,
+    waterproof:false, keyboard:false, nfc:false,
+    battery:'Li-Po SH1.25 connector',
+    pMin:25, pMax:40, label:'€25–40', score:5, highlight:true,
+    pros:['Ultra-zuinig nRF52840 — weken op batterij','GPS + kleurenscherm ingebouwd','Solar-connector aanwezig','Beste prijs-kwaliteitverhouding 2026','EDC-formaat — past in broekzak'],
+    cons:['Geen WiFi (alleen BLE)','Standaard stubby antenne — upgrade aanbevolen','Behuizing apart nodig voor buiten'],
+    bestFor:'Dagelijks gebruik (EDC), mobiele companion, outdoor solar-repeater',
+    firmware:['BLE Companion','USB Serial','Repeater'],
+    shops:{
+      off:['https://heltec.org/project/mesh-node-t114/','Heltec.org'],
+      amz:['https://www.amazon.nl/s?k=Heltec+T114+mesh+node+868','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-heltec-t114-lora.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=heltec+t114','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'heltec-v4', name:'Heltec WiFi LoRa 32 V4', brand:'Heltec',
+    img:'https://heltec.org/wp-content/uploads/2024/03/heltec-wifi-lora-32-v4.png',
+    roles:['repeater','companion'],
+    mcu:'ESP32-S3', lora:'SX1262 (600mW)', freq:'868 MHz',
+    screen:'0.96″ OLED', gps:false, ble:true, wifi:true, solar:true,
+    waterproof:false, keyboard:false, nfc:false,
+    battery:'Li-Po via connector',
+    pMin:25, pMax:40, label:'€25–40', score:4, highlight:false,
+    pros:['Hoogste zendvermogen: 600mW (27dBm)','WiFi ingebouwd — ideaal als Room Server','Verbeterd flashgeheugen t.o.v. V3','Goed voor vaste installatie in hackerspace'],
+    cons:['Hoog stroomverbruik door ESP32-S3','Geen GPS','Niet geschikt voor mobiel batterijgebruik'],
+    bestFor:'Vaste installatie, Room Server, hackerspace-hub',
+    firmware:['BLE Companion','USB Serial','Repeater','Room Server'],
+    shops:{
+      off:['https://heltec.org/project/wifi-lora-32-v4/','Heltec.org'],
+      amz:['https://www.amazon.nl/s?k=Heltec+WiFi+LoRa+32+V4','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-heltec-lora-32-v4.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=heltec+lora+32+v4','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'rak-wismesh-tag', name:'RAK WisMesh Tag', brand:'RAK Wireless',
+    img:'https://meshcore.co.uk/images/devices/rak_wismesh_tag.png',
+    roles:['companion','repeater'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:null, gps:true, ble:true, wifi:false, solar:false,
+    waterproof:true, keyboard:false, nfc:false,
+    battery:'Li-Po ingebouwd',
+    pMin:28, pMax:35, label:'€28–35', score:4, highlight:false,
+    pros:['IP66 waterdicht — direct bruikbaar buiten','GPS ingebouwd','Ultra-zuinig nRF52840','Compact, goed draagbaar'],
+    cons:['Geen scherm','Geen solar-connector','Beperkt uitbreidbaar'],
+    bestFor:'Outdoor tracker, draagbare companion, weerbestendige repeater',
+    firmware:['BLE Companion','Repeater'],
+    shops:{
+      off:['https://store.rakwireless.com/products/wismesh-tag-meshtastic-gps-lora-tracker-ip66','RAK Store'],
+      amz:['https://www.amazon.nl/s?k=RAK+WisMesh+Tag+LoRa','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-rak-wismesh-tag.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=rak+wismesh+tag','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'rak-wisblock-4631', name:'RAK WisBlock 4631', brand:'RAK Wireless',
+    img:'https://docs.rakwireless.com/assets/images/wisblock/rak4631/rak4631-overview.png',
+    roles:['repeater','companion'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:'Optioneel (module)', gps:'Optioneel (module)', ble:true, wifi:false, solar:true,
+    waterproof:true, keyboard:false, nfc:false,
+    battery:'Li-Po via basisbord',
+    pMin:30, pMax:55, label:'€30–55', score:5, highlight:false,
+    pros:['Volledig modulair — voeg sensoren toe','IP65 behuizing beschikbaar (Unify Enclosure)','Ultra-zuinig nRF52840','Uitbreidbaar met GPS, temp, vochtigheid, gas-sensoren','Populair bij gevorderde bouwers'],
+    cons:['Hogere instapdrempel — meer kennis vereist','Volledige setup kost meer','Geen WiFi zonder extra module'],
+    bestFor:'Gevorderde bouwers, infrastructuur-repeaters, IoT-sensornodes',
+    firmware:['BLE Companion','USB Serial','Repeater'],
+    shops:{
+      off:['https://store.rakwireless.com/collections/wisblock','RAK Store'],
+      amz:['https://www.amazon.nl/s?k=RAK+WisBlock+4631+LoRa+868','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-rak-wisblock-4631.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=rakwireless+wisblock','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'wio-tracker-l1', name:'Wio Tracker L1 Pro', brand:'SeeedStudio',
+    img:'https://meshcore.co.uk/images/devices/WIO_TRACKER_L1_PRO.png',
+    roles:['companion'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:'1.3″ TFT kleur', gps:true, ble:true, wifi:false, solar:false,
+    waterproof:false, keyboard:false, nfc:false,
+    battery:'1100 mAh ingebouwd',
+    pMin:38, pMax:45, label:'€38–45', score:4, highlight:false,
+    pros:['Dual-band GPS (L1+L5) — zeer nauwkeurig','Kleurenscherm ingebouwd','1100 mAh batterij ingebouwd','Goede allrounder voor dagelijks gebruik'],
+    cons:['Geen WiFi','Iets duurder dan T114 voor vergelijkbare functies','Geen solar-connector'],
+    bestFor:'Actieve GPS-gebruikers, wandelaars, groepstracking',
+    firmware:['BLE Companion'],
+    shops:{
+      off:['https://www.seeedstudio.com/Wio-Tracker-L1-Pro-for-Meshcore-p-6717.html','Seeedstudio.com'],
+      amz:['https://www.amazon.nl/s?k=Wio+Tracker+L1+Pro+meshcore','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-wio-tracker-l1-pro.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=wio+tracker+l1','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'thinknode-m1', name:'ThinkNode M1', brand:'Elecrow',
+    img:'https://meshcore.co.uk/images/devices/THINKNODE_M1.png',
+    roles:['companion'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:'1.54″ E-Ink', gps:true, ble:true, wifi:false, solar:false,
+    waterproof:false, keyboard:false, nfc:false,
+    battery:'Li-Po connector',
+    pMin:32, pMax:40, label:'€32–40', score:4, highlight:false,
+    pros:['E-Ink scherm — perfect leesbaar in felle zon','E-Ink verbruikt alleen stroom bij verversing','GPS + BLE ingebouwd','Lange standby-tijd'],
+    cons:['E-Ink verversing is traag','Geen WiFi','Geen solar-connector'],
+    bestFor:'Buitengebruik op zonnige dagen, lange batterijduur',
+    firmware:['BLE Companion'],
+    shops:{
+      off:['https://www.elecrow.com/thinknode-m1-meshtastic-lora-signal-transceiver-powered-by-nrf52840-with-154-screen-support-gps.html','Elecrow.com'],
+      amz:['https://www.amazon.nl/s?k=ThinkNode+M1+LoRa+nRF52840','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-thinknode-m1-lora.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=thinknode+m1','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'lilygo-t-echo', name:'Lilygo T-Echo', brand:'Lilygo',
+    img:'https://www.lilygo.cc/cdn/shop/products/T-Echo.jpg',
+    roles:['companion'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:'1.54″ E-Paper', gps:true, ble:true, wifi:false, solar:false,
+    waterproof:false, keyboard:false, nfc:true,
+    battery:'Li-Po ingebouwd',
+    pMin:55, pMax:75, label:'€55–75', score:4, highlight:false,
+    pros:['Robuuste ABS behuizing — kant-en-klaar','E-Paper leesbaar in volle zon','NFC voor veilig sleutels delen','GPS + BLE ingebouwd','Meerdere dagen standby'],
+    cons:['Duurder dan T114','E-Paper verversing traag','Standaard antenne zwak — upgrade aanbevolen'],
+    bestFor:'Kant-en-klare handheld, buitengebruik, lange trips',
+    firmware:['BLE Companion'],
+    shops:{
+      off:['https://lilygo.cc/products/t-echo','Lilygo.cc'],
+      amz:['https://www.amazon.nl/s?k=Lilygo+T-Echo+LoRa+868','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-lilygo-t-echo-lora.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=lilygo+t-echo','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'sensecap-t1000e', name:'SenseCAP T1000-E', brand:'SeeedStudio',
+    img:'https://files.seeedstudio.com/products/SenseCAP/SenseCAP_Tracker/T1000-E_1.png',
+    roles:['companion'],
+    mcu:'nRF52840', lora:'LR1110', freq:'868 MHz',
+    screen:null, gps:true, ble:true, wifi:false, solar:false,
+    waterproof:true, keyboard:false, nfc:false,
+    battery:'700 mAh ingebouwd',
+    pMin:45, pMax:65, label:'€45–65', score:3, highlight:false,
+    pros:['Creditcard-formaat — past in elke zak','IP65 waterdicht','Temperatuur & lichtsensoren ingebouwd','Discrete tracker-toepassing'],
+    cons:['LR1110: minder mainstream community support','Geen scherm','Magnetische laadkabel (specifiek accessoire nodig)','Kleinere batterij (700mAh)'],
+    bestFor:'Discrete tracker, assets volgen, compact EDC-node',
+    firmware:['BLE Companion'],
+    shops:{
+      off:['https://www.seeedstudio.com/SenseCAP-Card-Tracker-T1000-E-for-Meshtastic-p-5913.html','Seeedstudio.com'],
+      amz:['https://www.amazon.nl/s?k=SenseCAP+T1000-E+LoRa+tracker','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-sensecap-t1000-e.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=sensecap+t1000','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'sensecap-solar-p1', name:'SenseCAP Solar Node P1 Pro', brand:'SeeedStudio',
+    img:'https://meshcore.co.uk/images/devices/SOLAR_NODE_P1_PRO.png',
+    roles:['repeater'],
+    mcu:'nRF52840', lora:'SX1262', freq:'868 MHz',
+    screen:null, gps:true, ble:true, wifi:false, solar:true,
+    waterproof:true, keyboard:false, nfc:false,
+    battery:'5000 mAh ingebouwd',
+    pMin:68, pMax:80, label:'€68–80', score:5, highlight:true,
+    pros:['Zonnepaneel ingebouwd — echt plug-and-play','IP65 weerbestendig — gaat in de regen','5000 mAh batterij, weken autonoom','Beste kant-en-klare outdoor repeater'],
+    cons:['Duurder dan zelf bouwen met Heltec V3','Minder beschikbaar in NL-webshops','Geen scherm voor lokale configuratie'],
+    bestFor:'Outdoor repeater op dak/mast, plug-and-play solar, langdurig autonoom',
+    firmware:['Repeater'],
+    shops:{
+      off:['https://www.seeedstudio.com/SenseCAP-Solar-Node-P1-Pro-for-Meshtastic-LoRa-p-6412.html','Seeedstudio.com'],
+      amz:['https://www.amazon.nl/s?k=SenseCAP+Solar+Node+P1+Pro+LoRa','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-sensecap-solar-node-p1-pro.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=sensecap+solar+node','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'lilygo-tlora-pager', name:'Lilygo T-LoRa Pager', brand:'Lilygo',
+    img:'https://meshcore.co.uk/images/devices/lilygo_tlora_pager.png',
+    roles:['standalone'],
+    mcu:'ESP32-S3', lora:'SX1262', freq:'868 MHz',
+    screen:'2.1″ TFT kleur', gps:true, ble:true, wifi:true, solar:false,
+    waterproof:false, keyboard:true, nfc:false,
+    battery:'Li-Po ingebouwd',
+    pMin:55, pMax:70, label:'€55–70', score:4, highlight:false,
+    pros:['Compact pager-formaat — past in broekzak','Klein toetsenbord + kleurenscherm','GPS ingebouwd','Geen telefoon nodig'],
+    cons:['ESP32-S3 — hogere stroomopname','Compact toetsenbord minder comfortabel','Geen SD-kaart voor offline kaarten'],
+    bestFor:'Pocketable standalone communicator, events, outdoor',
+    firmware:['Standalone (MeshOS)','BLE Companion'],
+    shops:{
+      off:['https://lilygo.cc/products/t-lora-pager','Lilygo.cc'],
+      amz:['https://www.amazon.nl/s?k=Lilygo+T-LoRa+Pager','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-lilygo-tlora-pager.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=lilygo+tlora+pager','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'lilygo-tdeck-plus', name:'Lilygo T-Deck Plus', brand:'Lilygo',
+    img:'https://meshcore.co.uk/images/devices/lilygo_tdeck_plus.png',
+    roles:['standalone'],
+    mcu:'ESP32-S3', lora:'SX1262', freq:'868 MHz',
+    screen:'2.8″ TFT touchscreen', gps:true, ble:true, wifi:true, solar:false,
+    waterproof:false, keyboard:true, nfc:false,
+    battery:'2000 mAh ingebouwd',
+    pMin:75, pMax:95, label:'€75–95', score:5, highlight:true,
+    pros:['Meest populaire standalone apparaat 2026','QWERTY-toetsenbord + touchscreen','SD-kaart voor offline kaarten','GPS + WiFi + BLE','Volledig onafhankelijk communicatietoestel'],
+    cons:['Hoog stroomverbruik ESP32-S3','Niet waterdicht','Grotere aanschafsprijs (€75–95)'],
+    bestFor:'Volledig standalone gebruik zonder telefoon, noodcommunicatie',
+    firmware:['Standalone (MeshOS)','Room Server'],
+    shops:{
+      off:['https://www.lilygo.cc/products/t-deck-plus','Lilygo.cc'],
+      amz:['https://www.amazon.nl/s?k=Lilygo+T-Deck+Plus+LoRa','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-lilygo-t-deck-plus.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=lilygo+t-deck','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'lilygo-tdeck-pro', name:'Lilygo T-Deck Pro', brand:'Lilygo',
+    img:'https://meshcore.co.uk/images/devices/lilygo_tdeck_pro.png',
+    roles:['standalone'],
+    mcu:'ESP32-S3', lora:'SX1262', freq:'868 MHz',
+    screen:'3.7″ TFT touchscreen', gps:true, ble:true, wifi:true, solar:false,
+    waterproof:false, keyboard:true, nfc:false,
+    battery:'Li-Po ingebouwd',
+    pMin:90, pMax:110, label:'€90–110', score:4, highlight:false,
+    pros:['Groot 3.7″ touchscreen voor aangenaam gebruik','Premium standalone ervaring','QWERTY + GPS + WiFi + SD-kaart'],
+    cons:['Duurste standalone optie','Groter en zwaarder formaat','Hoog stroomverbruik'],
+    bestFor:'Premium standalone gebruik, comfortabel groot scherm',
+    firmware:['Standalone (MeshOS)','Room Server'],
+    shops:{
+      off:['https://lilygo.cc/products/t-deck-pro','Lilygo.cc'],
+      amz:['https://www.amazon.nl/s?k=Lilygo+T-Deck+Pro+LoRa','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-lilygo-t-deck-pro.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=lilygo+t-deck+pro','Tinytronics.nl'],
+    }
+  },
+  {
+    id:'heltec-wireless-tracker', name:'Heltec Wireless Tracker', brand:'Heltec',
+    img:'https://resource.heltec.cn/download/Resource_overview/wireless-tracker.png',
+    roles:['companion','repeater'],
+    mcu:'ESP32-S3', lora:'SX1262', freq:'868 MHz',
+    screen:'0.96″ TFT kleur', gps:true, ble:true, wifi:true, solar:false,
+    waterproof:false, keyboard:false, nfc:false,
+    battery:'Li-Po connector',
+    pMin:28, pMax:40, label:'€28–40', score:3, highlight:false,
+    pros:['GPS + WiFi + BLE ingebouwd','Klein kleurenschermpje','Geschikt voor IoT-sensortoepassingen','Goedkoop GPS+WiFi board'],
+    cons:['ESP32 — hoog stroomverbruik','Klein scherm, beperkt leesbaar','Niet ideaal als standalone'],
+    bestFor:'GPS sensor-node, IoT-tracking, WiFi-gateway',
+    firmware:['BLE Companion','USB Serial','Repeater'],
+    shops:{
+      off:['https://heltec.org/project/wireless-tracker/','Heltec.org'],
+      amz:['https://www.amazon.nl/s?k=Heltec+Wireless+Tracker+LoRa','Amazon.nl'],
+      ali:['https://nl.aliexpress.com/w/wholesale-heltec-wireless-tracker.html','AliExpress NL'],
+      tt: ['https://www.tinytronics.nl/nl/search?q=heltec+wireless+tracker','Tinytronics.nl'],
+    }
+  },
+];
+
+/* ════════ STATE ════════ */
+let activeRoles = new Set();
+let activeBudget = null;
+let activeChip   = null;
+let activeFeats  = new Set();
+let compareList  = [];
+let tableSortCol = -1, tableSortAsc = true;
+const wzAnswers  = {};
+
+/* ════════ HELPERS ════════ */
+function stars(n, max=5){
+  return '★'.repeat(n) + '<span class="star-empty">' + '★'.repeat(max-n) + '</span>';
+}
+function fv(val){ // feature value css
+  if(val === true)   return 'fb-yes';
+  if(val === false)  return 'fb-no';
+  if(val === null)   return 'fb-no';
+  return 'fb-opt'; // string = optional/partial
+}
+function fLabel(val, yes, no, opt){
+  if(val === true)  return yes;
+  if(val === false || val === null) return no;
+  return opt || val;
+}
+function imgFallback(img, fallback){
+  img.onerror = function(){
+    this.style.display='none';
+    fallback.style.display='flex';
+  };
+}
+
+/* ════════ RENDER CARDS ════════ */
+function renderCards(list){
+  const grid = document.getElementById('cards-grid');
+  if(!list.length){
+    grid.innerHTML = '<div class="no-results">Geen apparaten gevonden voor deze filters.<br><small>Probeer minder filters te selecteren.</small></div>';
+    return;
+  }
+  grid.innerHTML = list.map(d => {
+    const hasRec = d.highlight;
+    return `
+    <div class="device-card${hasRec?' recommended':''}" id="card-${d.id}">
+      ${hasRec ? '<div class="rec-badge">🏆 Aanbevolen</div>' : ''}
+      <button class="cmp-btn${hasRec?' ':''}${compareList.includes(d.id)?'sel':''}"
+        id="cmpbtn-${d.id}"
+        onclick="toggleCompare('${d.id}')">
+        ${compareList.includes(d.id)?'✓ Vergeleken':'+ Vergelijk'}
+      </button>
+
+      <!-- HEAD -->
+      <div class="card-head">
+        <div class="dev-img-wrap" id="imgwrap-${d.id}">
+          <img src="${d.img}" alt="${d.name}" id="img-${d.id}"
+            onerror="this.style.display='none';document.getElementById('fb-${d.id}').style.display='flex';">
+          <div class="img-fb" id="fb-${d.id}" style="display:none">${d.name.substring(0,4)}</div>
+        </div>
+        <div class="card-title">
+          <div class="brand-lbl">${d.brand}</div>
+          <div class="dev-name">${d.name}</div>
+          <div class="role-strip">
+            ${d.roles.map(r=>`<span class="rpill rpill-${r}">${r==='companion'?'Companion':r==='repeater'?'Repeater':'Standalone'}</span>`).join('')}
+          </div>
+          <div class="price-stars">
+            <div class="price">${d.label}</div>
+            <div class="stars">${stars(d.score)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="feat-strip">
+        <span class="fb ${fv(d.gps)}">📍 GPS ${fLabel(d.gps,'✓','—','opt')}</span>
+        <span class="fb ${d.screen?'fb-yes':'fb-no'}">🖥️ Scherm ${d.screen?'✓':'—'}</span>
+        <span class="fb ${fv(d.solar)}">☀️ Solar ${d.solar?'✓':'—'}</span>
+        <span class="fb ${fv(d.waterproof)}">💧 IP${d.waterproof?'65+':'—'} ${d.waterproof?'✓':'—'}</span>
+        <span class="fb ${fv(d.keyboard)}">⌨️ Toets ${d.keyboard?'✓':'—'}</span>
+        <span class="fb ${fv(d.wifi)}">📶 WiFi ${d.wifi?'✓':'—'}</span>
+        ${d.nfc ? '<span class="fb fb-yes">📟 NFC ✓</span>' : ''}
+      </div>
+
+      <!-- SPECS -->
+      <div class="spec-row">
+        <span class="sc">MCU: ${d.mcu}</span>
+        <span class="sc">LoRa: ${d.lora}</span>
+        <span class="sc">${d.freq}</span>
+        ${d.screen ? `<span class="sc">${d.screen}</span>` : ''}
+        <span class="sc">${d.battery}</span>
+      </div>
+
+      <!-- PROS/CONS -->
+      <div class="pros-cons">
+        <div class="pc-col pc-pros">
+          <div class="pc-title">Voordelen</div>
+          <ul>${d.pros.map(p=>`<li>${p}</li>`).join('')}</ul>
+        </div>
+        <div class="pc-col pc-cons">
+          <div class="pc-title">Nadelen</div>
+          <ul>${d.cons.map(c=>`<li>${c}</li>`).join('')}</ul>
+        </div>
+      </div>
+
+      <!-- BEST FOR -->
+      <div class="best-for">🎯 <strong>Beste keuze voor:</strong> ${d.bestFor}</div>
+
+      <!-- FIRMWARE -->
+      <div class="firmware-row">
+        ${d.firmware.map(f=>`<span class="fw-chip">${f}</span>`).join('')}
+      </div>
+
+      <!-- BUY -->
+      <div class="buy-section">
+        <div class="buy-lbl">Kopen bij</div>
+        <div class="buy-grid">
+          <a class="bbtn bbtn-off" href="${d.shops.off[0]}" target="_blank" rel="noopener">🏪 ${d.shops.off[1]}</a>
+          <a class="bbtn bbtn-amz" href="${d.shops.amz[0]}" target="_blank" rel="noopener">📦 ${d.shops.amz[1]}</a>
+          <a class="bbtn bbtn-ali" href="${d.shops.ali[0]}" target="_blank" rel="noopener">🛒 ${d.shops.ali[1]}</a>
+          <a class="bbtn bbtn-tt"  href="${d.shops.tt[0]}"  target="_blank" rel="noopener">🇳🇱 ${d.shops.tt[1]}</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════ RENDER TABLE ════════ */
+function renderTable(list){
+  const yes = v => v===true  ? '<span class="tc-yes">✓</span>' : v===false||v===null ? '<span class="tc-no">—</span>' : `<span class="tc-opt">${v}</span>`;
+  document.getElementById('tbl-body').innerHTML = list.map(d => `
+    <tr>
+      <td class="tc-name">${d.name}</td>
+      <td>${d.brand}</td>
+      <td class="${d.mcu.startsWith('nRF')?'tc-mcu-nrf':'tc-mcu-esp'}">${d.mcu}</td>
+      <td>${d.lora}</td>
+      <td>${d.screen||'<span class="tc-no">—</span>'}</td>
+      <td>${yes(d.gps)}</td>
+      <td>${yes(d.ble)}</td>
+      <td>${yes(d.wifi)}</td>
+      <td>${yes(d.solar)}</td>
+      <td>${d.waterproof?'<span class="tc-yes">IP65+</span>':'<span class="tc-no">—</span>'}</td>
+      <td>${yes(d.keyboard)}</td>
+      <td>${yes(d.nfc)}</td>
+      <td class="tc-price">${d.label}</td>
+      <td style="color:var(--purple);font-size:.7rem">${d.firmware.join(', ')}</td>
+    </tr>`).join('');
+}
+
+/* ════════ FILTERS ════════ */
+function applyFilters(){
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+
+  let list = D.filter(d => {
+    if(q && !d.name.toLowerCase().includes(q) && !d.brand.toLowerCase().includes(q)) return false;
+    if(activeRoles.size && !d.roles.some(r => activeRoles.has(r))) return false;
+    if(activeBudget !== null){
+      if(activeBudget === 999){ if(d.pMin <= 100) return false; }
+      else { if(d.pMin > activeBudget) return false; }
+    }
+    if(activeChip && d.mcu !== activeChip) return false;
+    for(const f of activeFeats){
+      if(f==='gps'        && !d.gps)       return false;
+      if(f==='screen'     && !d.screen)    return false;
+      if(f==='solar'      && !d.solar)     return false;
+      if(f==='waterproof' && !d.waterproof)return false;
+      if(f==='keyboard'   && !d.keyboard)  return false;
+      if(f==='wifi'       && !d.wifi)      return false;
+      if(f==='nfc'        && !d.nfc)       return false;
+    }
+    return true;
+  });
+
+  // sort
+  if(sort==='price-asc')  list.sort((a,b) => a.pMin - b.pMin);
+  else if(sort==='price-desc') list.sort((a,b) => b.pMin - a.pMin);
+  else if(sort==='name')  list.sort((a,b) => a.name.localeCompare(b.name));
+  else list.sort((a,b) => (b.score - a.score) || (a.pMin - b.pMin)); // recommended
+
+  const cnt = document.getElementById('results-count');
+  cnt.innerHTML = `<strong>${list.length}</strong> van ${D.length} apparaten`;
+
+  renderCards(list);
+  renderTable(list);
+}
+
+function togglePill(el){
+  const filter = el.dataset.filter;
+  const val    = el.dataset.val;
+
+  if(filter === 'role'){
+    if(el.classList.contains('active')){ activeRoles.delete(val); el.classList.remove('active'); }
+    else { activeRoles.add(val); el.classList.add('active'); }
+  } else if(filter === 'budget'){
+    document.querySelectorAll('.pill.budget').forEach(p => p.classList.remove('active'));
+    if(activeBudget == val){ activeBudget = null; }
+    else { activeBudget = parseInt(val); el.classList.add('active'); }
+  } else if(filter === 'chip'){
+    document.querySelectorAll('.pill.chip').forEach(p => p.classList.remove('active'));
+    if(activeChip === val){ activeChip = null; }
+    else { activeChip = val; el.classList.add('active'); }
+  }
+  applyFilters();
+}
+
+function toggleFeat(el){
+  const f = el.dataset.feat;
+  if(el.classList.contains('on')){ activeFeats.delete(f); el.classList.remove('on'); }
+  else { activeFeats.add(f); el.classList.add('on'); }
+  applyFilters();
+}
+
+function clearFilters(){
+  activeRoles.clear(); activeBudget = null; activeChip = null; activeFeats.clear();
+  document.querySelectorAll('.pill.active').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.feat-toggle.on').forEach(f => f.classList.remove('on'));
+  document.getElementById('search-input').value = '';
+  document.getElementById('sort-select').value = 'rec';
+  applyFilters();
+}
+
+/* ════════ TABLE SORT ════════ */
+function sortTable(col){
+  const tbody = document.getElementById('tbl-body');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+  if(tableSortCol === col) tableSortAsc = !tableSortAsc;
+  else { tableSortCol = col; tableSortAsc = true; }
+  rows.sort((a,b) => {
+    const at = a.cells[col].textContent.trim();
+    const bt = b.cells[col].textContent.trim();
+    const an = parseFloat(at.replace(/[^0-9.]/g,''));
+    const bn = parseFloat(bt.replace(/[^0-9.]/g,''));
+    if(!isNaN(an) && !isNaN(bn)) return tableSortAsc ? an-bn : bn-an;
+    return tableSortAsc ? at.localeCompare(bt) : bt.localeCompare(at);
+  });
+  document.querySelectorAll('#spec-tbl thead th').forEach((th,i) => {
+    th.classList.remove('sa','sd');
+    if(i===col) th.classList.add(tableSortAsc?'sa':'sd');
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+/* ════════ COMPARE ════════ */
+function toggleCompare(id){
+  const idx = compareList.indexOf(id);
+  if(idx > -1){ compareList.splice(idx,1); }
+  else {
+    if(compareList.length >= 3){ alert('Je kunt maximaal 3 apparaten vergelijken.'); return; }
+    compareList.push(id);
+  }
+  updateCompareTray();
+  // update button
+  const btn = document.getElementById(`cmpbtn-${id}`);
+  if(btn){
+    btn.classList.toggle('sel', compareList.includes(id));
+    btn.textContent = compareList.includes(id) ? '✓ Vergeleken' : '+ Vergelijk';
+  }
+}
+function updateCompareTray(){
+  const tray = document.getElementById('cmp-tray');
+  tray.classList.toggle('on', compareList.length > 0);
+  for(let i=0;i<3;i++){
+    const slot = document.getElementById(`cs${i}`);
+    if(compareList[i]){
+      const d = D.find(x=>x.id===compareList[i]);
+      slot.textContent = d ? d.name : '–';
+      slot.classList.add('filled');
+    } else {
+      slot.textContent = i===0?'Sleuf 1':i===1?'Sleuf 2':'Sleuf 3';
+      slot.classList.remove('filled');
+    }
+  }
+}
+function clearCompare(){
+  compareList = [];
+  document.querySelectorAll('.cmp-btn').forEach(b => { b.classList.remove('sel'); b.textContent='+ Vergelijk'; });
+  updateCompareTray();
+}
+function openCompare(){
+  if(compareList.length < 2){ alert('Selecteer minimaal 2 apparaten om te vergelijken.'); return; }
+  const devs = compareList.map(id => D.find(d=>d.id===id));
+  const rows = [
+    ['Merk', d=>d.brand],
+    ['MCU', d=>d.mcu],
+    ['LoRa chip', d=>d.lora],
+    ['Frequentie', d=>d.freq],
+    ['Scherm', d=>d.screen||'—'],
+    ['GPS', d=>d.gps===true?'✓ Ja':d.gps===false?'—':d.gps],
+    ['WiFi', d=>d.wifi?'✓':'—'],
+    ['Zonne-energie', d=>d.solar?'✓':'—'],
+    ['Waterdicht', d=>d.waterproof?'✓ IP65+':'—'],
+    ['Toetsenbord', d=>d.keyboard?'✓':'—'],
+    ['NFC', d=>d.nfc?'✓':'—'],
+    ['Batterij', d=>d.battery],
+    ['Firmware-rollen', d=>d.firmware.join(', ')],
+    ['Prijs', d=>d.label],
+    ['Beste voor', d=>d.bestFor],
+  ];
+  const thead = `<thead><tr><th>Spec</th>${devs.map(d=>`<th>${d.name}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${rows.map(([lbl,fn])=>`<tr><td><strong style="color:var(--dim);font-size:.75rem;text-transform:uppercase;">${lbl}</strong></td>${devs.map(d=>`<td>${fn(d)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  document.getElementById('cmp-table').innerHTML = thead + tbody;
+  document.getElementById('cmp-modal').classList.add('on');
+}
+function closeCompare(){
+  document.getElementById('cmp-modal').classList.remove('on');
+}
+document.getElementById('cmp-modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('cmp-modal')) closeCompare();
+});
+
+/* ════════ WIZARD ════════ */
+function selectWz(el){
+  const q = el.dataset.q;
+  document.querySelectorAll(`.wzo[data-q="${q}"]`).forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  wzAnswers[q] = el.dataset.v;
+  if(Object.keys(wzAnswers).length >= 4) showWzResult();
+}
+function showWzResult(){
+  const {role, battery, gps, budget} = wzAnswers;
+  const budgetNum = parseInt(budget);
+  const scores = D.map(d => {
+    let s = 0;
+    if(role==='companion'  && d.roles.includes('companion'))  s+=4;
+    if(role==='repeater'   && d.roles.includes('repeater'))   s+=4;
+    if(role==='standalone' && d.roles.includes('standalone')) s+=4;
+    if(battery==='max' && d.solar) s+=3;
+    if(battery==='max' && d.mcu==='nRF52840') s+=2;
+    if(battery==='mid' && d.mcu==='nRF52840') s+=1;
+    if(battery==='low' && d.mcu==='ESP32-S3') s+=1;
+    if(gps==='yes' && d.gps) s+=3;
+    if(gps==='no'  && !d.gps) s+=1;
+    if(d.pMin <= budgetNum) s+=2;
+    if(d.pMax <= budgetNum) s+=1;
+    if(d.pMin > budgetNum && budget!=='200') s-=3;
+    return {d, s};
+  });
+  const top = scores.sort((a,b)=>b.s-a.s).slice(0,3).map(x=>x.d);
+  const rc = document.getElementById('wz-recs');
+  rc.innerHTML = top.map((d,i) => `
+    <div class="wz-rec">
+      <div class="wr-name">${i===0?'🥇':'&nbsp;&nbsp;'} ${d.name}</div>
+      <div class="wr-price">${d.label}</div>
+      <div class="wr-why">${d.bestFor}</div>
+    </div>`).join('');
+  const res = document.getElementById('wz-result');
+  res.style.display='block';
+  res.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ════════ INIT ════════ */
+applyFilters();
+</script>
+</body>
+</html>

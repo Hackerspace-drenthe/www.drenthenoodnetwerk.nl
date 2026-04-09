@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 14: Routering &amp; Flooding — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🔄</span>
+    <div class="course-info">
+      <h1>Cursus 14: <span>Routering &amp; Flooding</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gemiddeld</span>
+        <span class="meta-tag tag-course">Cursus 14 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Flooding — Berichten Verspreiden"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Hop Limiet & Seen-List"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Flood Control & Netwerkefficiëntie"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- SECTION 1: Flooding — Berichten Verspreiden -->
+  <section class="lesson-section" data-section="s1" data-label="Flooding — Berichten Verspreiden">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Flooding — <span>Berichten Verspreiden</span></h2>
+    <p>Flooding is het basisprincipe van berichtverspreiding in MeshCore. Het idee is eenvoudig: <strong>elke node stuurt elk nieuw bericht door naar al zijn buren</strong>. Zo bereikt een bericht uiteindelijk het hele netwerk, zonder dat er routeringstabellen nodig zijn.</p>
+
+    <h3>Waarom flooding?</h3>
+    <p>MeshCore kiest voor flooding omdat het drie cruciale voordelen biedt:</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🧩</div>
+        <h4>Eenvoudig</h4>
+        <p>Geen complexe routeringsalgoritmen nodig. Elke node hoeft alleen te beslissen: "heb ik dit al gezien?" Zo niet, doorsturen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💪</div>
+        <h4>Robuust</h4>
+        <p>Als een node uitvalt, vindt het bericht automatisch een alternatief pad via andere nodes. Geen single point of failure.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🚫</div>
+        <h4>Geen routeringstabellen</h4>
+        <p>Nodes hoeven niet te weten wie waar in het netwerk zit. Perfect voor dynamische netwerken waar nodes komen en gaan.</p>
+      </div>
+    </div>
+
+    <h3>Hoe werkt flooding stap voor stap?</h3>
+    <ol>
+      <li><strong>Node A stuurt een bericht</strong> — het bericht wordt de ether in gezonden via LoRa-radio.</li>
+      <li><strong>Alle nodes binnen bereik ontvangen het</strong> — dit kunnen er één zijn, of tien, afhankelijk van de omgeving.</li>
+      <li><strong>Elke ontvangende node controleert zijn "seen-list"</strong> — een cache van recent geziene pakket-hashes.</li>
+      <li><strong>Nieuwe hash → doorsturen</strong> — als de pakket-hash nog niet in de seen-list staat, slaat de node de hash op en stuurt het bericht door.</li>
+      <li><strong>Bekende hash → weggoien</strong> — als de hash al gezien is, wordt het bericht als duplicaat herkend en niet doorgestuurd (duplicate suppression).</li>
+    </ol>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Store &amp; Forward:</strong> Flooding is inherent "store &amp; forward" — elke node ontvangt het bericht volledig, slaat het tijdelijk op, en stuurt het dan pas door. Dit maakt het netwerk betrouwbaar, zelfs als niet alle nodes tegelijk bereikbaar zijn.</div>
+    </div>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Dynamische topologie:</strong> Flooding zorgt ervoor dat berichten alle delen van het netwerk bereiken, zelfs als de netwerktopologie voortdurend verandert. Nodes mogen bewegen, uitvallen of bijkomen — flooding past zich automatisch aan.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Hop Limiet & Seen-List -->
+  <section class="lesson-section" data-section="s2" data-label="Hop Limiet & Seen-List">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Hop Limiet &amp; <span>Seen-List</span></h2>
+    <p>Flooding zonder beperkingen zou het netwerk overspoelen. Daarom heeft MeshCore twee cruciale mechanismen: de <strong>hop-limiet</strong> en de <strong>seen-list</strong>.</p>
+
+    <h3>Hop-limiet (TTL — Time To Live)</h3>
+    <p>Elk MeshCore-bericht bevat een <strong>hop-teller</strong> met een maximum van <strong>64 hops</strong>. Bij elke doorstuur-actie wordt deze teller met 1 verlaagd.</p>
+    <ul>
+      <li><strong>Startwaarde:</strong> maximaal 64 hops bij verzending</li>
+      <li><strong>Elke hop:</strong> de teller wordt met 1 verlaagd (decremented)</li>
+      <li><strong>Teller op 0:</strong> het pakket wordt niet meer doorgestuurd</li>
+      <li><strong>Doel:</strong> voorkomen dat berichten eindeloos rondcirkelen in het netwerk</li>
+    </ul>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Waarom een limiet?</strong> Zonder hop-limiet zou een bericht in een netwerk met lussen (waar node A node B bereikt en vice versa) oneindig doorgestuurd worden. De hop-limiet voorkomt deze "broadcast storms" en bespaart kostbare airtime en batterij.</div>
+    </div>
+
+    <h3>Het Seen-List mechanisme</h3>
+    <p>De seen-list is een compacte cache die elke node bijhoudt van recent geziene pakketten:</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔢</div>
+        <h4>Pakket-hash</h4>
+        <p>Van elk pakket wordt een hash berekend op basis van de inhoud. Alleen deze hash wordt opgeslagen, niet het volledige pakket.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📏</div>
+        <h4>~200 entries</h4>
+        <p>De typische seen-list bevat ruimte voor ongeveer 200 hashes, opgeslagen als circulaire buffer (FIFO).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🛡️</div>
+        <h4>Duplicate suppression</h4>
+        <p>Voorkomt broadcast storms: als een pakket al in de lijst staat, wordt het niet opnieuw doorgestuurd.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💾</div>
+        <h4>Geheugenefficiënt</h4>
+        <p>Alleen hashes opslaan (geen volledige pakketten) maakt het zeer zuinig met het beperkte RAM van LoRa-apparaten.</p>
+      </div>
+    </div>
+
+    <h3>Rebroadcast jitter</h3>
+    <p>Wanneer meerdere nodes tegelijk hetzelfde bericht ontvangen, zouden ze het allemaal op hetzelfde moment doorsturen. Dit veroorzaakt <strong>botsingen</strong> (collisions) op de radiofrequentie.</p>
+    <p>MeshCore lost dit op met <strong>rebroadcast jitter</strong>: elke node wacht een <strong>willekeurige vertraging</strong> voordat het een bericht doorstuurt. Zo worden de doorstuur-momenten gespreid en worden botsingen geminimaliseerd.</p>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Samengevat:</strong> De hop-limiet (TTL=64) begrenst de reikwijdte, de seen-list voorkomt duplicaten, en de rebroadcast jitter voorkomt radiobotsingen. Samen maken ze flooding beheersbaar.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Flood Control & Netwerkefficiëntie -->
+  <section class="lesson-section" data-section="s3" data-label="Flood Control & Netwerkefficiëntie">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Flood Control &amp; <span>Netwerkefficiëntie</span></h2>
+    <p>Hoewel flooding robuust is, brengt het een probleem met zich mee: <strong>overmatig doorsturen verspilt airtime en batterij</strong>. Flood control zorgt ervoor dat het netwerk efficiënt blijft.</p>
+
+    <h3>Flood control mechanismen in MeshCore</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔍</div>
+        <h4>Duplicate suppression</h4>
+        <p>De seen-list voorkomt dat dezelfde boodschap meerdere keren wordt doorgestuurd door een node.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔢</div>
+        <h4>Hop-limiet (TTL=64)</h4>
+        <p>Begrenst het maximale aantal doorstuur-stappen, waardoor berichten niet eindeloos rondgaan.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⏱️</div>
+        <h4>Rebroadcast jitter</h4>
+        <p>Willekeurige vertraging voorkomt dat alle nodes tegelijk zenden en radiobotsingen veroorzaken.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📉</div>
+        <h4>Adaptive flooding</h4>
+        <p>Sommige nodes kunnen hun doorstuur-frequentie verlagen bij hoge netwerkbelasting om congestie te beperken.</p>
+      </div>
+    </div>
+
+    <h3>Airtime-impact</h3>
+    <p>Elke keer dat een node een bericht doorstuurt, verbruikt dit <strong>airtime</strong> — de tijd dat de radio actief zendt. LoRa-apparaten hebben een beperkt <strong>duty cycle budget</strong> (vaak 1% in de EU). Overmatig flooding kan dit budget snel opgebruiken.</p>
+
+    <h3>Netwerkverzadiging</h3>
+    <p>Wanneer te veel berichten tegelijk het netwerk instromen, ontstaat <strong>congestie</strong>. Nodes komen niet meer toe aan het doorsturen van alle pakketten, waardoor berichten verloren gaan of sterk vertraagd raken.</p>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Best practices voor netwerkoperators:</strong>
+        <ul style="margin:8px 0 0 16px;">
+          <li>Stuur geen onnodige berichten</li>
+          <li>Houd berichten kort</li>
+          <li>Beperk de verzendfrequentie</li>
+          <li>Plaats repeaters strategisch om onnodige hops te minimaliseren</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Vergelijking routeringsmethoden</h3>
+    <table class="comp-table" aria-label="Vergelijking routeringsmethoden">
+      <thead>
+        <tr><th>Eigenschap</th><th>Flooding</th><th>Directed routing</th><th>Gossip protocol</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Routeringstabel nodig?</td><td class="check">✓ Nee</td><td class="cross">✗ Ja</td><td class="check">✓ Nee</td></tr>
+        <tr><td>Betrouwbaarheid</td><td>Hoog</td><td>Hoog (als route klopt)</td><td>Medium</td></tr>
+        <tr><td>Airtime-verbruik</td><td class="cross">✗ Hoog</td><td class="check">✓ Laag</td><td>Medium</td></tr>
+        <tr><td>Complexiteit</td><td>Laag</td><td>Hoog</td><td>Medium</td></tr>
+        <tr><td>Geschikt bij wisselende topologie</td><td class="check">✓ Zeer goed</td><td class="cross">✗ Slecht</td><td class="check">✓ Goed</td></tr>
+        <tr><td>Schaalbaarheid</td><td>Beperkt</td><td class="check">✓ Goed</td><td>Redelijk</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>MeshCore's aanpak:</strong> MeshCore combineert flooding en directed routing. Het eerste bericht naar een onbekende node gaat via flooding. Zodra het pad bekend is, schakelt MeshCore over naar directe routering — veel zuiniger met airtime en batterij.</div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Je hebt minimaal 70% goed nodig om deze cursus af te ronden.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+const quizQuestions = [
+  {
+    question: 'Wat is flooding in een mesh-netwerk?',
+    options: ['Alleen de dichtstbijzijnde node ontvangt het bericht', 'Elke node stuurt elk nieuw bericht door naar al zijn buren', 'Berichten worden alleen via bekende routes gestuurd', 'De afzender stuurt het bericht rechtstreeks naar de ontvanger'],
+    correct: 1,
+    explanation: 'Bij flooding stuurt elke node elk nieuw bericht door naar al zijn buren, zodat het hele netwerk bereikt wordt.'
+  },
+  {
+    question: 'Wat is het maximale aantal hops in MeshCore?',
+    options: ['7', '16', '32', '64'],
+    correct: 3,
+    explanation: 'MeshCore ondersteunt maximaal 64 hops per bericht — veel meer dan bijvoorbeeld Meshtastic\'s 7 hops.'
+  },
+  {
+    question: 'Wat is de seen-list?',
+    options: ['Een lijst van alle nodes in het netwerk', 'Een cache van recent geziene pakket-hashes voor duplicate suppression', 'Een routeringstabel met bekende paden', 'Een logboek van verzonden berichten'],
+    correct: 1,
+    explanation: 'De seen-list is een compacte cache van pakket-hashes waarmee een node duplicaten herkent en niet opnieuw doorstuurt.'
+  },
+  {
+    question: 'Waarom gebruikt MeshCore flooding als routeringsmethode?',
+    options: ['Omdat het de snelste methode is', 'Omdat het eenvoudig en robuust is en geen routeringstabellen nodig heeft', 'Omdat het de minste airtime verbruikt', 'Omdat het verplicht is door de LoRa-standaard'],
+    correct: 1,
+    explanation: 'Flooding is eenvoudig, robuust en werkt zonder routeringstabellen — ideaal voor dynamische mesh-netwerken.'
+  },
+  {
+    question: 'Wat gebeurt er wanneer de hop-teller (TTL) 0 bereikt?',
+    options: ['Het bericht wordt versleuteld', 'Het bericht wordt opnieuw verzonden', 'Het bericht wordt niet meer doorgestuurd', 'Het bericht wordt teruggestuurd naar de afzender'],
+    correct: 2,
+    explanation: 'Wanneer de TTL 0 bereikt, stopt het pakket — het wordt niet meer doorgestuurd door de volgende node.'
+  },
+  {
+    question: 'Hoe bepaalt een node of een pakket een duplicaat is?',
+    options: ['Door de afzender-ID te controleren', 'Door de pakket-hash te vergelijken met de seen-list', 'Door de berichtinhoud te lezen', 'Door de TTL-waarde te controleren'],
+    correct: 1,
+    explanation: 'Een node berekent de hash van het pakket en controleert of deze al in de seen-list staat. Zo ja, dan is het een duplicaat.'
+  },
+  {
+    question: 'Wat is rebroadcast jitter?',
+    options: ['Een foutmelding bij slechte ontvangst', 'Een willekeurige vertraging om radiobotsingen te voorkomen', 'De tijd die een bericht nodig heeft om één hop te maken', 'Een methode om berichten te comprimeren'],
+    correct: 1,
+    explanation: 'Rebroadcast jitter is een willekeurige vertraging die voorkomt dat meerdere nodes tegelijk hetzelfde bericht doorsturen en zo botsingen veroorzaken.'
+  },
+  {
+    question: 'Hoeveel entries heeft een typische seen-list in MeshCore?',
+    options: ['~20 entries', '~50 entries', '~200 entries', '~1000 entries'],
+    correct: 2,
+    explanation: 'Een typische seen-list bevat ruimte voor ongeveer 200 hashes, opgeslagen als circulaire buffer (FIFO).'
+  },
+  {
+    question: 'Welk probleem lost flood control op?',
+    options: ['Versleuteling van berichten', 'Overmatig airtime-verbruik en batterijverspilling', 'Het ontbreken van routeringstabellen', 'Te weinig nodes in het netwerk'],
+    correct: 1,
+    explanation: 'Flood control voorkomt dat overmatig doorsturen de beschikbare airtime opgebruikt en de batterijen van nodes leegtrekt.'
+  },
+  {
+    question: 'Waarom is een hop-limiet noodzakelijk?',
+    options: ['Om berichten sneller te maken', 'Om eindeloze doorstuur-lussen te voorkomen', 'Om de encryptie te versterken', 'Om het bereik te vergroten'],
+    correct: 1,
+    explanation: 'Zonder hop-limiet zouden berichten in netwerken met lussen eindeloos rondgestuurd worden, wat broadcast storms veroorzaakt.'
+  }
+];
+
+initCourse('c-routering', quizQuestions);
+</script>
+</body>
+</html>

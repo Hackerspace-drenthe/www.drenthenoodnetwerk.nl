@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 5: MeshCore Hardware — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.85rem;display:block;overflow-x:auto;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+.comp-table td{padding:8px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🔧</span>
+    <div class="course-info">
+      <h1>Cursus 5: <span>MeshCore Hardware</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Beginner</span>
+        <span class="meta-tag tag-course">Cursus 5 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie"></nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- SECTIE 1: Populaire MeshCore Apparaten -->
+  <section class="lesson-section" data-section="0" data-label="Populaire apparaten">
+    <div class="section-counter">Sectie 1 van 3</div>
+    <h2>Populaire MeshCore <span>Apparaten</span></h2>
+    <p>Er zijn diverse LoRa-boards die uitstekend werken met MeshCore. Hieronder vind je de vijf meest gebruikte apparaten, elk met hun eigen sterke punten en toepassingen.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📦</div>
+        <h4>Heltec V3</h4>
+        <p>ESP32-S3 + SX1262 met ingebouwd 0.96" OLED-scherm. Compact, goedkoop (~€20) en ideaal als instapmodel voor BLE Companion of Repeater.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📍</div>
+        <h4>T-Beam v1.2</h4>
+        <p>ESP32 + SX1262, ingebouwde GPS-module en 18650 batterijslot. Perfect als GPS-tracker of mobiele node (~€30).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⌨️</div>
+        <h4>T-Deck</h4>
+        <p>ESP32-S3 + SX1262 met 2.8" LCD-scherm en fysiek toetsenbord. Volledig standalone apparaat zonder telefoon (~€50).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">☀️</div>
+        <h4>Station G2</h4>
+        <p>nRF52 + SX1262, solar-ready ontwerp. Extreem laag stroomverbruik, ideaal voor off-grid repeaters op zonne-energie (~€45).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🧩</div>
+        <h4>RAK WisBlock (RAK4631)</h4>
+        <p>nRF52840 + SX1262, modulair systeem. Klik sensoren en I/O-modules aan. Uitstekend stroomverbruik, perfect voor zonne-repeaters.</p>
+      </div>
+    </div>
+
+    <h3>Vergelijkingstabel</h3>
+    <table class="comp-table" aria-label="MeshCore hardware vergelijking">
+      <thead>
+        <tr>
+          <th>Apparaat</th>
+          <th>Processor</th>
+          <th>Radio</th>
+          <th>GPS</th>
+          <th>Scherm</th>
+          <th>Batterij</th>
+          <th>Prijs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Heltec V3</strong></td>
+          <td>ESP32-S3</td>
+          <td>SX1262</td>
+          <td class="cross">✗</td>
+          <td>0.96" OLED</td>
+          <td>Extern (LiPo)</td>
+          <td>~€20</td>
+        </tr>
+        <tr>
+          <td><strong>T-Beam v1.2</strong></td>
+          <td>ESP32</td>
+          <td>SX1262</td>
+          <td class="check">✓</td>
+          <td>Optioneel</td>
+          <td>18650 slot</td>
+          <td>~€30</td>
+        </tr>
+        <tr>
+          <td><strong>T-Deck</strong></td>
+          <td>ESP32-S3</td>
+          <td>SX1262</td>
+          <td class="cross">✗</td>
+          <td>2.8" LCD + KB</td>
+          <td>Intern LiPo</td>
+          <td>~€50</td>
+        </tr>
+        <tr>
+          <td><strong>Station G2</strong></td>
+          <td>nRF52</td>
+          <td>SX1262</td>
+          <td class="cross">✗</td>
+          <td class="cross">✗</td>
+          <td>Solar + LiPo</td>
+          <td>~€45</td>
+        </tr>
+        <tr>
+          <td><strong>RAK WisBlock</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td>Optioneel</td>
+          <td>Optioneel</td>
+          <td>Extern (LiPo)</td>
+          <td>~€30–50</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Tip:</strong> Voor beginners is de Heltec V3 de beste keuze: goedkoop, compact en met een handig OLED-scherm om direct je berichten te zien. Wil je GPS-tracking? Kies dan de T-Beam.</div>
+    </div>
+  </section>
+
+  <!-- SECTIE 2: LoRa Radio Chips -->
+  <section class="lesson-section" data-section="1" data-label="LoRa radio chips">
+    <div class="section-counter">Sectie 2 van 3</div>
+    <h2>LoRa <span>Radio Chips</span></h2>
+    <p>Alle LoRa-chips worden gefabriceerd door <strong>Semtech</strong>. Het type chip in je apparaat bepaalt het zendvermogen, de ontvangstgevoeligheid en het stroomverbruik. Voor MeshCore is de chipkeuze cruciaal.</p>
+
+    <h3>SX1262 vs SX1276 — De Twee Generaties</h3>
+    <table class="comp-table" aria-label="LoRa chip vergelijking">
+      <thead>
+        <tr>
+          <th>Eigenschap</th>
+          <th>SX1276 (Gen 1)</th>
+          <th>SX1262 (Gen 2)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Zendvermogen (TX)</strong></td>
+          <td>+14 dBm (max +20 dBm)</td>
+          <td>+22 dBm</td>
+        </tr>
+        <tr>
+          <td><strong>Ontvangstgevoeligheid</strong></td>
+          <td>-130 dBm typisch</td>
+          <td>-137 dBm typisch</td>
+        </tr>
+        <tr>
+          <td><strong>Stroomverbruik (TX)</strong></td>
+          <td>~120 mA</td>
+          <td>~100 mA (bij hoger vermogen)</td>
+        </tr>
+        <tr>
+          <td><strong>Stroomverbruik (slaap)</strong></td>
+          <td>~1.5 µA</td>
+          <td>~0.6 µA</td>
+        </tr>
+        <tr>
+          <td><strong>TCXO ondersteuning</strong></td>
+          <td class="cross">✗</td>
+          <td class="check">✓ Ingebouwd</td>
+        </tr>
+        <tr>
+          <td><strong>Populaire boards</strong></td>
+          <td>Heltec V2, TTGO LoRa32</td>
+          <td>Heltec V3, T-Beam, RAK4631</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">✅</span>
+      <div class="callout-text"><strong>Aanbeveling:</strong> Kies altijd een SX1262-board voor nieuwe MeshCore-opstellingen. Het heeft betere ontvangstgevoeligheid (-137 vs -130 dBm), hoger zendvermogen (+22 vs +20 dBm) en lager stroomverbruik dan de oudere SX1276.</div>
+    </div>
+
+    <h3>TCXO — Temperature Compensated Crystal Oscillator</h3>
+    <p>De SX1262 beschikt over een ingebouwde <strong>TCXO</strong> (temperatuurgecompenseerd kristaloscillator). Dit zorgt ervoor dat de frequentie stabiel blijft, ongeacht de temperatuur. Dit is vooral belangrijk bij buitennodes die blootstaan aan temperatuurschommelingen.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌡️</div>
+        <h4>Zonder TCXO</h4>
+        <p>Frequentiedrift bij temperatuurverandering. Kan leiden tot gemiste pakketten, vooral in koude of warme omstandigheden.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🎯</div>
+        <h4>Met TCXO</h4>
+        <p>Stabiele frequentie van -40°C tot +85°C. Betrouwbaarder ontvangst en minder pakketverlies in het veld.</p>
+      </div>
+    </div>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Let op:</strong> Oudere SX1276-boards zijn <em>niet</em> ongeschikt, maar je mist 7 dB gevoeligheid — dat kan het verschil zijn tussen wél en niet bereiken van een verre node.</div>
+    </div>
+  </section>
+
+  <!-- SECTIE 3: Aansluitingen & Connectoren -->
+  <section class="lesson-section" data-section="2" data-label="Aansluitingen">
+    <div class="section-counter">Sectie 3 van 3</div>
+    <h2>Aansluitingen & <span>Connectoren</span></h2>
+    <p>De juiste connector en aansluiting kiezen is net zo belangrijk als het board zelf. Een verkeerde antenneconnector of een slecht beschermde buitennode kan je bereik drastisch verminderen.</p>
+
+    <h3>Antenneconnectoren: SMA vs IPEX/U.FL</h3>
+    <table class="comp-table" aria-label="Connector vergelijking">
+      <thead>
+        <tr>
+          <th>Eigenschap</th>
+          <th>SMA (RP-SMA)</th>
+          <th>IPEX / U.FL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Type</strong></td>
+          <td>Schroefdraad, extern</td>
+          <td>Kleine clip, intern</td>
+        </tr>
+        <tr>
+          <td><strong>Antennewisseling</strong></td>
+          <td class="check">✓ Eenvoudig</td>
+          <td class="cross">✗ Breekbaar bij herhaald los-/vastklikken</td>
+        </tr>
+        <tr>
+          <td><strong>Signaalverlies</strong></td>
+          <td>Minimaal</td>
+          <td>Iets hoger door pigtail-kabel</td>
+        </tr>
+        <tr>
+          <td><strong>Beste gebruik</strong></td>
+          <td>Vaste nodes, buitenantennes</td>
+          <td>Compact/draagbaar, interne antennes</td>
+        </tr>
+        <tr>
+          <td><strong>Voorbeeld boards</strong></td>
+          <td>T-Beam, Station G2</td>
+          <td>Heltec V3, RAK WisBlock</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔌</span>
+      <div class="callout-text"><strong>Tip:</strong> Heeft je board een IPEX-connector maar wil je een externe antenne gebruiken? Gebruik een <strong>IPEX-naar-SMA pigtail</strong> kabel. Let wel op: elke extra kabelverbinding introduceert signaalverlies.</div>
+    </div>
+
+    <h3>Data- &amp; Uitbreidingspoorten</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔌</div>
+        <h4>USB-C</h4>
+        <p>Standaard voor programmeren en voeding. Levert 5V, voldoende voor de meeste boards. Gebruik een datakabel, geen laat-alleen-oplaadkabel.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⚡</div>
+        <h4>GPIO Pinnen</h4>
+        <p>General Purpose Input/Output. Hiermee sluit je sensoren, LED's of relais aan. Beschikbaar op vrijwel alle boards.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔗</div>
+        <h4>UART (TX/RX)</h4>
+        <p>Seriële communicatie voor GPS-modules, debug-output of externe apparaten. De T-Beam gebruikt UART voor zijn GPS-chip.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📊</div>
+        <h4>I2C (SDA/SCL)</h4>
+        <p>Tweedraads bus voor sensoren (temperatuur, luchtvochtigheid, barometer) en OLED-schermen. Meerdere apparaten op één bus.</p>
+      </div>
+    </div>
+
+    <h3>Batterijconnectoren</h3>
+    <p>De meeste LoRa-boards gebruiken een <strong>JST-PH 2.0mm</strong> connector voor LiPo-batterijen. Let op de polariteit — deze verschilt per fabrikant! Controleer altijd het pinout-diagram van je board voordat je een batterij aansluit.</p>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">🔥</span>
+      <div class="callout-text"><strong>Waarschuwing:</strong> Een omgekeerde polariteit kan je board permanent beschadigen. Meet altijd met een multimeter vóór het aansluiten van een onbekende batterij.</div>
+    </div>
+
+    <h3>Weerbestendigheid voor Buitennodes</h3>
+    <p>Wil je een node buiten plaatsen? Houd dan rekening met weersbescherming:</p>
+    <ul>
+      <li><strong>IP65-behuizing</strong> — Beschermt tegen stof en waterstralen. Minimale vereiste voor buitengebruik.</li>
+      <li><strong>Kabelwartels</strong> — Waterdichte doorvoer voor antenne- en voedingskabels.</li>
+      <li><strong>Ventilatie</strong> — Voorkom condensatie binnenin de behuizing met een Gore-Tex ventilatieplug.</li>
+      <li><strong>UV-bestendig materiaal</strong> — ABS of ASA kunststof voorkomt verbrokkeling na langdurige zonblootstelling.</li>
+      <li><strong>Bliksembeveiliging</strong> — Overweeg een gasontladingsbuis (GDT) op de antenne-ingang voor vaste buiteninstallaties.</li>
+    </ul>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">🛡️</span>
+      <div class="callout-text"><strong>Best practice:</strong> Gebruik een standaard IP65 ABS-behuizing (~€10) met SMA-doorvoer. Siliconen kit rondom de kabeldoorvoeren maakt het geheel waterbestendig.</div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="quiz-section" data-section="quiz" data-label="Quiz">
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 5 vragen. Je hebt minimaal 70% nodig om de volgende cursus te ontgrendelen.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+const quizQuestions = [
+  {
+    question: 'Welke LoRa-chip wordt aanbevolen voor nieuwe MeshCore-opstellingen?',
+    options: ['SX1276', 'SX1278', 'SX1262', 'SX1231'],
+    correct: 2,
+    explanation: 'De SX1262 (Gen 2) heeft betere gevoeligheid (-137 dBm), hoger zendvermogen (+22 dBm) en lager stroomverbruik dan oudere chips.'
+  },
+  {
+    question: 'Welk apparaat heeft een ingebouwd toetsenbord en scherm?',
+    options: ['Heltec V3', 'T-Beam', 'T-Deck', 'RAK WisBlock'],
+    correct: 2,
+    explanation: 'De T-Deck heeft een 2.8" LCD-scherm en een fysiek toetsenbord, waardoor het volledig standalone werkt zonder telefoon.'
+  },
+  {
+    question: 'Wat is het verschil tussen een SMA- en een IPEX-connector?',
+    options: ['SMA is goedkoper, IPEX is duurder', 'SMA is een schroefverbinding voor externe antennes, IPEX is een kleine interne clip', 'Ze zijn identiek maar van verschillende fabrikanten', 'IPEX is waterdicht, SMA niet'],
+    correct: 1,
+    explanation: 'SMA is een stevige schroefdraadconnector voor externe antennes. IPEX (U.FL) is een kleine clip-connector voor interne of compacte antennes.'
+  },
+  {
+    question: 'Waarom is de SX1262 beter dan de SX1276 voor MeshCore?',
+    options: ['De SX1262 is goedkoper', 'De SX1262 heeft hogere gevoeligheid en meer zendvermogen', 'De SX1276 bestaat niet meer', 'De SX1262 werkt alleen op 868 MHz'],
+    correct: 1,
+    explanation: 'De SX1262 biedt -137 dBm gevoeligheid (vs -130 dBm) en +22 dBm zendvermogen (vs +20 dBm), plus een ingebouwde TCXO voor frequentiestabiliteit.'
+  },
+  {
+    question: 'Welk apparaat heeft een ingebouwde GPS en een 18650-batterijslot?',
+    options: ['Heltec V3', 'T-Deck', 'RAK WisBlock', 'T-Beam'],
+    correct: 3,
+    explanation: 'De T-Beam heeft een ingebouwde GPS-module en een 18650 batterijhouder, wat hem ideaal maakt als mobiele GPS-tracker.'
+  }
+];
+
+initCourse('c-hardware', quizQuestions);
+</script>
+</body>
+</html>

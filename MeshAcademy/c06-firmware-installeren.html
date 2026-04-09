@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 6: Firmware Installeren — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;display:block;overflow-x:auto;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── STEP FLOW ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;margin:20px 0;}
+.step{display:flex;gap:16px;align-items:flex-start;position:relative;padding-bottom:24px;}
+.step::before{content:'';position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--border);}
+.step:last-child::before{display:none;}
+.step-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;background:rgba(0,229,255,.12);border:2px solid rgba(0,229,255,.3);color:var(--cyan);}
+.step-content h4{font-size:.95rem;font-weight:700;margin-bottom:4px;}
+.step-content p{font-size:.88rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;}
+
+/* Locked */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" id="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">⚡</span>
+    <div class="course-info">
+      <h1>Cursus 6: <span>Firmware Installeren</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Beginner</span>
+        <span class="meta-tag tag-course">Cursus 6 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right"><a href="course-hub.html" class="back-btn">← Overzicht</a></div>
+</header>
+
+<div class="course-progress" role="region" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+<nav id="course-side-nav" aria-label="Sectie navigatie"></nav>
+
+<main id="main-content" class="course-body">
+
+  <!-- ═══ SECTIE 1: MeshCore Firmware ═══ -->
+  <section class="lesson-section" data-section="0" data-label="MeshCore Firmware">
+    <div class="section-counter">Sectie 1 van 3</div>
+    <h2>MeshCore <span>Firmware</span></h2>
+    <p>MeshCore is open-source firmware ontwikkeld door <strong>Ripplebiz</strong>, speciaal ontworpen voor LoRa mesh-netwerken. Het transformeert gewone ESP32- of nRF52-boards tot krachtige mesh-nodes die zonder internet of telefoonnetwerk kunnen communiceren.</p>
+
+    <h3>Waarom aangepaste firmware?</h3>
+    <p>Een standaard ESP32-board kan niet deelnemen aan een mesh-netwerk. MeshCore-firmware voegt essentiële functionaliteit toe:</p>
+    <ul>
+      <li><strong>LoRa mesh-routering</strong> — berichten worden automatisch doorgestuurd via meerdere hops</li>
+      <li><strong>End-to-end encryptie</strong> — elk gesprek is versleuteld met unieke sleutels</li>
+      <li><strong>Node-rollen</strong> — je kiest of het apparaat een client, repeater of room server wordt</li>
+      <li><strong>Energiebeheer</strong> — ultra-laag stroomverbruik voor langdurig gebruik op batterij</li>
+    </ul>
+
+    <h3>Waar download je firmware?</h3>
+    <p>MeshCore-firmware wordt gepubliceerd op <strong>GitHub</strong> (Ripplebiz/MeshCore). De eenvoudigste manier is via de online web-flasher op <strong>flasher.meshcore.co.uk</strong>, die automatisch de juiste firmware voor je board downloadt.</p>
+
+    <h3>Firmware-varianten per apparaat</h3>
+    <div class="info-grid">
+      <div class="info-card"><div class="ic-icon" aria-hidden="true">📦</div><h4>Heltec V3 / WiFi LoRa 32</h4><p>ESP32-S3 gebaseerd. Populairste instapmodel. Beschikbaar als Companion, Repeater en Room Server firmware.</p></div>
+      <div class="info-card"><div class="ic-icon" aria-hidden="true">📦</div><h4>LilyGO T-Beam</h4><p>ESP32 met ingebouwde GPS. Ideaal voor mobiel gebruik en locatiebepaling binnen het netwerk.</p></div>
+      <div class="info-card"><div class="ic-icon" aria-hidden="true">📦</div><h4>LilyGO T-Deck</h4><p>Standalone apparaat met scherm en toetsenbord. Draait als zelfstandige client zonder telefoon.</p></div>
+      <div class="info-card"><div class="ic-icon" aria-hidden="true">📦</div><h4>RAK WisBlock (nRF52840)</h4><p>Ultra-zuinig nRF52840 platform. Beste keuze voor zonne-energie repeaters door extreem laag verbruik.</p></div>
+    </div>
+
+    <h3>Versienummering</h3>
+    <p>MeshCore-releases volgen een versienummer zoals <strong>v0.9.2</strong>. Controleer altijd dat je de nieuwste stabiele versie flasht. De web-flasher toont automatisch de laatste release. Op GitHub kun je ook oudere versies en release notes bekijken.</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">ℹ️</span>
+      <div class="callout-text"><strong>Tip:</strong> De web-flasher op flasher.meshcore.co.uk herkent automatisch je boardtype en biedt alleen compatibele firmware-varianten aan. Je hoeft niet zelf het juiste bestand te zoeken.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 2: Firmware Flashen ═══ -->
+  <section class="lesson-section" data-section="1" data-label="Firmware Flashen">
+    <div class="section-counter">Sectie 2 van 3</div>
+    <h2>Firmware <span>Flashen</span></h2>
+    <p>Flashen betekent het schrijven van nieuwe firmware naar het geheugen van je board. Er zijn twee methoden: de <strong>web-flasher</strong> (aanbevolen) of handmatig met <strong>esptool</strong> (Python).</p>
+
+    <h3>Methode 1: Web-flasher (aanbevolen)</h3>
+    <p>De snelste en eenvoudigste manier. Geen installatie nodig — alleen een Chrome of Edge browser.</p>
+
+    <div class="step-flow">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><h4>USB aansluiten</h4><p>Verbind je board via USB-C (of micro-USB) met je computer.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Web-flasher openen</h4><p>Ga naar <strong>flasher.meshcore.co.uk</strong> in Chrome of Edge (andere browsers ondersteunen Web Serial niet).</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Board en rol kiezen</h4><p>Selecteer je boardtype (bijv. Heltec V3) en de gewenste firmware-rol (Companion, Repeater, Room Server).</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-content"><h4>Verbinden</h4><p>Klik "Connect" en selecteer de juiste COM-/seriële poort in het browserdialoog.</p></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-content"><h4>Flashen</h4><p>Klik "Flash" — de firmware wordt automatisch gedownload en naar het board geschreven. Dit duurt 1–2 minuten.</p></div></div>
+      <div class="step"><div class="step-num">6</div><div class="step-content"><h4>Herstart controleren</h4><p>Na het flashen herstart het board automatisch met MeshCore. Je ziet een bevestiging in de web-flasher.</p></div></div>
+    </div>
+
+    <h3>Methode 2: esptool (handmatig)</h3>
+    <p>Voor gevorderde gebruikers of als de web-flasher niet werkt. Vereist Python en esptool:</p>
+    <ol>
+      <li>Installeer Python 3 en vervolgens <code>pip install esptool</code></li>
+      <li>Download het juiste firmware-bestand (.bin) van GitHub</li>
+      <li>Verbind het board via USB</li>
+      <li>Zet het board in <strong>bootloader-modus</strong>: houd de <strong>BOOT</strong>-knop ingedrukt en druk kort op <strong>RST</strong> (Reset)</li>
+      <li>Voer het flash-commando uit: <code>esptool.py --port /dev/ttyUSB0 write_flash 0x0 firmware.bin</code></li>
+      <li>Na het flashen: druk op RST om het board te herstarten</li>
+    </ol>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Flash altijd de juiste firmware voor jouw specifieke boardtype. Een verkeerd firmware-bestand kan je apparaat onbruikbaar maken. De web-flasher voorkomt dit automatisch, maar bij handmatig flashen moet je zelf controleren.</div>
+    </div>
+
+    <h3>Veelvoorkomende problemen</h3>
+    <ul>
+      <li><strong>Poort niet gevonden:</strong> Controleer de USB-kabel (sommige kabels zijn alleen voor opladen, niet voor data). Probeer een andere USB-poort.</li>
+      <li><strong>Board reageert niet:</strong> Zet het board handmatig in bootloader-modus (BOOT + RST).</li>
+      <li><strong>Permission denied (Linux):</strong> Voeg je gebruiker toe aan de <code>dialout</code>-groep: <code>sudo usermod -aG dialout $USER</code></li>
+      <li><strong>Flash mislukt halverwege:</strong> Probeer opnieuw. Houd de BOOT-knop ingedrukt tijdens het hele flashproces bij hardnekkige problemen.</li>
+    </ul>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Tip:</strong> Na succesvol flashen kun je direct de MeshCore-app op je telefoon verbinden via Bluetooth (bij Companion-firmware) om te controleren of alles werkt.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 3: Node Rollen ═══ -->
+  <section class="lesson-section" data-section="2" data-label="Node Rollen">
+    <div class="section-counter">Sectie 3 van 3</div>
+    <h2>Node <span>Rollen</span></h2>
+    <p>Bij het flashen kies je een <strong>rol</strong> voor je node. De rol bepaalt hoe het apparaat zich gedraagt in het mesh-netwerk. Dit is de belangrijkste keuze die je maakt.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔁</div>
+        <h4>Repeater / Relay</h4>
+        <p>De ruggengraat van het netwerk. Stuurt berichten door zonder menselijke interactie. Geen scherm of Bluetooth nodig — alleen de radio. Ideaal voor vaste locaties met zonne-energie op hoge punten.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📱</div>
+        <h4>Client (Companion)</h4>
+        <p>Eindgebruiker-apparaat dat via Bluetooth (BLE) of USB verbindt met je telefoon of computer. Je stuurt en ontvangt berichten via de MeshCore-app. Clients herhalen GEEN berichten.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏠</div>
+        <h4>Room Server</h4>
+        <p>Host een chatroom in het netwerk. Slaat berichten op zodat gebruikers die later online komen ze alsnog kunnen lezen. Fungeert als centraal punt voor groepscommunicatie.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>Base Station</h4>
+        <p>Een beheerde repeater die extra telemetrie rapporteert: batterijniveau, signaalsterkte en uptime. Ideaal voor netwerkbeheerders die de gezondheid van het netwerk willen monitoren.</p>
+      </div>
+    </div>
+
+    <h3>Wanneer kies je welke rol?</h3>
+    <ul>
+      <li><strong>Repeater</strong> — als je een vaste node plaatst om het bereik van het netwerk te vergroten (bijv. op een dak of mast)</li>
+      <li><strong>Client</strong> — als je zelf berichten wilt versturen en ontvangen via je telefoon</li>
+      <li><strong>Room Server</strong> — als je een groepskanaal wilt hosten waar meerdere mensen berichten kunnen achterlaten</li>
+      <li><strong>Base Station</strong> — als je een beheerde repeater wilt met monitoringfunctie</li>
+    </ul>
+
+    <h3>Vergelijking van rollen</h3>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Rol</th>
+          <th>Functie</th>
+          <th>Stuurt door?</th>
+          <th>Stroomverbruik</th>
+          <th>Typisch apparaat</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Repeater</strong></td>
+          <td>Berichten doorsturen</td>
+          <td class="check">✓ Ja</td>
+          <td>Laag (geen BLE/scherm)</td>
+          <td>Heltec V3, RAK WisBlock</td>
+        </tr>
+        <tr>
+          <td><strong>Client</strong></td>
+          <td>Berichten zenden &amp; ontvangen</td>
+          <td class="cross">✗ Nee</td>
+          <td>Gemiddeld (BLE actief)</td>
+          <td>Heltec V3, T-Beam</td>
+        </tr>
+        <tr>
+          <td><strong>Room Server</strong></td>
+          <td>Chatroom hosten &amp; opslaan</td>
+          <td class="check">✓ Ja (groep)</td>
+          <td>Gemiddeld</td>
+          <td>Heltec V3, RAK WisBlock</td>
+        </tr>
+        <tr>
+          <td><strong>Base Station</strong></td>
+          <td>Beheerde repeater + telemetrie</td>
+          <td class="check">✓ Ja</td>
+          <td>Laag</td>
+          <td>Heltec V3, RAK WisBlock</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">ℹ️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Anders dan bij Meshtastic herhalen clients in MeshCore <strong>geen</strong> berichten. Alleen repeaters, room servers en base stations sturen door. Dit voorkomt ongewenste flooding en maakt het netwerk stabieler.</div>
+    </div>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">🔮</span>
+      <div class="callout-text"><strong>Vooruitblik:</strong> De rol kies je tijdens het flashen. Na het flashen configureer je de overige instellingen (frequentie, zendvermogen, node-naam) — dat behandelen we in de volgende cursus: <em>Eerste Configuratie</em>.</div>
+    </div>
+  </section>
+
+  <!-- ═══ QUIZ ═══ -->
+  <section class="quiz-section" data-section="quiz" data-label="Quiz">
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 5 vragen. Je hebt minimaal 70% nodig om de volgende cursus te ontgrendelen.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+const quizQuestions = [
+  {
+    question: 'Welk hulpmiddel kan MeshCore-firmware op een board flashen?',
+    options: ['Arduino IDE', 'De web-flasher of esptool', 'Alleen via SD-kaart', 'Bluetooth OTA'],
+    correct: 1,
+    explanation: 'MeshCore-firmware wordt geflasht via de online web-flasher (flasher.meshcore.co.uk) of handmatig met het Python-hulpmiddel esptool.'
+  },
+  {
+    question: 'Wat moet je doen voordat je handmatig flasht met esptool?',
+    options: ['WiFi inschakelen', 'Het board in bootloader-modus zetten (BOOT + RST)', 'De antenne verwijderen', 'Bluetooth uitschakelen'],
+    correct: 1,
+    explanation: 'Bij handmatig flashen moet je het board in bootloader-modus zetten door de BOOT-knop ingedrukt te houden terwijl je op RST drukt.'
+  },
+  {
+    question: 'Wat doet een Repeater-node in het MeshCore-netwerk?',
+    options: ['Berichten versturen via Bluetooth', 'Berichten doorsturen zonder menselijke interactie', 'Chatrooms hosten', 'Firmware updates verspreiden'],
+    correct: 1,
+    explanation: 'Een Repeater stuurt berichten automatisch door naar andere nodes — het is de ruggengraat van het netwerk en vereist geen gebruikersinteractie.'
+  },
+  {
+    question: 'Welke rol host een chatroom en slaat berichten op voor offline gebruikers?',
+    options: ['Client', 'Repeater', 'Room Server', 'Base Station'],
+    correct: 2,
+    explanation: 'Een Room Server maakt een chatroom aan, slaat berichten op en stuurt ze naar clients die later online komen.'
+  },
+  {
+    question: 'Waar kan MeshCore-firmware gedownload worden?',
+    options: ['Apple App Store', 'GitHub (of via de web-flasher)', 'Google Play Store', 'De ESP32 fabrikant'],
+    correct: 1,
+    explanation: 'MeshCore-firmware is beschikbaar op GitHub (Ripplebiz/MeshCore) en wordt automatisch gedownload wanneer je de web-flasher gebruikt.'
+  }
+];
+
+initCourse('c-firmware', quizQuestions);
+</script>
+</body>
+</html>

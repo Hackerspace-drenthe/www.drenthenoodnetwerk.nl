@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 7: Eerste Configuratie — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── STEP FLOW ─── */
+.step-flow{display:flex;flex-direction:column;gap:0;margin:20px 0;}
+.step{display:flex;gap:16px;align-items:flex-start;position:relative;padding-bottom:24px;}
+.step::before{content:'';position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--border);}
+.step:last-child::before{display:none;}
+.step-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;background:rgba(0,229,255,.12);border:2px solid rgba(0,229,255,.3);color:var(--cyan);}
+.step-content h4{font-size:.95rem;font-weight:700;margin-bottom:4px;}
+.step-content p{font-size:.88rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CONFIG EXPLORER ─── */
+.config-explorer{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:20px 0;}
+.config-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.config-tab{padding:12px 20px;font-size:.85rem;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .18s;background:none;border-top:none;border-left:none;border-right:none;}
+.config-tab:hover{color:var(--text);}.config-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.config-panel{display:none;padding:20px;}.config-panel.active{display:block;}
+.config-line{display:flex;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid rgba(0,229,255,.06);flex-wrap:wrap;}
+.config-key{font-family:monospace;color:var(--cyan);font-size:.88rem;min-width:180px;font-weight:600;}
+.config-val{font-family:monospace;color:var(--green);font-size:.88rem;min-width:100px;}
+.config-desc{font-size:.82rem;color:var(--dim);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">⚙️</span>
+    <div class="course-info">
+      <h1>Cursus 7: <span>Eerste Configuratie</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Beginner</span>
+        <span class="meta-tag tag-course">Cursus 7 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Companion App & Verbinding"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Configuratieparameters"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Back-up & Export"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ═══ SECTIE 1: Companion App & Verbinding ═══ -->
+  <section class="lesson-section" data-section="s1" data-label="Companion App & Verbinding">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Companion App & <span>Verbinding</span></h2>
+    <p>Na het flashen van de firmware moet je je apparaat configureren. Hiervoor gebruik je de <strong>MeshCore Companion App</strong> op je telefoon, die via Bluetooth Low Energy (BLE) communiceert met je node. Alternatief kun je een seriële/USB-verbinding gebruiken.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📱</div>
+        <h4>MeshCore Companion App</h4>
+        <p>De telefoon-app verbindt draadloos via BLE met je node. Beschikbaar voor Android en iOS. De makkelijkste manier om je apparaat in te stellen en berichten te versturen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔌</div>
+        <h4>Serieel / USB</h4>
+        <p>Verbind je node via USB-C met een computer. Gebruik een seriële terminal of de web-interface om parameters in te stellen. Handig voor geavanceerde configuratie.</p>
+      </div>
+    </div>
+
+    <h3>Verbinding maken na het flashen</h3>
+    <div class="step-flow">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content"><h4>Zet je node aan</h4><p>Sluit de node aan via USB of schakel de batterij in. Na het flashen start de firmware automatisch op.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content"><h4>Open de Companion App</h4><p>Installeer en open de MeshCore Companion App op je telefoon. Zorg dat Bluetooth is ingeschakeld.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content"><h4>BLE koppelen</h4><p>De app scant automatisch naar beschikbare nodes. Selecteer je apparaat in de lijst. Bij de eerste keer word je gevraagd om een koppeling te bevestigen.</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content"><h4>Node-naam instellen</h4><p>Geef je node een herkenbare naam (alias), bijvoorbeeld <strong>"HSD-Jan-01"</strong>. Deze naam is zichtbaar voor andere nodes in het netwerk.</p></div>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Tip:</strong> Gebruik een duidelijke naamconventie voor je node, zoals "HSD-[naam]-[nummer]". Zo herken je snel welk apparaat van wie is in het netwerk.</div>
+    </div>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Let op:</strong> Er kan maar één telefoon tegelijk gekoppeld zijn met een BLE Companion node. Wil je wisselen van telefoon? Vergeet eerst het apparaat in je Bluetooth-instellingen.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 2: Configuratieparameters ═══ -->
+  <section class="lesson-section" data-section="s2" data-label="Configuratieparameters">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Configuratie<span>parameters</span></h2>
+    <p>Elke node moet correct geconfigureerd worden om deel te nemen aan het netwerk. De radio-instellingen bepalen op welke "taal" je node zendt en ontvangt — <strong>alle nodes moeten exact dezelfde instellingen gebruiken</strong>, anders kunnen ze niet communiceren.</p>
+
+    <h3>HSD Drenthe standaardinstellingen</h3>
+    <p>Voor het Hackerspace Drenthe noodnetwerk gebruiken we de volgende instellingen:</p>
+
+    <div class="config-explorer" role="tablist" aria-label="Configuratie categorieën">
+      <div class="config-tabs">
+        <button class="config-tab active" role="tab" data-panel="radio" aria-selected="true">Radio</button>
+        <button class="config-tab" role="tab" data-panel="network">Netwerk</button>
+      </div>
+
+      <div class="config-panel active" id="panel-radio" role="tabpanel">
+        <div class="config-line"><span class="config-key">frequency</span><span class="config-val">869.525 MHz</span><span class="config-desc">ISM-band frequentie (EU: 869.4–869.65 sub-band, 10% duty cycle)</span></div>
+        <div class="config-line"><span class="config-key">spreading_factor</span><span class="config-val">SF11</span><span class="config-desc">Hoge spreading factor voor maximaal bereik in landelijk Drenthe</span></div>
+        <div class="config-line"><span class="config-key">bandwidth</span><span class="config-val">250 kHz</span><span class="config-desc">Goede balans tussen gevoeligheid en datasnelheid voor tekstberichten</span></div>
+        <div class="config-line"><span class="config-key">tx_power</span><span class="config-val">+22 dBm</span><span class="config-desc">Maximaal toegestaan zendvermogen (≈ 160 mW)</span></div>
+        <div class="config-line"><span class="config-key">coding_rate</span><span class="config-val">4/8</span><span class="config-desc">Maximale foutcorrectie — robuust in landelijk gebied met veel interferentie</span></div>
+      </div>
+
+      <div class="config-panel" id="panel-network" role="tabpanel">
+        <div class="config-line"><span class="config-key">node_name</span><span class="config-val">"HSD-Node01"</span><span class="config-desc">Zichtbare naam in het netwerk</span></div>
+        <div class="config-line"><span class="config-key">password</span><span class="config-val">••••••••</span><span class="config-desc">Netwerk wachtwoord — alle nodes moeten hetzelfde gebruiken</span></div>
+        <div class="config-line"><span class="config-key">channel</span><span class="config-val">0</span><span class="config-desc">Primair kanaal — kanaal 1 is gereserveerd voor noodverkeer</span></div>
+      </div>
+    </div>
+
+    <h3>Waarom deze instellingen?</h3>
+    <p>De keuze voor SF11 met 250 kHz bandbreedte is een bewuste afweging voor de situatie in Drenthe:</p>
+    <ul>
+      <li><strong>SF11</strong> — geeft een groter bereik dan SF10, belangrijk in het dunbevolkte Drentse landschap met grote afstanden tussen nodes.</li>
+      <li><strong>250 kHz BW</strong> — snel genoeg voor tekstberichten, maar gevoeliger dan 500 kHz. Bij 125 kHz zou de airtime te lang worden.</li>
+      <li><strong>CR 4/8</strong> — maximale foutcorrectie zorgt voor betrouwbare communicatie, ook bij zwak signaal of interferentie.</li>
+      <li><strong>+22 dBm</strong> — maximaal toegestaan zendvermogen in de 869 MHz sub-band voor het grootste bereik.</li>
+    </ul>
+
+    <h3>HSD kanaalconfiguratie</h3>
+    <p>Een "kanaal" in MeshCore wordt gedefinieerd door de combinatie van frequentie, spreading factor en bandbreedte. Alle drie moeten overeenkomen om te communiceren:</p>
+
+    <table class="comp-table" aria-label="HSD standaard kanaalinstellingen">
+      <thead><tr><th>Parameter</th><th>Waarde</th><th>Reden</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Frequentie</strong></td><td>869.525 MHz</td><td>ISM sub-band, 10% duty cycle toegestaan</td></tr>
+        <tr><td><strong>SF</strong></td><td>SF11</td><td>Maximaal bereik voor landelijk Drenthe</td></tr>
+        <tr><td><strong>BW</strong></td><td>250 kHz</td><td>Goede balans gevoeligheid/snelheid</td></tr>
+        <tr><td><strong>CR</strong></td><td>4/8</td><td>Maximale foutcorrectie voor robuustheid</td></tr>
+        <tr><td><strong>TX Power</strong></td><td>+22 dBm</td><td>Maximaal toegestaan in EU</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Alle nodes in het HSD-netwerk moeten exact dezelfde radio-instellingen gebruiken. Eén afwijkende SF of BW maakt het apparaat onzichtbaar voor de rest van het netwerk!</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 3: Back-up & Export ═══ -->
+  <section class="lesson-section" data-section="s3" data-label="Back-up & Export">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Back-up & <span>Export</span></h2>
+    <p>Je configuratie kun je exporteren als een <strong>JSON-bestand</strong>. Dit is essentieel voor back-ups en voor het snel instellen van nieuwe of vervangen apparaten.</p>
+
+    <h3>Waarom back-ups belangrijk zijn</h3>
+    <ul>
+      <li><strong>Na een reflash</strong> — als je de firmware opnieuw moet flashen, zijn alle instellingen weg. Met een back-up herstel je alles in seconden.</li>
+      <li><strong>Vervangend apparaat</strong> — als een node kapotgaat, importeer je de config op een nieuw apparaat en ben je direct weer online.</li>
+      <li><strong>Meerdere nodes</strong> — met één "master config" stel je snel meerdere nodes identiek in voor het HSD-netwerk.</li>
+    </ul>
+
+    <h3>Exporteren</h3>
+    <ol>
+      <li>Open de MeshCore Companion App en verbind met je node.</li>
+      <li>Ga naar <strong>Instellingen → Export Config</strong>.</li>
+      <li>Sla het JSON-bestand op in een veilige locatie (cloud, USB-stick, computer).</li>
+    </ol>
+
+    <h3>Importeren</h3>
+    <ol>
+      <li>Open de Companion App op het nieuwe of geresette apparaat.</li>
+      <li>Ga naar <strong>Instellingen → Import Config</strong>.</li>
+      <li>Selecteer het opgeslagen JSON-bestand.</li>
+      <li>De node herstart automatisch met de geïmporteerde instellingen.</li>
+    </ol>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Best practice:</strong> Sla na elke configuratiewijziging een nieuwe back-up op. Bewaar ook een "master config" JSON voor het HSD-netwerk, zodat nieuwe leden direct kunnen importeren.</div>
+    </div>
+
+    <h3>Voorbeeld JSON-configuratie</h3>
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">📄</span>
+      <div class="callout-text">
+        <code style="display:block;white-space:pre-wrap;font-size:.82rem;line-height:1.6;color:var(--text);">{
+  "node_name": "HSD-Jan-01",
+  "role": "companion",
+  "radio": {
+    "frequency": 869525000,
+    "sf": 11,
+    "bw": 250000,
+    "cr": 8,
+    "tx_power": 22
+  },
+  "network": {
+    "channel": 0,
+    "password": "hsd-drenthe-2025"
+  }
+}</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ QUIZ ═══ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord de vragen om deze cursus af te ronden. Je hebt minimaal 70% goed nodig.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── Config Explorer tabs ─── */
+(() => {
+  const tabs = document.querySelectorAll('.config-tab');
+  const panels = document.querySelectorAll('.config-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      const panel = document.getElementById('panel-' + tab.dataset.panel);
+      if (panel) panel.classList.add('active');
+    });
+  });
+})();
+
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  {
+    question: 'Welke app wordt gebruikt om MeshCore-apparaten te configureren?',
+    options: ['Meshtastic App', 'MeshCore Companion App via BLE', 'LoRa Config Tool', 'MeshCore Web Dashboard'],
+    correct: 1,
+    explanation: 'De MeshCore Companion App verbindt via Bluetooth Low Energy (BLE) met je node voor configuratie en berichtenverkeer.'
+  },
+  {
+    question: 'Welke frequentie gebruikt HSD Drenthe als standaard?',
+    options: ['868.000 MHz', '869.525 MHz', '433.175 MHz', '915.000 MHz'],
+    correct: 1,
+    explanation: 'HSD Drenthe gebruikt 869.525 MHz, in de ISM sub-band met 10% duty cycle.'
+  },
+  {
+    question: 'Welke Spreading Factor en bandbreedte gebruikt HSD?',
+    options: ['SF7, BW 125 kHz', 'SF12, BW 500 kHz', 'SF11, BW 250 kHz', 'SF10, BW 125 kHz'],
+    correct: 2,
+    explanation: 'HSD gebruikt SF11 met 250 kHz bandbreedte — optimale balans tussen bereik en snelheid voor het Drentse landschap.'
+  },
+  {
+    question: 'Waarom moeten alle nodes dezelfde radio-instellingen gebruiken?',
+    options: ['Anders gaat de batterij sneller leeg', 'Het is wettelijk verplicht', 'Anders kunnen ze niet met elkaar communiceren', 'De firmware crasht bij afwijkende instellingen'],
+    correct: 2,
+    explanation: 'Nodes met verschillende frequentie, SF of bandbreedte kunnen elkaars pakketten niet decoderen en zijn onzichtbaar voor elkaar.'
+  },
+  {
+    question: 'In welk formaat wordt een configuratie-back-up opgeslagen?',
+    options: ['XML', 'CSV', 'JSON', 'YAML'],
+    correct: 2,
+    explanation: 'MeshCore exporteert configuraties als JSON-bestanden, die je kunt importeren op andere of vervangende apparaten.'
+  }
+];
+
+initCourse('c-configuratie', quizQuestions);
+</script>
+</body>
+</html>

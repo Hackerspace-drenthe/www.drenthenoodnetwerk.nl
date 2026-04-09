@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeshCore Device Setup en Sync - Hackerspace Drenthe</title>
+<style>
+:root {
+  --green:#00ff88;
+  --cyan:#00e5ff;
+  --orange:#ff6b00;
+  --purple:#c864ff;
+  --yellow:#ffd060;
+  --red:#ff4466;
+  --dark:#050d1a;
+  --mid:#0a1628;
+  --card:#0d1f3c;
+  --card2:#112240;
+  --text:#e0eaff;
+  --dim:#7090b0;
+  --border:rgba(0,229,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--dark);
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:80px;
+}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+.site-header{
+  background:linear-gradient(180deg,#071530 0%,var(--dark) 100%);
+  border-bottom:1px solid var(--border);
+  padding:22px 32px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:14px;
+}
+.header-text h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:900;}
+.header-text h1 span{color:var(--green);}
+.header-text p{color:var(--dim);font-size:.92rem;margin-top:6px;line-height:1.6;max-width:760px;}
+.header-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+.header-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.07em;}
+.ht-green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.ht-cyan{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.ht-ora{background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.back-btn{
+  background:rgba(0,229,255,.1);
+  border:1px solid rgba(0,229,255,.25);
+  color:var(--cyan);
+  padding:9px 20px;
+  border-radius:20px;
+  font-size:.85rem;
+  font-weight:600;
+  transition:background .2s;
+  white-space:nowrap;
+  align-self:flex-start;
+}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+.page{padding:30px 32px;}
+
+.info-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-bottom:20px;
+}
+.info-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.info-card h3{font-size:.88rem;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin-bottom:7px;}
+.info-card p{font-size:.9rem;line-height:1.6;}
+.info-card strong{color:var(--green);}
+
+.setup-grid{
+  display:grid;
+  grid-template-columns:minmax(320px,450px) 1fr;
+  gap:18px;
+  margin-bottom:24px;
+}
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px;
+}
+.panel h2{font-size:1rem;font-weight:800;margin-bottom:12px;}
+.section-label{
+  font-size:.75rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--dim);
+  margin:16px 0 8px;
+}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.field label{font-size:.82rem;color:var(--dim);font-weight:600;}
+.field input,
+.field select,
+.field textarea{
+  background:rgba(0,229,255,.07);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+  padding:9px 10px;
+  font-size:.9rem;
+  outline:none;
+  transition:border-color .2s,background .2s;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus{border-color:var(--cyan);background:rgba(0,229,255,.12);}
+.field input[type=range]{padding:0;accent-color:var(--green);}
+.slider-line{display:flex;align-items:center;gap:10px;}
+.slider-line .value{font-size:.85rem;color:var(--cyan);font-weight:700;min-width:58px;text-align:right;}
+
+.preset-row,
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.btn{
+  background:rgba(0,229,255,.1);
+  border:1px solid rgba(0,229,255,.3);
+  color:var(--cyan);
+  border-radius:10px;
+  padding:8px 12px;
+  font-size:.82rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .18s;
+}
+.btn:hover{background:rgba(0,229,255,.2);}
+.btn.primary{background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.3);color:var(--green);}
+.btn.primary:hover{background:rgba(0,255,136,.2);}
+.btn.warn{background:rgba(255,107,0,.12);border-color:rgba(255,107,0,.3);color:var(--orange);}
+.btn.warn:hover{background:rgba(255,107,0,.2);}
+
+.status-strip{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+.status-chip{
+  font-size:.77rem;
+  font-weight:700;
+  border-radius:999px;
+  padding:4px 10px;
+  border:1px solid var(--border);
+  color:var(--dim);
+  background:rgba(0,229,255,.06);
+}
+.status-chip.ok{color:var(--green);border-color:rgba(0,255,136,.35);background:rgba(0,255,136,.09);}
+.status-chip.warn{color:var(--yellow);border-color:rgba(255,208,96,.35);background:rgba(255,208,96,.08);}
+.status-chip.bad{color:var(--red);border-color:rgba(255,68,102,.35);background:rgba(255,68,102,.09);}
+
+.config-box{
+  background:var(--mid);
+  border:1px solid rgba(0,229,255,.1);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:12px;
+}
+.config-box h3{font-size:.86rem;color:var(--dim);margin-bottom:8px;}
+pre{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  font-size:.78rem;
+  line-height:1.55;
+  color:#b8d4f2;
+  overflow:auto;
+  max-height:240px;
+}
+
+.validation-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
+.validation-item{
+  background:var(--mid);
+  border-radius:10px;
+  border:1px solid rgba(0,229,255,.08);
+  padding:9px 11px;
+  font-size:.84rem;
+  line-height:1.5;
+  color:var(--dim);
+}
+.validation-item.ok{border-color:rgba(0,255,136,.25);color:#9fe7c4;}
+.validation-item.warn{border-color:rgba(255,208,96,.3);color:#f6d88f;}
+.validation-item.bad{border-color:rgba(255,68,102,.3);color:#ff9ab0;}
+
+.sync-wrap{
+  background:var(--mid);
+  border:1px solid rgba(0,229,255,.1);
+  border-radius:10px;
+  padding:12px;
+}
+.progress-bg{height:10px;border-radius:999px;background:rgba(0,229,255,.09);overflow:hidden;margin-bottom:10px;}
+.progress-bar{height:10px;width:0%;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width .3s;}
+.log-list{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:160px;overflow:auto;}
+.log-list li{font-size:.78rem;line-height:1.5;background:rgba(0,229,255,.05);border-radius:8px;padding:6px 8px;color:var(--dim);}
+.log-list li.ok{color:#9fe7c4;border:1px solid rgba(0,255,136,.2);}
+.log-list li.warn{color:#f6d88f;border:1px solid rgba(255,208,96,.2);}
+.log-list li.bad{color:#ff9ab0;border:1px solid rgba(255,68,102,.2);}
+
+.guide-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+.guide-card{
+  background:var(--card2);
+  border:1px solid rgba(0,229,255,.12);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.guide-card h4{font-size:.9rem;margin-bottom:8px;}
+.guide-card p{font-size:.83rem;line-height:1.6;color:var(--dim);}
+.guide-card strong{color:var(--text);}
+
+.footer-note{
+  margin-top:18px;
+  color:var(--dim);
+  font-size:.8rem;
+  line-height:1.7;
+}
+
+@media(max-width:980px){
+  .setup-grid{grid-template-columns:1fr;}
+}
+@media(max-width:700px){
+  .site-header{padding:16px 18px;}
+  .page{padding:20px 14px;}
+  .row-2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-text">
+    <h1>MeshCore Device Setup en <span>HSD Kanaal Sync</span></h1>
+    <p>
+      Stel je MeshCore node in voor Hackerspace Drenthe en maak een consistente kanaalconfiguratie.
+      Deze pagina genereert direct een config-profiel, valideert kritieke instellingen en simuleert synchronisatie.
+    </p>
+    <div class="header-meta">
+      <span class="header-tag ht-green">EU 868</span>
+      <span class="header-tag ht-cyan">HACKERSPACE DRENTHE</span>
+      <span class="header-tag ht-ora">SYNC ASSISTANT</span>
+    </div>
+  </div>
+  <a href="course-hub.html" class="back-btn">← Terug naar Course Hub</a>
+</header>
+
+<main class="page">
+  <section class="info-row">
+    <article class="info-card">
+      <h3>Doel</h3>
+      <p>Snelle en veilige onboarding van nieuwe nodes met <strong>dezelfde kanaalparameters</strong>.</p>
+    </article>
+    <article class="info-card">
+      <h3>Belangrijk</h3>
+      <p>Gebruik alleen <strong>EU_868</strong> instellingen op dit netwerk en vraag de actuele kanaalsleutel aan een beheerder.</p>
+    </article>
+    <article class="info-card">
+      <h3>Workflow</h3>
+      <p>Kies profiel, controleer validatie, genereer config, start sync-simulatie en test daarna RSSI/SNR in het veld.</p>
+    </article>
+  </section>
+
+  <section class="setup-grid">
+    <div class="panel">
+      <h2>1) Device en radio configuratie</h2>
+
+      <div class="section-label">Snelle profielen</div>
+      <div class="preset-row">
+        <button type="button" class="btn" data-device-preset="starter">Starter</button>
+        <button type="button" class="btn" data-device-preset="portable">Portable</button>
+        <button type="button" class="btn" data-device-preset="relay">Relay</button>
+        <button type="button" class="btn warn" id="btn-load-hsd">Laad HSD standaard</button>
+      </div>
+
+      <div class="section-label">Device</div>
+      <div class="row-2">
+        <div class="field">
+          <label for="device-type">Device type</label>
+          <select id="device-type">
+            <option value="t-echo">LilyGO T-Echo</option>
+            <option value="t-beam" selected>LilyGO T-Beam</option>
+            <option value="heltec-v3">Heltec V3</option>
+            <option value="wisblock">RAK WisBlock</option>
+            <option value="generic">Generic ESP32 + LoRa</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="device-role">Rol</label>
+          <select id="device-role">
+            <option value="fixed" selected>Vaste node</option>
+            <option value="portable">Portable node</option>
+            <option value="relay">Relay node</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="node-name">Node naam</label>
+          <input id="node-name" type="text" value="HSD-Node-01" maxlength="32">
+        </div>
+        <div class="field">
+          <label for="connection-type">Sync methode</label>
+          <select id="connection-type">
+            <option value="usb" selected>USB kabel</option>
+            <option value="bluetooth">Bluetooth</option>
+            <option value="wifi">WiFi / Web UI</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="firmware-version">Firmware versie</label>
+          <input id="firmware-version" type="text" value="v1.9.2">
+        </div>
+        <div class="field">
+          <label for="antenna-gain">Antenne gain (dBi)</label>
+          <select id="antenna-gain">
+            <option value="2">2 dBi stock</option>
+            <option value="3">3 dBi whip</option>
+            <option value="5" selected>5 dBi fiberglass</option>
+            <option value="8">8 dBi fiberglass</option>
+            <option value="9">9 dBi yagi</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">Radio</div>
+      <div class="row-2">
+        <div class="field">
+          <label for="region">Regio</label>
+          <select id="region">
+            <option value="EU_868" selected>EU_868</option>
+            <option value="US_915">US_915</option>
+            <option value="AU_915">AU_915</option>
+            <option value="AS_923">AS_923</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="frequency">Frequentie (MHz)</label>
+          <input id="frequency" type="number" value="868.1" step="0.1" min="433" max="960">
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="sf">Spreading Factor</label>
+          <select id="sf">
+            <option value="7">SF7</option>
+            <option value="8">SF8</option>
+            <option value="9">SF9</option>
+            <option value="10" selected>SF10</option>
+            <option value="11">SF11</option>
+            <option value="12">SF12</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="bw">Bandbreedte</label>
+          <select id="bw">
+            <option value="125" selected>125 kHz</option>
+            <option value="250">250 kHz</option>
+            <option value="500">500 kHz</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="tx-power">TX power</label>
+        <div class="slider-line">
+          <input id="tx-power" type="range" min="2" max="22" step="1" value="20">
+          <span class="value" id="tx-power-val">20 dBm</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="cable-loss">Kabelverlies totaal (dB)</label>
+        <input id="cable-loss" type="number" value="1.0" min="0" max="20" step="0.1">
+      </div>
+
+      <div class="section-label">Kanaal sync (Hackerspace Drenthe)</div>
+      <div class="row-2">
+        <div class="field">
+          <label for="channel-name">Kanaal naam</label>
+          <input id="channel-name" type="text" value="HSD-Meshcore">
+        </div>
+        <div class="field">
+          <label for="channel-id">Kanaal ID</label>
+          <input id="channel-id" type="text" value="hsd-main-01">
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="channel-mode">Kanaal modus</label>
+          <select id="channel-mode">
+            <option value="psk" selected>PSK beveiligd</option>
+            <option value="open">Open (test only)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="channel-key">Kanaalsleutel</label>
+          <input id="channel-key" type="password" placeholder="Vraag bij HSD beheer">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="hop-limit">Hop limit</label>
+        <input id="hop-limit" type="number" value="5" min="1" max="10" step="1">
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn primary" id="btn-generate">Genereer config</button>
+        <button type="button" class="btn" id="btn-copy-config">Kopieer config</button>
+        <button type="button" class="btn" id="btn-copy-join">Kopieer join code</button>
+        <button type="button" class="btn" id="btn-export-json">Exporteer JSON</button>
+        <button type="button" class="btn" id="btn-import-json">Importeer JSON</button>
+        <button type="button" class="btn warn" id="btn-start-sync">Start sync simulatie</button>
+        <input type="file" id="import-json-file" accept="application/json,.json" style="display:none;">
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>2) Validatie en synchronisatie</h2>
+
+      <div class="status-strip">
+        <span class="status-chip" id="chip-ready">Ready: -</span>
+        <span class="status-chip" id="chip-blocking">Blocking: -</span>
+        <span class="status-chip" id="chip-warning">Warnings: -</span>
+      </div>
+
+      <div class="config-box">
+        <h3>Join code</h3>
+        <pre id="join-code">Nog niet gegenereerd.</pre>
+      </div>
+
+      <div class="config-box">
+        <h3>Config payload preview</h3>
+        <pre id="config-output">Nog niet gegenereerd.</pre>
+      </div>
+
+      <div class="config-box">
+        <h3>Connection instructie</h3>
+        <pre id="connection-hint">Kies eerst een sync methode.</pre>
+      </div>
+
+      <div class="validation-list" id="validation-list"></div>
+
+      <div class="sync-wrap">
+        <div class="progress-bg"><div class="progress-bar" id="sync-progress"></div></div>
+        <ul class="log-list" id="sync-log"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="guide-grid">
+    <article class="guide-card">
+      <h4>Stap 1 - firmware consistent</h4>
+      <p>Zorg dat alle nodes dezelfde major firmware draaien. Gemixte builds geven vaak sync-problemen bij kanaalmetadata.</p>
+    </article>
+    <article class="guide-card">
+      <h4>Stap 2 - regio en frequentie</h4>
+      <p>Voor dit netwerk: <strong>EU_868</strong>, doorgaans rond 868.1 MHz. Buiten bereik of verkeerde regio veroorzaakt directe incompatibiliteit.</p>
+    </article>
+    <article class="guide-card">
+      <h4>Stap 3 - kanaalsleutel</h4>
+      <p>Gebruik een actuele sleutel van het HSD beheerteam. Geen sleutel of foute lengte betekent: node ziet netwerk niet.</p>
+    </article>
+    <article class="guide-card">
+      <h4>Stap 4 - na sync testen</h4>
+      <p>Controleer ten minste 1 geslaagde uplink en check RSSI/SNR tegen een bekende node op het kanaal.</p>
+    </article>
+  </section>
+
+  <p class="footer-note">
+    Deze tool is bedoeld als praktische assistent voor configuratie. Definitieve kanaalwaarden, sleutelrotatie en operationele regels
+    worden beheerd door Hackerspace Drenthe. Deel kanaalsleutels niet publiek.
+  </p>
+</main>
+
+<script>
+const HSD_DEFAULT = {
+  region: 'EU_868',
+  frequency: 868.1,
+  sf: 10,
+  bw: 125,
+  txPower: 20,
+  channelName: 'HSD-Meshcore',
+  channelId: 'hsd-main-01',
+  hopLimit: 5,
+  mode: 'psk',
+};
+
+const DEVICE_PRESETS = {
+  starter: {
+    deviceType: 'heltec-v3',
+    role: 'fixed',
+    antennaGain: 3,
+    txPower: 17,
+    sf: 10,
+    bw: 125,
+    cableLoss: 0.8,
+  },
+  portable: {
+    deviceType: 't-echo',
+    role: 'portable',
+    antennaGain: 2,
+    txPower: 14,
+    sf: 9,
+    bw: 125,
+    cableLoss: 0.2,
+  },
+  relay: {
+    deviceType: 'wisblock',
+    role: 'relay',
+    antennaGain: 8,
+    txPower: 20,
+    sf: 11,
+    bw: 125,
+    cableLoss: 1.8,
+  },
+};
+
+const refs = {
+  deviceType: document.getElementById('device-type'),
+  deviceRole: document.getElementById('device-role'),
+  nodeName: document.getElementById('node-name'),
+  connectionType: document.getElementById('connection-type'),
+  firmwareVersion: document.getElementById('firmware-version'),
+  antennaGain: document.getElementById('antenna-gain'),
+  region: document.getElementById('region'),
+  frequency: document.getElementById('frequency'),
+  sf: document.getElementById('sf'),
+  bw: document.getElementById('bw'),
+  txPower: document.getElementById('tx-power'),
+  txPowerVal: document.getElementById('tx-power-val'),
+  cableLoss: document.getElementById('cable-loss'),
+  channelName: document.getElementById('channel-name'),
+  channelId: document.getElementById('channel-id'),
+  channelMode: document.getElementById('channel-mode'),
+  channelKey: document.getElementById('channel-key'),
+  hopLimit: document.getElementById('hop-limit'),
+
+  chipReady: document.getElementById('chip-ready'),
+  chipBlocking: document.getElementById('chip-blocking'),
+  chipWarning: document.getElementById('chip-warning'),
+  validationList: document.getElementById('validation-list'),
+  configOutput: document.getElementById('config-output'),
+  joinCode: document.getElementById('join-code'),
+  connectionHint: document.getElementById('connection-hint'),
+  syncProgress: document.getElementById('sync-progress'),
+  syncLog: document.getElementById('sync-log'),
+
+  btnGenerate: document.getElementById('btn-generate'),
+  btnCopyConfig: document.getElementById('btn-copy-config'),
+  btnCopyJoin: document.getElementById('btn-copy-join'),
+  btnExportJson: document.getElementById('btn-export-json'),
+  btnImportJson: document.getElementById('btn-import-json'),
+  btnStartSync: document.getElementById('btn-start-sync'),
+  btnLoadHsd: document.getElementById('btn-load-hsd'),
+  importJsonFile: document.getElementById('import-json-file'),
+};
+
+let latestConfigText = '';
+let latestJoinText = '';
+let syncTimer = null;
+
+function getFormData() {
+  return {
+    deviceType: refs.deviceType.value,
+    role: refs.deviceRole.value,
+    nodeName: refs.nodeName.value.trim(),
+    connectionType: refs.connectionType.value,
+    firmwareVersion: refs.firmwareVersion.value.trim(),
+    antennaGain: Number(refs.antennaGain.value),
+    region: refs.region.value,
+    frequency: Number(refs.frequency.value),
+    sf: Number(refs.sf.value),
+    bw: Number(refs.bw.value),
+    txPower: Number(refs.txPower.value),
+    cableLoss: Number(refs.cableLoss.value),
+    channelName: refs.channelName.value.trim(),
+    channelId: refs.channelId.value.trim(),
+    channelMode: refs.channelMode.value,
+    channelKey: refs.channelKey.value,
+    hopLimit: Number(refs.hopLimit.value),
+  };
+}
+
+function buildPayload(data) {
+  const keyMasked = data.channelKey ? '*'.repeat(Math.min(16, data.channelKey.length)) : '';
+  return {
+    meta: {
+      profile: 'Hackerspace Drenthe',
+      generatedAt: new Date().toISOString(),
+      tool: 'meshcore-device-setup-sync',
+    },
+    device: {
+      type: data.deviceType,
+      role: data.role,
+      nodeName: data.nodeName,
+      firmware: data.firmwareVersion,
+      syncMethod: data.connectionType,
+    },
+    radio: {
+      region: data.region,
+      frequencyMHz: data.frequency,
+      spreadingFactor: data.sf,
+      bandwidthKHz: data.bw,
+      txPowerDbm: data.txPower,
+      antennaGainDbi: data.antennaGain,
+      cableLossDb: data.cableLoss,
+      hopLimit: data.hopLimit,
+    },
+    channel: {
+      name: data.channelName,
+      id: data.channelId,
+      mode: data.channelMode,
+      keyMasked,
+    },
+  };
+}
+
+function buildJoinCode(data) {
+  const joinObj = {
+    net: data.channelName,
+    id: data.channelId,
+    region: data.region,
+    freq: data.frequency,
+    sf: data.sf,
+    bw: data.bw,
+    hop: data.hopLimit,
+    mode: data.channelMode,
+  };
+  if (data.channelMode === 'psk' && data.channelKey.length >= 8) {
+    joinObj.key = data.channelKey;
+  }
+  try {
+    return btoa(JSON.stringify(joinObj));
+  } catch (err) {
+    return 'Kon join-code niet genereren';
+  }
+}
+
+function validate(data) {
+  const checks = [];
+
+  checks.push({
+    type: data.nodeName.length >= 3 ? 'ok' : 'bad',
+    text: data.nodeName.length >= 3
+      ? 'Node naam is geldig.'
+      : 'Node naam moet minimaal 3 tekens zijn.',
+  });
+
+  checks.push({
+    type: data.region === 'EU_868' ? 'ok' : 'bad',
+    text: data.region === 'EU_868'
+      ? 'Regio klopt voor HSD netwerk (EU_868).'
+      : 'Regio wijkt af van HSD standaard (EU_868).',
+  });
+
+  checks.push({
+    type: data.frequency >= 863 && data.frequency <= 870 ? 'ok' : 'bad',
+    text: data.frequency >= 863 && data.frequency <= 870
+      ? 'Frequentie ligt binnen 868 MHz band.'
+      : 'Frequentie valt buiten de verwachte EU 868 band.',
+  });
+
+  checks.push({
+    type: data.channelName.length >= 3 ? 'ok' : 'bad',
+    text: data.channelName.length >= 3
+      ? 'Kanaalnaam ziet er goed uit.'
+      : 'Kanaalnaam ontbreekt of is te kort.',
+  });
+
+  const idOk = /^[a-z0-9-]{4,32}$/i.test(data.channelId);
+  checks.push({
+    type: idOk ? 'ok' : 'bad',
+    text: idOk
+      ? 'Kanaal ID formaat is geldig.'
+      : 'Kanaal ID moet 4-32 tekens hebben (letters/cijfers/-).',
+  });
+
+  if (data.channelMode === 'psk') {
+    checks.push({
+      type: data.channelKey.length >= 8 ? 'ok' : 'bad',
+      text: data.channelKey.length >= 8
+        ? 'PSK sleutel is ingevuld met voldoende lengte.'
+        : 'PSK sleutel is te kort (minimaal 8 tekens).',
+    });
+  } else {
+    checks.push({
+      type: 'warn',
+      text: 'Kanaal staat op open modus. Gebruik dit alleen voor test.',
+    });
+  }
+
+  checks.push({
+    type: data.txPower <= 20 ? 'ok' : 'warn',
+    text: data.txPower <= 20
+      ? 'TX power zit in gangbare range voor HSD setup.'
+      : 'TX power boven 20 dBm: controleer regelgeving en thermisch gedrag.',
+  });
+
+  checks.push({
+    type: data.cableLoss <= 2.5 ? 'ok' : 'warn',
+    text: data.cableLoss <= 2.5
+      ? 'Kabelverlies is netjes laag.'
+      : 'Kabelverlies is hoog; overweeg kortere of dikkere coax.',
+  });
+
+  checks.push({
+    type: !(data.role === 'relay' && data.antennaGain < 5) ? 'ok' : 'warn',
+    text: !(data.role === 'relay' && data.antennaGain < 5)
+      ? 'Antennegain past bij gekozen rol.'
+      : 'Relay rol met lage gain: overweeg 5 dBi of hoger.',
+  });
+
+  const blocking = checks.filter(c => c.type === 'bad').length;
+  const warning = checks.filter(c => c.type === 'warn').length;
+  const ready = blocking === 0;
+
+  return { checks, blocking, warning, ready };
+}
+
+function connectionInstructions(connectionType) {
+  const map = {
+    usb: [
+      '1. Verbind node via USB kabel.',
+      '2. Open MeshCore config tool en selecteer seriele poort.',
+      '3. Schrijf payload en herstart device.',
+      '4. Controleer heartbeat op HSD kanaal.',
+    ],
+    bluetooth: [
+      '1. Zet Bluetooth pairing op node aan.',
+      '2. Koppel in mobiele app met juiste node.',
+      '3. Importeer payload en sla kanaal op.',
+      '4. Test uplink/downlink met bekende HSD node.',
+    ],
+    wifi: [
+      '1. Verbind met device AP of webinterface.',
+      '2. Open netwerk instellingen pagina.',
+      '3. Plak payload of vul velden handmatig in.',
+      '4. Save + reboot, daarna status controleren.',
+    ],
+  };
+  return (map[connectionType] || map.usb).join('\n');
+}
+
+function renderValidation(validation) {
+  refs.validationList.innerHTML = '';
+  validation.checks.forEach(check => {
+    const item = document.createElement('div');
+    item.className = 'validation-item ' + check.type;
+    item.textContent = check.text;
+    refs.validationList.appendChild(item);
+  });
+
+  refs.chipReady.textContent = 'Ready: ' + (validation.ready ? 'Ja' : 'Nee');
+  refs.chipBlocking.textContent = 'Blocking: ' + validation.blocking;
+  refs.chipWarning.textContent = 'Warnings: ' + validation.warning;
+
+  refs.chipReady.className = 'status-chip ' + (validation.ready ? 'ok' : 'bad');
+  refs.chipBlocking.className = 'status-chip ' + (validation.blocking > 0 ? 'bad' : 'ok');
+  refs.chipWarning.className = 'status-chip ' + (validation.warning > 0 ? 'warn' : 'ok');
+}
+
+function renderAll() {
+  const data = getFormData();
+  const validation = validate(data);
+  const payload = buildPayload(data);
+  const joinCode = buildJoinCode(data);
+
+  refs.txPowerVal.textContent = data.txPower + ' dBm';
+  refs.connectionHint.textContent = connectionInstructions(data.connectionType);
+
+  latestConfigText = JSON.stringify(payload, null, 2);
+  latestJoinText = joinCode;
+
+  refs.configOutput.textContent = latestConfigText;
+  refs.joinCode.textContent = joinCode;
+
+  renderValidation(validation);
+  saveLocalState(data);
+}
+
+function addLog(message, type) {
+  const li = document.createElement('li');
+  li.className = type || '';
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  li.textContent = hh + ':' + mm + ':' + ss + ' - ' + message;
+  refs.syncLog.appendChild(li);
+  refs.syncLog.scrollTop = refs.syncLog.scrollHeight;
+}
+
+function clearSyncLog() {
+  refs.syncLog.innerHTML = '';
+  refs.syncProgress.style.width = '0%';
+}
+
+function startSyncSimulation() {
+  const data = getFormData();
+  const validation = validate(data);
+
+  clearSyncLog();
+
+  if (!validation.ready) {
+    addLog('Sync niet gestart: los eerst blocking validaties op.', 'bad');
+    return;
+  }
+
+  const stepsByMethod = {
+    usb: [
+      'USB poort gevonden.',
+      'Firmware compatibility check OK.',
+      'Radio parameters worden geschreven.',
+      'Kanaalgegevens worden geinjecteerd.',
+      'Node herstart en handshaket met kanaal.',
+      'Sync voltooid. Controleer RSSI/SNR in app.',
+    ],
+    bluetooth: [
+      'Bluetooth pairing gestart.',
+      'Session key opgebouwd.',
+      'Radio profiel verzonden.',
+      'Kanaalmetadata en hop-limit gesynchroniseerd.',
+      'Node bevestigt nieuwe kanaalconfig.',
+      'Sync voltooid. Test een bericht naar HSD node.',
+    ],
+    wifi: [
+      'Web sessie geopend op node.',
+      'Payload gevalideerd op device.',
+      'Radio en kanaal instellingen gecommit.',
+      'Node voert soft reboot uit.',
+      'Kanaal heartbeat succesvol ontvangen.',
+      'Sync voltooid. Node is online in HSD kanaal.',
+    ],
+  };
+
+  const steps = stepsByMethod[data.connectionType] || stepsByMethod.usb;
+  let index = 0;
+
+  addLog('Start sync procedure...', 'warn');
+
+  if (syncTimer) {
+    clearInterval(syncTimer);
+    syncTimer = null;
+  }
+
+  syncTimer = setInterval(() => {
+    if (index >= steps.length) {
+      clearInterval(syncTimer);
+      syncTimer = null;
+      refs.syncProgress.style.width = '100%';
+      addLog('Alle stappen gereed.', 'ok');
+      return;
+    }
+
+    const pct = Math.round(((index + 1) / steps.length) * 100);
+    refs.syncProgress.style.width = pct + '%';
+    const type = index === steps.length - 1 ? 'ok' : '';
+    addLog(steps[index], type);
+    index += 1;
+  }, 850);
+}
+
+function copyText(value, successMessage) {
+  if (!value) {
+    addLog('Niets om te kopieren.', 'warn');
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(value)
+      .then(() => addLog(successMessage, 'ok'))
+      .catch(() => addLog('Kopieren mislukt in browser context.', 'bad'));
+    return;
+  }
+  addLog('Clipboard API niet beschikbaar in deze omgeving.', 'warn');
+}
+
+function applyHsdDefaults() {
+  refs.region.value = HSD_DEFAULT.region;
+  refs.frequency.value = String(HSD_DEFAULT.frequency);
+  refs.sf.value = String(HSD_DEFAULT.sf);
+  refs.bw.value = String(HSD_DEFAULT.bw);
+  refs.txPower.value = String(HSD_DEFAULT.txPower);
+  refs.channelName.value = HSD_DEFAULT.channelName;
+  refs.channelId.value = HSD_DEFAULT.channelId;
+  refs.channelMode.value = HSD_DEFAULT.mode;
+  refs.hopLimit.value = String(HSD_DEFAULT.hopLimit);
+  addLog('HSD standaardprofiel geladen.', 'ok');
+  renderAll();
+}
+
+function applyDevicePreset(name) {
+  const p = DEVICE_PRESETS[name];
+  if (!p) return;
+  refs.deviceType.value = p.deviceType;
+  refs.deviceRole.value = p.role;
+  refs.antennaGain.value = String(p.antennaGain);
+  refs.txPower.value = String(p.txPower);
+  refs.sf.value = String(p.sf);
+  refs.bw.value = String(p.bw);
+  refs.cableLoss.value = String(p.cableLoss);
+  addLog('Device preset toegepast: ' + name + '.', 'ok');
+  renderAll();
+}
+
+function setSelectValueIfExists(el, value) {
+  if (value === undefined || value === null) return;
+  const str = String(value);
+  const exists = Array.from(el.options).some(o => o.value === str);
+  if (exists) el.value = str;
+}
+
+function setInputValue(el, value) {
+  if (value === undefined || value === null) return;
+  el.value = String(value);
+}
+
+function applyImportedConfig(parsed) {
+  const device = parsed.device || {};
+  const radio = parsed.radio || {};
+  const channel = parsed.channel || {};
+
+  setSelectValueIfExists(refs.deviceType, device.type ?? parsed.deviceType);
+  setSelectValueIfExists(refs.deviceRole, device.role ?? parsed.role);
+  setInputValue(refs.nodeName, device.nodeName ?? parsed.nodeName);
+  setSelectValueIfExists(refs.connectionType, device.syncMethod ?? parsed.connectionType);
+  setInputValue(refs.firmwareVersion, device.firmware ?? parsed.firmwareVersion);
+
+  setSelectValueIfExists(refs.region, radio.region ?? parsed.region);
+  setInputValue(refs.frequency, radio.frequencyMHz ?? parsed.frequency);
+  setSelectValueIfExists(refs.sf, radio.spreadingFactor ?? parsed.sf);
+  setSelectValueIfExists(refs.bw, radio.bandwidthKHz ?? parsed.bw);
+  setInputValue(refs.txPower, radio.txPowerDbm ?? parsed.txPower);
+  setSelectValueIfExists(refs.antennaGain, radio.antennaGainDbi ?? parsed.antennaGain);
+  setInputValue(refs.cableLoss, radio.cableLossDb ?? parsed.cableLoss);
+  setInputValue(refs.hopLimit, radio.hopLimit ?? parsed.hopLimit);
+
+  setInputValue(refs.channelName, channel.name ?? parsed.channelName);
+  setInputValue(refs.channelId, channel.id ?? parsed.channelId);
+  setSelectValueIfExists(refs.channelMode, channel.mode ?? parsed.channelMode);
+  setInputValue(refs.channelKey, channel.key ?? parsed.channelKey ?? '');
+}
+
+function exportConfigJson() {
+  renderAll();
+  if (!latestConfigText) {
+    addLog('Geen config om te exporteren.', 'warn');
+    return;
+  }
+
+  const data = getFormData();
+  const safeName = (data.nodeName || 'hsd-node')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  const payload = latestConfigText;
+  const blob = new Blob([payload], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeName + '-hsd-config.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  addLog('JSON configuratie geëxporteerd.', 'ok');
+}
+
+function triggerImportJson() {
+  refs.importJsonFile.value = '';
+  refs.importJsonFile.click();
+}
+
+function importConfigFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || ''));
+      applyImportedConfig(parsed);
+      renderAll();
+      addLog('JSON configuratie geïmporteerd.', 'ok');
+    } catch (err) {
+      addLog('Import mislukt: ongeldig JSON-bestand.', 'bad');
+    }
+  };
+  reader.onerror = () => addLog('Import mislukt: bestand kon niet gelezen worden.', 'bad');
+  reader.readAsText(file);
+}
+
+function saveLocalState(data) {
+  try {
+    localStorage.setItem('hsd_meshcore_setup_state', JSON.stringify(data));
+  } catch (err) {
+    // ignore storage errors
+  }
+}
+
+function loadLocalState() {
+  try {
+    const raw = localStorage.getItem('hsd_meshcore_setup_state');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return;
+
+    refs.deviceType.value = data.deviceType || refs.deviceType.value;
+    refs.deviceRole.value = data.role || refs.deviceRole.value;
+    refs.nodeName.value = data.nodeName || refs.nodeName.value;
+    refs.connectionType.value = data.connectionType || refs.connectionType.value;
+    refs.firmwareVersion.value = data.firmwareVersion || refs.firmwareVersion.value;
+    refs.antennaGain.value = String(data.antennaGain || refs.antennaGain.value);
+    refs.region.value = data.region || refs.region.value;
+    refs.frequency.value = String(data.frequency || refs.frequency.value);
+    refs.sf.value = String(data.sf || refs.sf.value);
+    refs.bw.value = String(data.bw || refs.bw.value);
+    refs.txPower.value = String(data.txPower || refs.txPower.value);
+    refs.cableLoss.value = String(data.cableLoss || refs.cableLoss.value);
+    refs.channelName.value = data.channelName || refs.channelName.value;
+    refs.channelId.value = data.channelId || refs.channelId.value;
+    refs.channelMode.value = data.channelMode || refs.channelMode.value;
+    refs.channelKey.value = data.channelKey || refs.channelKey.value;
+    refs.hopLimit.value = String(data.hopLimit || refs.hopLimit.value);
+  } catch (err) {
+    // ignore invalid storage
+  }
+}
+
+function bindEvents() {
+  const inputs = [
+    refs.deviceType, refs.deviceRole, refs.nodeName, refs.connectionType,
+    refs.firmwareVersion, refs.antennaGain, refs.region, refs.frequency,
+    refs.sf, refs.bw, refs.txPower, refs.cableLoss, refs.channelName,
+    refs.channelId, refs.channelMode, refs.channelKey, refs.hopLimit,
+  ];
+  inputs.forEach(el => {
+    el.addEventListener('input', renderAll);
+    el.addEventListener('change', renderAll);
+  });
+
+  refs.btnGenerate.addEventListener('click', () => {
+    renderAll();
+    addLog('Config opnieuw gegenereerd.', 'ok');
+  });
+
+  refs.btnCopyConfig.addEventListener('click', () => {
+    renderAll();
+    copyText(latestConfigText, 'Config payload gekopieerd.');
+  });
+
+  refs.btnCopyJoin.addEventListener('click', () => {
+    renderAll();
+    copyText(latestJoinText, 'Join code gekopieerd.');
+  });
+
+  refs.btnExportJson.addEventListener('click', exportConfigJson);
+  refs.btnImportJson.addEventListener('click', triggerImportJson);
+
+  refs.importJsonFile.addEventListener('change', (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    importConfigFromFile(file);
+  });
+
+  refs.btnStartSync.addEventListener('click', () => {
+    renderAll();
+    startSyncSimulation();
+  });
+
+  refs.btnLoadHsd.addEventListener('click', applyHsdDefaults);
+
+  document.querySelectorAll('[data-device-preset]').forEach(btn => {
+    btn.addEventListener('click', () => applyDevicePreset(btn.dataset.devicePreset));
+  });
+}
+
+loadLocalState();
+bindEvents();
+renderAll();
+addLog('Setup pagina gereed.', 'ok');
+</script>
+</body>
+</html>

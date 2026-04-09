@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 19: Eindexamen — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(200,100,255,.1);color:var(--purple);border:1px solid rgba(200,100,255,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout.purple{background:rgba(200,100,255,.07);border:1px solid rgba(200,100,255,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── EXAM INTRO ─── */
+.exam-intro{text-align:center;padding:40px 20px 32px;max-width:640px;margin:0 auto;}
+.exam-intro .exam-icon{font-size:4rem;margin-bottom:16px;}
+.exam-intro h2{font-size:1.6rem;font-weight:800;margin-bottom:16px;color:var(--text);}
+.exam-intro p{font-size:1.05rem;color:var(--dim);line-height:1.8;margin-bottom:0;}
+.exam-intro .exam-rules{display:inline-block;text-align:left;margin-top:20px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 28px;font-size:.92rem;color:var(--text);line-height:1.75;}
+.exam-intro .exam-rules strong{color:var(--cyan);}
+
+/* ─── CERTIFICATE ─── */
+.cert-section{text-align:center;padding:40px 20px;margin:40px 0;background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(200,100,255,.08));border:2px solid rgba(0,255,136,.3);border-radius:var(--radius);}
+.cert-section .grad-icon{font-size:4rem;margin-bottom:12px;}
+.cert-section h3{font-size:1.5rem;font-weight:900;margin-bottom:8px;color:var(--green);}
+.cert-section p{font-size:.95rem;color:var(--dim);max-width:500px;margin:0 auto 20px;}
+.cert-form{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:16px;}
+.cert-form label{font-size:.9rem;color:var(--dim);}
+.cert-name-input{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px 20px;font-size:1.1rem;color:var(--text);text-align:center;width:100%;max-width:420px;font-family:var(--font);transition:border-color .2s;}
+.cert-name-input:focus{outline:none;border-color:var(--cyan);box-shadow:var(--focus-ring);}
+.cert-name-input::placeholder{color:var(--dim);opacity:.6;}
+.cert-btn{padding:12px 32px;border-radius:24px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;gap:8px;}
+.cert-btn-generate{background:linear-gradient(135deg,var(--green),var(--cyan));color:var(--dark);}
+.cert-btn-generate:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.cert-btn-generate:disabled{opacity:.4;cursor:not-allowed;transform:none;filter:none;}
+.cert-btn-download{background:rgba(0,255,136,.12);border:2px solid rgba(0,255,136,.4);color:var(--green);}
+.cert-btn-download:hover{background:rgba(0,255,136,.2);}
+.cert-preview{margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.cert-canvas-wrap{width:100%;max-width:800px;border-radius:8px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);border:1px solid rgba(200,180,100,.2);}
+.cert-canvas-wrap canvas{display:block;width:100%;height:auto;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}.exam-intro{padding:24px 12px 20px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" id="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🎓</span>
+    <div class="course-info">
+      <h1>Cursus 19: <span>Eindexamen</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Expert</span>
+        <span class="meta-tag tag-course">Cursus 19 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Eindexamen"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- Intro text -->
+  <div class="exam-intro">
+    <div class="exam-icon" aria-hidden="true">🎓</div>
+    <h2>Welkom bij het Eindexamen</h2>
+    <p>Gefeliciteerd! Je hebt alle 18 cursussen doorlopen.</p>
+    <div class="exam-rules">
+      📝 Dit eindexamen test je kennis over <strong>alle onderwerpen</strong>.<br>
+      📊 Je krijgt <strong>20 vragen</strong> uit alle 18 cursussen.<br>
+      ✅ Je moet minimaal <strong>70% (14/20)</strong> goed beantwoorden.<br>
+      🏆 Bij slagen ontvang je je <strong>officiële MeshCore Academy certificaat</strong>.<br><br>
+      Succes!
+    </div>
+  </div>
+
+  <!-- Quiz section -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz" data-label="Eindexamen">
+    <span class="section-counter">Eindexamen</span>
+    <h2>🎓 Eindexamen</h2>
+    <p class="quiz-intro">20 vragen over alle 18 cursussen. Minimaal 70% (14/20) goed nodig.</p>
+    <div id="quiz-container" role="region" aria-label="Eindexamen"></div>
+  </section>
+
+  <!-- Certificate section (hidden until pass) -->
+  <section class="cert-section" id="cert-section" style="display:none;">
+    <div class="grad-icon" aria-hidden="true">🎓</div>
+    <h3>Gefeliciteerd, MeshCore Expert!</h3>
+    <p>Je hebt alle 19 cursussen voltooid en het eindexamen gehaald! Vul je naam in en download je officiële certificaat.</p>
+    <div class="cert-form">
+      <label for="cert-name">Je volledige naam voor het certificaat:</label>
+      <input type="text" id="cert-name" class="cert-name-input" placeholder="Voer je naam in…" maxlength="50" autocomplete="name" aria-label="Naam voor certificaat">
+      <button id="cert-generate" class="cert-btn cert-btn-generate" disabled aria-label="Genereer certificaat">🎓 Certificaat genereren</button>
+    </div>
+    <div class="cert-preview" id="cert-preview" style="display:none;">
+      <div class="cert-canvas-wrap"><canvas id="cert-canvas" aria-label="Certificaat voorbeeld"></canvas></div>
+      <button id="cert-download" class="cert-btn cert-btn-download" aria-label="Download certificaat als PDF">📄 Download als PDF</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="course-engine.js"></script>
+<script>
+/* ─── QUIZ (Eindexamen — 20 vragen over alle 18 cursussen) ─── */
+const quizQuestions = [
+  {
+    question: 'Wat is het belangrijkste voordeel van een mesh-netwerk?',
+    options: ['Hogere snelheid dan wifi', 'Zelfherstel (self-healing)', 'Goedkoper dan kabel', 'Onbeperkt bereik'],
+    correct: 1,
+    explanation: 'Een mesh-netwerk kan zichzelf herstellen: als een node uitvalt, vinden berichten automatisch een alternatieve route.'
+  },
+  {
+    question: 'Waarom is mesh ideaal voor noodcommunicatie?',
+    options: ['Het is sneller dan 5G', 'Het werkt zonder bestaande infrastructuur', 'Het heeft onbeperkt bereik', 'Het is gratis'],
+    correct: 1,
+    explanation: 'Mesh werkt zonder bestaande infrastructuur zoals GSM-masten of internet — ideaal als die uitvallen bij een ramp.'
+  },
+  {
+    question: 'Welke modulatietechniek gebruikt LoRa?',
+    options: ['Frequency Hopping', 'OFDM', 'Chirp Spread Spectrum', 'Phase Shift Keying'],
+    correct: 2,
+    explanation: 'LoRa gebruikt Chirp Spread Spectrum (CSS): het signaal glijdt continu over een frequentiebereik, wat het robuust maakt tegen ruis.'
+  },
+  {
+    question: 'Hoeveel seconden per uur mag je zenden bij 1% duty cycle?',
+    options: ['3,6 seconden', '36 seconden', '60 seconden', '360 seconden'],
+    correct: 1,
+    explanation: '1% van 3600 seconden (1 uur) = 36 seconden zendtijd per uur.'
+  },
+  {
+    question: 'Welk apparaat heeft een ingebouwd toetsenbord en scherm?',
+    options: ['Heltec V3', 'RAK WisBlock', 'T-Deck', 'T-Beam'],
+    correct: 2,
+    explanation: 'De T-Deck heeft een ingebouwd QWERTY-toetsenbord en LCD-scherm, ideaal als standalone communicatieapparaat.'
+  },
+  {
+    question: 'Welke node-rol slaat berichten op voor offline gebruikers?',
+    options: ['Repeater', 'Client', 'Room Server', 'Gateway'],
+    correct: 2,
+    explanation: 'Een Room Server bewaart berichten (store & forward) zodat offline gebruikers ze later kunnen ophalen.'
+  },
+  {
+    question: 'Welke frequentie gebruikt HSD Drenthe?',
+    options: ['433.175 MHz', '868.000 MHz', '869.525 MHz', '915.000 MHz'],
+    correct: 2,
+    explanation: 'HSD Drenthe gebruikt 869.525 MHz, binnen de Europese ISM-band met gunstige duty-cycle regels.'
+  },
+  {
+    question: 'Welk antennetype is het meest geschikt voor punt-naar-punt?',
+    options: ['Omni-directioneel', 'Patch-antenne', 'Yagi', 'Rubber ducky'],
+    correct: 2,
+    explanation: 'Een Yagi-antenne focust energie in één richting met hoge gain, ideaal voor punt-naar-punt verbindingen.'
+  },
+  {
+    question: 'Hoeveel demping geeft beton bij 868 MHz?',
+    options: ['1-3 dB', '5-8 dB', '10-15 dB', '25-30 dB'],
+    correct: 2,
+    explanation: 'Beton dempt het 868 MHz signaal met circa 10-15 dB per muur, afhankelijk van dikte en samenstelling.'
+  },
+  {
+    question: 'Wat is FSPL bij 868 MHz over 1 km?',
+    options: ['~72 dB', '~81 dB', '~91 dB', '~101 dB'],
+    correct: 2,
+    explanation: 'Free Space Path Loss bij 868 MHz over 1 km is ongeveer 91 dB, berekend met de FSPL-formule.'
+  },
+  {
+    question: 'Hoe bereken je batterijlevensduur?',
+    options: ['Spanning × stroom = uren', 'Capaciteit(mAh) / stroom(mA) = uren', 'Watt / volt = uren', 'Frequentie × tijd = uren'],
+    correct: 1,
+    explanation: 'Batterijlevensduur = capaciteit in mAh gedeeld door gemiddeld stroomverbruik in mA, geeft het aantal uren.'
+  },
+  {
+    question: 'Wat is store & forward?',
+    options: ['Berichten direct verwijderen na verzending', 'Room Server bewaart berichten voor offline gebruikers', 'Berichten comprimeren voor snelheid', 'Versleuteling van opgeslagen data'],
+    correct: 1,
+    explanation: 'Store & forward betekent dat een Room Server berichten opslaat en doorstuurt wanneer de ontvanger weer online komt.'
+  },
+  {
+    question: 'Welk packettype wordt gebruikt voor chatberichten?',
+    options: ['CMD_MSG', 'TXT_MSG', 'GPS_POS', 'ACK_MSG'],
+    correct: 1,
+    explanation: 'TXT_MSG is het packettype voor tekstberichten (chat) in MeshCore.'
+  },
+  {
+    question: 'Hoeveel hops kan een MeshCore-bericht maximaal maken?',
+    options: ['8', '16', '32', '64'],
+    correct: 3,
+    explanation: 'MeshCore ondersteunt maximaal 64 hops, wat een groot bereik mogelijk maakt over meerdere tussenliggende nodes.'
+  },
+  {
+    question: 'Welk protocol gebruikt pad-gebaseerde routering?',
+    options: ['Meshtastic', 'MeshCore', 'Reticulum', 'LoRaWAN'],
+    correct: 2,
+    explanation: 'Reticulum gebruikt pad-gebaseerde (path-based) routering, waarbij routes worden opgebouwd per bestemming.'
+  },
+  {
+    question: 'Welk encryptie-algoritme gebruikt MeshCore?',
+    options: ['AES-256-GCM', 'XChaCha20-Poly1305', 'RSA-2048', 'Blowfish'],
+    correct: 1,
+    explanation: 'MeshCore gebruikt XChaCha20-Poly1305 voor authenticated encryption — snel en veilig op embedded hardware.'
+  },
+  {
+    question: 'Welk key-exchange algoritme gebruikt MeshCore?',
+    options: ['Diffie-Hellman', 'RSA', 'Curve25519 (X25519)', 'ECDSA P-256'],
+    correct: 2,
+    explanation: 'MeshCore gebruikt Curve25519 (X25519) voor key exchange — moderne elliptic-curve cryptografie.'
+  },
+  {
+    question: 'Wat is de eerste stap bij troubleshooting?',
+    options: ['Firmware opnieuw flashen', 'Observeren (symptomen waarnemen)', 'De antenne vervangen', 'De node resetten'],
+    correct: 1,
+    explanation: 'Stap 1 is altijd observeren: welke symptomen zie je? Pas daarna kun je systematisch de oorzaak onderzoeken.'
+  },
+  {
+    question: 'Wat betekent N+1 redundantie?',
+    options: ['Eén extra batterij', 'Minimaal één alternatief pad', 'Dubbele encryptie', 'Twee antennes per node'],
+    correct: 1,
+    explanation: 'N+1 redundantie betekent dat er voor elke kritieke verbinding minimaal één alternatief pad beschikbaar is.'
+  },
+  {
+    question: 'Wat is de seen-list?',
+    options: ['Lijst van bekende nodes', 'Cache van geziene packet-hashes voor duplicate-onderdrukking', 'Logboek van alle berichten', 'Lijst van geblokkeerde gebruikers'],
+    correct: 1,
+    explanation: 'De seen-list is een cache van packet-hashes die nodes bijhouden om duplicaten te herkennen en niet opnieuw door te sturen.'
+  }
+];
+
+initCourse('c-eindexamen', quizQuestions);
+
+/* ─── CERTIFICATE GENERATOR ─── */
+(() => {
+  function checkAllCompleted() {
+    try {
+      const data = JSON.parse(localStorage.getItem('meshcore-academy') || '{}');
+      if (!data.courses) return false;
+      return COURSE_ORDER.every(id => {
+        const c = data.courses[id];
+        return c && c.completed;
+      });
+    } catch { return false; }
+  }
+
+  function hashName(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i) | 0;
+    return String(Math.abs(h)).padStart(6, '0').slice(-6);
+  }
+
+  function drawDecLine(ctx, x1, y, x2) {
+    const cx = (x1 + x2) / 2;
+    ctx.save();
+    ctx.strokeStyle = '#c8a84e';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(cx - 8, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + 8, y); ctx.lineTo(x2, y); ctx.stroke();
+    ctx.fillStyle = '#c8a84e';
+    ctx.beginPath(); ctx.arc(cx, y, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawCorner(ctx, x, y, dx, dy) {
+    ctx.save();
+    ctx.strokeStyle = '#c8a84e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + dx * 40, y); ctx.lineTo(x, y); ctx.lineTo(x, y + dy * 40);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + dx * 32, y + dy * 6); ctx.lineTo(x + dx * 6, y + dy * 6); ctx.lineTo(x + dx * 6, y + dy * 32);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawMeshIcon(ctx, cx, cy, r) {
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const a = (Math.PI * 2 / 6) * i - Math.PI / 2;
+      pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#1a5c2a';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.4;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        ctx.beginPath(); ctx.moveTo(pts[i][0], pts[i][1]); ctx.lineTo(pts[j][0], pts[j][1]); ctx.stroke();
+      }
+    }
+    ctx.fillStyle = '#1a5c2a';
+    ctx.globalAlpha = 0.6;
+    pts.forEach(([px, py]) => { ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill(); });
+    ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawCertificate(canvas, name) {
+    const ctx = canvas.getContext('2d');
+    const W = 1600, H = 1131;
+    canvas.width = W; canvas.height = H;
+    const cx = W / 2;
+
+    // Background
+    ctx.fillStyle = '#FDFAF0';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle paper texture
+    ctx.save(); ctx.globalAlpha = 0.03;
+    for (let i = 0; i < 200; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? '#000' : '#8a7a50';
+      ctx.fillRect(Math.random() * W, Math.random() * H, Math.random() * 3, Math.random() * 3);
+    }
+    ctx.restore();
+
+    // Outer border
+    ctx.strokeStyle = '#1a5c2a'; ctx.lineWidth = 6;
+    ctx.strokeRect(22, 22, W - 44, H - 44);
+
+    // Inner border
+    ctx.strokeStyle = '#c8a84e'; ctx.lineWidth = 2;
+    ctx.strokeRect(38, 38, W - 76, H - 76);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(44, 44, W - 88, H - 88);
+
+    // Corner ornaments
+    drawCorner(ctx, 52, 52, 1, 1);
+    drawCorner(ctx, W - 52, 52, -1, 1);
+    drawCorner(ctx, 52, H - 52, 1, -1);
+    drawCorner(ctx, W - 52, H - 52, -1, -1);
+
+    // Mesh icon at top
+    drawMeshIcon(ctx, cx, 100, 24);
+
+    let y = 150;
+    ctx.textAlign = 'center';
+
+    // Organization
+    ctx.fillStyle = '#1a5c2a';
+    ctx.font = '700 30px Georgia, "Times New Roman", serif';
+    ctx.fillText('HACKERSPACE DRENTHE', cx, y);
+    y += 28;
+    ctx.fillStyle = '#6a8a6f';
+    ctx.font = '400 15px Georgia, serif';
+    ctx.fillText('Drenthe Noodnetwerk  ·  hackerspace-drenthe.nl', cx, y);
+
+    y += 30;
+    drawDecLine(ctx, cx - 260, y, cx + 260);
+
+    // CERTIFICAAT
+    y += 60;
+    ctx.fillStyle = '#1a3a1f';
+    ctx.font = '700 52px Georgia, "Times New Roman", serif';
+    ctx.fillText('C E R T I F I C A A T', cx, y);
+
+    // Subtitle
+    y += 50;
+    ctx.fillStyle = '#4a6a50';
+    ctx.font = '400 20px Georgia, serif';
+    ctx.fillText('Hierbij verklaart Hackerspace Drenthe dat', cx, y);
+
+    // Gold line above name
+    y += 40;
+    ctx.strokeStyle = '#c8a84e'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - 280, y); ctx.lineTo(cx + 280, y); ctx.stroke();
+
+    // Name
+    y += 52;
+    ctx.fillStyle = '#1a2a1f';
+    ctx.font = 'italic 700 44px Georgia, "Times New Roman", serif';
+    ctx.fillText(name, cx, y);
+
+    // Gold line below name
+    y += 18;
+    ctx.strokeStyle = '#c8a84e'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx - 280, y); ctx.lineTo(cx + 280, y); ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - 240, y + 4); ctx.lineTo(cx + 240, y + 4); ctx.stroke();
+
+    // Body text
+    y += 50;
+    ctx.fillStyle = '#3a5a40';
+    ctx.font = '400 19px Georgia, serif';
+    ctx.fillText('met succes alle 19 cursussen van de MeshCore Academy heeft voltooid', cx, y);
+    y += 30;
+    ctx.fillText('en hiermee gecertificeerd is als', cx, y);
+
+    // Title
+    y += 55;
+    ctx.fillStyle = '#1a5c2a';
+    ctx.font = '700 34px Georgia, "Times New Roman", serif';
+    ctx.fillText('MESHCORE NETWORK SPECIALIST', cx, y);
+
+    y += 28;
+    drawDecLine(ctx, cx - 200, y, cx + 200);
+
+    // Skills
+    y += 35;
+    ctx.fillStyle = '#6a7a6f';
+    ctx.font = '400 13px Georgia, serif';
+    ctx.fillText('Mesh Netwerken · LoRa Technologie · Hardware · Antennes · RF Planning · Configuratie · Protocollen · Beveiliging · Netwerk Ontwerp', cx, y);
+
+    // Date & cert number
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    const certNum = 'HSD-MC-' + today.getFullYear() + '-' + hashName(name + today.toISOString().slice(0, 10));
+
+    y = H - 230;
+    ctx.fillStyle = '#4a5a4f';
+    ctx.font = '400 16px Georgia, serif';
+    ctx.fillText('Uitgereikt op ' + dateStr, cx, y);
+    y += 24;
+    ctx.font = '400 13px Georgia, serif';
+    ctx.fillText('Certificaatnummer: ' + certNum, cx, y);
+
+    // Signature lines
+    const sigY = H - 148;
+    ctx.strokeStyle = '#8a9a8f'; ctx.lineWidth = 1;
+
+    ctx.beginPath(); ctx.moveTo(cx - 360, sigY); ctx.lineTo(cx - 100, sigY); ctx.stroke();
+    ctx.fillStyle = '#4a5a4f';
+    ctx.font = '600 14px Georgia, serif';
+    ctx.fillText('Hackerspace Drenthe', cx - 230, sigY + 22);
+    ctx.font = '400 12px Georgia, serif';
+    ctx.fillText('Bestuur', cx - 230, sigY + 40);
+
+    ctx.beginPath(); ctx.moveTo(cx + 100, sigY); ctx.lineTo(cx + 360, sigY); ctx.stroke();
+    ctx.font = '600 14px Georgia, serif';
+    ctx.fillText('Drenthe Noodnetwerk', cx + 230, sigY + 22);
+    ctx.font = '400 12px Georgia, serif';
+    ctx.fillText('Coördinator', cx + 230, sigY + 40);
+
+    // Bottom line
+    drawDecLine(ctx, cx - 200, H - 72, cx + 200);
+
+    // Footer
+    ctx.fillStyle = '#8a9a8f';
+    ctx.font = '400 11px Georgia, serif';
+    ctx.fillText('Dit certificaat is uitgereikt door Hackerspace Drenthe als erkenning van voltooiing van het MeshCore Academy programma.', cx, H - 52);
+  }
+
+  function downloadPDF(canvas, name) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+    const safeName = name.replace(/[^a-zA-Z0-9\s\-]/g, '').replace(/\s+/g, '-') || 'Certificaat';
+    pdf.save('MeshCore-Certificaat-' + safeName + '.pdf');
+  }
+
+  // UI wiring
+  const nameInput = document.getElementById('cert-name');
+  const genBtn = document.getElementById('cert-generate');
+  const preview = document.getElementById('cert-preview');
+  const canvas = document.getElementById('cert-canvas');
+  const dlBtn = document.getElementById('cert-download');
+
+  if (nameInput && genBtn) {
+    nameInput.addEventListener('input', () => {
+      const v = nameInput.value.trim();
+      genBtn.disabled = v.length < 2;
+      if (preview) preview.style.display = 'none';
+    });
+
+    genBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (name.length < 2) return;
+      drawCertificate(canvas, name);
+      preview.style.display = '';
+      preview.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    dlBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (name.length < 2) return;
+      if (typeof window.jspdf === 'undefined') {
+        alert('PDF-bibliotheek wordt nog geladen. Probeer het opnieuw.');
+        return;
+      }
+      downloadPDF(canvas, name);
+    });
+  }
+
+  // Show certificate section when exam is passed
+  function checkShowCert() {
+    try {
+      const data = JSON.parse(localStorage.getItem('meshcore-academy') || '{}');
+      if (!data.courses) return;
+      const exam = data.courses['c-eindexamen'];
+      if (exam && exam.completed && exam.bestScore >= 14) {
+        const cert = document.getElementById('cert-section');
+        if (cert) cert.style.display = '';
+      }
+    } catch {}
+  }
+  checkShowCert();
+  setInterval(checkShowCert, 2000);
+})();
+</script>
+</body>
+</html>

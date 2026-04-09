@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mei Meshcore Maand — Hackerspace Drenthe</title>
+<style>
+  :root {
+    --green: #00ff88;
+    --cyan: #00e5ff;
+    --orange: #ff6b00;
+    --dark: #050d1a;
+    --mid: #0a1628;
+    --card: #0d1f3c;
+    --text: #e0eaff;
+    --dim: #7090b0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  /* ─── STAR FIELD ─── */
+  #stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+
+  /* ─── SLIDES ─── */
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 60px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    z-index: 10;
+  }
+  .slide.active {
+    opacity: 1; pointer-events: all;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  #progress-bar {
+    position: fixed; top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    transition: width 0.5s ease;
+    z-index: 100;
+    box-shadow: 0 0 10px var(--cyan);
+  }
+
+  /* ─── NAV ─── */
+  #nav {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 12px; align-items: center;
+    z-index: 100;
+  }
+  #nav button {
+    background: rgba(0,229,255,.12);
+    border: 1px solid rgba(0,229,255,.35);
+    color: var(--cyan);
+    padding: 10px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    transition: background .2s, box-shadow .2s;
+    backdrop-filter: blur(8px);
+  }
+  #nav button:hover {
+    background: rgba(0,229,255,.25);
+    box-shadow: 0 0 14px var(--cyan);
+  }
+  #slide-counter {
+    color: var(--dim); font-size: 13px; min-width: 60px; text-align: center;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; line-height: 1.1; }
+  h2 { font-size: clamp(1.4rem, 3vw, 2.4rem); font-weight: 700; margin-bottom: 18px; }
+  h3 { font-size: clamp(1rem, 2vw, 1.4rem); font-weight: 600; color: var(--cyan); margin-bottom: 8px; }
+  p  { font-size: clamp(.9rem, 1.8vw, 1.1rem); line-height: 1.6; color: var(--text); }
+
+  .glow-green { color: var(--green); text-shadow: 0 0 18px var(--green); }
+  .glow-cyan  { color: var(--cyan);  text-shadow: 0 0 18px var(--cyan); }
+  .glow-orange{ color: var(--orange);text-shadow: 0 0 18px var(--orange); }
+  .tag {
+    display: inline-block; padding: 4px 14px;
+    background: rgba(0,255,136,.1); border: 1px solid rgba(0,255,136,.3);
+    border-radius: 20px; font-size: .85rem; color: var(--green);
+    letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(0,229,255,.18);
+    border-radius: 16px;
+    padding: 28px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+
+  /* ─── GRID ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 900px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 960px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%; max-width: 960px; }
+
+  /* ─── BIG STAT ─── */
+  .stat { text-align: center; }
+  .stat-num { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; }
+  .stat-label { font-size: .9rem; color: var(--dim); margin-top: 4px; }
+
+  /* ─── SLIDE 1 — HERO ─── */
+  #s1 { text-align: center; gap: 20px; }
+  #s1 .subtitle { font-size: clamp(1rem,2vw,1.3rem); color: var(--dim); max-width: 600px; }
+  .pulse-circle {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,255,136,.25) 0%, transparent 70%);
+    display: flex; align-items: center; justify-content: center;
+    animation: pulse 2.5s ease-in-out infinite;
+    position: relative;
+  }
+  .pulse-circle::before, .pulse-circle::after {
+    content: ''; position: absolute;
+    border-radius: 50%; border: 2px solid rgba(0,255,136,.3);
+    animation: ripple 2.5s ease-out infinite;
+  }
+  .pulse-circle::before { width: 200px; height: 200px; animation-delay: 0.5s; }
+  .pulse-circle::after  { width: 250px; height: 250px; animation-delay: 1s; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  @keyframes ripple { 0%{opacity:.6;transform:scale(.8)} 100%{opacity:0;transform:scale(1.4)} }
+  .antenna-icon { font-size: 5rem; }
+
+  /* ─── SLIDE 2 — PROBLEEM ─── */
+  #s2 { gap: 28px; }
+  .scenario-box {
+    background: rgba(255,107,0,.08);
+    border: 1px solid rgba(255,107,0,.3);
+    border-radius: 14px;
+    padding: 22px 28px;
+    max-width: 820px;
+    width: 100%;
+  }
+  .scenario-box p { color: #ffd0a0; font-size: clamp(.95rem,1.8vw,1.1rem); line-height: 1.7; }
+  .fail-icons { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+  .fail-item  { text-align: center; }
+  .fail-item .icon { font-size: 2.4rem; }
+  .fail-item .label { font-size: .8rem; color: var(--dim); margin-top: 4px; }
+  .fail-item .cross { font-size: 1.2rem; color: #ff4444; }
+
+  /* ─── SLIDE 3 — HOE WERKT MESH ─── */
+  #mesh-svg-wrap { width: min(560px, 90vw); position: relative; }
+  #msg-log { font-size: .85rem; color: var(--cyan); min-height: 1.4em; text-align: center; margin-top: 8px; letter-spacing: .04em; }
+  .btn-secondary {
+    margin-top: 14px;
+    background: rgba(0,255,136,.1);
+    border: 1px solid rgba(0,255,136,.3);
+    color: var(--green); padding: 10px 28px;
+    border-radius: 30px; cursor: pointer;
+    font-size: .95rem; font-weight: 600;
+    transition: background .2s, box-shadow .2s;
+  }
+  .btn-secondary:hover { background: rgba(0,255,136,.22); box-shadow: 0 0 14px var(--green); }
+
+  /* ─── SLIDE 4 — LORA ─── */
+  #s4 { gap: 24px; }
+  .lora-compare { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 900px; }
+  .lora-tile {
+    flex: 1 1 180px; max-width: 220px;
+    background: var(--card);
+    border: 1px solid rgba(0,229,255,.2);
+    border-radius: 14px;
+    padding: 20px 18px; text-align: center;
+  }
+  .lora-tile .icon { font-size: 2.2rem; margin-bottom: 8px; }
+  .lora-tile h4 { font-size: 1rem; color: var(--cyan); margin-bottom: 6px; }
+  .lora-tile p  { font-size: .82rem; color: var(--dim); }
+  .wave-anim { position: relative; height: 60px; width: 100%; overflow: hidden; }
+  .wave-anim svg { position: absolute; bottom: 0; left: 0; animation: waveSlide 3s linear infinite; }
+  @keyframes waveSlide { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ─── SLIDE 5 — STACK ─── */
+  #s5 { gap: 24px; }
+  .stack-layers { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 680px; }
+  .stack-layer {
+    border-radius: 12px; padding: 16px 28px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer;
+    transition: transform .25s, box-shadow .3s, background .25s;
+  }
+  .stack-layer:hover { transform: translateX(10px); }
+  .layer-hw:hover   { background: rgba(255,107,0,.28); box-shadow: 0 0 18px rgba(255,107,0,.35); }
+  .layer-lora:hover { background: rgba(100,100,255,.28); box-shadow: 0 0 18px rgba(100,100,255,.35); }
+  .layer-mesh:hover { background: rgba(0,229,255,.22); box-shadow: 0 0 18px rgba(0,229,255,.3); }
+  .layer-mc:hover   { background: rgba(0,255,136,.22); box-shadow: 0 0 18px rgba(0,255,136,.3); }
+  .layer-hw   { background: rgba(255,107,0,.15); border: 1px solid rgba(255,107,0,.4); }
+  .layer-lora { background: rgba(100,100,255,.15); border: 1px solid rgba(100,100,255,.4); }
+  .layer-mesh { background: rgba(0,229,255,.12); border: 1px solid rgba(0,229,255,.35); }
+  .layer-mc   { background: rgba(0,255,136,.12); border: 1px solid rgba(0,255,136,.4); }
+  .layer-icon { font-size: 2rem; min-width: 40px; text-align: center; transition: transform .25s; }
+  .stack-layer:hover .layer-icon { transform: scale(1.3) rotate(-8deg); }
+  .layer-name { font-weight: 700; font-size: 1.05rem; }
+  .layer-desc {
+    font-size: .85rem; color: var(--dim); margin-top: 2px;
+    max-height: 0; overflow: hidden; opacity: 0;
+    transition: max-height .35s ease, opacity .3s ease, margin-top .3s ease;
+  }
+  .stack-layer:hover .layer-desc {
+    max-height: 60px; opacity: 1; margin-top: 6px; color: var(--text);
+  }
+
+  /* ─── SLIDE 6 — KAART DRENTHE ─── */
+  #s6 { gap: 20px; }
+  #map-wrap { position: relative; width: min(520px, 88vw); }
+  #node-tooltip {
+    position: absolute; background: var(--card);
+    border: 1px solid var(--cyan); border-radius: 8px;
+    padding: 8px 14px; font-size: .82rem; pointer-events: none;
+    display: none; color: var(--text); white-space: nowrap; z-index: 20;
+  }
+
+  /* ─── SLIDE 7 — KOSTEN ─── */
+  #s7 { gap: 24px; }
+  .cost-bar-wrap { width: 100%; max-width: 700px; }
+  .cost-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .cost-label { min-width: 180px; font-size: .9rem; color: var(--dim); }
+  .cost-bar-bg { flex: 1; height: 14px; background: rgba(255,255,255,.06); border-radius: 10px; overflow: hidden; }
+  .cost-bar { height: 100%; border-radius: 10px; animation: growBar 1.2s ease forwards; width: 0; }
+  @keyframes growBar { to { width: var(--w); } }
+  .cost-val { min-width: 60px; font-size: .9rem; color: var(--cyan); text-align: right; }
+
+  /* ─── SLIDE 8 — ROLLEN ─── */
+  #s8 { gap: 22px; }
+  .role-card {
+    background: var(--card);
+    border: 1px solid rgba(0,229,255,.15);
+    border-radius: 14px;
+    padding: 18px 16px; text-align: center;
+    cursor: default;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .role-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--cyan);
+    box-shadow: 0 0 20px rgba(0,229,255,.2);
+  }
+  .role-card .ri { font-size: 2.2rem; margin-bottom: 8px; }
+  .role-card h4 { font-size: .95rem; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  .role-card p  { font-size: .78rem; color: var(--dim); }
+
+  /* ─── SLIDE 9 — QUIZ ─── */
+  #s9 { gap: 22px; }
+  #quiz-wrap { width: 100%; max-width: 720px; }
+  #quiz-question { font-size: clamp(1rem,2.2vw,1.3rem); font-weight: 600; margin-bottom: 18px; line-height: 1.4; }
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .quiz-opt {
+    background: rgba(0,229,255,.07);
+    border: 1px solid rgba(0,229,255,.25);
+    border-radius: 12px; padding: 14px 18px;
+    cursor: pointer; font-size: .95rem;
+    transition: background .2s, border-color .2s, transform .15s;
+    text-align: left;
+  }
+  .quiz-opt:hover:not(.locked) {
+    background: rgba(0,229,255,.18);
+    border-color: var(--cyan);
+    transform: translateX(4px);
+  }
+  .quiz-opt.correct { background: rgba(0,255,136,.18); border-color: var(--green); color: var(--green); }
+  .quiz-opt.wrong   { background: rgba(255,68,68,.14); border-color: #ff4444; color: #ff8888; }
+  #quiz-feedback { min-height: 1.6em; font-size: .95rem; margin-top: 10px; text-align: center; }
+  #quiz-progress { color: var(--dim); font-size: .85rem; text-align: right; margin-bottom: 6px; }
+  #quiz-score { font-size: 1.5rem; font-weight: 800; text-align: center; display: none; }
+  #quiz-next {
+    display: none; margin: 16px auto 0;
+    background: var(--green);
+    border: none;
+    color: #050d1a; padding: 12px 36px;
+    border-radius: 30px; cursor: pointer;
+    font-size: 1rem; font-weight: 800; letter-spacing: .04em;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 0 16px rgba(0,255,136,.5);
+  }
+  #quiz-next:hover {
+    background: #00ffaa;
+    transform: scale(1.05);
+    box-shadow: 0 0 24px rgba(0,255,136,.75);
+  }
+
+  /* ─── SLIDE 10 — CTA ─── */
+  #s10 { gap: 24px; text-align: center; }
+  .cta-grid { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .cta-chip {
+    background: rgba(0,255,136,.1);
+    border: 1px solid rgba(0,255,136,.3);
+    border-radius: 30px;
+    padding: 12px 26px;
+    font-size: 1rem; font-weight: 600; color: var(--green);
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s, transform .2s;
+  }
+  .cta-chip:hover {
+    background: rgba(0,255,136,.24);
+    box-shadow: 0 0 18px rgba(0,255,136,.4);
+    transform: scale(1.04);
+  }
+  .countdown-row { display: flex; gap: 28px; justify-content: center; }
+  .countdown-unit { text-align: center; }
+  .countdown-num { font-size: clamp(2rem,4vw,3rem); font-weight: 800; color: var(--cyan);
+    text-shadow: 0 0 16px var(--cyan); }
+  .countdown-lbl { font-size: .8rem; color: var(--dim); }
+
+  /* ─── SCANLINE OVERLAY ─── */
+  #scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 200;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px, transparent 2px,
+      rgba(0,0,0,.07) 2px, rgba(0,0,0,.07) 4px
+    );
+  }
+
+  /* ─── CORNER DECOR ─── */
+  .corner {
+    position: fixed; width: 40px; height: 40px;
+    border-color: rgba(0,229,255,.3); border-style: solid;
+    z-index: 50;
+  }
+  .corner-tl { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+  .corner-tr { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 52px; left: 12px; border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 52px; right: 12px; border-width: 0 2px 2px 0; }
+
+  /* ─── GLITCH ─── */
+  .glitch {
+    position: relative; display: inline-block;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    width: 100%; overflow: hidden;
+  }
+  .glitch::before {
+    color: #ff00aa; clip-path: polygon(0 0,100% 0,100% 35%,0 35%);
+    animation: glt1 3s infinite; animation-delay: 0s;
+  }
+  .glitch::after {
+    color: #00e5ff; clip-path: polygon(0 65%,100% 65%,100% 100%,0 100%);
+    animation: glt2 3s infinite; animation-delay: .5s;
+  }
+  @keyframes glt1 {
+    0%,90%,100%{transform:none;opacity:0}
+    92%{transform:translateX(-3px);opacity:.7}
+    95%{transform:translateX(3px);opacity:.7}
+    97%{transform:none;opacity:0}
+  }
+  @keyframes glt2 {
+    0%,88%,100%{transform:none;opacity:0}
+    90%{transform:translateX(4px);opacity:.6}
+    93%{transform:translateX(-2px);opacity:.6}
+    96%{transform:none;opacity:0}
+  }
+
+  /* ─── SLIDE-IN CHILDREN ─── */
+  .slide.active .reveal {
+    animation: revealUp .5s ease both;
+  }
+  .slide.active .reveal:nth-child(1) { animation-delay: .05s; }
+  .slide.active .reveal:nth-child(2) { animation-delay: .15s; }
+  .slide.active .reveal:nth-child(3) { animation-delay: .25s; }
+  .slide.active .reveal:nth-child(4) { animation-delay: .35s; }
+  .slide.active .reveal:nth-child(5) { animation-delay: .45s; }
+  @keyframes revealUp {
+    from{opacity:0;transform:translateY(20px)}
+    to  {opacity:1;transform:translateY(0)}
+  }
+
+  /* ─── HOP ANIMATION ─── */
+  @keyframes hopPulse {
+    0%{r:8;opacity:1} 50%{r:18;opacity:.4} 100%{r:8;opacity:1}
+  }
+  .node-pulse { animation: hopPulse 1.8s ease-in-out infinite; }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:600px){
+    .grid-3,.grid-4 { grid-template-columns: 1fr 1fr; }
+    .quiz-options    { grid-template-columns: 1fr; }
+    .lora-compare    { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND EFFECTS -->
+<canvas id="stars"></canvas>
+<div id="scanlines"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+<div id="progress-bar" style="width:10%"></div>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 1 — HERO
+══════════════════════════════════════════ -->
+<section class="slide active" id="s1">
+  <div class="reveal">
+    <div class="pulse-circle">
+      <div class="antenna-icon">📡</div>
+    </div>
+  </div>
+  <div class="reveal" style="margin-top:16px">
+    <div class="tag">Hackerspace Drenthe · Mei 2026</div>
+  </div>
+  <h1 class="reveal">
+    <span class="glitch glow-green" data-text="Mei Meshcore Maand">Mei Meshcore Maand</span>
+  </h1>
+  <p class="subtitle reveal">We bouwen een noodnetwerk voor Drenthe —<br>zonder internet, zonder abonnement, voor iedereen.</p>
+  <div class="reveal" style="margin-top:12px; color:var(--dim); font-size:.85rem">
+    ← gebruik pijltjestoetsen of knoppen onderaan →
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 2 — HET PROBLEEM
+══════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="tag reveal">Het probleem</div>
+  <h2 class="reveal">Wat als het netwerk uitvalt? 🌩️</h2>
+  <div class="scenario-box reveal">
+    <p>Een hevige storm trekt over Drenthe. De stroom valt uit, de mobiele zendmasten liggen plat.
+       Je buren zijn niet bereikbaar. De ambulance weet niet dat oma op de grond ligt.
+       <strong style="color:#ffd0a0">Hoe communiceer je nog?</strong>
+    </p>
+  </div>
+  <div class="fail-icons reveal">
+    <div class="fail-item">
+      <div class="icon">📵</div>
+      <div class="cross">✗ 4G/5G</div>
+      <div class="label">Zendmast uit</div>
+    </div>
+    <div class="fail-item">
+      <div class="icon">🌐</div>
+      <div class="cross">✗ Internet</div>
+      <div class="label">Fiber/kabel uit</div>
+    </div>
+    <div class="fail-item">
+      <div class="icon">📻</div>
+      <div class="cross">✗ DAB radio</div>
+      <div class="label">Eenrichtingsverkeer</div>
+    </div>
+    <div class="fail-item">
+      <div class="icon">📞</div>
+      <div class="cross">✗ Vaste lijn</div>
+      <div class="label">VoIP afhankelijk van stroom</div>
+    </div>
+  </div>
+  <p class="reveal" style="color:var(--green); font-size:1.1rem; margin-top:8px">
+    👉 Drenthe bouwt een <strong>eigen noodnetwerk</strong> dat altijd werkt.
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 3 — HOE WERKT EEN MESH?
+══════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="tag reveal">Hoe werkt het?</div>
+  <h2 class="reveal">Bericht stuurt zichzelf door het netwerk 🔁</h2>
+  <div id="mesh-svg-wrap" class="reveal">
+    <svg id="mesh-svg" viewBox="0 0 560 320" width="100%" style="display:block">
+      <defs>
+        <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="rgba(0,229,255,.6)"/>
+        </marker>
+        <filter id="glow-f">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- connections will be drawn by JS -->
+      <g id="mesh-links"></g>
+      <g id="mesh-nodes"></g>
+      <g id="mesh-labels"></g>
+      <g id="msg-packet"></g>
+    </svg>
+    <div id="msg-log">Klik op "Stuur bericht" om een bericht te sturen...</div>
+    <div style="text-align:center">
+      <button class="btn-secondary" onclick="sendMeshMessage()">📨 Stuur bericht</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 4 — LoRa TECHNOLOGIE
+══════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="tag reveal">De radio-technologie</div>
+  <h2 class="reveal">LoRa = <span class="glow-cyan">Lo</span>ng <span class="glow-cyan">Ra</span>nge Radio 📻</h2>
+  <div class="lora-compare reveal">
+    <div class="lora-tile">
+      <div class="icon">📶</div>
+      <h4>Frequentie</h4>
+      <p class="glow-cyan" style="font-size:1.3rem;font-weight:800;">868 MHz</p>
+      <p>Vrij te gebruiken in Europa. Geen vergunning nodig.</p>
+    </div>
+    <div class="lora-tile">
+      <div class="icon">📏</div>
+      <h4>Bereik</h4>
+      <p class="glow-green" style="font-size:1.3rem;font-weight:800;">15 km+</p>
+      <p>In het vlakke Drenthe. Via meerdere hops: over de hele provincie.</p>
+    </div>
+    <div class="lora-tile">
+      <div class="icon">🔋</div>
+      <h4>Verbruik</h4>
+      <p style="font-size:1.3rem;font-weight:800;color:#ffd0a0">Extreem laag</p>
+      <p>Een node draait maanden op een kleine batterij + zonnepaneel.</p>
+    </div>
+    <div class="lora-tile">
+      <div class="icon">🐢</div>
+      <h4>Snelheid</h4>
+      <p style="font-size:1.3rem;font-weight:800;color:#ff8888">Langzaam</p>
+      <p>Ideaal voor tekstberichten &amp; GPS. Geen video of foto's.</p>
+    </div>
+  </div>
+  <div class="reveal" style="width:100%;max-width:700px">
+    <div style="display:flex;justify-content:space-between;color:var(--dim);font-size:.8rem;margin-bottom:6px">
+      <span>Jouw huis</span><span>1 km</span><span>5 km</span><span>10 km</span><span>15 km</span>
+    </div>
+    <div style="height:28px;background:var(--card);border-radius:20px;overflow:hidden;border:1px solid rgba(0,229,255,.2)">
+      <div style="height:100%;width:0;border-radius:20px;
+        background:linear-gradient(90deg,rgba(0,255,136,.8),rgba(0,229,255,.5),rgba(100,100,255,.3));
+        animation:growBar 2s 0.4s ease forwards" id="lora-reach-bar"></div>
+    </div>
+    <div style="text-align:center;font-size:.8rem;color:var(--dim);margin-top:6px">
+      Typisch LoRa bereik in Drenthe (vlak terrein, 5m antenne)
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 5 — TECHNOLOGIE STACK
+══════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="tag reveal">De technologie-stapel</div>
+  <h2 class="reveal">Van chip naar bericht 🏗️</h2>
+  <p class="reveal" style="color:var(--dim);margin-bottom:4px">👆 Hover over een laag om meer te zien</p>
+  <div class="stack-layers reveal">
+    <div class="stack-layer layer-mc" title="Eigen firmware, slimme routering, AES-256 encryptie">
+      <div class="layer-icon">⚡</div>
+      <div>
+        <div class="layer-name" style="color:var(--green)">Meshcore Firmware</div>
+        <div class="layer-desc">Slimme routering, AES-256 encryptie, tot 64 hops, eigen companion-app</div>
+      </div>
+    </div>
+    <div class="stack-layer layer-mesh" title="Open-source protocol voor berichten via LoRa">
+      <div class="layer-icon">📨</div>
+      <div>
+        <div class="layer-name" style="color:var(--cyan)">Meshtastic Protocol</div>
+        <div class="layer-desc">Open-source berichten, kanalen, verbinden met telefoon via Bluetooth</div>
+      </div>
+    </div>
+    <div class="stack-layer layer-lora" title="Radiotechnologie: klein vermogen, groot bereik">
+      <div class="layer-icon">📡</div>
+      <div>
+        <div class="layer-name" style="color:#8888ff">LoRa Radio</div>
+        <div class="layer-desc">868 MHz, lange afstand, minimaal stroomverbruik, vrij te gebruiken</div>
+      </div>
+    </div>
+    <div class="stack-layer layer-hw" title="Kleine microcontroller-boards van €15–35">
+      <div class="layer-icon">🔧</div>
+      <div>
+        <div class="layer-name" style="color:var(--orange)">Hardware</div>
+        <div class="layer-desc">Heltec V3, RAK WisBlock, T-Deck — boards van €15 tot €35</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 6 — KAART DRENTHE
+══════════════════════════════════════════ -->
+<section class="slide" id="s6">
+  <div class="tag reveal">Netwerk kaart</div>
+  <h2 class="reveal">Drenthe: het perfecte testgebied 🗺️</h2>
+  <div id="map-wrap" class="reveal">
+    <div id="node-tooltip"></div>
+    <svg id="drenthe-map" viewBox="0 0 520 380" width="100%" style="display:block;border-radius:12px">
+      <defs>
+        <radialGradient id="mapbg" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#0d2040"/>
+          <stop offset="100%" stop-color="#050d1a"/>
+        </radialGradient>
+        <filter id="nodeglow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="520" height="380" fill="url(#mapbg)" rx="12"/>
+      <!-- Simplified Drenthe outline -->
+      <path id="drenthe-border"
+        d="M120,40 L200,30 L280,28 L360,40 L400,70 L420,110 L415,160 L400,210
+           L390,260 L370,310 L330,350 L280,365 L230,360 L190,340 L160,310
+           L130,275 L110,240 L100,200 L95,155 L100,110 L110,70 Z"
+        fill="rgba(0,100,200,.08)" stroke="rgba(0,229,255,.3)" stroke-width="1.5"/>
+      <!-- Grid lines -->
+      <g stroke="rgba(0,229,255,.05)" stroke-width="1">
+        <line x1="0" y1="95" x2="520" y2="95"/>
+        <line x1="0" y1="190" x2="520" y2="190"/>
+        <line x1="0" y1="285" x2="520" y2="285"/>
+        <line x1="130" y1="0" x2="130" y2="380"/>
+        <line x1="260" y1="0" x2="260" y2="380"/>
+        <line x1="390" y1="0" x2="390" y2="380"/>
+      </g>
+      <!-- Node connections will be drawn by JS -->
+      <g id="map-links"></g>
+      <!-- Nodes will be drawn by JS -->
+      <g id="map-nodes-g"></g>
+    </svg>
+  </div>
+  <p class="reveal" style="color:var(--dim);font-size:.85rem">
+    Hover over een node voor info · Klik voor bereik-cirkel
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 7 — KOSTEN
+══════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="tag reveal">Wat kost het?</div>
+  <h2 class="reveal">Goedkoper dan een pizza 🍕</h2>
+
+  <div class="cost-bar-wrap reveal">
+    <div class="cost-row">
+      <div class="cost-label">LoRa-board (Heltec V3)</div>
+      <div class="cost-bar-bg">
+        <div class="cost-bar" style="background:linear-gradient(90deg,var(--green),var(--cyan));--w:50%"></div>
+      </div>
+      <div class="cost-val">€15–35</div>
+    </div>
+    <div class="cost-row">
+      <div class="cost-label">Antenne (868 MHz)</div>
+      <div class="cost-bar-bg">
+        <div class="cost-bar" style="background:linear-gradient(90deg,#8888ff,var(--cyan));--w:22%"></div>
+      </div>
+      <div class="cost-val">€5–15</div>
+    </div>
+    <div class="cost-row">
+      <div class="cost-label">Zonnepaneel + lader</div>
+      <div class="cost-bar-bg">
+        <div class="cost-bar" style="background:linear-gradient(90deg,#ffd060,var(--orange));--w:22%"></div>
+      </div>
+      <div class="cost-val">€5–15</div>
+    </div>
+    <div class="cost-row">
+      <div class="cost-label">Batterij (18650)</div>
+      <div class="cost-bar-bg">
+        <div class="cost-bar" style="background:linear-gradient(90deg,#ff8888,var(--orange));--w:14%"></div>
+      </div>
+      <div class="cost-val">€3–8</div>
+    </div>
+    <div class="cost-row">
+      <div class="cost-label">Behuizing (3D-print)</div>
+      <div class="cost-bar-bg">
+        <div class="cost-bar" style="background:linear-gradient(90deg,rgba(0,255,136,.5),var(--green));--w:10%"></div>
+      </div>
+      <div class="cost-val">€2–5</div>
+    </div>
+  </div>
+
+  <div class="grid-3 reveal" style="max-width:700px">
+    <div class="card" style="text-align:center">
+      <div class="stat-num glow-green">€20</div>
+      <div class="stat-label">Minimaal (eenvoudig)</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="stat-num glow-cyan">€50</div>
+      <div class="stat-label">Complete buitennode</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="stat-num" style="color:#ffd060">€0</div>
+      <div class="stat-label">Abonnement / maand</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 8 — ROLLEN
+══════════════════════════════════════════ -->
+<section class="slide" id="s8">
+  <div class="tag reveal">Meedoen</div>
+  <h2 class="reveal">Er is een rol voor iedereen 🙌</h2>
+  <div class="grid-3 reveal" style="max-width:900px">
+    <div class="role-card">
+      <div class="ri">🔧</div>
+      <h4>Hardware-scout</h4>
+      <p>Test boards, antennes en zonnepanelen — en deel je bevindingen.</p>
+    </div>
+    <div class="role-card">
+      <div class="ri">🔨</div>
+      <h4>Bouwer</h4>
+      <p>Solderen, assembleren, monteren. Van losse onderdelen naar werkende node.</p>
+    </div>
+    <div class="role-card">
+      <div class="ri">📡</div>
+      <h4>Tester</h4>
+      <p>Bereik meten met je telefoon en de Meshcore-app. Direct meedoen!</p>
+    </div>
+    <div class="role-card">
+      <div class="ri">🖨️</div>
+      <h4>Designer</h4>
+      <p>3D-print weerbestendige behuizingen voor buitenlocaties in Drenthe.</p>
+    </div>
+    <div class="role-card">
+      <div class="ri">📝</div>
+      <h4>Documentatie-held</h4>
+      <p>Schrijf tutorials zodat iedereen mee kan bouwen. Geen solderen nodig.</p>
+    </div>
+    <div class="role-card">
+      <div class="ri">🎤</div>
+      <h4>Presentatie-tijger</h4>
+      <p>Verspreid enthousiasme, organiseer meet-ups en maak het project zichtbaar.</p>
+    </div>
+  </div>
+  <p class="reveal" style="color:var(--dim); margin-top:12px; font-size:.9rem">
+    Elke woensdag 19:00–21:00 · De Nieuwe Veste, Coevorden
+  </p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 9 — QUIZ
+══════════════════════════════════════════ -->
+<section class="slide" id="s9">
+  <div class="tag reveal">Quiz tijd! 🎮</div>
+  <h2 class="reveal">Test je kennis</h2>
+  <div id="quiz-wrap" class="reveal">
+    <div id="quiz-progress"></div>
+    <div id="quiz-question"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div id="quiz-feedback"></div>
+    <button id="quiz-next" onclick="quizNext()">Volgende vraag →</button>
+    <div id="quiz-score"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 10 — CTA
+══════════════════════════════════════════ -->
+<section class="slide" id="s10">
+  <div class="tag reveal">Kick-off 6 mei 2026</div>
+  <h2 class="reveal glow-green">Bouw mee aan het noodnetwerk! 🚀</h2>
+  <div class="countdown-row reveal" id="countdown-row">
+    <div class="countdown-unit"><div class="countdown-num" id="cd-d">–</div><div class="countdown-lbl">dagen</div></div>
+    <div class="countdown-unit"><div class="countdown-num" id="cd-h">–</div><div class="countdown-lbl">uren</div></div>
+    <div class="countdown-unit"><div class="countdown-num" id="cd-m">–</div><div class="countdown-lbl">minuten</div></div>
+    <div class="countdown-unit"><div class="countdown-num" id="cd-s">–</div><div class="countdown-lbl">seconden</div></div>
+  </div>
+  <p class="reveal" style="color:var(--dim)">tot de kick-off bij Hackerspace Drenthe · De Nieuwe Veste, Coevorden</p>
+  <div class="cta-grid reveal">
+    <a class="cta-chip" href="https://drenthenoodnetwerk.nl" target="_blank">🌐 drenthenoodnetwerk.nl</a>
+    <a class="cta-chip" href="https://drenthenoodnetwerk.nl/meedoen.html" target="_blank">🙋 Aanmelden</a>
+    <a class="cta-chip" href="https://t.me/+GTTYOvZTRVNhNThk" target="_blank">💬 Telegram-groep</a>
+    <a class="cta-chip" href="https://drenthenoodnetwerk.nl/apparaten.html" target="_blank">🛠️ Apparaten bekijken</a>
+    <a class="cta-chip" href="meshcore-device-setup-sync.html" target="_blank">⚙️ Device setup + kanaal sync</a>
+    <a class="cta-chip" href="lora-protocol-payloads.html" target="_blank">📦 LoRa protocol + payload lab</a>
+    <a class="cta-chip" href="course-hub.html" style="background:rgba(200,100,255,.12);border-color:rgba(200,100,255,.35);color:#c864ff;">🎓 MeshCore Academy</a>
+  </div>
+  <p class="reveal" style="font-size:.85rem;color:var(--dim);margin-top:16px">
+    Open-source · LoRa · Zonne-energie · Geen abonnement · Voor iedereen
+  </p>
+</section>
+
+<!-- ═══════════ NAVIGATION ═══════════ -->
+<div id="nav">
+  <button onclick="prevSlide()">← Vorige</button>
+  <span id="slide-counter">1 / 10</span>
+  <button onclick="nextSlide()">Volgende →</button>
+</div>
+
+<script>
+/* ════════════════════════════ STARS ════════════════════════════ */
+(function(){
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    stars = Array.from({length:180},()=>({
+      x: Math.random()*c.width,
+      y: Math.random()*c.height,
+      r: Math.random()*1.4+.3,
+      a: Math.random(),
+      da: (Math.random()-.5)*.008
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a = Math.max(.05, Math.min(1, s.a + s.da));
+      if(s.a<=.05||s.a>=1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(180,210,255,${s.a})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize(); draw();
+})();
+
+/* ════════════════════════════ SLIDES ════════════════════════════ */
+const slides = document.querySelectorAll('.slide');
+const TOTAL = slides.length;
+let current = 0;
+
+function goTo(n){
+  slides[current].classList.remove('active');
+  current = Math.max(0, Math.min(TOTAL-1, n));
+  slides[current].classList.add('active');
+  document.getElementById('slide-counter').textContent = `${current+1} / ${TOTAL}`;
+  document.getElementById('progress-bar').style.width = `${(current+1)/TOTAL*100}%`;
+  onSlideEnter(current);
+}
+function nextSlide(){ goTo(current+1); }
+function prevSlide(){ goTo(current-1); }
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') nextSlide();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')   prevSlide();
+});
+
+/* touch swipe */
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx = e.changedTouches[0].clientX - tx;
+  if(Math.abs(dx)>50){ dx<0 ? nextSlide() : prevSlide(); }
+},{passive:true});
+
+/* ════════════════════════════ MESH SVG ════════════════════════════ */
+const meshNodes = [
+  {id:'A', x:80,  y:160, label:'Jouw\nboerderij', color:'#00ff88'},
+  {id:'B', x:180, y:80,  label:'Kerktoren',      color:'#00e5ff'},
+  {id:'C', x:280, y:120, label:'Windmolen',       color:'#00e5ff'},
+  {id:'D', x:220, y:220, label:'Buurman',         color:'#00e5ff'},
+  {id:'E', x:360, y:200, label:'School',          color:'#00e5ff'},
+  {id:'F', x:460, y:160, label:'Bestelling\nontvanger', color:'#ff6b00'},
+];
+const meshEdges = [
+  ['A','B'],['A','D'],['B','C'],['B','D'],['C','E'],['D','E'],['E','F'],['C','F']
+];
+const meshPath = ['A','B','C','E','F'];
+
+function initMeshSVG(){
+  const svg = document.getElementById('mesh-svg');
+  const linksG = document.getElementById('mesh-links');
+  const nodesG = document.getElementById('mesh-nodes');
+  const labelsG = document.getElementById('mesh-labels');
+  linksG.innerHTML=''; nodesG.innerHTML=''; labelsG.innerHTML='';
+
+  meshEdges.forEach(([a,b])=>{
+    const na = meshNodes.find(n=>n.id===a);
+    const nb = meshNodes.find(n=>n.id===b);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',na.x); line.setAttribute('y1',na.y);
+    line.setAttribute('x2',nb.x); line.setAttribute('y2',nb.y);
+    line.setAttribute('stroke','rgba(0,229,255,.2)');
+    line.setAttribute('stroke-width','1.5');
+    line.setAttribute('id',`edge-${a}-${b}`);
+    linksG.appendChild(line);
+  });
+
+  meshNodes.forEach(n=>{
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('id','mn-'+n.id);
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',n.x); circle.setAttribute('cy',n.y);
+    circle.setAttribute('r','10');
+    circle.setAttribute('fill',n.color);
+    circle.setAttribute('filter','url(#glow-f)');
+    circle.setAttribute('opacity','.9');
+    g.appendChild(circle);
+
+    nodesG.appendChild(g);
+
+    const lines = n.label.split('\n');
+    lines.forEach((ln,i)=>{
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',n.x); t.setAttribute('y',n.y+24+(i*14));
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('fill','rgba(200,230,255,.8)');
+      t.setAttribute('font-size','10');
+      t.setAttribute('font-family','system-ui');
+      t.textContent = ln;
+      labelsG.appendChild(t);
+    });
+  });
+}
+
+let meshAnimRunning = false;
+function sendMeshMessage(){
+  if(meshAnimRunning) return;
+  meshAnimRunning = true;
+  const log = document.getElementById('msg-log');
+  const steps = meshPath;
+  const labels = ['Jouw boerderij','Kerktoren','Windmolen','School','Ontvanger'];
+  const svg = document.getElementById('mesh-svg');
+  const packet = document.getElementById('msg-packet');
+  packet.innerHTML='';
+
+  // reset edges
+  meshEdges.forEach(([a,b])=>{
+    const el = document.getElementById(`edge-${a}-${b}`);
+    if(el) el.setAttribute('stroke','rgba(0,229,255,.2)');
+  });
+
+  let step = 0;
+  log.textContent = '📨 Bericht vertrekt van: Jouw boerderij';
+
+  function advance(){
+    if(step >= steps.length-1){
+      log.textContent = '✅ Bericht aangekomen bij de ontvanger! ' + steps.length + ' hops.';
+      packet.innerHTML='';
+      meshAnimRunning = false;
+      return;
+    }
+    const from = meshNodes.find(n=>n.id===steps[step]);
+    const to   = meshNodes.find(n=>n.id===steps[step+1]);
+
+    // highlight edge
+    const edgeKey1 = `edge-${steps[step]}-${steps[step+1]}`;
+    const edgeKey2 = `edge-${steps[step+1]}-${steps[step]}`;
+    const edgeEl = document.getElementById(edgeKey1)||document.getElementById(edgeKey2);
+    if(edgeEl){ edgeEl.setAttribute('stroke','#00ff88'); edgeEl.setAttribute('stroke-width','3'); }
+
+    log.textContent = `⚡ Hop ${step+1}: ${labels[step]} → ${labels[step+1]}`;
+
+    // animate circle
+    packet.innerHTML='';
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('r','7');
+    circle.setAttribute('fill','#fff');
+    circle.setAttribute('filter','url(#glow-f)');
+    circle.setAttribute('opacity',' .9');
+    packet.appendChild(circle);
+
+    const anim = document.createElementNS('http://www.w3.org/2000/svg','animateMotion');
+    anim.setAttribute('dur','0.7s');
+    anim.setAttribute('fill','freeze');
+    anim.setAttribute('from',`${from.x},${from.y}`);
+    anim.setAttribute('to',`${to.x},${to.y}`);
+    circle.appendChild(anim);
+    anim.beginElement();
+
+    step++;
+    setTimeout(advance, 750);
+  }
+  advance();
+}
+
+/* ════════════════════════════ DRENTHE MAP ════════════════════════════ */
+const mapNodes = [
+  {id:'coevorden',  x:310, y:300, label:'Coevorden\n(Hackerspace)',  pop:30000, status:'planned',  color:'#00ff88'},
+  {id:'emmen',      x:380, y:240, label:'Emmen',                     pop:107000,status:'planned',  color:'#00e5ff'},
+  {id:'hoogeveen',  x:220, y:220, label:'Hoogeveen',                 pop:55000, status:'planned',  color:'#00e5ff'},
+  {id:'meppel',     x:150, y:170, label:'Meppel',                    pop:32000, status:'planned',  color:'#ffd060'},
+  {id:'assen',      x:245, y:130, label:'Assen',                     pop:67000, status:'planned',  color:'#ffd060'},
+  {id:'dalen',      x:340, y:330, label:'Dalen',                     pop:4000,  status:'idea',     color:'rgba(0,229,255,.5)'},
+  {id:'sleen',      x:355, y:275, label:'Sleen',                     pop:3000,  status:'idea',     color:'rgba(0,229,255,.5)'},
+  {id:'borger',     x:330, y:190, label:'Borger',                    pop:4500,  status:'idea',     color:'rgba(0,229,255,.5)'},
+];
+const mapEdges=[
+  ['coevorden','emmen'],['coevorden','hoogeveen'],['emmen','borger'],
+  ['hoogeveen','assen'],['hoogeveen','meppel'],['assen','meppel'],
+  ['coevorden','dalen'],['emmen','sleen'],['sleen','borger'],
+  ['borger','assen']
+];
+
+function initDrentheMap(){
+  const linksG = document.getElementById('map-links');
+  const nodesG = document.getElementById('map-nodes-g');
+  const tooltip = document.getElementById('node-tooltip');
+  linksG.innerHTML=''; nodesG.innerHTML='';
+
+  mapEdges.forEach(([a,b])=>{
+    const na=mapNodes.find(n=>n.id===a);
+    const nb=mapNodes.find(n=>n.id===b);
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',na.x); line.setAttribute('y1',na.y);
+    line.setAttribute('x2',nb.x); line.setAttribute('y2',nb.y);
+    line.setAttribute('stroke','rgba(0,229,255,.2)');
+    line.setAttribute('stroke-width','1.2');
+    line.setAttribute('stroke-dasharray','4 4');
+    linksG.appendChild(line);
+  });
+
+  mapNodes.forEach(n=>{
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+
+    const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pulse.setAttribute('cx',n.x); pulse.setAttribute('cy',n.y);
+    pulse.setAttribute('r','12'); pulse.setAttribute('fill',n.color);
+    pulse.setAttribute('opacity','.2');
+    pulse.classList.add('node-pulse');
+    g.appendChild(pulse);
+
+    const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx',n.x); dot.setAttribute('cy',n.y);
+    dot.setAttribute('r','7'); dot.setAttribute('fill',n.color);
+    dot.setAttribute('filter','url(#nodeglow)');
+    g.appendChild(dot);
+
+    const lines=n.label.split('\n');
+    lines.forEach((ln,i)=>{
+      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x',n.x); t.setAttribute('y',n.y+19+(i*12));
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('fill','rgba(200,230,255,.9)');
+      t.setAttribute('font-size','9');
+      t.setAttribute('font-family','system-ui');
+      t.textContent=ln;
+      g.appendChild(t);
+    });
+
+    const mapWrap=document.getElementById('map-wrap');
+    g.addEventListener('mouseenter',e=>{
+      tooltip.style.display='block';
+      tooltip.innerHTML=`<strong>${n.label.replace('\n',' ')}</strong><br>
+        Inwoners: ~${n.pop.toLocaleString('nl')}<br>
+        Status: ${n.status==='planned'?'<span style="color:var(--green)">Gepland</span>':'<span style="color:#ffd060">Idee</span>'}`;
+    });
+    g.addEventListener('mousemove',e=>{
+      const r=mapWrap.getBoundingClientRect();
+      tooltip.style.left=(e.clientX-r.left+12)+'px';
+      tooltip.style.top=(e.clientY-r.top-20)+'px';
+    });
+    g.addEventListener('mouseleave',()=>{ tooltip.style.display='none'; });
+
+    nodesG.appendChild(g);
+  });
+}
+
+/* ════════════════════════════ QUIZ ════════════════════════════ */
+const quizData = [
+  {
+    q:'Wat betekent "mesh" in mesh-netwerk?',
+    opts:['Een soort antenne','Elk punt is verbonden en stuurt door','Een speciale wifi-chip','Een betaald abonnement'],
+    a:1, uitleg:'Correct! In een mesh-netwerk kan elk punt berichten ontvangen én doorsturen naar andere punten.'
+  },
+  {
+    q:'Waarvoor staat "LoRa"?',
+    opts:['Local Router','Long Range','Low Resistance','Logic Radio'],
+    a:1, uitleg:'LoRa = Long Range! Het is een radiotechnologie voor grote afstanden met heel weinig stroom.'
+  },
+  {
+    q:'Hoeveel kan een eenvoudige Meshcore-node kosten?',
+    opts:['Meer dan €500','Zo\'n €200','Minder dan €50','Gratis, van internet downloaden'],
+    a:2, uitleg:'Correct! Een basale node kost al vanaf €20–50, inclusief board, antenne en batterij.'
+  },
+  {
+    q:'Wat is een "hop" in een mesh-netwerk?',
+    opts:['Een soort sprong in de software','Het sturen van een bericht van node naar node','Een fout in het netwerk','Een naam voor de antenne'],
+    a:1, uitleg:'Elke keer dat een bericht van de ene node naar de volgende "springt", heet dat een hop.'
+  },
+  {
+    q:'Wat is de LoRa-frequentie die in Nederland gebruikt wordt?',
+    opts:['433 MHz','2,4 GHz','868 MHz','5 GHz'],
+    a:2, uitleg:'In Europa gebruiken LoRa-netwerken 868 MHz — een vrije band waar je geen vergunning voor nodig hebt.'
+  },
+  {
+    q:'Wat voor energie gebruiken de buitennodes van Meshcore Drenthe?',
+    opts:['Netstroom (stopcontact)','Batterijen die je elke week vervangt','Zonne-energie met batterijbuffer','Een dieselgenerator'],
+    a:2, uitleg:'De nodes draaien op zonnepanelen met een batterij als buffer voor bewolkte dagen. Helemaal autonoom!'
+  },
+  {
+    q:'Wanneer is de kick-off van Mei Meshcore Maand?',
+    opts:['1 mei 2026','6 mei 2026','15 mei 2026','1 juni 2026'],
+    a:1, uitleg:'De kick-off is op woensdagavond 6 mei 2026, 19:00–21:00 bij De Nieuwe Veste in Coevorden.'
+  },
+];
+
+let quizIndex = 0, quizScore = 0, quizLocked = false;
+
+function renderQuiz(){
+  const q = quizData[quizIndex];
+  document.getElementById('quiz-progress').textContent = `Vraag ${quizIndex+1} van ${quizData.length}`;
+  document.getElementById('quiz-question').textContent = q.q;
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('quiz-score').style.display='none';
+  document.getElementById('quiz-next').style.display='none';
+  quizLocked = false;
+
+  const optEl = document.getElementById('quiz-options');
+  optEl.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='quiz-opt';
+    btn.textContent=opt;
+    btn.onclick=()=>answerQuiz(i);
+    optEl.appendChild(btn);
+  });
+}
+
+function answerQuiz(i){
+  if(quizLocked) return;
+  quizLocked = true;
+  const q = quizData[quizIndex];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o=>o.classList.add('locked'));
+  opts[i].classList.add(i===q.a?'correct':'wrong');
+  if(i!==q.a) opts[q.a].classList.add('correct');
+  const fb = document.getElementById('quiz-feedback');
+  if(i===q.a){
+    quizScore++;
+    fb.innerHTML='<span style="color:var(--green)">✓ Goed! ' + q.uitleg + '</span>';
+  } else {
+    fb.innerHTML='<span style="color:#ff8888">✗ Helaas. ' + q.uitleg + '</span>';
+  }
+  document.getElementById('quiz-next').style.display='block';
+}
+
+function quizNext(){
+  quizIndex++;
+  if(quizIndex >= quizData.length){
+    document.getElementById('quiz-options').innerHTML='';
+    document.getElementById('quiz-question').textContent='';
+    document.getElementById('quiz-progress').textContent='';
+    document.getElementById('quiz-feedback').textContent='';
+    document.getElementById('quiz-next').style.display='none';
+    const sc = document.getElementById('quiz-score');
+    sc.style.display='block';
+    const pct = Math.round(quizScore/quizData.length*100);
+    let emoji = pct>=80?'🏆':pct>=50?'👍':'💡';
+    sc.innerHTML=`${emoji} Jij scoorde <span class="glow-green">${quizScore} / ${quizData.length}</span><br>
+      <span style="font-size:.9rem;color:var(--dim)">${pct}% correct — ${
+        pct>=80?'Uitstekend! Je bent klaar voor Mei Meshcore Maand!':
+        pct>=50?'Goed gedaan! Je weet al veel over mesh-netwerken.':
+        'Goed geprobeerd — vanavond leer je alles!'
+      }</span>`;
+  } else {
+    renderQuiz();
+  }
+}
+
+/* ════════════════════════════ COUNTDOWN ════════════════════════════ */
+function updateCountdown(){
+  const target = new Date('2026-05-06T19:00:00');
+  const now = new Date();
+  const diff = target - now;
+  if(diff<=0){
+    document.getElementById('countdown-row').innerHTML=
+      '<div style="color:var(--green);font-size:1.5rem;font-weight:800">🎉 Het is zover! Welkom bij de kick-off!</div>';
+    return;
+  }
+  const d=Math.floor(diff/864e5);
+  const h=Math.floor((diff%864e5)/36e5);
+  const m=Math.floor((diff%36e5)/6e4);
+  const s=Math.floor((diff%6e4)/1e3);
+  document.getElementById('cd-d').textContent=String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent=String(s).padStart(2,'0');
+}
+
+/* ════════════════════════════ ON SLIDE ENTER ════════════════════════════ */
+function onSlideEnter(n){
+  if(n===2){ initMeshSVG(); }
+  if(n===5){ initDrentheMap(); }
+  if(n===8){
+    quizIndex=0; quizScore=0;
+    renderQuiz();
+  }
+  if(n===9){ updateCountdown(); setInterval(updateCountdown,1000); }
+}
+
+/* ════════════════════════════ LORA BAR RESET ════════════════════════════ */
+// Reset animations when re-entering slide
+document.querySelectorAll('.cost-bar').forEach(b=>{
+  b.style.animationPlayState='paused';
+});
+
+/* init */
+document.getElementById('progress-bar').style.width = `${1/TOTAL*100}%`;
+onSlideEnter(0);
+</script>
+</body>
+</html>

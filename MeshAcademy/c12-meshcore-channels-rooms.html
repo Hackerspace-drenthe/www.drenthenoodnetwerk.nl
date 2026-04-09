@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 12: MeshCore Kanalen &amp; Rooms — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;overflow-x:auto;display:block;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">💬</span>
+    <div class="course-info">
+      <h1>Cursus 12: <span>MeshCore Kanalen &amp; Rooms</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gemiddeld</span>
+        <span class="meta-tag tag-course">Cursus 12 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Hoe communicatie werkt"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Rooms & Groepscommunicatie"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Kanaalplanning & Beheer"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: Hoe Communicatie Werkt in MeshCore              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="lesson-section" data-section="s1" data-label="Hoe communicatie werkt">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Hoe Communicatie Werkt in <span>MeshCore</span></h2>
+    <p>Voordat je berichten kunt versturen, moet je begrijpen hoe MeshCore communicatie organiseert. Het fundament is het <strong>kanaal</strong> — een combinatie van radio-instellingen waarmee nodes elkaar "horen".</p>
+
+    <h3>Wat is een kanaal?</h3>
+    <p>Een kanaal in MeshCore is een specifieke combinatie van radio-parameters:</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>Frequentie</h4>
+        <p>De radiofrequentie waarop wordt uitgezonden, bijv. 869.525 MHz. Nodes op een andere frequentie horen niets.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📊</div>
+        <h4>Spreading Factor (SF)</h4>
+        <p>Bepaalt hoe "breed" het signaal wordt uitgesmeerd. Hogere SF = meer bereik, maar lagere snelheid.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📏</div>
+        <h4>Bandbreedte (BW)</h4>
+        <p>De breedte van het radiokanaal in kHz. Bredere bandbreedte = snellere data, maar gevoeliger voor ruis.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔑</div>
+        <h4>Kanaalsleutel</h4>
+        <p>Een gedeelde sleutel die bepaalt bij welk netwerk je hoort. Zonder de juiste sleutel kun je niet deelnemen.</p>
+      </div>
+    </div>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Kanaal-isolatie:</strong> Nodes op verschillende kanalen (andere frequentie, SF, BW of sleutel) kunnen elkaar niet horen. Ze bestaan als volledig gescheiden netwerken, zelfs als ze fysiek naast elkaar staan.</div>
+    </div>
+
+    <h3>Berichttypen in MeshCore</h3>
+    <p>Binnen een kanaal zijn er twee fundamentele manieren om berichten te versturen:</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🎯</div>
+        <h4>Direct Message (DM)</h4>
+        <p>Gericht aan één specifieke node. Het bericht wordt <strong>end-to-end versleuteld</strong> — alleen de ontvanger kan het lezen. Tussenstations (repeaters) sturen het door zonder de inhoud te zien.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌊</div>
+        <h4>Broadcast / Flood</h4>
+        <p>Verstuurd naar <strong>alle nodes</strong> op het kanaal. Elke node ontvangt het bericht. Gebruikt voor netwerkaankondigingen en noodberichten.</p>
+      </div>
+    </div>
+
+    <h3>Primair en secundair kanaal</h3>
+    <p>MeshCore ondersteunt het gebruik van een <strong>primair kanaal</strong> en optioneel een of meer <strong>secundaire kanalen</strong>. Het primaire kanaal is het hoofdkanaal waarop het netwerk draait — repeaters luisteren hier standaard op. Secundaire kanalen kunnen worden gebruikt voor specifieke doeleinden, maar vereisen eigen repeater-dekking.</p>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>HSD Drenthe standaard:</strong> Het primaire kanaal voor HSD Drenthe is <strong>869.525 MHz, SF11, BW250</strong>. Alle repeaters en clients in het netwerk gebruiken deze instellingen.</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: Rooms & Groepscommunicatie                      -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="lesson-section" data-section="s2" data-label="Rooms & Groepscommunicatie">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Rooms &amp; <span>Groepscommunicatie</span></h2>
+    <p>Directe berichten zijn handig voor één-op-één gesprekken, maar in een noodnetwerk wil je vaak met een <strong>groep</strong> communiceren. Hier komen <strong>Rooms</strong> om de hoek kijken.</p>
+
+    <h3>Wat is een Room?</h3>
+    <p>Een Room in MeshCore is een persistent groepskanaal dat wordt gehost door een speciale node: de <strong>Room Server</strong>. Zie het als een groepschat die altijd beschikbaar is, zelfs als niet iedereen tegelijk online is.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏠</div>
+        <h4>Room Server</h4>
+        <p>Een node met speciale firmware die rooms host. Slaat berichten op en stuurt ze door aan alle deelnemers.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📥</div>
+        <h4>Join / Leave</h4>
+        <p>Gebruikers kunnen rooms joinen en verlaten. Je ontvangt alleen berichten van rooms waar je lid van bent.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💾</div>
+        <h4>Berichtopslag</h4>
+        <p>De Room Server slaat de laatste N berichten op. Zo gaan gesprekken niet verloren als je even offline was.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔄</div>
+        <h4>Store &amp; Forward</h4>
+        <p>Was je offline? Bij herverbinding ontvang je automatisch gemiste berichten. Geen bericht gaat verloren.</p>
+      </div>
+    </div>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Een Room Server is een <em>fysieke node</em> in het meshnetwerk — geen cloud-dienst. Als de Room Server uitvalt, is de room tijdelijk niet beschikbaar. Kies daarom een betrouwbare locatie met stabiele stroomvoorziening.</div>
+    </div>
+
+    <h3>Room-functies in detail</h3>
+    <table class="comp-table" aria-label="Room Server functies">
+      <thead><tr><th>Functie</th><th>Beschrijving</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Benoemde rooms</strong></td><td>Elke room heeft een naam, bijv. "HSD-Algemeen", "Noodkanaal" of "Techniek". Zo weet iedereen waar welk gesprek plaatsvindt.</td></tr>
+        <tr><td><strong>Berichtgeschiedenis</strong></td><td>De Room Server bewaart de laatste berichten. Nieuwe deelnemers of herverbindende nodes zien de recente context.</td></tr>
+        <tr><td><strong>Aanwezigheidsinfo</strong></td><td>De Room Server houdt bij wie online is. Zo zie je welke teamleden beschikbaar zijn — cruciaal bij noodoperaties.</td></tr>
+        <tr><td><strong>Meerdere rooms</strong></td><td>Eén Room Server kan meerdere rooms hosten. Zo heb je niet voor elk kanaal apart hardware nodig.</td></tr>
+        <tr><td><strong>Publieke rooms</strong></td><td>Iedereen op het netwerk kan deelnemen. Ideaal voor algemene info en noodberichten.</td></tr>
+        <tr><td><strong>Privé rooms</strong></td><td>Alleen toegankelijk voor geautoriseerde gebruikers. Geschikt voor coördinatieteams of gevoelige informatie.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Direct Message vs. Room:</strong> Een DM is een versleuteld één-op-één gesprek. Een Room is een groepsgesprek dat door een Room Server wordt beheerd. Gebruik DM's voor privégesprekken en Rooms voor teamcommunicatie.</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: Kanaalplanning & Beheer                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="lesson-section" data-section="s3" data-label="Kanaalplanning & Beheer">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Kanaalplanning &amp; <span>Beheer</span></h2>
+    <p>Een goed gepland kanaalschema is essentieel voor een betrouwbaar meshnetwerk. Te veel kanalen versplinteren je dekking; te weinig creëren congestie.</p>
+
+    <h3>Waarom niet te veel kanalen?</h3>
+    <p>Elk apart kanaal heeft zijn <strong>eigen repeater-dekking</strong> nodig. Repeaters luisteren standaard op één kanaal — als je vijf kanalen hebt, heb je vijf keer zoveel repeaters nodig voor dezelfde dekking. Dat is duur, complex en vaak onnodig.</p>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">🔥</span>
+      <div class="callout-text"><strong>Vuistregel:</strong> Gebruik zo min mogelijk kanalen voor de radio-laag en organiseer groepscommunicatie via <strong>Rooms</strong>. Rooms delen hetzelfde radiokanaal en hebben dezelfde repeater-dekking — zonder extra hardware.</div>
+    </div>
+
+    <h3>Kanaalplan HSD Drenthe</h3>
+    <p>Het aanbevolen kanaalplan voor HSD Drenthe combineert één primair radiokanaal met meerdere rooms:</p>
+
+    <table class="comp-table" aria-label="Kanaalplan HSD Drenthe">
+      <thead><tr><th>Type</th><th>Naam</th><th>Doel</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Primair kanaal</strong></td><td>HSD-Mesh (869.525 MHz, SF11, BW250)</td><td>Hoofdkanaal — alle repeaters, clients en Room Servers gebruiken dit.</td></tr>
+        <tr><td><strong>Room</strong></td><td>Noodkanaal</td><td>Alleen voor noodcommunicatie. Wordt gemonitord door alle hulpverleners.</td></tr>
+        <tr><td><strong>Room</strong></td><td>HSD-Algemeen</td><td>Dagelijkse communicatie, aankondigingen, statusupdates van het netwerk.</td></tr>
+        <tr><td><strong>Room</strong></td><td>Techniek</td><td>Technische discussies: firmware-updates, antenneplaatsing, storingen.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Efficiënt:</strong> Met dit plan heb je slechts één set repeaters nodig (op het primaire kanaal) terwijl je toch drie gescheiden gespreksruimtes hebt via Rooms.</div>
+    </div>
+
+    <h3>Beheer van Room Servers</h3>
+    <p>Als netwerkbeheerder heb je verantwoordelijkheden voor de Room Server(s):</p>
+    <ul>
+      <li><strong>Uptime:</strong> Zorg dat de Room Server continu draait. Gebruik een stabiele stroomvoorziening (netstroom + UPS).</li>
+      <li><strong>Berichtlimiet:</strong> Configureer hoeveel berichten worden opgeslagen. Te veel vergt geheugen; te weinig en gebruikers missen context.</li>
+      <li><strong>Rooms aanmaken/verwijderen:</strong> Maak rooms aan op basis van de behoeften van het netwerk. Verwijder ongebruikte rooms.</li>
+      <li><strong>Toegangsbeheer:</strong> Bepaal welke rooms publiek zijn en welke privé. Beheer toegangsrechten voor privé-rooms.</li>
+      <li><strong>Monitoring:</strong> Controleer regelmatig of de Room Server bereikbaar is en berichten correct opslaat en doorstuurt.</li>
+    </ul>
+
+    <h3>Naamgevingsconventies</h3>
+    <p>Gebruik duidelijke, herkenbare namen voor rooms:</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">✅</div>
+        <h4>Goede namen</h4>
+        <p>"HSD-Algemeen", "Noodkanaal", "Techniek-Drenthe" — duidelijk, kort, beschrijvend.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">❌</div>
+        <h4>Slechte namen</h4>
+        <p>"Room1", "Test", "Kanaal-3" — nietszeggend, verwarrend voor nieuwe gebruikers.</p>
+      </div>
+    </div>
+
+    <h3>Beveiliging</h3>
+    <p>Kanaal- en roombeveiliging is een uitgebreid onderwerp. De basis:</p>
+    <ul>
+      <li>Het primaire kanaal gebruikt een gedeelde sleutel — iedereen met de sleutel kan meeluisteren op broadcasts.</li>
+      <li>Directe berichten zijn altijd end-to-end versleuteld, ongeacht het kanaal.</li>
+      <li>Privé-rooms kunnen extra toegangscontrole hebben.</li>
+      <li>Verander kanaalsleutels periodiek, vooral na personeelswisselingen.</li>
+    </ul>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Meer weten?</strong> Uitgebreide beveiligingsprincipes worden behandeld in Cursus 16: Geavanceerde Beveiliging. Daar leer je over sleutelbeheer, encryptieprotocollen en threat-modelling.</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- QUIZ                                                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Je hebt minimaal 70% nodig om de volgende cursus te ontgrendelen.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  {
+    question: 'Wat definieert een MeshCore-kanaal?',
+    options: ['Alleen de frequentie', 'De combinatie van frequentie, SF, BW en kanaalsleutel', 'Het IP-adres van de node', 'De naam van de room'],
+    correct: 1,
+    explanation: 'Een kanaal is de combinatie van frequentie, Spreading Factor, bandbreedte én kanaalsleutel. Alle vier moeten overeenkomen om te communiceren.'
+  },
+  {
+    question: 'Wat is een Room Server in MeshCore?',
+    options: ['Een cloudserver op het internet', 'Een node die persistente chatkanalen host met berichtopslag', 'Een repeater met extra antenne', 'Een app op je telefoon'],
+    correct: 1,
+    explanation: 'Een Room Server is een fysieke meshnode met speciale firmware die rooms host, berichten opslaat en doorstuurt aan deelnemers.'
+  },
+  {
+    question: 'Wat gebeurt er wanneer een offline gebruiker opnieuw verbinding maakt met een room?',
+    options: ['Alle berichten zijn verloren', 'De gebruiker moet de room opnieuw joinen', 'De gebruiker ontvangt automatisch de opgeslagen berichten', 'De Room Server stuurt een foutmelding'],
+    correct: 2,
+    explanation: 'Dankzij store & forward slaat de Room Server berichten op en stuurt deze automatisch naar gebruikers wanneer ze opnieuw verbinden.'
+  },
+  {
+    question: 'Wat is het verschil tussen een direct message en een broadcast?',
+    options: ['Er is geen verschil', 'Een DM gaat naar één specifieke node, een broadcast naar alle nodes op het kanaal', 'Een broadcast is versleuteld, een DM niet', 'Een DM gebruikt meer bandbreedte'],
+    correct: 1,
+    explanation: 'Een direct message is gericht aan één node en end-to-end versleuteld. Een broadcast wordt naar alle nodes op het kanaal gestuurd.'
+  },
+  {
+    question: 'Kunnen nodes op verschillende kanalen elkaar horen?',
+    options: ['Ja, altijd', 'Alleen als ze dezelfde frequentie hebben', 'Nee, kanalen zijn volledig geïsoleerd', 'Alleen via een Room Server'],
+    correct: 2,
+    explanation: 'Kanalen zijn volledig geïsoleerd. Nodes met andere frequentie, SF, BW of sleutel kunnen elkaars berichten niet ontvangen.'
+  },
+  {
+    question: 'Wat is store & forward bij een Room Server?',
+    options: ['Berichten doorsturen naar het internet', 'De Room Server slaat berichten op voor offline gebruikers en levert ze bij herverbinding', 'Berichten opslaan op een SD-kaart', 'Alleen de laatste 2 berichten bewaren'],
+    correct: 1,
+    explanation: 'Store & forward betekent dat de Room Server berichten bewaart en automatisch aflevert wanneer een offline gebruiker weer verbinding maakt.'
+  },
+  {
+    question: 'Waarom moet je niet te veel aparte kanalen aanmaken?',
+    options: ['Kanalen zijn duur om te registreren', 'Elk kanaal heeft zijn eigen repeater-dekking nodig', 'MeshCore ondersteunt maximaal 2 kanalen', 'Meer kanalen verbruiken meer stroom op clients'],
+    correct: 1,
+    explanation: 'Repeaters luisteren op één kanaal. Meer kanalen vereisen meer repeaters voor dezelfde dekking. Gebruik liever rooms op één primair kanaal.'
+  },
+  {
+    question: 'Welke radio-instellingen gebruikt HSD Drenthe als primair kanaal?',
+    options: ['868.000 MHz, SF7, BW125', '869.525 MHz, SF11, BW250', '433.175 MHz, SF12, BW500', '915.000 MHz, SF10, BW125'],
+    correct: 1,
+    explanation: 'Het primaire kanaal van HSD Drenthe is 869.525 MHz met Spreading Factor 11 en Bandbreedte 250 kHz.'
+  },
+  {
+    question: 'Welke informatie biedt een Room Server over gebruikers?',
+    options: ['GPS-locatie van alle gebruikers', 'Aanwezigheidsinformatie (wie is online)', 'Het batterijniveau van elke node', 'De firmwareversie van elke node'],
+    correct: 1,
+    explanation: 'De Room Server houdt bij wie online is (aanwezigheids-/presence-informatie). Dit is cruciaal om te weten wie beschikbaar is bij noodoperaties.'
+  },
+  {
+    question: 'Wat is het doel van een noodkanaal-room?',
+    options: ['Firmware-updates versturen', 'Specifiek bestemd voor noodcommunicatie', 'Technische tests uitvoeren', 'Automatisch weer-informatie delen'],
+    correct: 1,
+    explanation: 'De noodkanaal-room is uitsluitend bestemd voor noodcommunicatie, zodat urgente berichten niet verloren raken in regulier verkeer.'
+  }
+];
+
+initCourse('c-channels', quizQuestions);
+</script>
+</body>
+</html>

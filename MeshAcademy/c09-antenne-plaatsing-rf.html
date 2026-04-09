@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 9: Antenne Plaatsing & RF — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.85rem;display:block;overflow-x:auto;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+.comp-table td{padding:8px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);font-weight:700;}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">📍</span>
+    <div class="course-info">
+      <h1>Cursus 9: <span>Antenne Plaatsing &amp; RF</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gemiddeld</span>
+        <span class="meta-tag tag-course">Cursus 9 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Line-of-Sight & Fresnel Zone"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Plaatsing Best Practices"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Obstakels & Demping"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ═══ SECTIE 1: Line-of-Sight & Fresnel Zone ═══ -->
+  <section class="lesson-section" data-section="s1" data-label="Line-of-Sight & Fresnel Zone">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Line-of-Sight &amp; <span>Fresnel Zone</span></h2>
+
+    <p>Voor betrouwbare LoRa-verbindingen is <strong>Line-of-Sight (LOS)</strong> — een direct, onbelemmerd zichtpad tussen twee antennes — de allerbelangrijkste factor. Hoewel sub-GHz radiogolven gedeeltelijk door obstakels kunnen dringen, wordt het signaal daarbij enorm verzwakt.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">👁️</div>
+        <h4>Wat is LOS?</h4>
+        <p>Line-of-Sight betekent dat je vanaf de ene antenne een rechte, ononderbroken lijn naar de andere kunt trekken. Geen gebouwen, bomen of heuvels ertussen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>Waarom cruciaal voor LoRa?</h4>
+        <p>LoRa op 868 MHz gedraagt zich bijna als licht — obstakels blokkeren het signaal. Zonder LOS verlies je al snel 10–30 dB, wat het verschil is tussen een werkende en falende link.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🥚</div>
+        <h4>De Fresnel Zone</h4>
+        <p>Zelfs met visueel vrij zicht heeft het radiosignaal een ellipsvormige zone rondom het pad nodig — de Fresnel-zone. Obstakels in deze zone verzwakken je signaal aanzienlijk.</p>
+      </div>
+    </div>
+
+    <h3>Fresnel Zone — de onzichtbare bundel</h3>
+    <p>Het radiosignaal reist niet als een dunne laserstraal maar als een brede, ellipsvormige bundel. De eerste Fresnel-zone is het gebied dat vrij moet zijn voor optimale propagatie. Als meer dan <strong>40% van de Fresnel-zone geblokkeerd</strong> is, treedt er significant signaalverlies op.</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">📊</span>
+      <div class="callout-text"><strong>Fresnel-zone straal (vereenvoudigd):</strong><br>r₁ ≈ 17,3 × √(d / (4 × f))<br>waarbij d = afstand in km, f = frequentie in GHz.<br><br><strong>Voorbeeld bij 868 MHz en 1 km:</strong> r₁ ≈ 17,3 × √(1 / (4 × 0,868)) ≈ <strong>9,3 meter</strong> op het middenpunt.</div>
+    </div>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Vuistregel:</strong> Minimaal 60% van de eerste Fresnel-zone moet vrij zijn van obstakels. Dit betekent dat antennes vaak hoger moeten dan je intuïtief denkt! Bij een 1 km link moet er ~9 meter vrije ruimte zijn rondom het pad op het middenpunt.</div>
+    </div>
+
+    <h3>Wat betekent dit in de praktijk?</h3>
+    <p>Stel: je hebt twee antennes op 2 meter hoogte met 1 km ertussen. De Fresnel-zone is ~9,3 m breed op het midden. De onderkant reikt dan tot ver onder de grond — je pad is dus zwaar geblokkeerd. Door beide antennes op 8–10 meter te plaatsen, blijft de zone grotendeels vrij.</p>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Onthoud:</strong> Hoe langer de afstand, hoe breder de Fresnel-zone, en hoe hoger je antennes moeten staan om deze vrij te houden.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 2: Plaatsing Best Practices ═══ -->
+  <section class="lesson-section" data-section="s2" data-label="Plaatsing Best Practices">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Plaatsing <span>Best Practices</span></h2>
+
+    <p>De locatie en hoogte van je antenne bepalen 80% van je bereik. Hieronder de gouden regels voor optimale plaatsing.</p>
+
+    <h3>Hoogte is koning</h3>
+    <p>Elke meter hoger plaatsen levert significant meer bereik op. Volgens het Friis path loss model neemt signaalverlies af naarmate de Fresnel-zone meer vrijkomt. Het minimum is <strong>3–5 meter boven de directe omgeving</strong>.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏠</div>
+        <h4>Mast op dak</h4>
+        <p>Meest effectief. Een korte mast (2–3 m) op een plat dak geeft uitstekende resultaten. Gebruik stevige bevestiging tegen wind.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏭</div>
+        <h4>Schoorsteenmontage</h4>
+        <p>Bestaande schoorsteen als masthoogte benutten. Let op hittebestendigheid en gebruik RVS klemmen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌳</div>
+        <h4>Boom-montage</h4>
+        <p>Gratis hoogte, maar let op: natte bladeren dempen 868 MHz sterk. Weerbestendig behuizing is essentieel. Bomen bewegen in de wind!</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🪟</div>
+        <h4>Raamplaatsing</h4>
+        <p>Noodoplossing als buitenmontage niet kan. Glas kost 2–3 dB verlies. Plaats zo dicht mogelijk bij het raam.</p>
+      </div>
+    </div>
+
+    <h3>Oriëntatie</h3>
+    <p>Een <strong>omni-directionele antenne</strong> moet altijd verticaal staan — zo zendt deze gelijkmatig in alle richtingen. Een <strong>directionele antenne</strong> (Yagi, panel) moet gericht worden op het doelgebied. Verkeerde polarisatie kan tot 20 dB verlies veroorzaken.</p>
+
+    <h3>Kabelverliezen — houd het kort!</h3>
+    <p>Elk stuk coaxkabel tussen je radio en antenne kost signaal. Hoe langer de kabel, hoe meer verlies. De oplossing: monteer het board zo dicht mogelijk bij de antenne, of gebruik een hoogwaardige kabel.</p>
+
+    <table class="comp-table" aria-label="Coaxkabel vergelijking">
+      <thead>
+        <tr><th>Kabeltype</th><th>Verlies bij 868 MHz</th><th>Diameter</th><th>Prijs indicatie</th><th>Aanbeveling</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>RG58</strong></td><td>~0,5 dB/m</td><td>5 mm</td><td>€0,50/m</td><td>Max 2–3 m, alleen voor testen</td></tr>
+        <tr><td><strong>RG213</strong></td><td>~0,3 dB/m</td><td>10 mm</td><td>€1,50/m</td><td>Acceptabel tot 5 m</td></tr>
+        <tr><td><strong>LMR400</strong></td><td>~0,1 dB/m</td><td>10 mm</td><td>€3,00/m</td><td>Beste keuze voor langere runs</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚡</span>
+      <div class="callout-text"><strong>Rekenvoorbeeld:</strong> 10 meter RG58 kost je 5 dB — dat is meer dan 3× je signaalsterkte! Dezelfde 10 meter in LMR400 kost slechts 1 dB. Investeer in goede kabel of monteer het board direct bij de antenne.</div>
+    </div>
+
+    <h3>Bliksembeveiliging</h3>
+    <p>Buitenantennes op hoogte zijn kwetsbaar voor bliksem. Basisbescherming:</p>
+    <ul>
+      <li><strong>Aarding:</strong> Verbind de antennemast met een aardpen via minimaal 16 mm² koperdraad</li>
+      <li><strong>Surge protector:</strong> Plaats een coax bliksemafleider (surge protector) tussen kabel en radio</li>
+      <li><strong>Koppel los bij onweer:</strong> Bij verwacht zwaar onweer is fysiek loskoppelen het veiligst</li>
+    </ul>
+  </section>
+
+  <!-- ═══ SECTIE 3: Obstakels & Demping ═══ -->
+  <section class="lesson-section" data-section="s3" data-label="Obstakels & Demping">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Obstakels &amp; <span>Demping</span></h2>
+
+    <p>Niet elk obstakel blokkeert je signaal even sterk. Het is belangrijk te weten hoeveel demping (attenuatie) veelvoorkomende materialen veroorzaken bij 868 MHz.</p>
+
+    <h3>Materiaaldemping bij 868 MHz</h3>
+    <table class="comp-table" aria-label="Materiaaldemping bij 868 MHz">
+      <thead>
+        <tr><th>Materiaal</th><th>Demping</th><th>Effect</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Glas</strong> (enkel)</td><td>2–3 dB</td><td>Aanvaardbaar, signaal komt erdoor</td></tr>
+        <tr><td><strong>Hout</strong></td><td>3–5 dB</td><td>Merkbaar verlies, maar werkbaar</td></tr>
+        <tr><td><strong>Baksteen</strong></td><td>5–10 dB</td><td>Flink verlies, afhankelijk van dikte</td></tr>
+        <tr><td><strong>Beton</strong></td><td>10–15 dB</td><td>Zwaar verlies, gewapend beton nog erger</td></tr>
+        <tr><td><strong>Metaal</strong></td><td>20–40+ dB</td><td class="cross">Blokkeert signaal effectief volledig</td></tr>
+        <tr><td><strong>Vegetatie / bomen</strong></td><td>5–15 dB</td><td>Sterk afhankelijk van dichtheid en vocht</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout red">
+      <span class="callout-icon" aria-hidden="true">🚫</span>
+      <div class="callout-text"><strong>Let op:</strong> Metalen daken, stalen containers en loodsen zijn praktisch ondoordringbaar voor 868 MHz. Plaats je antenne altijd buiten metalen behuizingen!</div>
+    </div>
+
+    <h3>Stedelijk vs. landelijk</h3>
+    <p>In <strong>stedelijk gebied</strong> is het signaalpad vol obstakels: gebouwen, auto's, metalen constructies. Typisch bereik bedraagt 1–3 km, zwaar afhankelijk van hoogte. In <strong>landelijk gebied</strong> met open zicht zijn afstanden van 5–20+ km haalbaar, mits de Fresnel-zone vrij blijft.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏙️</div>
+        <h4>Stedelijk</h4>
+        <p>Veel reflecties, demping door gebouwen. Korter bereik (1–3 km). Hoogte is hier extra belangrijk om over obstakels heen te zenden.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌾</div>
+        <h4>Landelijk</h4>
+        <p>Weinig obstakels, open terrein. Bereik tot 20+ km mogelijk. Let op heuvels en bomenrijen die de Fresnel-zone kunnen blokkeren.</p>
+      </div>
+    </div>
+
+    <h3>Reflecties en multipath</h3>
+    <p>In stedelijke omgevingen kaatst je signaal tegen gebouwen, de grond en metalen objecten. Deze <strong>reflecties</strong> zorgen ervoor dat meerdere kopieën van het signaal met verschillende vertragingen aankomen — dit heet <strong>multipath</strong>. LoRa's chirp spread spectrum is hier redelijk robuust tegen, maar het kan toch tot onverwachte dode zones leiden.</p>
+
+    <h3>Praktische tips</h3>
+    <ul>
+      <li><strong>Vermijd metalen daken:</strong> Als je antenne onder een metalen dak staat, neem deze mee naar buiten</li>
+      <li><strong>Positioneer bij een raam:</strong> Als buitenplaatsing niet kan, kies het raam dat richting je netwerk wijst (slechts 2–3 dB verlies)</li>
+      <li><strong>Gebruik een externe antenne:</strong> De meegeleverde rubber duck is een noodoplossing — een externe antenne buiten maakt een enorm verschil</li>
+      <li><strong>Test meerdere posities:</strong> Verplaats je node en test het signaal. Soms maakt 1 meter verschuiving al verschil door reflecties</li>
+      <li><strong>Denk in 3D:</strong> Niet alleen horizontale obstakels tellen — ook de grond, boomkruinen en daken erboven</li>
+    </ul>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Pro tip:</strong> Een goedkoop board (€20) met een externe antenne buiten op hoogte presteert beter dan een duur board met stock-antenne binnenshuis op tafelhoogte.</div>
+    </div>
+  </section>
+
+  <!-- ═══ QUIZ ═══ -->
+  <section class="quiz-section" data-section="quiz" data-label="Quiz">
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Minimaal 70% nodig om verder te gaan.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+const quizQuestions = [
+  {
+    question: 'Wat is de Fresnel-zone?',
+    options: ['Het bereik van een antenne', 'Het ellipsvormige gebied rondom het LOS-pad dat vrij moet zijn', 'De maximale zendafstand bij 868 MHz', 'De hoek waaronder een antenne zendt'],
+    correct: 1,
+    explanation: 'De Fresnel-zone is het ellipsvormige gebied rondom de Line-of-Sight lijn. Dit gebied moet grotendeels vrij zijn van obstakels voor optimale signaaloverdracht.'
+  },
+  {
+    question: 'Wat is de minimum aanbevolen antennehoogte boven de directe omgeving?',
+    options: ['1 meter', '3–5 meter', '10–15 meter', '20 meter'],
+    correct: 1,
+    explanation: 'Een minimum van 3–5 meter boven de directe omgeving wordt aanbevolen om de Fresnel-zone voldoende vrij te houden.'
+  },
+  {
+    question: 'Hoeveel verlies heeft RG58 coaxkabel bij 868 MHz per meter?',
+    options: ['~0,1 dB/m', '~0,3 dB/m', '~0,5 dB/m', '~1,0 dB/m'],
+    correct: 2,
+    explanation: 'RG58 heeft circa 0,5 dB verlies per meter bij 868 MHz. Bij 10 meter kabel verlies je dus al 5 dB — meer dan 3× je signaalsterkte!'
+  },
+  {
+    question: 'Welk kabeltype heeft het laagste verlies?',
+    options: ['RG58', 'RG213', 'LMR400', 'Alle kabels zijn gelijk'],
+    correct: 2,
+    explanation: 'LMR400 heeft met ~0,1 dB/m het laagste verlies van de drie veelgebruikte kabeltypen. Ideaal voor langere kabelruns.'
+  },
+  {
+    question: 'Hoeveel demping veroorzaakt beton bij 868 MHz?',
+    options: ['2–3 dB', '5–10 dB', '10–15 dB', '20–40 dB'],
+    correct: 2,
+    explanation: 'Beton veroorzaakt 10–15 dB demping bij 868 MHz. Gewapend beton (met staal) kan nog hoger zijn.'
+  },
+  {
+    question: 'Welk materiaal blokkeert het 868 MHz signaal het sterkst?',
+    options: ['Glas', 'Baksteen', 'Hout', 'Metaal'],
+    correct: 3,
+    explanation: 'Metaal veroorzaakt 20–40+ dB demping en blokkeert het signaal effectief volledig. Plaats antennes altijd buiten metalen behuizingen.'
+  },
+  {
+    question: 'Wat gebeurt er als meer dan 40% van de Fresnel-zone geblokkeerd is?',
+    options: ['Geen merkbaar effect', 'Significant signaalverlies', 'De frequentie verschuift', 'Het bereik verdubbelt door reflecties'],
+    correct: 1,
+    explanation: 'Bij meer dan 40% blokkade van de Fresnel-zone treedt er significant signaalverlies op, zelfs als er visueel vrij zicht lijkt te zijn.'
+  },
+  {
+    question: 'Waarom is hoogte zo belangrijk voor antenneplaatsing?',
+    options: ['Hogere antennes zijn goedkoper', 'Het verbetert de batterijduur', 'Het houdt de Fresnel-zone vrij en verbetert Line-of-Sight', 'Het verandert de zendfrequentie'],
+    correct: 2,
+    explanation: 'Hoogte zorgt ervoor dat de Fresnel-zone vrij blijft van obstakels en verbetert de Line-of-Sight naar andere antennes, wat direct meer bereik oplevert.'
+  },
+  {
+    question: 'Hoeveel demping veroorzaakt glas bij 868 MHz?',
+    options: ['0 dB — glas is volledig transparant', '2–3 dB', '10–15 dB', '20+ dB'],
+    correct: 1,
+    explanation: 'Enkel glas veroorzaakt 2–3 dB demping bij 868 MHz. Het signaal komt erdoor, maar met merkbaar verlies.'
+  },
+  {
+    question: 'Wat is de beste praktijk voor kabellengte tussen radio en antenne?',
+    options: ['Minstens 10 meter voor veiligheid', 'Precies 5 meter voor optimale impedantie', 'Zo kort mogelijk houden', 'Kabellengte maakt niet uit'],
+    correct: 2,
+    explanation: 'Houd kabels zo kort mogelijk! Elke meter kabel kost signaal. Monteer bij voorkeur het board direct bij de antenne of gebruik hoogwaardige kabel zoals LMR400.'
+  }
+];
+initCourse('c-antenne-plaatsing', quizQuestions);
+</script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 11: Stroomverbruik & Batterij — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;display:block;overflow-x:auto;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+.comp-table .highlight{color:var(--yellow);font-weight:700;}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🔋</span>
+    <div class="course-info">
+      <h1>Cursus 11: <span>Stroomverbruik &amp; Batterij</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gemiddeld</span>
+        <span class="meta-tag tag-course">Cursus 11 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Stroomverbruik van MeshCore Nodes"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Batterijen & Levensduur"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Solar & Buitenplaatsing"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ─── SECTIE 1: Stroomverbruik van MeshCore Nodes ─── -->
+  <section class="lesson-section" data-section="s1" data-label="Stroomverbruik van MeshCore Nodes">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Stroomverbruik van <span>MeshCore Nodes</span></h2>
+    <p>Het stroomverbruik van een MeshCore-node hangt af van de gebruikte chip, radio, randapparatuur en de ingestelde rol. Begrijpen waar de stroom naartoe gaat is essentieel voor het plannen van batterij- of zonne-oplossingen.</p>
+
+    <h3>ESP32 power states</h3>
+    <p>De ESP32 (gebruikt in Heltec V3, T-Beam, T-Deck) is een veelzijdige chip, maar relatief hongerig vergeleken met nRF52840:</p>
+    <ul>
+      <li><strong>Active TX (zenden):</strong> ~120 mA — de radio en processor werken op volle kracht.</li>
+      <li><strong>Active RX (ontvangen):</strong> ~20 mA — de radio luistert actief naar inkomende signalen.</li>
+      <li><strong>Light sleep:</strong> ~0,8 mA — processor pauzeert, radio uit, wake-up timer actief.</li>
+      <li><strong>Deep sleep:</strong> ~10 µA — bijna alles uit, alleen RTC-timer draait nog.</li>
+    </ul>
+
+    <h3>nRF52840 power states</h3>
+    <p>De nRF52840 (gebruikt in RAK4631 WisBlock, T-Echo) is specifiek ontworpen voor laag energieverbruik:</p>
+    <ul>
+      <li><strong>Active TX:</strong> ~7 mA — een fractie van de ESP32.</li>
+      <li><strong>Active RX:</strong> ~5 mA — extreem efficiënt luisteren.</li>
+      <li><strong>Sleep:</strong> ~2 µA — vijf keer lager dan ESP32 deep sleep.</li>
+    </ul>
+
+    <h3>LoRa radio (SX1262)</h3>
+    <ul>
+      <li><strong>TX @ +22 dBm:</strong> ~120 mA — het zwaarte moment qua stroomverbruik.</li>
+      <li><strong>RX (luisteren):</strong> ~10 mA.</li>
+      <li><strong>Sleep:</strong> ~1 µA — verwaarloosbaar.</li>
+    </ul>
+
+    <h3>Randapparatuur</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📺</div>
+        <h4>OLED Display</h4>
+        <p>~20 mA wanneer aan. Zet het display uit voor batterij-nodes — het gebruikt evenveel als de radio in RX-modus!</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🛰️</div>
+        <h4>GPS Module</h4>
+        <p>~25–50 mA continu. De grootste stroomvreter na de radio. Gebruik GPS alleen als locatie echt nodig is.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📱</div>
+        <h4>Bluetooth (BLE)</h4>
+        <p>~5–15 mA bij actieve verbinding. Companion-nodes hebben dit nodig, repeaters niet.</p>
+      </div>
+    </div>
+
+    <h3>Verbruik per rol</h3>
+    <p>Het totale systeemverbruik wordt sterk bepaald door de <strong>rol</strong> van de node. Een repeater luistert altijd; een client kan slapen tussen berichten door.</p>
+
+    <table class="comp-table" aria-label="Gemiddeld stroomverbruik per apparaat en rol">
+      <thead>
+        <tr><th>Apparaat</th><th>Rol</th><th>Gem. stroom</th><th>Toelichting</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Heltec V3</td><td>Repeater</td><td class="highlight">~70–80 mA</td><td>Radio continu in RX, ESP32 actief</td></tr>
+        <tr><td>Heltec V3</td><td>Client (sleep)</td><td>~15–20 mA</td><td>Periodiek wakker, meeste tijd in light sleep</td></tr>
+        <tr><td>RAK4631</td><td>Repeater</td><td>~15–20 mA</td><td>nRF52840 zeer efficiënt, radio in RX</td></tr>
+        <tr><td>RAK4631</td><td>Client (sleep)</td><td class="check">~3–5 mA</td><td>Ultra-laag verbruik dankzij nRF52840</td></tr>
+        <tr><td>T-Beam</td><td>Repeater + GPS</td><td class="cross">~100–130 mA</td><td>ESP32 + radio + GPS = hongerig</td></tr>
+        <tr><td>T-Echo</td><td>Client (sleep)</td><td class="check">~5–8 mA</td><td>nRF52840 + e-ink (geen continu verbruik)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Kernpunt:</strong> Een Heltec V3 als repeater verbruikt gemiddeld ~70–80 mA. Dezelfde Heltec als client met slaapstand: slechts ~15–20 mA. De rol bepaalt het verbruik meer dan de hardware.</div>
+    </div>
+  </section>
+
+  <!-- ─── SECTIE 2: Batterijen & Levensduur ─── -->
+  <section class="lesson-section" data-section="s2" data-label="Batterijen & Levensduur">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Batterijen &amp; <span>Levensduur</span></h2>
+    <p>De keuze van batterij bepaalt hoelang je node kan draaien zonder opladen. Twee gangbare typen voor MeshCore:</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔋</div>
+        <h4>18650 Li-Ion</h4>
+        <p>Cilindrische cel, 2500–3500 mAh, 3,7V nominaal. Meest gebruikt voor MeshCore. Robuust, goedkoop, overal verkrijgbaar.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📦</div>
+        <h4>LiPo Pouch</h4>
+        <p>Platte zachte cel, diverse maten (500–6000 mAh). Lichter dan 18650, maar heeft een beschermcircuit nodig. Ideaal voor compacte builds.</p>
+      </div>
+    </div>
+
+    <h3>Levensduur berekenen</h3>
+    <p>De basisformule voor geschatte batterijduur is simpel:</p>
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">🧮</span>
+      <div class="callout-text"><strong>Formule:</strong> Capaciteit (mAh) ÷ gemiddeld stroomverbruik (mA) = levensduur in uren.<br>In de praktijk: vermenigvuldig met ~0,85 voor efficiëntieverliezen.</div>
+    </div>
+
+    <h3>Rekenvoorbeelden</h3>
+    <table class="comp-table" aria-label="Batterijduur rekenvoorbeelden">
+      <thead>
+        <tr><th>Scenario</th><th>Batterij</th><th>Gem. stroom</th><th>Berekening</th><th>Levensduur</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Heltec V3 Repeater</td><td>3000 mAh 18650</td><td>80 mA</td><td>3000 ÷ 80</td>
+          <td class="highlight">~37,5 uur ≈ 1,5 dag</td>
+        </tr>
+        <tr>
+          <td>Heltec V3 Client</td><td>3000 mAh 18650</td><td>20 mA</td><td>3000 ÷ 20</td>
+          <td class="check">~150 uur ≈ 6+ dagen</td>
+        </tr>
+        <tr>
+          <td>RAK4631 Repeater</td><td>3000 mAh 18650</td><td>18 mA</td><td>3000 ÷ 18</td>
+          <td class="check">~167 uur ≈ 7 dagen</td>
+        </tr>
+        <tr>
+          <td>RAK4631 Client</td><td>3000 mAh 18650</td><td>4 mA</td><td>3000 ÷ 4</td>
+          <td class="check">~750 uur ≈ 31 dagen</td>
+        </tr>
+        <tr>
+          <td>T-Beam + GPS Repeater</td><td>3000 mAh 18650</td><td>120 mA</td><td>3000 ÷ 120</td>
+          <td class="cross">~25 uur ≈ 1 dag</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Spanningsmonitoring</h3>
+    <p>MeshCore-nodes kunnen het accuniveau rapporteren via het mesh-netwerk. Dit is cruciaal voor remote nodes:</p>
+    <ul>
+      <li><strong>4,2V</strong> — volledig opgeladen (100%).</li>
+      <li><strong>3,7V</strong> — nominaal (~50%).</li>
+      <li><strong>3,3V</strong> — bijna leeg (~10%). Node zou moeten waarschuwen.</li>
+      <li><strong>3,0V</strong> — afsluitspanning. Dieper ontladen beschadigt de cel.</li>
+    </ul>
+
+    <h3>Gedrag bij lage batterij</h3>
+    <p>Slimme strategieën om de levensduur te verlengen wanneer de batterij laag is:</p>
+    <ul>
+      <li>Verlaag het TX-vermogen (bijv. van +22 dBm naar +10 dBm) — scheelt ~50% stroom bij zenden.</li>
+      <li>Verleng de slaapintervallen — minder vaak waken bespaart stapelen van verbruik.</li>
+      <li>Schakel GPS en display uit.</li>
+      <li>Stuur een "low battery" waarschuwing naar het netwerk.</li>
+    </ul>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Let op:</strong> Ontlaad 18650-cellen nooit onder 2,5V. De meeste boards hebben ingebouwde bescherming, maar goedkope cellen soms niet. Gebruik altijd cellen met ingebouwd BMS (Battery Management System).</div>
+    </div>
+  </section>
+
+  <!-- ─── SECTIE 3: Solar & Buitenplaatsing ─── -->
+  <section class="lesson-section" data-section="s3" data-label="Solar & Buitenplaatsing">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Solar &amp; <span>Buitenplaatsing</span></h2>
+    <p>Voor permanente buitennodes is zonne-energie de meest praktische oplossing. Maar in Nederland — en zeker in Drenthe — moet je rekening houden met beperkte zonuren, vooral in de winter.</p>
+
+    <h3>Paneelkeuze</h3>
+    <p>Vuistregel: het paneel moet minstens <strong>2× het dagelijks verbruik</strong> kunnen opwekken om bewolkte dagen op te vangen.</p>
+    <ul>
+      <li><strong>Repeater (80 mA × 24h = 1920 mAh/dag):</strong> minimaal ~4000 mAh opwekking nodig → <strong>6W paneel</strong> is de standaard.</li>
+      <li><strong>Client (20 mA × 24h = 480 mAh/dag):</strong> een 2–3W paneel volstaat.</li>
+    </ul>
+
+    <h3>Typische setup voor een buitennode</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">☀️</div>
+        <h4>Zonnepaneel</h4>
+        <p>6W (5V/6V) paneel. Groter is beter voor bewolkte periodes. Monocristallijn heeft het beste rendement.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔌</div>
+        <h4>Laadcontroller</h4>
+        <p>TP4056 (basis) of CN3791 (MPPT). De controller beschermt de batterij tegen overladen en diepontladen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔋</div>
+        <h4>Batterij</h4>
+        <p>3000+ mAh 18650. Buffer voor nacht en bewolkte dagen. Twee cellen parallel (6000 mAh) voor extra marge.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📦</div>
+        <h4>Behuizing</h4>
+        <p>IP65 behuizing: stofdicht + beschermd tegen waterstralen. Antenne-aansluiting via waterdichte SMA-doorvoer.</p>
+      </div>
+    </div>
+
+    <h3>Power budget: winter in Drenthe</h3>
+    <p>Nederland kent korte winterdagen met veel bewolking. Een realistische inschatting voor december/januari:</p>
+    <ul>
+      <li><strong>Effectieve zonuren:</strong> slechts 1–2 uur per dag (bewolkt = ~20% rendement).</li>
+      <li><strong>6W paneel bij 2 uur zon:</strong> ~6W × 2h × 0,7 (efficiency) ÷ 5V ≈ 1680 mAh opbrengst.</li>
+      <li><strong>Repeater verbruikt:</strong> ~1920 mAh/dag → net niet genoeg op de slechtste dagen.</li>
+      <li><strong>Oplossing:</strong> grotere batterij (6000+ mAh) als buffer voor 2–3 slechte dagen achter elkaar.</li>
+    </ul>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Best practices voor plaatsing:</strong> Paneel op het zuiden gericht, 30–45° hellingshoek (optimaal voor Nederlandse breedtegraad ~52°N). Houd het paneel schoon — vuil en bladeren verlagen de opbrengst met 10–30%.</div>
+    </div>
+
+    <h3>Wat is IP65?</h3>
+    <p>De IP-code (Ingress Protection) geeft aan hoe goed een behuizing beschermd is:</p>
+    <ul>
+      <li><strong>IP6x — eerste cijfer (6):</strong> volledig stofdicht. Geen stofdeeltjes dringen binnen.</li>
+      <li><strong>IPx5 — tweede cijfer (5):</strong> beschermd tegen waterstralen uit alle richtingen.</li>
+      <li><strong>IP65 samengevat:</strong> stofdicht + waterstralenbestendig. Geschikt voor buiten, maar niet voor onderdompeling.</li>
+    </ul>
+
+    <h3>Vergelijking voedingsbronnen</h3>
+    <table class="comp-table" aria-label="Vergelijking voedingsbronnen voor MeshCore nodes">
+      <thead>
+        <tr><th>Voedingsbron</th><th>Kosten</th><th>Looptijd</th><th>Geschikt voor</th><th>Nadelen</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>USB (netstroom)</td><td>Laag</td><td>Onbeperkt</td><td>Thuisnodes, Room Servers</td><td>Afhankelijk van stroomnet</td>
+        </tr>
+        <tr>
+          <td>18650 batterij</td><td>Laag</td><td>1–31 dagen*</td><td>Draagbare nodes, noodkits</td><td>Moet opgeladen worden</td>
+        </tr>
+        <tr>
+          <td>Solar + batterij</td><td>Medium</td><td class="check">Onbeperkt**</td><td>Permanente buitennodes, repeaters</td><td>Afhankelijk van zon, hogere kosten</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:.8rem;color:var(--dim);">* Afhankelijk van rol en hardware. ** Mits correct gedimensioneerd paneel en batterij.</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Samenvatting:</strong> Voor een permanente repeater in Drenthe adviseren we: 6W zonnepaneel, 2× 18650 (6000 mAh) parallel, TP4056 of beter als laadcontroller, en een IP65-behuizing. Paneel op het zuiden, 30–45° hoek.</div>
+    </div>
+  </section>
+
+  <!-- ─── QUIZ ─── -->
+  <section class="quiz-section" data-section="quiz" data-label="Quiz">
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Minimaal 70% nodig om deze cursus af te ronden.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+const quizQuestions = [
+  {
+    question: 'Wat is het gemiddelde stroomverbruik van een Heltec V3 als repeater?',
+    options: ['~15–20 mA', '~40–50 mA', '~70–80 mA', '~120–150 mA'],
+    correct: 2,
+    explanation: 'Een Heltec V3 als repeater verbruikt gemiddeld ~70–80 mA omdat de ESP32 en radio continu actief zijn.'
+  },
+  {
+    question: 'Hoe bereken je de geschatte batterijduur?',
+    options: ['Spanning × stroom = uren', 'Capaciteit (mAh) ÷ gemiddeld stroomverbruik (mA) = uren', 'Wattage × capaciteit = uren', 'Capaciteit × spanning ÷ stroom = uren'],
+    correct: 1,
+    explanation: 'De basisformule is: capaciteit (mAh) gedeeld door gemiddeld stroomverbruik (mA) geeft het aantal uren.'
+  },
+  {
+    question: 'Wat is het stroomverbruik van een ESP32 in deep sleep?',
+    options: ['~0,8 mA', '~100 µA', '~10 µA', '~1 µA'],
+    correct: 2,
+    explanation: 'De ESP32 verbruikt ~10 µA in deep sleep — alleen de RTC-timer draait nog.'
+  },
+  {
+    question: 'Waarom is de nRF52840 beter voor batterijduur dan de ESP32?',
+    options: ['Hogere zendkracht', 'Veel lager stroomverbruik in actieve en slaapstand', 'Ingebouwd zonnepaneel', 'Groter intern geheugen'],
+    correct: 1,
+    explanation: 'De nRF52840 verbruikt slechts ~7 mA bij TX en ~2 µA in slaapstand — veel efficiënter dan de ESP32.'
+  },
+  {
+    question: 'Welk formaat zonnepaneel is minimaal nodig voor een repeater-node in Drenthe?',
+    options: ['1W', '3W', '6W', '20W'],
+    correct: 2,
+    explanation: 'Een 6W paneel is de standaard voor een repeater. Het moet minstens 2× het dagverbruik opleveren, rekening houdend met beperkte zonuren.'
+  },
+  {
+    question: 'Wat is de typische capaciteit van een 18650 Li-Ion cel?',
+    options: ['500–1000 mAh', '2500–3500 mAh', '5000–8000 mAh', '10.000+ mAh'],
+    correct: 1,
+    explanation: 'Een standaard 18650 cel heeft 2500–3500 mAh bij 3,7V nominaal. Het is de meest gebruikte batterij voor MeshCore.'
+  },
+  {
+    question: 'Welk onderdeel verbruikt naast de radio de meeste stroom?',
+    options: ['LED-indicator', 'GPS-module (~25–50 mA)', 'Micro-SD kaartlezer', 'USB-controller'],
+    correct: 1,
+    explanation: 'De GPS-module verbruikt continu ~25–50 mA — meer dan een OLED-display (~20 mA) en een flinke aanslag op de batterij.'
+  },
+  {
+    question: 'Wat betekent een IP65-classificatie?',
+    options: ['Waterdicht tot 65 meter diepte', 'Stofdicht en beschermd tegen waterstralen', 'Bestand tegen 65°C temperatuur', 'Geschikt voor 65% luchtvochtigheid'],
+    correct: 1,
+    explanation: 'IP65 = stofdicht (6) + beschermd tegen waterstralen uit alle richtingen (5). Geschikt voor buiten, maar niet voor onderdompeling.'
+  },
+  {
+    question: 'Onder welke hoek moet een zonnepaneel in Nederland geplaatst worden?',
+    options: ['0° (horizontaal)', '30–45°', '60–75°', '90° (verticaal)'],
+    correct: 1,
+    explanation: 'Voor de Nederlandse breedtegraad (~52°N) is een hellingshoek van 30–45° optimaal, gericht op het zuiden.'
+  },
+  {
+    question: 'Hoelang gaat een 3000 mAh batterij mee bij 80 mA gemiddeld verbruik?',
+    options: ['~12,5 uur', '~24 uur', '~37,5 uur', '~75 uur'],
+    correct: 2,
+    explanation: '3000 mAh ÷ 80 mA = 37,5 uur — dat is ongeveer 1,5 dag voor een repeater zonder zonnepaneel.'
+  }
+];
+
+initCourse('c-stroomverbruik', quizQuestions);
+</script>
+</body>
+</html>

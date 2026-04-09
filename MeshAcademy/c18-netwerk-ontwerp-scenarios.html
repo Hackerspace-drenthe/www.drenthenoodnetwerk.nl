@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 18: Netwerk Ontwerp & Scenario's — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout.purple{background:rgba(200,100,255,.07);border:1px solid rgba(200,100,255,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;display:block;overflow-x:auto;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap;}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── SCENARIO CARDS ─── */
+.scenario-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;margin:20px 0;}
+.scenario-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden;}
+.scenario-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.scenario-card.sc-green::before{background:var(--green);}
+.scenario-card.sc-orange::before{background:var(--orange);}
+.scenario-card.sc-purple::before{background:var(--purple);}
+.scenario-card.sc-cyan::before{background:var(--cyan);}
+.scenario-card h4{font-size:1rem;font-weight:700;margin-bottom:8px;}
+.scenario-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0 0 8px;}
+.scenario-card .sc-specs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.sc-spec{font-size:.75rem;padding:3px 10px;border-radius:10px;background:rgba(0,229,255,.08);border:1px solid var(--border);color:var(--text);}
+
+/* ─── NETWORK PLANNER ─── */
+.planner{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:20px 0;}
+.planner-bar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.planner-bar h4{font-size:.95rem;font-weight:700;}
+.planner-hint{font-size:.78rem;color:var(--dim);}
+.planner-canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
+.planner-tools{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.tool-btn{padding:6px 16px;border-radius:16px;font-size:.82rem;font-weight:600;border:1px solid var(--border);background:var(--card2);color:var(--dim);cursor:pointer;transition:all .18s;}
+.tool-btn:hover{border-color:rgba(0,229,255,.3);color:var(--text);}
+.tool-btn.active{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);}
+.planner-stats{padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;border-top:1px solid var(--border);}
+.ps-stat{text-align:center;}
+.ps-lbl{font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+.ps-val{font-size:1.1rem;font-weight:700;color:var(--cyan);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* Locked */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.scenario-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link" id="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🗺️</span>
+    <div class="course-info">
+      <h1>Cursus 18: <span>Netwerk Ontwerp &amp; Scenario's</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gevorderd</span>
+        <span class="meta-tag tag-course">Cursus 18 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie"></nav>
+
+<main id="main-content" class="course-body">
+
+  <!-- ═══ SECTIE 1: Netwerktopologie Ontwerpen ═══ -->
+  <section class="lesson-section" data-section="0" data-label="Netwerktopologie ontwerpen">
+    <div class="section-counter">Sectie 1 van 3</div>
+    <h2>Netwerktopologie <span>ontwerpen</span></h2>
+    <p>Een mesh-netwerk ontwerpen begint met de juiste vragen: <strong>hoeveel nodes heb je nodig?</strong> Welke <strong>locaties</strong> zijn strategisch? Welke <strong>hardware</strong> past bij elke rol? In deze sectie leer je een netwerk van scratch opbouwen.</p>
+
+    <h3>Belangrijke ontwerpbeslissingen</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📐</div>
+        <h4>Hoeveel nodes?</h4>
+        <p>Bepaal het dekkingsgebied en de maximale hop-afstand. Een vuistregel: in stedelijk gebied elke 1–3 km een node, in landelijk gebied elke 3–8 km (met hoge antennes).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⛰️</div>
+        <h4>Waar repeaters plaatsen?</h4>
+        <p>Kies hoge punten: kerktorens, watertorens, hoge gebouwen, masten. Hoe hoger de antenne, hoe groter het dekkingsgebied en hoe meer line-of-sight (LOS) verbindingen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔧</div>
+        <h4>Hardware per rol</h4>
+        <p>Repeaters kunnen eenvoudige, goedkope nodes zijn. Room Servers hebben meer capaciteit nodig (opslag, processing). Backbone-nodes vereisen betrouwbare stroomvoorziening.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔀</div>
+        <h4>Backbone vs. randnodes</h4>
+        <p>Backbone-nodes vormen de hoofdverbinding tussen gebieden — hoog vermogen, strategisch geplaatst. Randnodes breiden de dekking lokaal uit en dienen eindgebruikers.</p>
+      </div>
+    </div>
+
+    <h3>Topologie-patronen</h3>
+    <p>Er zijn vier veelgebruikte patronen voor mesh-netwerken. Elk heeft specifieke voor- en nadelen:</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔗</div>
+        <h4>Lineaire keten</h4>
+        <p>Nodes in een lijn — langs een weg, rivier of kustlijn. Eenvoudig en goedkoop, maar kwetsbaar: één uitval breekt het netwerk in tweeën.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⭐</div>
+        <h4>Ster (hub-and-spoke)</h4>
+        <p>Eén centrale repeater op een hoog punt met spokes naar randnodes. Efficiënt qua hops, maar de hub is een single point of failure.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔲</div>
+        <h4>Grid (raster)</h4>
+        <p>Regelmatige spreiding van nodes in een rasterpatroon. Goede redundantie en voorspelbare dekking, maar vereist meer nodes dan andere patronen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🕸️</div>
+        <h4>Hybride (backbone + takken)</h4>
+        <p>Een krachtige backbone verbindt hubs, met lokale mesh-clusters als takken. Combineert efficiëntie met redundantie — het meest gebruikte patroon in de praktijk.</p>
+      </div>
+    </div>
+
+    <h3>Vergelijking topologie-patronen</h3>
+    <table class="comp-table" aria-label="Vergelijking topologieën">
+      <thead>
+        <tr><th>Patroon</th><th>Redundantie</th><th>Kosten</th><th>Complexiteit</th><th>Beste voor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Lineaire keten</strong></td><td class="cross">Laag</td><td class="check">Laag</td><td class="check">Eenvoudig</td><td>Wegen, rivieren, corridors</td></tr>
+        <tr><td><strong>Ster</strong></td><td class="cross">Gemiddeld*</td><td class="check">Gemiddeld</td><td class="check">Eenvoudig</td><td>Klein gebied rond hoog punt</td></tr>
+        <tr><td><strong>Grid</strong></td><td class="check">Hoog</td><td class="cross">Hoog</td><td>Gemiddeld</td><td>Stedelijke gebieden, regelmatig terrein</td></tr>
+        <tr><td><strong>Hybride</strong></td><td class="check">Hoog</td><td>Gemiddeld</td><td class="cross">Complex</td><td>Grote netwerken, gemengd terrein</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.82rem;color:var(--dim);">* Hub is een single point of failure; redundantie geldt alleen voor de spokes.</p>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Ontwerptip:</strong> Begin altijd met het identificeren van <strong>hoge punten</strong> in je gebied. Plot deze op een kaart en bereken de afstanden. Dit bepaalt of een directe verbinding mogelijk is of dat je tussenliggende repeaters nodig hebt.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 2: Scenario's & Case Studies ═══ -->
+  <section class="lesson-section" data-section="1" data-label="Scenario's & case studies">
+    <div class="section-counter">Sectie 2 van 3</div>
+    <h2>Scenario's &amp; <span>case studies</span></h2>
+    <p>Theorie is belangrijk, maar het echte leren komt door het toepassen op <strong>realistische scenario's</strong>. Hieronder drie case studies met concrete ontwerpkeuzes.</p>
+
+    <h3>Scenario 1: Noodnetwerk voor een stad</h3>
+    <div class="scenario-card sc-green">
+      <h4>🏙️ Noodnetwerk voor een stad</h4>
+      <p>Een stad met 50.000 inwoners en een oppervlakte van 15 km². GSM en internet zijn uitgevallen na een natuurramp. Kritieke locaties moeten verbonden blijven.</p>
+      <div class="sc-specs">
+        <span class="sc-spec">50.000 inwoners</span>
+        <span class="sc-spec">15 km²</span>
+        <span class="sc-spec">8–10 repeaters</span>
+        <span class="sc-spec">3 Room Servers</span>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Kritieke locaties:</strong> ziekenhuis, brandweerkazerne, gemeentehuis, scholen (opvanglocaties)</li>
+      <li><strong>Ontwerp:</strong> 8–10 backbone-repeaters op hoge gebouwen/masten, verspreid over het stedelijk gebied</li>
+      <li><strong>Room Servers:</strong> 3 stuks — bij het ziekenhuis, gemeentehuis en grootste school — voor groepscommunicatie en berichtopslag</li>
+      <li><strong>Dekkingsanalyse:</strong> met 10 repeaters op 15–25 meter hoogte bereik je ~95% dekking in een stad van 15 km²</li>
+      <li><strong>Budget:</strong> ~€1.500–€2.500 (10× Heltec V3 + antennes + behuizingen + zonnepanelen)</li>
+      <li><strong>Tijdlijn:</strong> installatie in 2–3 dagen met een team van 4–5 personen</li>
+    </ul>
+
+    <h3>Scenario 2: Evenement-netwerk</h3>
+    <div class="scenario-card sc-purple">
+      <h4>🎪 Evenement-netwerk (festival/evenement)</h4>
+      <p>Tijdelijk netwerk voor een groot evenement. Hoge dichtheid aan gebruikers in een klein gebied. Het mobiele netwerk is overbelast — MeshCore als backup voor organisatie en EHBO.</p>
+      <div class="sc-specs">
+        <span class="sc-spec">Tijdelijk</span>
+        <span class="sc-spec">Hoge dichtheid</span>
+        <span class="sc-spec">Zonne-energie</span>
+        <span class="sc-spec">Extra redundantie</span>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Uitdaging:</strong> veel berichten in kort tijdsbestek, beperkt gebied (~2–5 km²)</li>
+      <li><strong>Ontwerp:</strong> portabele nodes op statieven of tijdelijke masten, zonne-energie voor onafhankelijkheid</li>
+      <li><strong>Redundantie:</strong> extra repeaters voor hogere betrouwbaarheid — als één uitvalt, neemt een ander het over</li>
+      <li><strong>Room Servers:</strong> aparte rooms voor organisatie, EHBO, beveiliging en publiek</li>
+      <li><strong>Tip:</strong> test het netwerk vóór het evenement en train alle operators</li>
+      <li><strong>Budget:</strong> ~€800–€1.200 (6–8 portabele nodes + batterijpacks + statieven)</li>
+      <li><strong>Tijdlijn:</strong> opbouw in 1 dag, afbouw in enkele uren</li>
+    </ul>
+
+    <h3>Scenario 3: HSD Drenthe Netwerk</h3>
+    <div class="scenario-card sc-orange">
+      <h4>🌲 HSD Drenthe Netwerk — het echte project</h4>
+      <p>Hackerspace Drenthe bouwt een noodnetwerk voor een landelijk gebied. Grote afstanden, weinig hoge punten, wisselende weersomstandigheden.</p>
+      <div class="sc-specs">
+        <span class="sc-spec">Landelijk</span>
+        <span class="sc-spec">12+ nodes</span>
+        <span class="sc-spec">Zonne-energie</span>
+        <span class="sc-spec">High-gain antennes</span>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Sleutellocaties:</strong> De Nieuwe Veste hackerspace, watertorens, kerktorens in dorpen</li>
+      <li><strong>12+ nodes gepland:</strong> backbone via hoge punten, randnodes in dorpen en buitengebieden</li>
+      <li><strong>Uitdagingen:</strong>
+        <ul>
+          <li>Lange afstanden (5–15 km tussen dorpen)</li>
+          <li>Weinig hoge punten in het vlakke Drentse landschap</li>
+          <li>Winterweer: ijs op antennes, korte dagen (minder zonne-energie)</li>
+        </ul>
+      </li>
+      <li><strong>Oplossingen:</strong>
+        <ul>
+          <li>High-gain antennes (8–12 dBi) voor lange afstanden</li>
+          <li>Zonnepanelen met grotere batterijbuffers voor wintermaanden</li>
+          <li>Strategische plaatsing op bestaande structuren (torens, masten, hoge boerderijen)</li>
+        </ul>
+      </li>
+      <li><strong>Budget:</strong> ~€2.000–€3.500 (12× nodes + high-gain antennes + zonnepanelen + behuizingen)</li>
+      <li><strong>Tijdlijn:</strong> fase 1 (backbone) in 1 maand, uitbouw over 3–6 maanden</li>
+    </ul>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">🏗️</span>
+      <div class="callout-text"><strong>HSD Drenthe:</strong> Dit is een echt project! Wil je meehelpen? Neem contact op met Hackerspace Drenthe via <strong>De Nieuwe Veste</strong> en sluit je aan bij het noodnetwerk-team.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 3: Schaalbaarheid & Capaciteit ═══ -->
+  <section class="lesson-section" data-section="2" data-label="Schaalbaarheid & capaciteit">
+    <div class="section-counter">Sectie 3 van 3</div>
+    <h2>Schaalbaarheid &amp; <span>capaciteit</span></h2>
+    <p>Een netwerk dat vandaag werkt, moet ook morgen werken — als het groeit. Begrijp de <strong>limieten</strong> en plan vooruit.</p>
+
+    <h3>Capaciteitslimieten</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⏱️</div>
+        <h4>Airtime-budget per node</h4>
+        <p>Elke node heeft een beperkte zendtijd (duty cycle). Bij 1% duty cycle op 868 MHz en berichten van ~300 ms, kun je per node ~120 berichten per uur versturen/relayën.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📊</div>
+        <h4>Doorvoer vs. netwerkgrootte</h4>
+        <p>Hoe meer nodes, hoe meer berichten gerelayed worden. De totale doorvoer per node daalt naarmate het netwerk groeit — elke node moet meer verkeer doorsturen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌊</div>
+        <h4>Flooding als bottleneck</h4>
+        <p>Bij flooding stuurt elke node elk bericht door. In een netwerk van 50 nodes genereert één bericht tot 50 heruitzendingen. Dit verbruikt snel het airtime-budget.</p>
+      </div>
+    </div>
+
+    <h3>Schaalbaarheidstrategieën</h3>
+    <ol>
+      <li><strong>Kanaalscheiding</strong> — Verdeel groepen over verschillende kanalen (frequenties). Groepen die niet met elkaar hoeven communiceren, gebruiken aparte kanalen en consumeren elkaars airtime niet.</li>
+      <li><strong>Geografische segmentatie</strong> — Splits grote netwerken in kleinere, onafhankelijke netwerken die verbonden zijn via <strong>bridge-nodes</strong>. Elke regio beheert zijn eigen verkeer.</li>
+      <li><strong>Gelaagde architectuur</strong> — Gebruik een tiered model: lokale mesh-clusters → backbone-repeaters → lokale mesh-clusters. De backbone draagt alleen inter-regio verkeer, niet lokaal verkeer.</li>
+    </ol>
+
+    <table class="comp-table" aria-label="Schaalbaarheidstrategieën vergelijking">
+      <thead>
+        <tr><th>Strategie</th><th>Effectiviteit</th><th>Complexiteit</th><th>Wanneer toepassen?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Kanaalscheiding</strong></td><td class="check">Hoog</td><td class="check">Laag</td><td>Meerdere groepen, zelfde gebied</td></tr>
+        <tr><td><strong>Geografische segmentatie</strong></td><td class="check">Hoog</td><td>Gemiddeld</td><td>Grote gebieden, &gt;30 nodes</td></tr>
+        <tr><td><strong>Gelaagde architectuur</strong></td><td class="check">Zeer hoog</td><td class="cross">Hoog</td><td>Provinciale/regionale netwerken</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Toekomstbestendig ontwerpen</h3>
+    <ul>
+      <li><strong>Ontwerp voor 2× de verwachte groei</strong> — Als je nu 10 nodes plant, zorg dat de topologie 20 nodes aankan zonder herontwerp.</li>
+      <li><strong>Reserveer capaciteit voor noodpieken</strong> — In een noodsituatie stijgt het berichtenverkeer explosief. Houd 30–50% airtime-reserve aan.</li>
+      <li><strong>Documenteer je netwerkontwerp</strong> — Maak een kaart met node-locaties, hardware, frequenties en contactpersonen. Toekomstige beheerders moeten het netwerk kunnen begrijpen en uitbreiden.</li>
+      <li><strong>Plan onderhoudscycli</strong> — Batterijen, zonnepanelen en antennes slijten. Plan halfjaarlijkse inspectieronden.</li>
+    </ul>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚡</span>
+      <div class="callout-text"><strong>Vuistregel:</strong> als je noodbericht meer dan <strong>5 hops</strong> nodig heeft, overweeg dan een extra backbone-repeater. Meer hops = meer latency, meer airtime-verbruik en hogere kans op packetverlies.</div>
+    </div>
+
+    <h3>🗺️ Interactieve Netwerkplanner</h3>
+    <p>Ontwerp je eigen netwerk! Plaats nodes, bekijk verbindingen en analyseer dekking en redundantie.</p>
+
+    <div class="planner">
+      <div class="planner-bar"><h4>Interactieve Netwerkplanner</h4><span class="planner-hint">Klik om nodes te plaatsen • Sleep om te verplaatsen</span></div>
+      <canvas class="planner-canvas" id="planner-canvas" width="900" height="400" aria-label="Netwerk planner canvas"></canvas>
+      <div class="planner-tools">
+        <button class="tool-btn active" data-tool="repeater">📡 Repeater</button>
+        <button class="tool-btn" data-tool="companion">📱 Companion</button>
+        <button class="tool-btn" data-tool="room">🏠 Room Server</button>
+        <button class="tool-btn" data-tool="remove" style="border-color:rgba(255,68,102,.3);color:var(--red);">✕ Verwijderen</button>
+        <button class="tool-btn" data-tool="clear" style="margin-left:auto;border-color:rgba(255,68,102,.3);color:var(--red);">Reset</button>
+      </div>
+      <div class="planner-stats">
+        <div class="ps-stat"><div class="ps-lbl">Nodes</div><div class="ps-val" id="ps-nodes">0</div></div>
+        <div class="ps-stat"><div class="ps-lbl">Verbindingen</div><div class="ps-val" id="ps-links">0</div></div>
+        <div class="ps-stat"><div class="ps-lbl">Dekking</div><div class="ps-val" id="ps-coverage">0%</div></div>
+        <div class="ps-stat"><div class="ps-lbl">Redundantie</div><div class="ps-val" id="ps-redundancy">—</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ QUIZ ═══ -->
+  <section class="quiz-section" data-section="quiz" data-label="Quiz">
+    <h2>📝 Quiz</h2>
+    <p class="quiz-intro">Test je kennis over netwerk ontwerp en scenario's. 10 vragen, minimaal 70% nodig om te slagen!</p>
+    <div id="quiz-container" role="region" aria-label="Quiz netwerk ontwerp"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── Network Planner ─── */
+(() => {
+  const canvas = document.getElementById('planner-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const RANGE = 120;
+  let nodes = [];
+  let currentTool = 'repeater';
+  let dragging = null;
+  let dragOffset = { x: 0, y: 0 };
+
+  const TYPES = {
+    repeater: { color: '#00e5ff', icon: '📡', label: 'Repeater' },
+    companion: { color: '#00ff88', icon: '📱', label: 'Companion' },
+    room: { color: '#c864ff', icon: '🏠', label: 'Room Server' }
+  };
+
+  function getLinks() {
+    const links = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        if (Math.sqrt(dx * dx + dy * dy) <= RANGE) {
+          links.push([i, j]);
+        }
+      }
+    }
+    return links;
+  }
+
+  function getCoveragePercent() {
+    if (nodes.length === 0) return 0;
+    const W = canvas.width, H = canvas.height;
+    const gridSize = 20;
+    let covered = 0, total = 0;
+    for (let x = 0; x < W; x += gridSize) {
+      for (let y = 0; y < H; y += gridSize) {
+        total++;
+        for (const n of nodes) {
+          const dx = n.x - x, dy = n.y - y;
+          if (Math.sqrt(dx * dx + dy * dy) <= RANGE) { covered++; break; }
+        }
+      }
+    }
+    return Math.round((covered / total) * 100);
+  }
+
+  function getRedundancy(links) {
+    if (nodes.length < 2) return '—';
+    const neighbors = new Array(nodes.length).fill(0);
+    for (const [a, b] of links) { neighbors[a]++; neighbors[b]++; }
+    const connected = neighbors.filter(n => n > 0);
+    if (connected.length === 0) return '—';
+    const avg = connected.reduce((s, v) => s + v, 0) / connected.length;
+    if (avg >= 3) return 'Hoog ✓';
+    if (avg >= 2) return 'Goed';
+    if (avg >= 1) return 'Laag ⚠';
+    return 'Geen';
+  }
+
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#081428';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(0,229,255,.05)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+    for (const n of nodes) {
+      ctx.fillStyle = 'rgba(0,229,255,.03)';
+      ctx.beginPath(); ctx.arc(n.x, n.y, RANGE, 0, Math.PI * 2); ctx.fill();
+    }
+
+    const links = getLinks();
+    for (const [a, b] of links) {
+      ctx.strokeStyle = 'rgba(0,229,255,.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(nodes[a].x, nodes[a].y);
+      ctx.lineTo(nodes[b].x, nodes[b].y);
+      ctx.stroke();
+    }
+
+    for (const n of nodes) {
+      const t = TYPES[n.type];
+      ctx.fillStyle = t.color;
+      ctx.beginPath(); ctx.arc(n.x, n.y, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#081428';
+      ctx.beginPath(); ctx.arc(n.x, n.y, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = t.color;
+      ctx.beginPath(); ctx.arc(n.x, n.y, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.font = '14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(t.icon, n.x, n.y - 16);
+    }
+
+    document.getElementById('ps-nodes').textContent = nodes.length;
+    document.getElementById('ps-links').textContent = links.length;
+    document.getElementById('ps-coverage').textContent = getCoveragePercent() + '%';
+    document.getElementById('ps-redundancy').textContent = getRedundancy(links);
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const sy = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
+  }
+
+  function findNode(pos) {
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const dx = nodes[i].x - pos.x, dy = nodes[i].y - pos.y;
+      if (Math.sqrt(dx * dx + dy * dy) < 18) return i;
+    }
+    return -1;
+  }
+
+  canvas.addEventListener('mousedown', e => {
+    const pos = getPos(e);
+    if (currentTool === 'remove') {
+      const idx = findNode(pos);
+      if (idx >= 0) { nodes.splice(idx, 1); draw(); }
+      return;
+    }
+    if (currentTool === 'clear') return;
+    const idx = findNode(pos);
+    if (idx >= 0) {
+      dragging = idx;
+      dragOffset = { x: nodes[idx].x - pos.x, y: nodes[idx].y - pos.y };
+    } else if (TYPES[currentTool]) {
+      nodes.push({ x: pos.x, y: pos.y, type: currentTool });
+      draw();
+    }
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (dragging === null) return;
+    const pos = getPos(e);
+    nodes[dragging].x = pos.x + dragOffset.x;
+    nodes[dragging].y = pos.y + dragOffset.y;
+    draw();
+  });
+
+  canvas.addEventListener('mouseup', () => { dragging = null; });
+  canvas.addEventListener('mouseleave', () => { dragging = null; });
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); canvas.dispatchEvent(new MouseEvent('mousedown', e.touches[0])); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); canvas.dispatchEvent(new MouseEvent('mousemove', e.touches[0])); }, { passive: false });
+  canvas.addEventListener('touchend', () => { dragging = null; });
+
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tool = btn.dataset.tool;
+      if (tool === 'clear') { nodes = []; draw(); return; }
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTool = tool;
+    });
+  });
+
+  draw();
+})();
+
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  { question: 'Welk topologie-patroon is het beste voor langs een weg of rivier?', options: ['Grid (raster)', 'Lineaire keten', 'Ster (hub-and-spoke)', 'Hybride'], correct: 1, explanation: 'Een lineaire keten plaatst nodes in een lijn, ideaal voor corridors zoals wegen of rivieren.' },
+  { question: 'Hoeveel backbone-repeaters zijn nodig voor een noodnetwerk in een stad van 15 km²?', options: ['2–3', '4–5', '8–10', '20+'], correct: 2, explanation: 'Voor een stad van 15 km² heb je 8–10 backbone-repeaters nodig om voldoende dekking en redundantie te garanderen.' },
+  { question: 'Wat is een backbone-node?', options: ['Een goedkope randnode', 'Een high-powered repeater die grote gebieden met elkaar verbindt', 'Een mobiel apparaat', 'Een node zonder antenne'], correct: 1, explanation: 'Een backbone-node is een krachtige repeater op een strategische (hoge) locatie die de hoofdverbinding vormt tussen gebieden.' },
+  { question: 'Wanneer wordt flooding een bottleneck in een mesh-netwerk?', options: ['Bij minder dan 5 nodes', 'Als het netwerk groeit en meer gerelayede berichten het airtime-budget opgebruiken', 'Alleen bij regen', 'Nooit, flooding schaalt oneindig'], correct: 1, explanation: 'Bij flooding stuurt elke node elk bericht door. Hoe meer nodes, hoe meer heruitzendingen, waardoor het airtime-budget snel opraakt.' },
+  { question: 'Wat is geografische segmentatie?', options: ['Nodes dichter bij elkaar plaatsen', 'Het netwerk opsplitsen in aparte netwerken die via bridge-nodes verbonden zijn', 'Alleen GPS gebruiken', 'Alle nodes op dezelfde frequentie zetten'], correct: 1, explanation: 'Geografische segmentatie splitst een groot netwerk in kleinere, onafhankelijke netwerken die via bridge-nodes met elkaar communiceren.' },
+  { question: 'Waarom plaats je repeaters op hoge punten?', options: ['Ze zijn daar goedkoper', 'Betere line-of-sight (LOS) en meer dekkingsgebied', 'Minder stroomverbruik', 'Betere GPS-ontvangst'], correct: 1, explanation: 'Hoge punten bieden meer line-of-sight verbindingen en een groter dekkingsgebied, waardoor minder repeaters nodig zijn.' },
+  { question: 'Welke hardware-rol heeft een Room Server?', options: ['Eenvoudige, goedkope repeater', 'Een krachtiger apparaat voor groepscommunicatie en berichtopslag', 'Alleen een antenne', 'Een mobiele telefoon'], correct: 1, explanation: 'Een Room Server heeft meer capaciteit nodig dan een eenvoudige repeater: opslag voor berichten en processing voor groepscommunicatie.' },
+  { question: 'Wat is gelaagde (tiered) architectuur?', options: ['Alle nodes op dezelfde hoogte', 'Lokale mesh → backbone → lokale mesh', 'Nodes zonder verbinding', 'Eén enkele repeater voor alles'], correct: 1, explanation: 'Gelaagde architectuur scheidt lokaal verkeer van inter-regio verkeer: lokale mesh-clusters verbonden via een backbone.' },
+  { question: 'Hoe plan je voor toekomstige groei van je netwerk?', options: ['Ontwerp voor exact het huidige aantal nodes', 'Ontwerp voor 2× de verwachte capaciteit', 'Gebruik altijd de goedkoopste hardware', 'Groei is niet nodig bij mesh'], correct: 1, explanation: 'Ontwerp voor 2× de verwachte groei zodat je netwerk toekomstige uitbreidingen aankan zonder compleet herontwerp.' },
+  { question: 'Welke uitdaging heeft het landelijke Drenthe voor een mesh-netwerk?', options: ['Te veel hoge gebouwen', 'Lange afstanden en weinig hoge punten', 'Te veel nodes beschikbaar', 'Geen stroom beschikbaar'], correct: 1, explanation: 'Drenthe is vlak en landelijk: grote afstanden tussen dorpen en weinig hoge punten maken het plaatsen van repeaters uitdagend.' }
+];
+
+initCourse('c-netwerk-ontwerp', quizQuestions);
+</script>
+</body>
+</html>

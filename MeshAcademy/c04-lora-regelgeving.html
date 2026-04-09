@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 4: LoRa Regelgeving — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── DUTY CYCLE CALCULATOR ─── */
+.calc-container{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:20px 0;}
+.calc-container h4{font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--cyan);}
+.calc-row{display:flex;align-items:center;gap:16px;margin-bottom:14px;flex-wrap:wrap;}
+.calc-label{font-size:.85rem;color:var(--dim);min-width:140px;}
+.calc-slider{-webkit-appearance:none;appearance:none;flex:1;min-width:160px;height:6px;border-radius:3px;background:rgba(0,229,255,.15);outline:none;}
+.calc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid var(--dark);}
+.calc-slider:focus-visible{box-shadow:var(--focus-ring);}
+.calc-value{font-size:.88rem;font-weight:700;color:var(--cyan);min-width:60px;text-align:right;}
+.calc-select{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:.85rem;cursor:pointer;}
+.calc-result{background:var(--mid);border-radius:10px;padding:20px;text-align:center;margin-top:16px;}
+.calc-result-num{font-size:2.4rem;font-weight:900;color:var(--green);}
+.calc-result-label{font-size:.85rem;color:var(--dim);margin-top:4px;}
+.calc-results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;}
+.calc-result-box{background:var(--mid);border-radius:10px;padding:16px;text-align:center;}
+.calc-result-box .num{font-size:1.6rem;font-weight:900;color:var(--yellow);}
+.calc-result-box .label{font-size:.78rem;color:var(--dim);margin-top:4px;}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.calc-results-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">⚖️</span>
+    <div class="course-info">
+      <h1>Cursus 4: <span>LoRa Regelgeving</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Beginner</span>
+        <span class="meta-tag tag-course">Cursus 4 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: ISM Band & EU Regelgeving"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Duty Cycle Uitgelegd"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Praktische Gevolgen"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: ISM Band & EU Regelgeving                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="lesson-section" data-section="s1" data-label="ISM Band & EU Regelgeving">
+    <div class="section-counter">Sectie 1 van 3</div>
+    <h2>ISM Band & <span>EU Regelgeving</span></h2>
+
+    <p>LoRa maakt gebruik van de <strong>ISM-band</strong> — een deel van het radiospectrum dat wereldwijd is gereserveerd voor <em>Industrial, Scientific and Medical</em> toepassingen. In Europa is dat de <strong>868 MHz band</strong>. Je hebt er geen vergunning voor nodig, maar er gelden wél strikte regels.</p>
+
+    <h3>Wat is de ISM-band?</h3>
+    <p>De ISM-banden werden in 1947 door de ITU (International Telecommunication Union) aangewezen voor niet-commercieel gebruik. De bekendste voorbeelden:</p>
+    <ul>
+      <li><strong>2,4 GHz</strong> — gebruikt door wifi, Bluetooth en magnetrons</li>
+      <li><strong>868 MHz</strong> — de Europese LoRa-band (korte afstand apparatuur)</li>
+      <li><strong>915 MHz</strong> — de Amerikaanse ISM-band (niet toegestaan in EU!)</li>
+      <li><strong>433 MHz</strong> — gebruikt door afstandsbedieningen en weerstations</li>
+    </ul>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">📐</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> "Vrij te gebruiken" betekent niet "zonder regels". De ISM-band is een <em>gedeeld spectrum</em> — duizenden apparaten gebruiken dezelfde frequenties. Daarom zijn er regels voor zendvermogen en zendtijd.</div>
+    </div>
+
+    <h3>EU 868 MHz Frequentieplan</h3>
+    <p>De 868 MHz band is opgedeeld in <strong>sub-banden</strong>, elk met eigen regels voor duty cycle en vermogen:</p>
+
+    <table class="comp-table" aria-label="EU 868 MHz sub-band overzicht">
+      <thead>
+        <tr>
+          <th>Sub-band</th>
+          <th>Frequentiebereik</th>
+          <th>Duty Cycle</th>
+          <th>Max. ERP</th>
+          <th>Gebruik</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>g</strong></td>
+          <td>863,0 – 868,0 MHz</td>
+          <td>1%</td>
+          <td>25 mW (+14 dBm)</td>
+          <td>Algemeen SRD</td>
+        </tr>
+        <tr>
+          <td><strong>g1</strong></td>
+          <td>868,0 – 868,6 MHz</td>
+          <td>1%</td>
+          <td>25 mW (+14 dBm)</td>
+          <td>LoRa hoofdband</td>
+        </tr>
+        <tr>
+          <td><strong>g2</strong></td>
+          <td>868,7 – 869,2 MHz</td>
+          <td>0,1%</td>
+          <td>25 mW (+14 dBm)</td>
+          <td>Alarm systemen</td>
+        </tr>
+        <tr>
+          <td><strong>g3</strong></td>
+          <td>869,4 – 869,65 MHz</td>
+          <td>10%</td>
+          <td>500 mW (+27 dBm)</td>
+          <td>Hoog-vermogen band</td>
+        </tr>
+        <tr>
+          <td><strong>g4</strong></td>
+          <td>869,7 – 870,0 MHz</td>
+          <td>1%</td>
+          <td>25 mW (+14 dBm)</td>
+          <td>Algemeen SRD</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Let op:</strong> MeshCore en de meeste LoRa-apparaten gebruiken sub-band g1 (868,0–868,6 MHz). Hier geldt <strong>1% duty cycle</strong> en maximaal <strong>25 mW (+14 dBm) ERP</strong>.</div>
+    </div>
+
+    <h3>ETSI EN 300 220</h3>
+    <p>Alle regels voor de 868 MHz band zijn vastgelegd in de Europese standaard <strong>ETSI EN 300 220</strong>. Dit is de norm die fabrikanten moeten volgen om het CE-keurmerk te krijgen. De belangrijkste eisen:</p>
+    <ul>
+      <li><strong>Maximaal zendvermogen (ERP)</strong> — 25 mW (+14 dBm) in de meeste sub-banden</li>
+      <li><strong>Duty cycle limieten</strong> — beperkt de zendtijd per uur</li>
+      <li><strong>Bandbreedte beperkingen</strong> — je signaal mag niet buiten je sub-band vallen</li>
+      <li><strong>Spurious emissies</strong> — ongewenste signalen op andere frequenties moeten minimaal zijn</li>
+    </ul>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🇪🇺</div>
+        <h4>Europa: 868 MHz</h4>
+        <p>25 mW ERP, 1% duty cycle op de hoofdband. Gereguleerd door ETSI EN 300 220.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🇺🇸</div>
+        <h4>VS: 902–928 MHz</h4>
+        <p>Tot 1 W ERP, geen duty cycle maar frequency hopping vereist (FCC Part 15). Veel ruimer dan EU.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌏</div>
+        <h4>Azië-Pacific</h4>
+        <p>Verschilt per land. Australië: 915–928 MHz. Japan: 920–925 MHz. Altijd lokale regels checken!</p>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Tip:</strong> Koop altijd apparatuur voor de juiste regio. Een 915 MHz board uit de VS werkt niet legaal in Europa — en de frequenties overlappen niet met onze 868 MHz band.</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: Duty Cycle Uitgelegd                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="lesson-section" data-section="s2" data-label="Duty Cycle Uitgelegd">
+    <div class="section-counter">Sectie 2 van 3</div>
+    <h2>Duty Cycle <span>Uitgelegd</span></h2>
+
+    <p>Duty cycle is het <strong>percentage van de tijd dat je mag zenden</strong>. Het is de belangrijkste beperking waar je als LoRa-gebruiker mee te maken krijgt. Begrijp je dit concept goed, dan kun je je netwerk veel beter ontwerpen.</p>
+
+    <h3>De basisberekening</h3>
+    <p>Bij 1% duty cycle mag je maximaal <strong>1% van elk uur</strong> zenden:</p>
+    <ul>
+      <li>1 uur = 3600 seconden</li>
+      <li>1% van 3600 = <strong>36 seconden zendtijd per uur</strong></li>
+    </ul>
+    <p>Dat klinkt als weinig — en dat ís het ook. Maar LoRa-berichten zijn klein (meestal &lt;100 bytes), dus je kunt nog steeds tientallen berichten per uur versturen.</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🧮</span>
+      <div class="callout-text"><strong>Rekenvoorbeeld:</strong> Een bericht duurt 1 seconde om te versturen. Na het zenden moet je <strong>99 seconden wachten</strong> (1 / 0,01 − 1 = 99). Bij 1% duty cycle kun je dus max 36 berichten van 1 seconde per uur versturen.</div>
+    </div>
+
+    <h3>Waarom duty cycle?</h3>
+    <p>De ISM-band is een <strong>gedeeld spectrum</strong>. Duizenden apparaten — van weerstations tot garagedeuropeners — gebruiken dezelfde frequenties. Zonder beperkingen zou één apparaat het hele spectrum kunnen bezetten, waardoor niemand anders kan communiceren.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🤝</div>
+        <h4>Eerlijk delen</h4>
+        <p>Duty cycle zorgt dat alle apparaten een eerlijk aandeel krijgen van het spectrum.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>Minder interferentie</h4>
+        <p>Hoe minder je zendt, hoe kleiner de kans dat je signaal botst met een ander apparaat.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⚖️</div>
+        <h4>Wettelijke plicht</h4>
+        <p>Duty cycle is geen richtlijn maar een <strong>wettelijke eis</strong>. Overtreding kan boetes opleveren.</p>
+      </div>
+    </div>
+
+    <h3>Airtime vs. Spreading Factor</h3>
+    <p>De <strong>airtime</strong> (zendtijd) van een bericht hangt sterk af van de gekozen <strong>Spreading Factor (SF)</strong>. Een hogere SF betekent meer bereik, maar ook veel langere zendtijd — en dus sneller je duty cycle budget op.</p>
+
+    <table class="comp-table" aria-label="Airtime per SF voor 50 bytes payload">
+      <thead>
+        <tr>
+          <th>SF</th>
+          <th>Bandbreedte</th>
+          <th>Airtime (50 bytes)</th>
+          <th>Berichten/uur (1% DC)</th>
+          <th>Wachttijd na 1 bericht</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SF7</strong></td>
+          <td>125 kHz</td>
+          <td>~72 ms</td>
+          <td>~500</td>
+          <td>~7 seconden</td>
+        </tr>
+        <tr>
+          <td><strong>SF8</strong></td>
+          <td>125 kHz</td>
+          <td>~134 ms</td>
+          <td>~268</td>
+          <td>~13 seconden</td>
+        </tr>
+        <tr>
+          <td><strong>SF9</strong></td>
+          <td>125 kHz</td>
+          <td>~247 ms</td>
+          <td>~145</td>
+          <td>~25 seconden</td>
+        </tr>
+        <tr>
+          <td><strong>SF10</strong></td>
+          <td>125 kHz</td>
+          <td>~453 ms</td>
+          <td>~79</td>
+          <td>~45 seconden</td>
+        </tr>
+        <tr>
+          <td><strong>SF11</strong></td>
+          <td>250 kHz</td>
+          <td>~414 ms</td>
+          <td>~87</td>
+          <td>~41 seconden</td>
+        </tr>
+        <tr>
+          <td><strong>SF12</strong></td>
+          <td>125 kHz</td>
+          <td>~1483 ms</td>
+          <td>~24</td>
+          <td>~147 seconden</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> MeshCore gebruikt standaard <strong>SF11 BW250</strong>. Door de bredere bandbreedte (250 kHz i.p.v. 125 kHz) wordt de airtime gehalveerd, wat een slimme balans geeft tussen bereik en duty cycle budget.</div>
+    </div>
+
+    <h3>Interactieve Duty Cycle Calculator</h3>
+    <div class="calc-container">
+      <h4>⏱️ Bereken je zendbudget</h4>
+      <div class="calc-row">
+        <span class="calc-label">Spreading Factor:</span>
+        <select class="calc-select" id="dc-sf">
+          <option value="7">SF7 (BW125)</option>
+          <option value="8">SF8 (BW125)</option>
+          <option value="9">SF9 (BW125)</option>
+          <option value="10">SF10 (BW125)</option>
+          <option value="11" selected>SF11 (BW250) — MeshCore</option>
+          <option value="12">SF12 (BW125)</option>
+        </select>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">Payload grootte:</span>
+        <input type="range" class="calc-slider" id="dc-payload" min="10" max="200" value="50" aria-label="Payload grootte in bytes">
+        <span class="calc-value" id="dc-payload-val">50 bytes</span>
+      </div>
+      <div class="calc-row">
+        <span class="calc-label">Duty cycle:</span>
+        <select class="calc-select" id="dc-duty">
+          <option value="0.1">0,1% (sub-band g2)</option>
+          <option value="1" selected>1% (sub-band g1 — standaard)</option>
+          <option value="10">10% (sub-band g3)</option>
+        </select>
+      </div>
+      <div class="calc-results-grid">
+        <div class="calc-result-box">
+          <div class="num" id="dc-airtime">414 ms</div>
+          <div class="label">Airtime per bericht</div>
+        </div>
+        <div class="calc-result-box">
+          <div class="num" id="dc-msgs">87</div>
+          <div class="label">Berichten per uur</div>
+        </div>
+        <div class="calc-result-box">
+          <div class="num" id="dc-wait">41 s</div>
+          <div class="label">Wachttijd na zenden</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: Praktische Gevolgen voor MeshCore                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="lesson-section" data-section="s3" data-label="Praktische Gevolgen">
+    <div class="section-counter">Sectie 3 van 3</div>
+    <h2>Praktische Gevolgen <span>voor MeshCore</span></h2>
+
+    <p>De duty cycle regels hebben directe gevolgen voor hoe een MeshCore mesh-netwerk functioneert. Elk bericht dat een node verstuurt — of het nu eigen verkeer is of een doorgestuurd bericht — telt mee voor het duty cycle budget.</p>
+
+    <h3>Repeater nodes: het zendbudget beheren</h3>
+    <p>Een <strong>repeater node</strong> stuurt niet alleen eigen berichten, maar ook berichten van andere nodes door. Dat betekent dat een drukke repeater veel sneller zijn duty cycle budget verbruikt:</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📤</div>
+        <h4>Eigen berichten</h4>
+        <p>Heartbeats, positie-updates en antwoorden. Meestal 5-10 berichten per uur.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔁</div>
+        <h4>Doorgestuurde berichten</h4>
+        <p>Elk bericht dat door de repeater loopt, kost extra airtime uit hetzelfde budget.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📊</div>
+        <h4>Budget bewaken</h4>
+        <p>MeshCore houdt intern bij hoeveel airtime er is verbruikt en pauzeert als het budget op is.</p>
+      </div>
+    </div>
+
+    <h3>Waarom SF11 BW250?</h3>
+    <p>MeshCore kiest standaard voor <strong>SF11 met 250 kHz bandbreedte</strong>. Dit is een bewuste afweging:</p>
+
+    <table class="comp-table" aria-label="SF11 BW250 versus alternatieven">
+      <thead>
+        <tr>
+          <th>Instelling</th>
+          <th>Bereik</th>
+          <th>Airtime (50 bytes)</th>
+          <th>Berichten/uur</th>
+          <th>Geschiktheid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SF7 BW125</strong></td>
+          <td>Kort (2-5 km)</td>
+          <td>~72 ms</td>
+          <td>~500</td>
+          <td>Stedelijk, veel verkeer</td>
+        </tr>
+        <tr>
+          <td><strong>SF9 BW125</strong></td>
+          <td>Gemiddeld (5-8 km)</td>
+          <td>~247 ms</td>
+          <td>~145</td>
+          <td>Voorstedelijk</td>
+        </tr>
+        <tr>
+          <td style="color:var(--green);font-weight:700;">SF11 BW250 ✓</td>
+          <td>Goed (8-15 km)</td>
+          <td>~414 ms</td>
+          <td>~87</td>
+          <td>MeshCore standaard</td>
+        </tr>
+        <tr>
+          <td><strong>SF12 BW125</strong></td>
+          <td>Maximaal (10-20 km)</td>
+          <td>~1483 ms</td>
+          <td>~24</td>
+          <td>Extreme afstand</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Kernpunt:</strong> SF11 BW250 biedt bijna het bereik van SF12, maar met slechts ~28% van de airtime. Dat betekent <strong>3,5× meer berichten per uur</strong> — cruciaal voor een mesh-netwerk waar nodes berichten doorsturen.</div>
+    </div>
+
+    <h3>Gevolgen van overtreding</h3>
+    <p>Het overschrijden van de duty cycle is <strong>illegaal</strong>. In de praktijk:</p>
+    <ul>
+      <li><strong>Juridisch:</strong> Agentschap Telecom (in NL) kan boetes opleggen bij aanhoudende storingen</li>
+      <li><strong>Technisch:</strong> Je veroorzaakt interferentie voor andere gebruikers van dezelfde band</li>
+      <li><strong>Sociaal:</strong> In de LoRa-community word je gezien als "slechte buur" — het schaadt het gedeelde spectrum</li>
+      <li><strong>Praktisch:</strong> Je eigen berichten worden minder betrouwbaar door congestie</li>
+    </ul>
+
+    <div class="callout red">
+      <span class="callout-icon" aria-hidden="true">🚫</span>
+      <div class="callout-text"><strong>Nooit doen:</strong> Firmware aanpassen om de duty cycle te omzeilen. Dit is niet alleen illegaal, maar ondermijnt ook de betrouwbaarheid van je eigen netwerk én dat van anderen.</div>
+    </div>
+
+    <h3>Tips om binnen de limieten te blijven</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📦</div>
+        <h4>Houd berichten kort</h4>
+        <p>Minder bytes = minder airtime. Gebruik compacte berichtformaten en vermijd onnodige data.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⏰</div>
+        <h4>Beperk de frequentie</h4>
+        <p>Stuur niet vaker dan nodig. Stel update-intervallen in op minuten, niet seconden.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📉</div>
+        <h4>Gebruik lagere SF waar mogelijk</h4>
+        <p>Als je nodes dicht bij elkaar staan, gebruik dan een lagere SF voor kortere airtime.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🗺️</div>
+        <h4>Plan je netwerk</h4>
+        <p>Zorg dat repeaters strategisch geplaatst zijn zodat er geen onnodige hops nodig zijn.</p>
+      </div>
+    </div>
+
+    <h3>Duty cycle budget per SF-instelling</h3>
+    <p>Onderstaande tabel laat zien hoeveel "nuttige data" je per uur kunt versturen bij 1% duty cycle:</p>
+
+    <table class="comp-table" aria-label="Data-doorvoer per SF bij 1% duty cycle">
+      <thead>
+        <tr>
+          <th>SF</th>
+          <th>Airtime/bericht</th>
+          <th>Berichten/uur</th>
+          <th>Nuttige data/uur</th>
+          <th>Oordeel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SF7 BW125</strong></td>
+          <td>72 ms</td>
+          <td>500</td>
+          <td>~25 kB</td>
+          <td class="check">Ruim budget</td>
+        </tr>
+        <tr>
+          <td><strong>SF9 BW125</strong></td>
+          <td>247 ms</td>
+          <td>145</td>
+          <td>~7,3 kB</td>
+          <td class="check">Voldoende</td>
+        </tr>
+        <tr>
+          <td><strong>SF11 BW250</strong></td>
+          <td>414 ms</td>
+          <td>87</td>
+          <td>~4,3 kB</td>
+          <td style="color:var(--yellow);">Acceptabel</td>
+        </tr>
+        <tr>
+          <td><strong>SF12 BW125</strong></td>
+          <td>1483 ms</td>
+          <td>24</td>
+          <td>~1,2 kB</td>
+          <td class="cross">Zeer beperkt</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🎯</span>
+      <div class="callout-text"><strong>Conclusie:</strong> Voor een mesh-netwerk is duty cycle de belangrijkste bottleneck. Kies de laagste SF die je bereik toelaat, houd berichten klein, en plan je netwerk slim. MeshCore's keuze van SF11 BW250 is een uitstekend compromis voor de meeste noodnetwerk-scenario's.</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- QUIZ                                                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="quiz-section" data-section="quiz" data-label="Quiz">
+    <h2>📝 Kennistoets</h2>
+    <p class="quiz-intro">Test je kennis over LoRa regelgeving en duty cycle. Je hebt minimaal 4 van de 5 vragen goed nodig om te slagen.</p>
+    <div id="quiz-container"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── DUTY CYCLE CALCULATOR ─── */
+(function(){
+  const sfData = {
+    7:  { bw: 125000, preamble: 8 },
+    8:  { bw: 125000, preamble: 8 },
+    9:  { bw: 125000, preamble: 8 },
+    10: { bw: 125000, preamble: 8 },
+    11: { bw: 250000, preamble: 8 },
+    12: { bw: 125000, preamble: 8 }
+  };
+
+  function calcAirtime(sf, payload) {
+    const d = sfData[sf];
+    const Tsym = Math.pow(2, sf) / d.bw * 1000; // ms
+    const Tpreamble = (d.preamble + 4.25) * Tsym;
+    const DE = sf >= 11 ? 1 : 0;
+    const CR = 1; // 4/5
+    const H = 0; // explicit header
+    const nPayload = Math.max(Math.ceil((8 * payload - 4 * sf + 28 + 16 - 20 * H) / (4 * (sf - 2 * DE))) * (CR + 4), 0) + 8;
+    const Tpayload = nPayload * Tsym;
+    return Tpreamble + Tpayload;
+  }
+
+  function update() {
+    const sf = parseInt(document.getElementById('dc-sf').value);
+    const payload = parseInt(document.getElementById('dc-payload').value);
+    const dcPct = parseFloat(document.getElementById('dc-duty').value);
+
+    document.getElementById('dc-payload-val').textContent = payload + ' bytes';
+
+    const airtime = calcAirtime(sf, payload);
+    const dcFrac = dcPct / 100;
+    const budgetMs = 3600000 * dcFrac;
+    const msgs = Math.floor(budgetMs / airtime);
+    const waitSec = (airtime / dcFrac / 1000) - (airtime / 1000);
+
+    document.getElementById('dc-airtime').textContent = airtime < 1000 ? Math.round(airtime) + ' ms' : (airtime / 1000).toFixed(1) + ' s';
+    document.getElementById('dc-msgs').textContent = msgs;
+    document.getElementById('dc-wait').textContent = waitSec < 60 ? Math.round(waitSec) + ' s' : (waitSec / 60).toFixed(1) + ' min';
+  }
+
+  document.getElementById('dc-sf').addEventListener('change', update);
+  document.getElementById('dc-payload').addEventListener('input', update);
+  document.getElementById('dc-duty').addEventListener('change', update);
+  update();
+})();
+
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  {
+    question: 'Wat betekent 1% duty cycle in de 868 MHz band?',
+    options: ['Je mag maximaal 1 bericht per minuut versturen', 'Je mag maximaal 36 seconden per uur zenden', 'Je moet op 1% van het beschikbare vermogen zenden', 'Je mag maar 1% van de frequenties gebruiken'],
+    correct: 1,
+    explanation: '1% duty cycle betekent dat je maximaal 1% van de tijd mag zenden: 1% × 3600 seconden = 36 seconden per uur.'
+  },
+  {
+    question: 'Wat is het maximale zendvermogen (ERP) in de EU 868 MHz hoofdband?',
+    options: ['100 mW (+20 dBm)', '10 mW (+10 dBm)', '25 mW (+14 dBm)', '500 mW (+27 dBm)'],
+    correct: 2,
+    explanation: 'In sub-band g1 (868,0–868,6 MHz) is het maximale ERP 25 mW, oftewel +14 dBm. De 500 mW geldt alleen voor de smalle g3 sub-band.'
+  },
+  {
+    question: 'Waarom bestaat de duty cycle beperking?',
+    options: ['Om stroom te besparen', 'Om eerlijk gebruik van het gedeelde spectrum te garanderen', 'Om de levensduur van radiochips te verlengen', 'Omdat LoRa alleen korte berichten kan versturen'],
+    correct: 1,
+    explanation: 'De ISM-band is een gedeeld spectrum. Duty cycle zorgt dat alle gebruikers eerlijk toegang hebben en voorkomt dat één apparaat het spectrum monopoliseert.'
+  },
+  {
+    question: 'Welke Europese standaard regelt het gebruik van de 868 MHz ISM-band?',
+    options: ['IEEE 802.15.4', 'ETSI EN 300 220', 'FCC Part 15', 'ITU-R M.1073'],
+    correct: 1,
+    explanation: 'ETSI EN 300 220 is de Europese standaard voor Short Range Devices (SRD) in de 868 MHz band. FCC Part 15 is de Amerikaanse standaard.'
+  },
+  {
+    question: 'Wat is het effect van een hogere Spreading Factor op je duty cycle budget?',
+    options: ['Geen effect, duty cycle is onafhankelijk van SF', 'Lagere airtime, dus meer berichten per uur', 'Hogere airtime, dus minder berichten per uur', 'De duty cycle limiet wordt automatisch verhoogd'],
+    correct: 2,
+    explanation: 'Een hogere SF betekent langere airtime per bericht. Bij SF12 BW125 duurt een bericht ~1,5 seconde versus ~72 ms bij SF7 — dat is 20× langer. Hierdoor kun je veel minder berichten per uur versturen binnen je 1% budget.'
+  }
+];
+
+initCourse('c-lora-regels', quizQuestions);
+</script>
+</body>
+</html>

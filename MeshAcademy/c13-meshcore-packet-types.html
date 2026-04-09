@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 13: MeshCore Packet Types — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">📦</span>
+    <div class="course-info">
+      <h1>Cursus 13: <span>MeshCore Packet Types</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gemiddeld</span>
+        <span class="meta-tag tag-course">Cursus 13 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Packet Structuur"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: MeshCore Packet Types"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Packet Levenscyclus"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- SECTION 1: Packet Structuur -->
+  <section class="lesson-section" data-section="s1" data-label="Packet Structuur">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Packet <span>Structuur</span></h2>
+    <p>In MeshCore wordt alle communicatie verpakt in <strong>packets</strong> — kleine datapakketjes die via de radio worden verzonden. Een packet is de kleinste eenheid van informatie die door het mesh-netwerk reist.</p>
+
+    <h3>Opbouw van een packet</h3>
+    <p>Elk MeshCore-packet heeft een vaste structuur die ervoor zorgt dat ontvangende nodes precies weten wat ze ermee moeten doen:</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏷️</div>
+        <h4>Header</h4>
+        <p>Bevat het type-byte (welk soort packet), de afzender-ID en vlaggen (flags) die aangeven hoe het packet verwerkt moet worden.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📄</div>
+        <h4>Payload</h4>
+        <p>De eigenlijke data: een tekstbericht, GPS-coördinaten, of een verzoek. De lengte varieert per packet type.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔒</div>
+        <h4>Integriteitscontrole</h4>
+        <p>Een controle die onderdeel is van de encryptie. Hiermee kan de ontvanger verifiëren dat het packet niet beschadigd of gewijzigd is.</p>
+      </div>
+    </div>
+
+    <h3>Waarom kleine packets?</h3>
+    <p>LoRa-radio's hebben een beperkte <strong>airtime</strong> — de tijd dat de radio mag zenden. In Europa geldt een <strong>duty cycle</strong> van maximaal 1% op de meeste frequenties. Elk packet moet daarom zo klein mogelijk zijn:</p>
+    <ul>
+      <li><strong>Minder airtime:</strong> een kleiner packet is sneller verzonden, waardoor je binnen de duty cycle blijft.</li>
+      <li><strong>Meer ruimte:</strong> andere nodes in het netwerk krijgen ook de kans om te zenden.</li>
+      <li><strong>Minder kans op fouten:</strong> kortere transmissies hebben minder last van interferentie.</li>
+    </ul>
+
+    <h3>Packet-identificatie</h3>
+    <p>Elk packet krijgt een <strong>unieke hash</strong> — een soort digitale vingerafdruk. Nodes gebruiken deze hash om te bepalen of ze een packet al eerder hebben gezien. Zo wordt voorkomen dat hetzelfde packet eindeloos wordt doorgestuurd (re-broadcast).</p>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Onthoud:</strong> De maximale packetgrootte wordt bepaald door de LoRa-airtime. Hoe langer een packet, hoe meer airtime het kost — en airtime is in Europa streng gereguleerd.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: MeshCore Packet Types -->
+  <section class="lesson-section" data-section="s2" data-label="MeshCore Packet Types">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>MeshCore <span>Packet Types</span></h2>
+    <p>MeshCore kent verschillende packet types, elk met een eigen doel. Het <strong>type-byte</strong> in de header bepaalt wat voor soort packet het is en hoe ontvangende nodes het moeten verwerken.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💬</div>
+        <h4>TXT_MSG</h4>
+        <p>Tekstbericht (chat). Het meest gebruikte packet type. Bevat een versleuteld bericht van één node naar een andere.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">👋</div>
+        <h4>HELLO</h4>
+        <p>Node-aankondiging: "Ik ben hier, dit is mijn naam en deze mogelijkheden heb ik." Hiermee maken nodes zich bekend in het netwerk.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">✅</div>
+        <h4>ACK</h4>
+        <p>Bevestiging (acknowledgement). Wordt teruggestuurd om aan te geven dat een bericht succesvol is ontvangen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔍</div>
+        <h4>PING / TRACE</h4>
+        <p>Netwerkdiagnostiek. PING test of een node bereikbaar is. TRACE laat het pad zien dat een packet aflegt.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📥</div>
+        <h4>REQ</h4>
+        <p>Request aan een Room Server om opgeslagen berichten op te halen. Wordt gebruikt wanneer een node offline was en gemiste berichten wil ophalen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🕶️</div>
+        <h4>ANON_REQ</h4>
+        <p>Anoniem verzoek. Werkt als REQ maar zonder de identiteit van de afzender prijs te geven — privacy-beschermend.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📢</div>
+        <h4>ADV</h4>
+        <p>Advertentie/dienstaankondiging. Een node maakt zijn diensten of mogelijkheden bekend aan het netwerk. Cryptografisch ondertekend.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📍</div>
+        <h4>GPS_POS</h4>
+        <p>GPS-positie delen. Stuurt de GPS-locatie van een node naar het netwerk, bruikbaar voor tracking en kaartweergave.</p>
+      </div>
+    </div>
+
+    <h3>Vergelijkingstabel</h3>
+    <table class="comp-table" aria-label="Vergelijking MeshCore packet types">
+      <thead>
+        <tr><th>Type</th><th>Doel</th><th>Typische grootte</th><th>Frequentie</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>TXT_MSG</strong></td><td>Tekstberichten (chat)</td><td>Klein – medium</td><td>Hoog (bij actief gebruik)</td></tr>
+        <tr><td><strong>HELLO</strong></td><td>Node-aankondiging</td><td>Klein</td><td>Periodiek</td></tr>
+        <tr><td><strong>ACK</strong></td><td>Ontvangstbevestiging</td><td>Zeer klein</td><td>Per ontvangen bericht</td></tr>
+        <tr><td><strong>PING / TRACE</strong></td><td>Netwerkdiagnostiek</td><td>Zeer klein</td><td>Op verzoek</td></tr>
+        <tr><td><strong>REQ</strong></td><td>Berichten ophalen van server</td><td>Klein</td><td>Bij verbinding</td></tr>
+        <tr><td><strong>ANON_REQ</strong></td><td>Anoniem verzoek</td><td>Klein</td><td>Incidenteel</td></tr>
+        <tr><td><strong>ADV</strong></td><td>Dienstaankondiging</td><td>Klein – medium</td><td>Periodiek</td></tr>
+        <tr><td><strong>GPS_POS</strong></td><td>Locatie delen</td><td>Klein</td><td>Periodiek / op verzoek</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Let op:</strong> ANON_REQ gebruikt een tijdelijke publieke sleutel in plaats van de permanente identiteit van de afzender. Zo kan een node berichten ophalen van een Room Server zonder dat de server weet wie het verzoek doet.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Packet Levenscyclus -->
+  <section class="lesson-section" data-section="s3" data-label="Packet Levenscyclus">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Packet <span>Levenscyclus</span></h2>
+    <p>Wat gebeurt er precies wanneer je een bericht verstuurt in MeshCore? Hieronder volg je een packet stap voor stap van verzender tot ontvanger.</p>
+
+    <h3>Van bericht tot bezorging</h3>
+    <ol>
+      <li><strong>App maakt TXT_MSG-packet:</strong> je typt een bericht en de app verpakt het in een TXT_MSG-packet met de juiste header.</li>
+      <li><strong>Packet wordt versleuteld:</strong> het packet wordt versleuteld zodat alleen de ontvanger het kan lezen (details in Cursus 16).</li>
+      <li><strong>Radio verzendt packet:</strong> de LoRa-radio verzendt het versleutelde packet via de antenne.</li>
+      <li><strong>Naburige repeaters ontvangen het:</strong> alle nodes binnen radiobereik ontvangen het packet.</li>
+      <li><strong>Hash-controle:</strong> elke repeater controleert de unieke packet-hash: "Heb ik dit packet al eerder gezien?"</li>
+      <li><strong>Doorsturen (flood):</strong> als het packet nieuw is, stuurt de repeater het door naar zijn eigen buren.</li>
+      <li><strong>Bestemming ontvangt en ontsleutelt:</strong> de bestemmingsnode herkent het packet als "voor mij" en ontsleutelt de inhoud.</li>
+      <li><strong>ACK terug:</strong> een ACK-packet wordt teruggestuurd door het netwerk naar de oorspronkelijke afzender als bevestiging.</li>
+    </ol>
+
+    <h3>Time To Live (TTL)</h3>
+    <p>Packets leven niet eeuwig. Elke keer dat een packet wordt doorgestuurd (een "hop"), wordt een <strong>hop-teller</strong> verlaagd. Wanneer deze nul bereikt, wordt het packet niet meer verder doorgestuurd. Dit voorkomt dat packets eindeloos door het netwerk blijven circuleren.</p>
+
+    <h3>Duplicaatdetectie</h3>
+    <p>Elke node houdt een <strong>seen-list</strong> bij — een lijst van recent ontvangen packet-hashes. Als een binnenkomend packet een hash heeft die al in de lijst staat, wordt het genegeerd. Zo wordt dubbele doorsturen (en onnodige airtime) voorkomen. Meer details over de seen-list volgen in Cursus 14.</p>
+
+    <h3>Bezorgbevestiging via ACK</h3>
+    <p>Wanneer de bestemmingsnode een bericht succesvol ontvangt en ontsleutelt, stuurt hij een <strong>ACK-packet</strong> terug. Dit ACK reist via het netwerk terug naar de afzender. Zo weet je zeker dat je bericht is aangekomen.</p>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Als je geen ACK ontvangt, betekent dat niet per se dat het bericht verloren is — het kan zijn dat het ACK-packet zelf niet is teruggekomen. In een mesh-netwerk is bezorging "best effort" met bevestiging.</div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Je hebt minimaal 70% nodig (7/10) om de volgende cursus te ontgrendelen.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+const quizQuestions = [
+  {
+    question: 'Wat bevat een TXT_MSG-packet?',
+    options: ['GPS-coördinaten', 'Een versleuteld tekstbericht (chat)', 'Een node-aankondiging', 'Diagnostische data'],
+    correct: 1,
+    explanation: 'TXT_MSG is het packet type voor versleutelde tekstberichten (chat) tussen nodes.'
+  },
+  {
+    question: 'Wat is het doel van een ACK-packet?',
+    options: ['Een node aankondigen in het netwerk', 'De route naar een node opvragen', 'Bevestigen dat een bericht is ontvangen', 'GPS-positie delen'],
+    correct: 2,
+    explanation: 'ACK (acknowledgement) wordt teruggestuurd om te bevestigen dat een bericht succesvol is ontvangen.'
+  },
+  {
+    question: 'Hoe voorkomen nodes dat ze hetzelfde packet opnieuw doorsturen?',
+    options: ['Ze controleren de afzender-ID', 'Ze vergelijken de packet-hash met hun seen-list', 'Ze wachten 10 seconden tussen elke doorstuur', 'Ze sturen alleen door als ze de ontvanger kennen'],
+    correct: 1,
+    explanation: 'Elke node houdt een seen-list bij van packet-hashes. Als een hash al bekend is, wordt het packet niet opnieuw doorgestuurd.'
+  },
+  {
+    question: 'Wat doet een HELLO-packet?',
+    options: ['Het versleutelt een bericht', 'Het kondigt de aanwezigheid en mogelijkheden van een node aan', 'Het vraagt berichten op bij een server', 'Het bevestigt de ontvangst van een bericht'],
+    correct: 1,
+    explanation: 'HELLO-packets maken een node bekend in het netwerk: "Ik ben hier, dit is mijn naam en deze mogelijkheden heb ik."'
+  },
+  {
+    question: 'Waarom zijn kleine packets belangrijk in MeshCore?',
+    options: ['Ze zijn goedkoper om te versturen', 'Ze voldoen aan duty cycle regels en gebruiken minder airtime', 'Ze zijn makkelijker te versleutelen', 'Ze kunnen alleen door nieuwe hardware worden verzonden'],
+    correct: 1,
+    explanation: 'Kleinere packets gebruiken minder airtime, waardoor nodes binnen de wettelijke duty cycle (max 1% in Europa) blijven.'
+  },
+  {
+    question: 'Waarvoor wordt ANON_REQ gebruikt?',
+    options: ['Om een bericht zonder versleuteling te versturen', 'Om anoniem/privacy-beschermend berichten op te vragen bij een server', 'Om een node permanent te blokkeren', 'Om de firmware van een node bij te werken'],
+    correct: 1,
+    explanation: 'ANON_REQ gebruikt een tijdelijke publieke sleutel zodat de afzender niet identificeerbaar is — dit beschermt de privacy.'
+  },
+  {
+    question: 'Welke informatie deelt een GPS_POS-packet?',
+    options: ['De batterijstatus van een node', 'De firmware-versie', 'De GPS-locatie van een node', 'Een versleuteld groepsbericht'],
+    correct: 2,
+    explanation: 'GPS_POS-packets delen de GPS-locatie van een node, bruikbaar voor tracking en kaartweergave.'
+  },
+  {
+    question: 'Wat gebeurt er als eerste wanneer je een bericht verstuurt?',
+    options: ['De radio begint direct met zenden', 'Repeaters controleren de route', 'Het packet wordt aangemaakt en versleuteld', 'Er wordt een ACK verstuurd'],
+    correct: 2,
+    explanation: 'Eerst maakt de app een TXT_MSG-packet aan, daarna wordt het versleuteld, en pas dan verzendt de radio het.'
+  },
+  {
+    question: 'Waarvoor worden PING en TRACE gebruikt?',
+    options: ['Om tekst te versturen', 'Voor netwerkdiagnostiek', 'Om de duty cycle te meten', 'Om nodes te verwijderen uit het netwerk'],
+    correct: 1,
+    explanation: 'PING test of een node bereikbaar is, TRACE laat het pad zien dat een packet aflegt — beide zijn diagnostische tools.'
+  },
+  {
+    question: 'Hoe beslist een repeater of hij een packet moet doorsturen?',
+    options: ['Hij stuurt altijd alles door', 'Hij controleert of de packet-hash nieuw is in zijn seen-list', 'Hij stuurt alleen door als de afzender bekend is', 'Hij stuurt door op basis van signaalsterkte'],
+    correct: 1,
+    explanation: 'Een repeater controleert de unieke packet-hash tegen zijn seen-list. Alleen als het packet nieuw is, wordt het doorgestuurd.'
+  }
+];
+
+initCourse('c-packet-types', quizQuestions);
+</script>
+</body>
+</html>

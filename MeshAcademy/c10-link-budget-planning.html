@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 10: Link Budget & Planning — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── INTERACTIVE DEMO ─── */
+.demo-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin:20px 0;}
+.demo-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;}
+.demo-bar h4{font-size:.95rem;font-weight:700;}
+.demo-hint{font-size:.78rem;color:var(--dim);}
+.demo-controls{padding:14px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--border);}
+.demo-controls label{font-size:.85rem;color:var(--dim);display:flex;align-items:center;gap:8px;}
+.demo-controls input[type=range]{accent-color:var(--cyan);min-width:120px;}
+.demo-controls .val-out{font-size:.85rem;font-weight:700;color:var(--cyan);min-width:40px;}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🧮</span>
+    <div class="course-info">
+      <h1>Cursus 10: <span>Link Budget &amp; Planning</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gemiddeld</span>
+        <span class="meta-tag tag-course">Cursus 10 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Wat is een Link Budget?"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: Pad-verlies berekenen"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Netwerkplanning voor Drenthe"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- ═══ SECTIE 1: Wat is een Link Budget? ═══ -->
+  <section class="lesson-section" data-section="s1" data-label="Wat is een Link Budget?">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Wat is een <span>Link Budget?</span></h2>
+    <p>Een link budget is de boekhouding van je radioverbinding. Je telt al het zendvermogen en alle antenne-winst bij elkaar op, en trekt alle verliezen ervan af. Als het resultaat boven de gevoeligheid van de ontvanger uitkomt, werkt de verbinding.</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🧮</span>
+      <div class="callout-text"><strong>Formule:</strong> Ontvangen vermogen = TX Power + TX Antenne Gain − Kabelverlies − Padverliezen + RX Antenne Gain − RX Kabelverlies</div>
+    </div>
+
+    <p>Als het ontvangen vermogen <strong>hoger</strong> is dan de gevoeligheid van de ontvanger → de link werkt. Het verschil noemen we de <strong>link marge</strong>. Je wilt minimaal <strong>10 dB marge</strong> om betrouwbaar te zijn.</p>
+
+    <h3>Wat zit er in een Link Budget?</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>TX Power</h4>
+        <p>Het zendvermogen van de radio. SX1262 levert maximaal +22 dBm (158 mW), het EU-maximum voor 868 MHz.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📶</div>
+        <h4>Antenne Gain</h4>
+        <p>De versterking van de antenne in dBi. Beide kanten tellen mee: zender én ontvanger.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔌</div>
+        <h4>Kabelverliezen</h4>
+        <p>Elke meter coaxkabel kost signaal. RG58: ~0,3 dB/m. LMR-400: ~0,07 dB/m bij 868 MHz.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌍</div>
+        <h4>Padverliezen</h4>
+        <p>Het signaalverlies door afstand (Free Space Path Loss) en obstakels. Dit is meestal het grootste verlies.</p>
+      </div>
+    </div>
+
+    <h3>Rekenvoorbeeld</h3>
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">✅</span>
+      <div class="callout-text">
+        <strong>Voorbeeld:</strong> +22 dBm TX + 3 dBi TX antenne − 1 dB kabel − 130 dB padverliezen + 3 dBi RX antenne − 1 dB RX kabel = <strong>−104 dBm</strong><br>
+        SX1262 gevoeligheid bij SF11: ~−137 dBm → Marge = −104 − (−137) = <strong>33 dB ✓</strong><br>
+        Ruim voldoende marge voor een betrouwbare verbinding!
+      </div>
+    </div>
+
+    <h3>Link Budget componenten</h3>
+    <table class="comp-table" aria-label="Link budget componenten">
+      <thead><tr><th>Component</th><th>Waarde</th><th>Toelichting</th></tr></thead>
+      <tbody>
+        <tr><td>TX power SX1262</td><td class="check">+22 dBm</td><td>Maximum EU 868 MHz</td></tr>
+        <tr><td>Antenne gain (omni)</td><td class="check">+3 tot +6 dBi</td><td>Per kant (TX en RX)</td></tr>
+        <tr><td>Kabelverlies (1m RG58)</td><td class="cross">−0,3 dB</td><td>Per meter kabel</td></tr>
+        <tr><td>Vrije-ruimte padverliezen (1 km)</td><td class="cross">−91 dB</td><td>FSPL bij 868 MHz</td></tr>
+        <tr><td>Obstakelverliezen</td><td class="cross">−5 tot −30 dB</td><td>Bomen, muren, heuvels</td></tr>
+        <tr><td>RX gevoeligheid (SF11)</td><td class="check">−137 dBm</td><td>SX1262 specificatie</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Interactive Link Budget Calculator -->
+    <div class="demo-wrap">
+      <div class="demo-bar"><h4>🧮 Link Budget Calculator</h4><span class="demo-hint">Pas de waarden aan en bekijk het resultaat</span></div>
+      <div style="padding:20px;" id="lb-calc">
+        <div class="demo-controls" style="border-top:none;padding:0;flex-direction:column;align-items:stretch;gap:12px;">
+          <label>TX power: <input type="range" id="lb-tx" min="5" max="22" value="22"><span class="val-out" id="lb-tx-val">22 dBm</span></label>
+          <label>TX antenne gain: <input type="range" id="lb-txg" min="0" max="14" value="3"><span class="val-out" id="lb-txg-val">3 dBi</span></label>
+          <label>RX antenne gain: <input type="range" id="lb-rxg" min="0" max="14" value="3"><span class="val-out" id="lb-rxg-val">3 dBi</span></label>
+          <label>Kabellengte (m): <input type="range" id="lb-cable" min="0" max="20" value="1"><span class="val-out" id="lb-cable-val">1 m</span></label>
+          <label>Extra verliezen (obstakels): <input type="range" id="lb-extra" min="0" max="40" value="5"><span class="val-out" id="lb-extra-val">5 dB</span></label>
+          <label>Afstand (km): <input type="range" id="lb-dist" min="0.1" max="30" value="5" step="0.1"><span class="val-out" id="lb-dist-val">5.0 km</span></label>
+        </div>
+        <div id="lb-result" style="background:var(--mid);border-radius:10px;padding:18px;margin-top:16px;font-size:.92rem;line-height:1.7;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 2: Pad-verlies Berekenen ═══ -->
+  <section class="lesson-section" data-section="s2" data-label="Pad-verlies berekenen">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>Pad-verlies <span>berekenen</span></h2>
+    <p>Padverliezen vormen het grootste deel van je link budget. Het belangrijkste model hiervoor is <strong>Free Space Path Loss (FSPL)</strong> — het verlies dat een signaal lijdt puur door afstand, zonder obstakels.</p>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">📐</span>
+      <div class="callout-text"><strong>FSPL (dB) = 20 × log₁₀(d) + 20 × log₁₀(f) + 32,45</strong><br>Waarbij d = afstand in km, f = frequentie in MHz</div>
+    </div>
+
+    <h3>FSPL bij 868 MHz — praktijktabel</h3>
+    <table class="comp-table" aria-label="FSPL bij 868 MHz per afstand">
+      <thead><tr><th>Afstand</th><th>FSPL (dB)</th><th>Praktijkscenario</th></tr></thead>
+      <tbody>
+        <tr><td>100 m</td><td>71 dB</td><td>Binnen een dorp, line-of-sight</td></tr>
+        <tr><td>500 m</td><td>85 dB</td><td>Paar straten verderop</td></tr>
+        <tr><td>1 km</td><td>~91 dB</td><td>Dorpskern naar buitenrand</td></tr>
+        <tr><td>5 km</td><td>~105 dB</td><td>Dorp naar dorp in vlak terrein</td></tr>
+        <tr><td>10 km</td><td>~111 dB</td><td>Regionale verbinding met hoogte</td></tr>
+        <tr><td>20 km</td><td>~117 dB</td><td>Maximaal bereik, hoge antennes nodig</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Obstakels en materiaaldemping</h3>
+    <p>In de praktijk is het pad zelden vrij. Obstakels voegen extra dB verlies toe bovenop de FSPL. Zie ook <a href="c09-antenne-plaatsing-rf.html">Cursus 9: Antenne Plaatsing &amp; RF</a> voor gedetailleerde materiaalwaarden.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌲</div>
+        <h4>Bos &amp; vegetatie</h4>
+        <p>Dicht bos: +10 tot +20 dB extra verlies. Bladeren absorberen en verstrooien het signaal, vooral in de zomer.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏠</div>
+        <h4>Gebouwen</h4>
+        <p>Eén baksteenmuur: ~10 dB. Betonmuur: ~15 dB. Metaalplaat: +30 dB. Vermijd pad door gebouwen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⛰️</div>
+        <h4>Terrein &amp; heuvels</h4>
+        <p>Een heuvel in het pad kan 20+ dB extra verlies veroorzaken. Hoogte is de beste oplossing.</p>
+      </div>
+    </div>
+
+    <h3>Marge plannen</h3>
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Voeg altijd 10–20 dB extra marge toe!</strong> Redenen: weersinvloeden (regen = +2–5 dB bij 868 MHz), vegetatiegroei in het voorjaar, interferentie van andere apparaten, en onvoorziene obstakels. Een link die vandaag werkt met 2 dB marge kan morgen uitvallen.</div>
+    </div>
+  </section>
+
+  <!-- ═══ SECTIE 3: Netwerkplanning voor Drenthe ═══ -->
+  <section class="lesson-section" data-section="s3" data-label="Netwerkplanning voor Drenthe">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Netwerkplanning voor <span>Drenthe</span></h2>
+    <p>Bij het plannen van een mesh-netwerk over een hele regio moeten we nadenken over node-plaatsing, dekking en redundantie. Drenthe is relatief vlak met gemengd terrein: bossen, landbouwgrond en dorpen — ideaal om de principes te oefenen.</p>
+
+    <h3>Node-plaatsingsstrategie</h3>
+    <p>De sleutel tot een goed mesh-netwerk is strategische plaatsing op <strong>hoge punten</strong>. Denk aan kerktorens, watertorens, silo's, zendmasten en hoge gebouwen. Vanaf deze punten is line-of-sight naar meerdere richtingen mogelijk.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⛪</div>
+        <h4>Kerktorens</h4>
+        <p>Ideale hoge punten in elk dorp. Met toestemming kun je een kleine antenne + repeater plaatsen voor uitstekende lokale dekking.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏗️</div>
+        <h4>Watertorens &amp; silo's</h4>
+        <p>Hoogte = bereik. Een repeater op een graansilo of watertoren dekt een straal van 10–20+ km in vlak terrein.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🌲</div>
+        <h4>Rand-van-bos plaatsing</h4>
+        <p>Vermijd plaatsing midden in bos. Kies de rand of gebruik hogere masten (8–12 m) om boven het bladerdak uit te komen.</p>
+      </div>
+    </div>
+
+    <h3>Bereik en node-dichtheid</h3>
+    <p>De maximale betrouwbare hopafstand bepaalt de afstand tussen nodes:</p>
+
+    <table class="comp-table" aria-label="Bereik per scenario bij SF11 BW250">
+      <thead><tr><th>Scenario</th><th>Bereik SF11 BW250</th><th>Node-afstand</th></tr></thead>
+      <tbody>
+        <tr><td>Line-of-sight (open veld)</td><td class="check">3–8 km</td><td>Elke 5–6 km een node</td></tr>
+        <tr><td>Bebouwd gebied / dorp</td><td>1–3 km</td><td>Elke 1,5–2 km een node</td></tr>
+        <tr><td>Bos / dicht terrein</td><td class="cross">0,5–1,5 km</td><td>Elke 0,5–1 km een node</td></tr>
+        <tr><td>Hoge mast naar hoge mast</td><td class="check">10–20+ km</td><td>Backbone-links</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Redundantie: N+1</h3>
+    <p>Een betrouwbaar noodnetwerk heeft <strong>N+1 redundantie</strong>: elke node moet minstens via <strong>twee onafhankelijke paden</strong> bereikbaar zijn. Als één node of link uitvalt, bestaat er altijd een alternatieve route.</p>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">🛡️</span>
+      <div class="callout-text"><strong>N+1 regel:</strong> Plan altijd overlapping in dekkingsgebieden. Elke node moet door minstens 2 buren gezien worden. Zo overleeft het netwerk het uitvallen van een individuele node.</div>
+    </div>
+
+    <h3>Praktijkplan: 12+ nodes voor Drenthe</h3>
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">🗺️</span>
+      <div class="callout-text">
+        <strong>Strategie voor volledige dekking:</strong><br>
+        • <strong>3–5 backbone-nodes</strong> op hoge punten (watertorens, zendmasten) met 10–20 km bereik onderling<br>
+        • <strong>5–7 dorpsnodes</strong> op kerktorens of gemeentegebouwen voor lokale dekking<br>
+        • <strong>2–4 vulnodes</strong> om gaten te dichten in bosgebieden (Drentse Aa, Dwingelderveld)<br>
+        • Begin met de backbone, test met een draagbaar station, breid stap voor stap uit
+      </div>
+    </div>
+
+    <h3>Dekkingsgebied concept</h3>
+    <p>Elk node heeft een <strong>dekkingsgebied</strong> — het gebied waarbinnen andere nodes het signaal betrouwbaar kunnen ontvangen. Bij netwerkplanning teken je deze gebieden op een kaart en zorg je dat ze overlappen. Hoe meer overlap, hoe robuuster het netwerk.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🎯</div>
+        <h4>Overlap plannen</h4>
+        <p>Streef naar 30–50% overlap tussen dekkingsgebieden van naburige nodes voor betrouwbare mesh-routing.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📊</div>
+        <h4>Test &amp; meet</h4>
+        <p>Gebruik RSSI en SNR-metingen met een draagbaar station om de werkelijke dekking te valideren voordat je permanent installeert.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ QUIZ ═══ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord de 10 vragen om deze cursus af te ronden. Je hebt minimaal 70% goed nodig.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── Link Budget Calculator ─── */
+(() => {
+  const ids = ['lb-tx','lb-txg','lb-rxg','lb-cable','lb-extra','lb-dist'];
+  const sliders = ids.map(id => document.getElementById(id));
+  const result = document.getElementById('lb-result');
+
+  function calc() {
+    const tx = +sliders[0].value;
+    const txg = +sliders[1].value;
+    const rxg = +sliders[2].value;
+    const cable = +sliders[3].value;
+    const extra = +sliders[4].value;
+    const dist = +sliders[5].value;
+
+    document.getElementById('lb-tx-val').textContent = tx + ' dBm';
+    document.getElementById('lb-txg-val').textContent = txg + ' dBi';
+    document.getElementById('lb-rxg-val').textContent = rxg + ' dBi';
+    document.getElementById('lb-cable-val').textContent = cable + ' m';
+    document.getElementById('lb-extra-val').textContent = extra + ' dB';
+    document.getElementById('lb-dist-val').textContent = dist.toFixed(1) + ' km';
+
+    const fspl = 20 * Math.log10(dist) + 20 * Math.log10(868) + 32.45;
+    const cableLoss = cable * 0.3;
+    const eirp = tx + txg;
+    const totalGain = eirp + rxg;
+    const totalLoss = cableLoss + fspl + extra;
+    const rxPower = totalGain - totalLoss;
+    const sensitivity = -137;
+    const margin = rxPower - sensitivity;
+
+    let status, statusClass;
+    if (margin > 15) { status = 'Uitstekend'; statusClass = 'color:var(--green)'; }
+    else if (margin > 5) { status = 'Goed'; statusClass = 'color:var(--cyan)'; }
+    else if (margin > 0) { status = 'Matig — krap'; statusClass = 'color:var(--yellow)'; }
+    else { status = 'Onvoldoende — geen verbinding'; statusClass = 'color:var(--red)'; }
+
+    result.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:12px;">
+        <div><span style="color:var(--dim);font-size:.8rem;">EIRP</span><br><strong>${eirp.toFixed(1)} dBm</strong></div>
+        <div><span style="color:var(--dim);font-size:.8rem;">FSPL</span><br><strong>−${fspl.toFixed(1)} dB</strong></div>
+        <div><span style="color:var(--dim);font-size:.8rem;">Kabelverlies</span><br><strong>−${cableLoss.toFixed(1)} dB</strong></div>
+        <div><span style="color:var(--dim);font-size:.8rem;">RX power</span><br><strong>${rxPower.toFixed(1)} dBm</strong></div>
+      </div>
+      <p><strong>Link marge: <span style="${statusClass}">${margin.toFixed(1)} dB — ${status}</span></strong></p>
+      <p style="font-size:.82rem;color:var(--dim);">RX gevoeligheid: ${sensitivity} dBm (SF11/SF12). Marge > 10 dB aanbevolen.</p>
+    `;
+  }
+
+  sliders.forEach(s => s.addEventListener('input', calc));
+  calc();
+})();
+
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  {
+    question: 'Wat is een link budget?',
+    options: ['De prijs van een LoRa-module', 'De som van alle gains minus alle verliezen om te bepalen of een link werkt', 'Het maximale aantal hops in een mesh', 'De bandbreedte van het kanaal'],
+    correct: 1,
+    explanation: 'Een link budget is de som van zendvermogen en antenne-gains minus alle verliezen. Als het resultaat boven de ontvangergevoeligheid ligt, werkt de verbinding.'
+  },
+  {
+    question: 'Welke minimale link marge wordt aanbevolen voor een betrouwbare verbinding?',
+    options: ['1 dB', '5 dB', '10 dB', '50 dB'],
+    correct: 2,
+    explanation: 'Een marge van minimaal 10 dB wordt aanbevolen om betrouwbaar te zijn bij wisselende omstandigheden zoals weer en vegetatie.'
+  },
+  {
+    question: 'Wat is de Free Space Path Loss (FSPL) bij 868 MHz over 1 km?',
+    options: ['~71 dB', '~81 dB', '~91 dB', '~111 dB'],
+    correct: 2,
+    explanation: 'Bij 868 MHz en 1 km afstand is de FSPL ongeveer 91 dB volgens de formule FSPL = 20×log₁₀(d) + 20×log₁₀(f) + 32,45.'
+  },
+  {
+    question: 'Wat is de gevoeligheid van de SX1262 bij SF11?',
+    options: ['-100 dBm', '-120 dBm', '-137 dBm', '-150 dBm'],
+    correct: 2,
+    explanation: 'De SX1262 kan bij SF11 signalen tot ongeveer -137 dBm ontvangen. Dit is een van de redenen waarom LoRa zo ver kan reiken.'
+  },
+  {
+    question: 'Wat betekent N+1 redundantie in een mesh-netwerk?',
+    options: ['Elke node heeft één antenne extra', 'Er is altijd minstens één alternatief pad beschikbaar', 'Het netwerk heeft N+1 gateways', 'Alle nodes zenden op twee frequenties'],
+    correct: 1,
+    explanation: 'N+1 redundantie betekent dat elke node via minstens twee onafhankelijke paden bereikbaar is, zodat het netwerk één uitval kan opvangen.'
+  },
+  {
+    question: 'Wat is het realistische bereik van LoRa bij SF11 BW250 in bebouwd gebied?',
+    options: ['50–100 meter', '1–3 km', '10–15 km', '30+ km'],
+    correct: 1,
+    explanation: 'In bebouwd gebied (dorpen, steden) is 1–3 km een realistisch bereik door obstakelverliezen van gebouwen en bomen.'
+  },
+  {
+    question: 'Hoe heet de formule voor padverliezen in vrije ruimte?',
+    options: ['Ohms Law', 'Shannon Capacity', 'Free Space Path Loss (FSPL)', 'Fresnel Radius'],
+    correct: 2,
+    explanation: 'De Free Space Path Loss (FSPL) formule berekent het signaalverlies puur door afstand: FSPL = 20×log₁₀(d) + 20×log₁₀(f) + 32,45.'
+  },
+  {
+    question: 'Als het ontvangen vermogen -120 dBm is en de gevoeligheid -137 dBm, wat is de marge?',
+    options: ['7 dB', '17 dB', '120 dB', '257 dB'],
+    correct: 1,
+    explanation: 'Marge = ontvangen vermogen − gevoeligheid = -120 − (-137) = 17 dB. Dit is ruim boven de aanbevolen 10 dB.'
+  },
+  {
+    question: 'Waarom moet je altijd extra marge toevoegen aan je link budget?',
+    options: ['Omdat radio\'s altijd minder zenden dan opgegeven', 'Vanwege verslechtering door weer, vegetatiegroei en interferentie', 'Om de batterij te sparen', 'Omdat de formule altijd fout is'],
+    correct: 1,
+    explanation: 'Omstandigheden veranderen: regen voegt 2–5 dB verlies toe, bladeren groeien in het voorjaar, en interferentie kan optreden. Extra marge (10–20 dB) vangt dit op.'
+  },
+  {
+    question: 'Wat bepaalt de afstand tussen nodes in een mesh-netwerk?',
+    options: ['De prijs van de apparatuur', 'De maximale betrouwbare hopafstand', 'Het aantal beschikbare kanalen', 'De kleur van de behuizing'],
+    correct: 1,
+    explanation: 'De node-afstand wordt bepaald door de maximale betrouwbare hopafstand. Nodes moeten dicht genoeg staan om elkaars signaal betrouwbaar te ontvangen.'
+  }
+];
+initCourse('c-link-budget', quizQuestions);
+</script>
+</body>
+</html>

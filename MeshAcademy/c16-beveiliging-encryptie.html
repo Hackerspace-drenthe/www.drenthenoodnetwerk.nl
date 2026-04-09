@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursus 16: Beveiliging &amp; Encryptie — MeshCore Academy</title>
+<style>
+/* ─── DESIGN TOKENS ─── */
+:root{--green:#00ff88;--cyan:#00e5ff;--orange:#ff6b00;--purple:#c864ff;--yellow:#ffd060;--red:#ff4466;--dark:#050d1a;--mid:#0a1628;--card:#0d1f3c;--card2:#112240;--text:#e0eaff;--dim:#7090b0;--border:rgba(0,229,255,.14);--font:'Segoe UI',system-ui,sans-serif;--radius:14px;--focus-ring:0 0 0 3px rgba(0,229,255,.6);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:100%;}
+.reduce-motion *,.reduce-motion *::before,.reduce-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+body{font-family:var(--font);background:var(--dark);color:var(--text);min-height:100vh;line-height:1.6;}
+a{color:var(--cyan);text-decoration:none;}a:hover{text-decoration:underline;}
+a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
+.skip-link{position:absolute;top:-100%;left:16px;padding:12px 24px;background:var(--cyan);color:var(--dark);font-weight:700;border-radius:0 0 8px 8px;z-index:9999;transition:top .2s;}
+.skip-link:focus{top:0;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+
+/* ─── COURSE HEADER ─── */
+.course-header{background:linear-gradient(180deg,#071530,var(--dark));border-bottom:1px solid var(--border);padding:24px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.course-header-left{display:flex;align-items:center;gap:14px;}
+.course-icon{font-size:2.2rem;}
+.course-info h1{font-size:clamp(1.2rem,3vw,1.8rem);font-weight:900;line-height:1.2;}
+.course-info h1 span{color:var(--green);}
+.course-info .course-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;}
+.meta-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em;}
+.tag-level{background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.tag-course{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.course-header-right{display:flex;gap:10px;align-items:center;}
+.back-btn{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ─── PROGRESS BAR ─── */
+.course-progress{padding:0 32px;margin:16px 0;display:flex;align-items:center;gap:12px;}
+.course-progress-track{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;}
+.course-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:4px;transition:width .5s;}
+#course-progress-label{font-size:.8rem;color:var(--dim);min-width:80px;}
+
+/* ─── SIDE NAV DOTS ─── */
+#course-side-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:50;}
+.nav-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--dim);background:transparent;cursor:pointer;transition:all .2s;padding:0;}
+.nav-dot.read{background:var(--green);border-color:var(--green);}
+.nav-dot-quiz{border-color:var(--yellow);}
+.nav-dot-quiz.read{background:var(--yellow);border-color:var(--yellow);}
+
+/* ─── LAYOUT ─── */
+.course-body{max-width:960px;margin:0 auto;padding:32px 32px 100px;}
+
+/* ─── LESSON SECTIONS ─── */
+.lesson-section{margin-bottom:48px;padding-top:20px;}
+.section-counter{font-size:.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.lesson-section h2{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;margin-bottom:12px;color:var(--text);}
+.lesson-section h2 span{color:var(--cyan);}
+.lesson-section h3{font-size:1.1rem;font-weight:700;color:var(--cyan);margin:20px 0 8px;}
+.lesson-section p{font-size:.95rem;color:var(--text);line-height:1.75;margin-bottom:14px;max-width:72ch;}
+.lesson-section ul,.lesson-section ol{margin:10px 0 14px 20px;color:var(--text);font-size:.92rem;line-height:1.7;}
+.lesson-section li{margin-bottom:6px;}
+
+/* ─── INFO CARDS ─── */
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:20px 0;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .2s;}
+.info-card:hover{border-color:rgba(0,229,255,.3);}
+.info-card .ic-icon{font-size:1.8rem;margin-bottom:8px;}
+.info-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.info-card p{font-size:.85rem;color:var(--dim);line-height:1.6;margin:0;}
+
+/* ─── CALLOUT ─── */
+.callout{border-radius:12px;padding:18px 22px;margin:20px 0;display:flex;gap:14px;align-items:flex-start;}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.orange{background:rgba(255,107,0,.07);border:1px solid rgba(255,107,0,.22);}
+.callout-icon{font-size:1.4rem;flex-shrink:0;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ─── COMPARISON TABLE ─── */
+.comp-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.88rem;}
+.comp-table th{background:var(--card2);color:var(--cyan);font-weight:700;padding:12px 16px;text-align:left;border-bottom:2px solid var(--border);}
+.comp-table td{padding:10px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.comp-table tr:hover td{background:rgba(0,229,255,.04);}
+.comp-table .check{color:var(--green);}
+.comp-table .cross{color:var(--red);}
+
+/* ─── QUIZ SECTION ─── */
+.quiz-section{margin-top:48px;padding-top:32px;border-top:2px solid var(--border);}
+.quiz-section h2{font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+.quiz-section .quiz-intro{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+
+/* Quiz components */
+.quiz-progress{height:6px;background:var(--card);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:3px;transition:width .3s;}
+.quiz-header{display:flex;justify-content:space-between;margin-bottom:12px;font-size:.82rem;color:var(--dim);}
+.quiz-question{font-size:1.15rem;font-weight:700;line-height:1.4;margin-bottom:20px;color:var(--text);}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+.quiz-option{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:left;color:var(--text);font-size:.92rem;}
+.quiz-option:hover{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.05);}
+.quiz-option.selected{border-color:var(--cyan);background:rgba(0,229,255,.1);}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(0,229,255,.1);color:var(--cyan);font-weight:700;font-size:.85rem;flex-shrink:0;}
+.quiz-option.selected .opt-letter{background:var(--cyan);color:var(--dark);}
+.quiz-nav{display:flex;justify-content:space-between;gap:12px;}
+.quiz-btn{padding:10px 24px;border-radius:24px;font-size:.88rem;font-weight:600;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;text-align:center;}
+.quiz-btn:hover{border-color:rgba(0,229,255,.4);}
+.quiz-btn:disabled{opacity:.4;cursor:not-allowed;}
+.quiz-btn-primary{background:rgba(0,229,255,.12);border-color:rgba(0,229,255,.4);color:var(--cyan);}
+.quiz-btn-primary:hover{background:rgba(0,229,255,.25);}
+.quiz-hint{font-size:.82rem;color:var(--yellow);margin-top:8px;}
+.quiz-btn-retry{border-color:rgba(255,208,96,.3);color:var(--yellow);}
+
+/* Quiz results */
+.quiz-results{text-align:center;padding:32px 0;}
+.results-icon{font-size:3rem;margin-bottom:12px;}
+.results-title{font-size:1.5rem;font-weight:800;margin-bottom:16px;}
+.results-score{margin-bottom:16px;}
+.score-num{font-size:2.4rem;font-weight:900;display:block;}
+.score-num.pass{color:var(--green);}
+.score-num.fail{color:var(--yellow);}
+.score-detail{font-size:.88rem;color:var(--dim);}
+.results-bar{height:14px;background:var(--card);border-radius:7px;overflow:visible;position:relative;margin:20px auto;max-width:400px;}
+.results-bar-fill{height:100%;border-radius:7px;transition:width .5s;}
+.results-bar-fill.pass{background:linear-gradient(90deg,var(--green),var(--cyan));}
+.results-bar-fill.fail{background:linear-gradient(90deg,var(--yellow),var(--orange));}
+.results-bar-threshold{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text);border-radius:1px;}
+.results-msg{font-size:.92rem;color:var(--dim);line-height:1.6;max-width:500px;margin:16px auto;}
+.results-msg strong{color:var(--text);}
+.results-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+
+/* Review */
+.quiz-review{margin-top:32px;}
+.quiz-review h4{font-size:1.1rem;font-weight:700;margin-bottom:16px;}
+.review-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+.review-item.correct{border-left:4px solid var(--green);}
+.review-item.wrong{border-left:4px solid var(--red);}
+.review-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.review-icon{font-size:1.2rem;font-weight:700;}
+.review-item.correct .review-icon{color:var(--green);}
+.review-item.wrong .review-icon{color:var(--red);}
+.review-q{font-weight:600;font-size:.92rem;}
+.review-body{font-size:.85rem;color:var(--dim);line-height:1.6;padding-left:30px;}
+.review-body strong{color:var(--text);}
+.text-pass{color:var(--green)!important;}
+.text-fail{color:var(--red)!important;}
+.review-explanation{margin-top:6px;font-style:italic;color:var(--dim);}
+
+/* ─── LOCKED MSG ─── */
+.locked-msg{text-align:center;padding:80px 32px;}
+.locked-icon{font-size:4rem;margin-bottom:16px;}
+.locked-msg h2{font-size:1.5rem;margin-bottom:12px;}
+.locked-msg p{color:var(--dim);margin-bottom:24px;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){.course-header{padding:16px;}.course-body{padding:20px 16px 80px;}#course-side-nav{display:none;}.info-grid{grid-template-columns:1fr;}.course-progress{padding:0 16px;}}
+@media(max-width:480px){.course-header-right{width:100%;}.back-btn{flex:1;text-align:center;}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+<header class="course-header" role="banner">
+  <div class="course-header-left">
+    <span class="course-icon" aria-hidden="true">🔐</span>
+    <div class="course-info">
+      <h1>Cursus 16: <span>Beveiliging &amp; Encryptie</span></h1>
+      <div class="course-meta">
+        <span class="meta-tag tag-level">Gevorderd</span>
+        <span class="meta-tag tag-course">Cursus 16 van 19</span>
+      </div>
+    </div>
+  </div>
+  <div class="course-header-right">
+    <a href="course-hub.html" class="back-btn" aria-label="Terug naar cursus overzicht">← Overzicht</a>
+  </div>
+</header>
+
+<div class="course-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Cursusvoortgang">
+  <div class="course-progress-track"><div class="course-progress-fill" id="course-progress-fill" style="width:0%"></div></div>
+  <span id="course-progress-label">0% voltooid</span>
+</div>
+
+<nav id="course-side-nav" aria-label="Sectie navigatie">
+  <button class="nav-dot" data-target="s1" aria-label="Sectie 1: Cryptografie Basis"></button>
+  <button class="nav-dot" data-target="s2" aria-label="Sectie 2: MeshCore Encryptie in Detail"></button>
+  <button class="nav-dot" data-target="s3" aria-label="Sectie 3: Dreigingen & Best Practices"></button>
+  <button class="nav-dot nav-dot-quiz" data-target="quiz" aria-label="Quiz"></button>
+</nav>
+
+<main class="course-body" id="main-content">
+
+  <!-- SECTION 1: Cryptografie Basis -->
+  <section class="lesson-section" data-section="s1" data-label="Cryptografie Basis">
+    <span class="section-counter">Sectie 1 van 3</span>
+    <h2>Cryptografie <span>Basis</span></h2>
+
+    <p>Radiosignalen zijn van nature openbaar: iedereen met een ontvanger op de juiste frequentie kan meeluisteren. Daarom is encryptie essentieel voor elk mesh-netwerk dat via radio communiceert. Zonder encryptie kan elke voorbijganger je berichten lezen.</p>
+
+    <h3>Symmetrische vs. asymmetrische encryptie</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔑</div>
+        <h4>Symmetrisch</h4>
+        <p>Eén gedeelde sleutel voor versleutelen én ontcijferen. Snel, maar hoe deel je de sleutel veilig? Dit is het sleuteldistributieprobleem.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔐</div>
+        <h4>Asymmetrisch</h4>
+        <p>Twee sleutels: een publieke (delen mag) en een privé (geheim houden). Lost het distributieprobleem op, maar is trager.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🤝</div>
+        <h4>Hybride aanpak</h4>
+        <p>Gebruik asymmetrische crypto om een gedeelde symmetrische sleutel af te spreken. Daarna communiceer je snel met die symmetrische sleutel. Dit is precies wat MeshCore doet.</p>
+      </div>
+    </div>
+
+    <h3>Kernconcepten</h3>
+    <p>Bij elke versleutelde communicatie spelen vier begrippen een rol:</p>
+    <ul>
+      <li><strong>Versleuteling:</strong> Plaintext → <em>encryptie</em> → Ciphertext → <em>decryptie</em> → Plaintext</li>
+      <li><strong>Authenticatie:</strong> Hoe weet je zeker dat het bericht van de beweerde afzender komt?</li>
+      <li><strong>Integriteit:</strong> Hoe weet je dat het bericht onderweg niet is gewijzigd?</li>
+      <li><strong>AEAD (Authenticated Encryption with Associated Data):</strong> Encryptie + integriteitscontrole in één operatie. Zowel de vertrouwelijkheid als de authenticiteit worden gegarandeerd.</li>
+    </ul>
+
+    <div class="callout green">
+      <span class="callout-icon" aria-hidden="true">💡</span>
+      <div class="callout-text"><strong>Onthoud:</strong> Encryptie zonder authenticatie is gevaarlijk — een aanvaller zou het bericht kunnen wijzigen zonder dat je het merkt. Daarom gebruikt MeshCore altijd AEAD: versleuteling én authenticatie tegelijk.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: MeshCore Encryptie in Detail -->
+  <section class="lesson-section" data-section="s2" data-label="MeshCore Encryptie in Detail">
+    <span class="section-counter">Sectie 2 van 3</span>
+    <h2>MeshCore Encryptie <span>in Detail</span></h2>
+
+    <p>MeshCore gebruikt een moderne, bewezen combinatie: <strong>Curve25519</strong> voor sleuteluitwisseling en <strong>XChaCha20-Poly1305</strong> voor versleuteling. Geen AES — en daar is een goede reden voor.</p>
+
+    <h3>Sleuteluitwisseling: Curve25519 (X25519)</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📐</div>
+        <h4>Elliptic Curve Diffie-Hellman</h4>
+        <p>Curve25519 is een ECDH-algorithme. Twee partijen kunnen een gedeeld geheim berekenen zonder dat geheim ooit over de lijn te sturen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔢</div>
+        <h4>Sleutelpaar generatie</h4>
+        <p>Elke node genereert een keypair: een 32-byte privésleutel en een 32-byte publieke sleutel. De publieke sleutel wordt gedeeld, de privésleutel verlaat het apparaat nooit.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🤫</div>
+        <h4>Gedeeld geheim</h4>
+        <p>Jouw privésleutel + hun publieke sleutel = gedeeld geheim. Zij berekenen hetzelfde geheim met hun privésleutel + jouw publieke sleutel. Wiskunde maakt dit mogelijk.</p>
+      </div>
+    </div>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Perfect Forward Secrecy:</strong> Zelfs als een privésleutel later gelekt wordt, blijven eerdere sessies beschermd. Het gedeeld geheim wordt per sessie afgeleid, niet hergebruikt.</div>
+    </div>
+
+    <h3>Versleuteling: XChaCha20-Poly1305</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⚡</div>
+        <h4>XChaCha20</h4>
+        <p>Een stream cipher met 256-bit sleutel en 192-bit nonce. Extreem snel op processors zonder hardware-AES, zoals de ESP32.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">✅</div>
+        <h4>Poly1305</h4>
+        <p>Een Message Authentication Code (MAC). Garandeert dat het bericht niet is gewijzigd (integriteit) en daadwerkelijk van de verwachte afzender komt (authenticatie).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🛡️</div>
+        <h4>AEAD gecombineerd</h4>
+        <p>XChaCha20 + Poly1305 samen = Authenticated Encryption with Associated Data. Versleuteling en integriteitscontrole in één enkele operatie.</p>
+      </div>
+    </div>
+
+    <h3>Waarom geen AES?</h3>
+    <p>AES is uitstekend op hardware die speciale AES-instructies heeft (zoals moderne Intel/AMD-processors). Maar de ESP32 — het hart van de meeste MeshCore-nodes — heeft <strong>geen hardware-AES</strong>. Software-AES is trager en kwetsbaarder voor timing-aanvallen. XChaCha20 is ontworpen om snel te zijn in pure software en is inherent resistent tegen timing-aanvallen.</p>
+
+    <h3>Het complete proces</h3>
+    <ol>
+      <li><strong>HELLO-uitwisseling:</strong> Nodes wisselen publieke sleutels uit tijdens het HELLO-pakket.</li>
+      <li><strong>Gedeeld geheim:</strong> Via X25519 berekent elke node het gedeelde geheim uit de ontvangen publieke sleutel en de eigen privésleutel.</li>
+      <li><strong>Bericht versleutelen:</strong> Elk bericht wordt versleuteld met XChaCha20-Poly1305 met een sleutel afgeleid van het gedeelde geheim.</li>
+      <li><strong>Ontvanger ontcijfert:</strong> De ontvanger berekent hetzelfde gedeelde geheim en ontcijfert het bericht. Tussenstations (repeaters) kunnen de inhoud niet lezen.</li>
+    </ol>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Belangrijk:</strong> Repeaters sturen versleutelde pakketten door zonder ze te kunnen lezen. Ze zien alleen de buitenste routeringsinformatie, nooit de berichtinhoud. Dit is echte end-to-end encryptie.</div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: Dreigingen & Best Practices -->
+  <section class="lesson-section" data-section="s3" data-label="Dreigingen & Best Practices">
+    <span class="section-counter">Sectie 3 van 3</span>
+    <h2>Dreigingen &amp; <span>Best Practices</span></h2>
+
+    <p>Encryptie is een krachtig wapen, maar geen wondermiddel. Begrijp de dreigingen waar een mesh-radionetwerk mee te maken heeft en hoe je ze mitigeert.</p>
+
+    <h3>Dreigingsmodel voor mesh-radio</h3>
+    <table class="comp-table" aria-label="Dreigingsoverzicht mesh-radio">
+      <thead><tr><th>Dreiging</th><th>Beschrijving</th><th>Mitigatie</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Afluisteren</strong></td><td>Iemand vangt radiosignalen op en leest berichten mee</td><td class="check">✓ Opgelost door XChaCha20-Poly1305 encryptie</td></tr>
+        <tr><td><strong>Replay-aanval</strong></td><td>Een aanvaller stuurt een eerder onderschept bericht opnieuw</td><td class="check">✓ Opgelost door nonce/volgnummers</td></tr>
+        <tr><td><strong>Man-in-the-middle</strong></td><td>Een aanvaller plaatst zich tussen twee nodes en onderschept verkeer</td><td>⚡ Gemitigeerd door TOFU (Trust On First Use) en sleutelverificatie</td></tr>
+        <tr><td><strong>Jamming</strong></td><td>De radiofrequentie wordt opzettelijk verstoord</td><td class="cross">✗ Fysieke aanval, moeilijk te voorkomen. Spread spectrum helpt deels</td></tr>
+        <tr><td><strong>Verkeersanalyse</strong></td><td>Observer ziet wanneer berichten worden gestuurd en tussen welke nodes (metadata)</td><td>⚡ Deels gemitigeerd door ANON_REQ</td></tr>
+      </tbody>
+    </table>
+
+    <h3>ANON_REQ: privacy in MeshCore</h3>
+    <p>MeshCore heeft een speciaal pakkettype: <strong>ANON_REQ</strong>. Dit is een anoniem routeringsverzoek dat de identiteit van de afzender verbergt. Een waarnemer kan zien dát er verkeer is, maar niet wie het verstuurt. Dit beschermt de privacy van de gebruiker in gevoelige situaties.</p>
+
+    <h3>Best practices</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔄</div>
+        <h4>Firmware bijwerken</h4>
+        <p>Houd firmware altijd up-to-date. Beveiligingspatches dichten kwetsbaarheden die na release ontdekt worden.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">👁️</div>
+        <h4>Node-identiteiten verifiëren</h4>
+        <p>Controleer de publieke-sleutel-vingerafdruk van nodes waarmee je communiceert. Dit voorkomt man-in-the-middle-aanvallen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🚫</div>
+        <h4>Privésleutels beschermen</h4>
+        <p>Deel nooit je privésleutel. Wie je privésleutel heeft, kan zich als jou voordoen en al je berichten lezen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔒</div>
+        <h4>Sterke wachtwoorden</h4>
+        <p>Gebruik sterke wachtwoorden voor Room Servers. Een zwak wachtwoord ondermijnt alle andere beveiligingslagen.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📍</div>
+        <h4>Fysieke beveiliging</h4>
+        <p>Buitennodes op masten of daken zijn fysiek toegankelijk. Overweeg sabotagedetectie of plaatsing op moeilijk bereikbare locaties.</p>
+      </div>
+    </div>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">🔥</span>
+      <div class="callout-text"><strong>Denk eraan:</strong> Beveiliging is zo sterk als de zwakste schakel. Technisch perfecte encryptie helpt niet als iemand fysiek bij je node kan en de privésleutel kan uitlezen.</div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="quiz-section lesson-section" id="quiz" data-section="quiz">
+    <span class="section-counter">Quiz</span>
+    <h2>🧪 Test je kennis</h2>
+    <p class="quiz-intro">Beantwoord alle 10 vragen. Je hebt minimaal 70% goed nodig om deze cursus af te ronden.</p>
+    <div id="quiz-container" role="region" aria-label="Quiz"></div>
+  </section>
+
+</main>
+
+<script src="course-engine.js"></script>
+<script>
+/* ─── QUIZ ─── */
+const quizQuestions = [
+  {
+    question: 'Welk sleuteluitwisselingsalgoritme gebruikt MeshCore?',
+    options: ['RSA-2048', 'Curve25519 (X25519)', 'Diffie-Hellman klassiek', 'AES-256 key exchange'],
+    correct: 1,
+    explanation: 'MeshCore gebruikt Curve25519 (X25519), een Elliptic Curve Diffie-Hellman algoritme, voor sleuteluitwisseling.'
+  },
+  {
+    question: 'Welk versleutelingsalgoritme gebruikt MeshCore voor berichten?',
+    options: ['AES-256-GCM', 'RSA-4096', 'XChaCha20-Poly1305', 'Blowfish-CBC'],
+    correct: 2,
+    explanation: 'MeshCore versleutelt berichten met XChaCha20-Poly1305, een snelle AEAD-cipher die ideaal is voor resource-beperkte apparaten.'
+  },
+  {
+    question: 'Wat betekent AEAD?',
+    options: ['Advanced Encryption Algorithm Design', 'Authenticated Encryption with Associated Data', 'Asymmetric Endpoint Authentication Device', 'Automatic Error And Detection'],
+    correct: 1,
+    explanation: 'AEAD staat voor Authenticated Encryption with Associated Data — encryptie en integriteitscontrole in één operatie.'
+  },
+  {
+    question: 'Waarom gebruikt MeshCore XChaCha20 in plaats van AES?',
+    options: ['AES is verouderd en onveilig', 'XChaCha20 is sneller op ESP32 (geen hardware-AES nodig) en resistent tegen timing-aanvallen', 'AES is verboden in de EU', 'XChaCha20 heeft kleinere sleutels'],
+    correct: 1,
+    explanation: 'De ESP32 heeft geen hardware-AES-instructies. XChaCha20 is ontworpen voor snelle software-implementatie en is inherent resistent tegen timing-aanvallen.'
+  },
+  {
+    question: 'Wat biedt Poly1305?',
+    options: ['Encryptie van data', 'Sleutelgeneratie', 'Berichtauthenticatie en integriteitscontrole', 'Compressie van pakketten'],
+    correct: 2,
+    explanation: 'Poly1305 is een Message Authentication Code (MAC) die garandeert dat het bericht niet is gewijzigd en van de verwachte afzender komt.'
+  },
+  {
+    question: 'Wat is TOFU (Trust On First Use)?',
+    options: ['Een type encryptie', 'Bij het eerste contact accepteer je de sleutel van de andere node en vertrouw je die voor toekomstige communicatie', 'Een firmware-update methode', 'Een methode om nodes te resetten'],
+    correct: 1,
+    explanation: 'TOFU betekent dat je de publieke sleutel van een node accepteert bij het eerste contact. Latere communicatie wordt geverifieerd tegen die bekende sleutel.'
+  },
+  {
+    question: 'Welke aanval wordt direct voorkomen door encryptie?',
+    options: ['Jamming', 'Afluisteren (eavesdropping)', 'Fysieke diefstal', 'Stroomuitval'],
+    correct: 1,
+    explanation: 'Encryptie voorkomt dat afluisteraars de inhoud van berichten kunnen lezen, zelfs als ze de radiosignalen opvangen.'
+  },
+  {
+    question: 'Wat beschermt ANON_REQ in MeshCore?',
+    options: ['De berichtinhoud', 'De frequentie van het signaal', 'De identiteit/privacy van de afzender', 'De locatie van repeaters'],
+    correct: 2,
+    explanation: 'ANON_REQ is een anoniem routeringsverzoek dat de identiteit van de afzender verbergt, waardoor de privacy beschermd wordt.'
+  },
+  {
+    question: 'Wat gebeurt er bij Curve25519 sleuteluitwisseling?',
+    options: ['Beide nodes sturen hun privésleutel naar elkaar', 'Een gedeeld geheim wordt berekend uit jouw privésleutel en hun publieke sleutel', 'Een centrale server deelt de sleutel uit', 'De sleutel wordt via Bluetooth overgedragen'],
+    correct: 1,
+    explanation: 'Bij X25519 combineer je jouw privésleutel met de publieke sleutel van de andere node om een gedeeld geheim te berekenen. De privésleutel wordt nooit verstuurd.'
+  },
+  {
+    question: 'Waarom is bescherming tegen replay-aanvallen belangrijk?',
+    options: ['Om de batterij te sparen', 'Om te voorkomen dat oude berichten opnieuw worden verstuurd alsof ze nieuw zijn', 'Om de signaalsterkte te verbeteren', 'Om meer nodes toe te voegen'],
+    correct: 1,
+    explanation: 'Zonder replay-bescherming kan een aanvaller eerder onderschepte berichten opnieuw versturen. Nonce/volgnummers zorgen ervoor dat elk bericht uniek is.'
+  }
+];
+
+initCourse('c-beveiliging', quizQuestions);
+</script>
+</body>
+</html>

@@ -469,13 +469,21 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     const sens = baseSens + sensDelta + bwDelta;
     const txPower = 14;
     const linkBudget = txPower - sens;
-    const d0 = 1;
-    const fspl0 = 20 * Math.log10(868) + 20 * Math.log10(d0) + 32.45;
-    const remainingDb = linkBudget - fspl0;
-    const pathLossExp = 2.8;
-    const rangeKm = d0 * Math.pow(10, remainingDb / (10 * pathLossExp));
-    const heightFactor = Math.sqrt(height / 5);
-    return Math.min(rangeKm * heightFactor, 30);
+
+    /* Log-distance path loss model (semi-rural, n=3.8)
+       with 20 dB margin for fading, cable loss, vegetation, obstructions */
+    const fspl1km = 20 * Math.log10(868) + 32.45; /* FSPL at 1 km */
+    const margin = 20;
+    const n = 3.8;
+    const remaining = linkBudget - fspl1km - margin;
+    const propRange = Math.pow(10, remaining / (10 * n));
+
+    /* Radio horizon: d(km) ≈ 3.57 × (√h_tx + √h_rx)
+       Assume receiver at 2 m height */
+    const horizonKm = 3.57 * (Math.sqrt(height) + Math.sqrt(2));
+
+    /* The more limiting factor determines actual range */
+    return Math.min(propRange, horizonKm, 50);
   }
 
   function update() {

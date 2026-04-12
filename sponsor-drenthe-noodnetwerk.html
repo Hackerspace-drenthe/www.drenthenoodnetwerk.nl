@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sponsordocument Meshcore Drenthe — Word partner van het open-source noodnetwerk voor de provincie Drenthe.">
+  <title>Sponsordocument — Meshcore Drenthe Noodnetwerk</title>
+  <style>
+    /* ============================================
+       CSS Custom Properties (Design Tokens)
+       ============================================ */
+    :root {
+      /* Colors */
+      --color-primary: #1a6b3c;
+      --color-primary-dark: #145530;
+      --color-primary-light: #e8f5ee;
+      --color-secondary: #2c5aa0;
+      --color-secondary-dark: #1e3f70;
+      --color-secondary-light: #e3edf8;
+      --color-accent: #e67e22;
+      --color-accent-dark: #c0650e;
+      --color-accent-light: #fef3e6;
+
+      /* Grays */
+      --color-bg: #ffffff;
+      --color-bg-alt: #f7f8fa;
+      --color-bg-dark: #1a1a2e;
+      --color-text: #1a1a2e;
+      --color-text-muted: #555770;
+      --color-text-light: #8890a4;
+      --color-border: #e0e2e8;
+
+      /* Sponsor tiers */
+      --color-bronze: #cd7f32;
+      --color-silver: #8c8c8c;
+      --color-gold: #d4a017;
+      --color-platinum: #3b82f6;
+
+      /* Typography */
+      --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      --space-3xl: 4rem;
+
+      /* Borders */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.5rem;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-normal: 250ms ease;
+
+      /* Layout */
+      --max-width: 72rem;
+      --nav-height: 3.75rem;
+    }
+
+    /* Dark theme overrides */
+    [data-theme="dark"] {
+      --color-bg: #0f1120;
+      --color-bg-alt: #1a1c30;
+      --color-text: #e8eaf0;
+      --color-text-muted: #a0a4b8;
+      --color-text-light: #6a6f85;
+      --color-border: #2a2d42;
+      --color-primary-light: #1a3a28;
+      --color-secondary-light: #1a2a42;
+      --color-accent-light: #3a2a18;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    /* ============================================
+       Reset & Base
+       ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: calc(var(--nav-height) + var(--space-md));
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.7;
+      font-size: 1rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img, svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    a {
+      color: var(--color-secondary);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      transition: color var(--transition-fast);
+    }
+
+    a:hover, a:focus-visible {
+      color: var(--color-secondary-dark);
+    }
+
+    /* Focus visible for keyboard nav (WCAG 2.4.7) */
+    :focus-visible {
+      outline: 3px solid var(--color-secondary);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    /* Skip to content link (WCAG 2.4.1) */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: var(--space-md);
+      background: var(--color-primary);
+      color: #fff;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      z-index: 1000;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .skip-link:focus {
+      top: var(--space-sm);
+    }
+
+    /* ============================================
+       Typography
+       ============================================ */
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    h1 { font-size: clamp(2rem, 5vw, 3.25rem); }
+    h2 { font-size: clamp(1.5rem, 3.5vw, 2.25rem); }
+    h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); }
+    h4 { font-size: 1.125rem; }
+
+    p {
+      margin-bottom: var(--space-md);
+    }
+
+    /* ============================================
+       Layout Utilities
+       ============================================ */
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--space-lg);
+    }
+
+    .section {
+      padding: var(--space-3xl) 0;
+    }
+
+    .section--alt {
+      background: var(--color-bg-alt);
+    }
+
+    .section__header {
+      text-align: center;
+      margin-bottom: var(--space-2xl);
+    }
+
+    .section__subtitle {
+      color: var(--color-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.875rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .section__desc {
+      color: var(--color-text-muted);
+      max-width: 40rem;
+      margin: var(--space-md) auto 0;
+      font-size: 1.1rem;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--space-xl);
+    }
+
+    .grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+    .grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+    .grid--4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+
+    .text-center { text-align: center; }
+
+    /* ============================================
+       Navigation
+       ============================================ */
+    .nav {
+      position: sticky;
+      top: 0;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      z-index: 100;
+      height: var(--nav-height);
+    }
+
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+    }
+
+    .nav__brand {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--color-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .nav__brand:hover {
+      color: var(--color-primary-dark);
+    }
+
+    .nav__links {
+      display: none;
+      list-style: none;
+      gap: var(--space-xs);
+    }
+
+    .nav__links a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .nav__links a:hover,
+    .nav__links a:focus-visible {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    .nav__actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .nav__toggle {
+      display: flex;
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs);
+      cursor: pointer;
+      color: var(--color-text);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-xs) var(--space-sm);
+      cursor: pointer;
+      color: var(--color-text);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      transition: background var(--transition-fast);
+    }
+
+    .theme-toggle:hover {
+      background: var(--color-bg-alt);
+    }
+
+    /* Mobile nav menu */
+    .nav__mobile {
+      display: none;
+      position: absolute;
+      top: var(--nav-height);
+      left: 0;
+      right: 0;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-md);
+    }
+
+    .nav__mobile.is-open {
+      display: block;
+    }
+
+    .nav__mobile a {
+      display: block;
+      padding: var(--space-sm) var(--space-md);
+      text-decoration: none;
+      color: var(--color-text-muted);
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+    }
+
+    .nav__mobile a:hover,
+    .nav__mobile a:focus-visible {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+    }
+
+    @media (min-width: 64rem) {
+      .nav__links {
+        display: flex;
+      }
+      .nav__toggle {
+        display: none;
+      }
+    }
+
+    /* ============================================
+       Hero Section
+       ============================================ */
+    .hero {
+      padding: var(--space-3xl) 0;
+      text-align: center;
+      background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-secondary-light) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 2rem;
+      padding: var(--space-xs) var(--space-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero__title {
+      margin-bottom: var(--space-lg);
+    }
+
+    .hero__title span {
+      color: var(--color-primary);
+    }
+
+    .hero__desc {
+      font-size: 1.2rem;
+      color: var(--color-text-muted);
+      max-width: 38rem;
+      margin: 0 auto var(--space-xl);
+    }
+
+    .hero__cta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-2xl);
+    }
+
+    .hero__stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-xl);
+      margin-top: var(--space-xl);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat__value {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1.2;
+    }
+
+    .stat__label {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+
+    /* ============================================
+       Buttons
+       ============================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      white-space: nowrap;
+    }
+
+    .btn--primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .btn--primary:hover, .btn--primary:focus-visible {
+      background: var(--color-primary-dark);
+      color: #fff;
+    }
+
+    .btn--outline {
+      background: transparent;
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .btn--outline:hover, .btn--outline:focus-visible {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .btn--accent {
+      background: var(--color-accent);
+      color: #fff;
+    }
+
+    .btn--accent:hover, .btn--accent:focus-visible {
+      background: var(--color-accent-dark);
+      color: #fff;
+    }
+
+    .btn--lg {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+
+    /* ============================================
+       Cards
+       ============================================ */
+    .card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .card__icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .card__icon--green { background: var(--color-primary-light); color: var(--color-primary); }
+    .card__icon--blue { background: var(--color-secondary-light); color: var(--color-secondary); }
+    .card__icon--orange { background: var(--color-accent-light); color: var(--color-accent); }
+
+    .card__title {
+      margin-bottom: var(--space-sm);
+    }
+
+    .card__text {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0;
+    }
+
+    /* ============================================
+       Mesh Network SVG Animation
+       ============================================ */
+    .mesh-svg {
+      max-width: 36rem;
+      margin: 0 auto var(--space-xl);
+    }
+
+    .mesh-node {
+      fill: var(--color-primary);
+      transition: r var(--transition-normal);
+    }
+
+    .mesh-node:hover {
+      r: 8;
+    }
+
+    .mesh-line {
+      stroke: var(--color-primary);
+      stroke-width: 1.5;
+      opacity: 0.3;
+    }
+
+    .mesh-pulse {
+      fill: var(--color-primary);
+      opacity: 0;
+    }
+
+    @keyframes pulseDot {
+      0% { opacity: 0.8; r: 3; }
+      100% { opacity: 0; r: 12; }
+    }
+
+    .mesh-pulse--animated {
+      animation: pulseDot 2s ease-out infinite;
+    }
+
+    /* ============================================
+       PDCA Cycle
+       ============================================ */
+    .pdca {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+      align-items: center;
+    }
+
+    @media (min-width: 48rem) {
+      .pdca {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .pdca__svg-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
+    .pdca-arc {
+      transition: opacity var(--transition-normal);
+      cursor: pointer;
+    }
+
+    .pdca-arc:hover {
+      opacity: 0.85;
+    }
+
+    .pdca__list {
+      list-style: none;
+    }
+
+    .pdca__item {
+      padding: var(--space-md);
+      border-left: 4px solid var(--color-border);
+      margin-bottom: var(--space-md);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      transition: border-color var(--transition-normal), background var(--transition-normal);
+    }
+
+    .pdca__item[data-phase="plan"]  { border-left-color: #3b82f6; }
+    .pdca__item[data-phase="do"]    { border-left-color: #22c55e; }
+    .pdca__item[data-phase="check"] { border-left-color: #f59e0b; }
+    .pdca__item[data-phase="act"]   { border-left-color: #ef4444; }
+
+    .pdca__item.is-active {
+      background: var(--color-bg-alt);
+    }
+
+    .pdca__item-title {
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+
+    .pdca__item-text {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0;
+    }
+
+    /* ============================================
+       Sponsor Tiers
+       ============================================ */
+    .tier {
+      background: var(--color-bg);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      text-align: center;
+      position: relative;
+      transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+    }
+
+    .tier:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .tier--featured {
+      border-color: var(--color-gold);
+      box-shadow: 0 0 0 1px var(--color-gold), var(--shadow-md);
+    }
+
+    .tier__badge {
+      position: absolute;
+      top: -0.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-gold);
+      color: #fff;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tier__icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      margin: 0 auto var(--space-md);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+    }
+
+    .tier__icon--bronze   { background: #fef3e6; color: var(--color-bronze); }
+    .tier__icon--silver   { background: #f0f0f0; color: var(--color-silver); }
+    .tier__icon--gold     { background: #fef9e6; color: var(--color-gold); }
+    .tier__icon--platinum { background: #e8f0fe; color: var(--color-platinum); }
+
+    .tier__name {
+      font-size: 1.25rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .tier__price {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      margin-bottom: var(--space-sm);
+    }
+
+    .tier__period {
+      font-size: 0.85rem;
+      color: var(--color-text-light);
+      margin-bottom: var(--space-lg);
+    }
+
+    .tier__features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: var(--space-xl);
+    }
+
+    .tier__features li {
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+
+    .tier__features li:last-child {
+      border-bottom: none;
+    }
+
+    .tier__check {
+      color: var(--color-primary);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .tier__cross {
+      color: var(--color-text-light);
+      flex-shrink: 0;
+    }
+
+    /* ============================================
+       Timeline
+       ============================================ */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.5rem;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--color-border);
+      border-radius: 2px;
+    }
+
+    .timeline__item {
+      position: relative;
+      padding-bottom: var(--space-xl);
+    }
+
+    .timeline__item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline__dot {
+      position: absolute;
+      left: calc(-2rem + 0.175rem);
+      top: 0.25rem;
+      width: 0.875rem;
+      height: 0.875rem;
+      border-radius: 50%;
+      border: 3px solid var(--color-primary);
+      background: var(--color-bg);
+    }
+
+    .timeline__item--done .timeline__dot {
+      background: var(--color-primary);
+    }
+
+    .timeline__date {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .timeline__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: var(--space-xs) 0;
+    }
+
+    .timeline__text {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0;
+    }
+
+    /* ============================================
+       Features List (Wat krijgt de sponsor)
+       ============================================ */
+    .features {
+      list-style: none;
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .features__item {
+      display: flex;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+    }
+
+    .features__icon {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .features__text strong {
+      display: block;
+      margin-bottom: var(--space-xs);
+    }
+
+    .features__text p {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
+    /* ============================================
+       Academy Section
+       ============================================ */
+    .academy-modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+      gap: var(--space-md);
+    }
+
+    .academy-module {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      font-size: 0.9rem;
+      transition: box-shadow var(--transition-fast);
+    }
+
+    .academy-module:hover {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .academy-module__num {
+      font-weight: 800;
+      color: var(--color-primary);
+      font-size: 0.75rem;
+    }
+
+    .academy-module__title {
+      font-weight: 600;
+      margin-top: var(--space-xs);
+    }
+
+    .academy-module__level {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.125rem 0.5rem;
+      border-radius: 2rem;
+      margin-top: var(--space-sm);
+    }
+
+    .academy-module__level--beginner   { background: #dcfce7; color: #166534; }
+    .academy-module__level--gemiddeld  { background: #fef3c7; color: #92400e; }
+    .academy-module__level--gevorderd  { background: #fee2e2; color: #991b1b; }
+    .academy-module__level--expert     { background: #ede9fe; color: #5b21b6; }
+
+    /* ============================================
+       Contact / CTA
+       ============================================ */
+    .cta-section {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      color: #fff;
+      text-align: center;
+      padding: var(--space-3xl) 0;
+    }
+
+    .cta-section h2,
+    .cta-section p {
+      color: #fff;
+    }
+
+    .cta-section p {
+      opacity: 0.9;
+    }
+
+    .cta-section .btn--outline {
+      border-color: #fff;
+      color: #fff;
+    }
+
+    .cta-section .btn--outline:hover,
+    .cta-section .btn--outline:focus-visible {
+      background: #fff;
+      color: var(--color-primary);
+    }
+
+    .cta-section .btn--accent:hover,
+    .cta-section .btn--accent:focus-visible {
+      background: #fff;
+      color: var(--color-accent);
+    }
+
+    /* ============================================
+       Comparison Table
+       ============================================ */
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+    }
+
+    .table-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 40rem;
+    }
+
+    .table-wrap th,
+    .table-wrap td {
+      padding: var(--space-sm) var(--space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.9rem;
+    }
+
+    .table-wrap th {
+      background: var(--color-bg-alt);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--color-text-muted);
+      position: sticky;
+      top: 0;
+    }
+
+    .table-wrap td:first-child {
+      font-weight: 600;
+    }
+
+    .table-wrap tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-wrap tbody tr:hover {
+      background: var(--color-primary-light);
+    }
+
+    /* ============================================
+       Impact Counter
+       ============================================ */
+    .impact-counter {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-xl);
+      margin: var(--space-2xl) 0;
+    }
+
+    .impact-counter__item {
+      text-align: center;
+      min-width: 8rem;
+    }
+
+    .impact-counter__value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1.1;
+    }
+
+    .impact-counter__label {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      margin-top: var(--space-xs);
+    }
+
+    /* ============================================
+       Footer
+       ============================================ */
+    .footer {
+      background: var(--color-bg-alt);
+      border-top: 1px solid var(--color-border);
+      padding: var(--space-2xl) 0 var(--space-lg);
+    }
+
+    .footer__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+      gap: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+
+    .footer__title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+    }
+
+    .footer__links {
+      list-style: none;
+    }
+
+    .footer__links li {
+      margin-bottom: var(--space-sm);
+    }
+
+    .footer__links a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    .footer__links a:hover {
+      color: var(--color-primary);
+    }
+
+    .footer__bottom {
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--space-lg);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--color-text-light);
+    }
+
+    /* ============================================
+       Print Styles
+       ============================================ */
+    @media print {
+      .nav, .theme-toggle, .nav__toggle, .skip-link, .btn {
+        display: none !important;
+      }
+
+      body {
+        font-size: 11pt;
+        color: #000;
+        background: #fff;
+      }
+
+      .section {
+        padding: 1.5rem 0;
+        break-inside: avoid;
+      }
+
+      .hero {
+        background: none !important;
+        padding: 1rem 0;
+      }
+
+      .tier, .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        break-inside: avoid;
+      }
+
+      .cta-section {
+        background: none !important;
+        color: #000 !important;
+      }
+
+      .cta-section h2,
+      .cta-section p {
+        color: #000 !important;
+      }
+    }
+
+    /* ============================================
+       Reduced Motion (WCAG 2.3.3)
+       ============================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ============================================
+       High Contrast (WCAG)
+       ============================================ */
+    @media (forced-colors: active) {
+      .btn, .tier, .card {
+        border: 2px solid ButtonText;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Skip to main content (WCAG 2.4.1) -->
+  <a href="#main" class="skip-link">Ga naar hoofdinhoud</a>
+
+  <!-- ========================================
+       Navigation
+       ======================================== -->
+  <nav class="nav" role="navigation" aria-label="Hoofdnavigatie">
+    <div class="container nav__inner">
+      <a href="#main" class="nav__brand" aria-label="Meshcore Drenthe — Terug naar boven">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" focusable="false">
+          <circle cx="14" cy="6" r="3" fill="currentColor"/>
+          <circle cx="6" cy="20" r="3" fill="currentColor"/>
+          <circle cx="22" cy="20" r="3" fill="currentColor"/>
+          <line x1="14" y1="6" x2="6" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+          <line x1="14" y1="6" x2="22" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+          <line x1="6" y1="20" x2="22" y2="20" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+        </svg>
+        Meshcore Drenthe
+      </a>
+
+      <ul class="nav__links" role="list">
+        <li><a href="#project">Het Project</a></li>
+        <li><a href="#waarom">Waarom Sponsoren</a></li>
+        <li><a href="#pdca">Aanpak</a></li>
+        <li><a href="#pakketten">Pakketten</a></li>
+        <li><a href="#tijdlijn">Tijdlijn</a></li>
+        <li><a href="#academy">Academy</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <button class="theme-toggle" type="button" aria-label="Wissel licht/donker thema" id="themeToggle">
+          <span aria-hidden="true">🌙</span>
+        </button>
+        <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="mobileNav" aria-label="Menu openen" id="navToggle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="nav__mobile" id="mobileNav" role="menu" aria-label="Mobiel menu">
+      <a href="#project" role="menuitem">Het Project</a>
+      <a href="#waarom" role="menuitem">Waarom Sponsoren</a>
+      <a href="#pdca" role="menuitem">Aanpak</a>
+      <a href="#pakketten" role="menuitem">Pakketten</a>
+      <a href="#tijdlijn" role="menuitem">Tijdlijn</a>
+      <a href="#academy" role="menuitem">Academy</a>
+      <a href="#contact" role="menuitem">Contact</a>
+    </div>
+  </nav>
+
+  <!-- ========================================
+       Main Content
+       ======================================== -->
+  <main id="main">
+
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container">
+        <div class="hero__badge" aria-label="Sponsordocument 2026">
+          <span aria-hidden="true">📡</span> Sponsordocument 2026
+        </div>
+
+        <h1 id="hero-title" class="hero__title">
+          Bouw mee aan het<br><span>Noodnetwerk van Drenthe</span>
+        </h1>
+
+        <p class="hero__desc">
+          Een open-source mesh-netwerk op LoRa-technologie dat werkt zonder internet,
+          zonder provider en op zonne-energie. Wij zoeken partners die dit mogelijk willen maken.
+        </p>
+
+        <!-- Mesh Network SVG Illustration -->
+        <div class="mesh-svg" role="img" aria-label="Schematische weergave van een mesh-netwerk met onderling verbonden nodes">
+          <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Connections -->
+            <line class="mesh-line" x1="80" y1="60" x2="180" y2="40"/>
+            <line class="mesh-line" x1="80" y1="60" x2="150" y2="130"/>
+            <line class="mesh-line" x1="180" y1="40" x2="260" y2="80"/>
+            <line class="mesh-line" x1="180" y1="40" x2="150" y2="130"/>
+            <line class="mesh-line" x1="150" y1="130" x2="260" y2="80"/>
+            <line class="mesh-line" x1="260" y1="80" x2="350" y2="50"/>
+            <line class="mesh-line" x1="260" y1="80" x2="320" y2="150"/>
+            <line class="mesh-line" x1="350" y1="50" x2="430" y2="90"/>
+            <line class="mesh-line" x1="350" y1="50" x2="320" y2="150"/>
+            <line class="mesh-line" x1="320" y1="150" x2="430" y2="90"/>
+            <line class="mesh-line" x1="150" y1="130" x2="320" y2="150"/>
+            <line class="mesh-line" x1="80" y1="60" x2="60" y2="160"/>
+            <line class="mesh-line" x1="60" y1="160" x2="150" y2="130"/>
+            <line class="mesh-line" x1="430" y1="90" x2="450" y2="170"/>
+            <line class="mesh-line" x1="320" y1="150" x2="450" y2="170"/>
+
+            <!-- Animated pulses -->
+            <circle class="mesh-pulse mesh-pulse--animated" cx="80" cy="60" r="3" style="animation-delay: 0s"/>
+            <circle class="mesh-pulse mesh-pulse--animated" cx="260" cy="80" r="3" style="animation-delay: 0.7s"/>
+            <circle class="mesh-pulse mesh-pulse--animated" cx="430" cy="90" r="3" style="animation-delay: 1.4s"/>
+
+            <!-- Nodes -->
+            <circle class="mesh-node" cx="80" cy="60" r="6"/>
+            <circle class="mesh-node" cx="180" cy="40" r="5"/>
+            <circle class="mesh-node" cx="150" cy="130" r="5"/>
+            <circle class="mesh-node" cx="260" cy="80" r="7"/>
+            <circle class="mesh-node" cx="350" cy="50" r="5"/>
+            <circle class="mesh-node" cx="320" cy="150" r="6"/>
+            <circle class="mesh-node" cx="430" cy="90" r="6"/>
+            <circle class="mesh-node" cx="60" cy="160" r="4"/>
+            <circle class="mesh-node" cx="450" cy="170" r="4"/>
+
+            <!-- Labels -->
+            <text x="260" y="73" text-anchor="middle" font-size="9" font-weight="700" fill="white">R</text>
+          </svg>
+        </div>
+
+        <div class="hero__cta">
+          <a href="#pakketten" class="btn btn--primary btn--lg">Bekijk sponsorpakketten</a>
+          <a href="#contact" class="btn btn--outline btn--lg">Neem contact op</a>
+        </div>
+
+        <div class="hero__stats" role="list" aria-label="Kernfeiten">
+          <div class="stat" role="listitem">
+            <span class="stat__value" data-count="12">0</span>
+            <span class="stat__label">Geplande Nodes</span>
+          </div>
+          <div class="stat" role="listitem">
+            <span class="stat__value">869.618 MHz</span>
+            <span class="stat__label">SF7 / CR5 / 62.5 kHz</span>
+          </div>
+          <div class="stat" role="listitem">
+            <span class="stat__value">15 km</span>
+            <span class="stat__label">Bereik per Node</span>
+          </div>
+          <div class="stat" role="listitem">
+            <span class="stat__value">€20–50</span>
+            <span class="stat__label">Kosten per Node</span>
+          </div>
+          <div class="stat" role="listitem">
+            <span class="stat__value" data-count="19">0</span>
+            <span class="stat__label">Academy Modules</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Het Project
+         ======================================== -->
+    <section id="project" class="section" aria-labelledby="project-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Over het project</p>
+          <h2 id="project-title">Wat is Meshcore Drenthe?</h2>
+          <p class="section__desc">
+            Een decentraal noodnetwerk voor de hele provincie Drenthe, gebouwd door vrijwilligers
+            van Hackerspace Drenthe. Zonder internet, zonder provider — op zonne-energie.
+          </p>
+        </div>
+
+        <div class="grid grid--3">
+          <article class="card">
+            <div class="card__icon card__icon--green" aria-hidden="true">📡</div>
+            <h3 class="card__title">LoRa Mesh Technologie</h3>
+            <p class="card__text">
+              Nodes sturen berichten door van punt naar punt via LoRa-radio op 869.618 MHz (SF7/CR5, 62.5 kHz — Netherlands preset).
+              Bereik tot 15 km per hop, via meerdere hops nog veel verder. Geen zendmast nodig.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--blue" aria-hidden="true">🌿</div>
+            <h3 class="card__title">Waarom Drenthe?</h3>
+            <p class="card__text">
+              Grote afstanden, verspreide dorpen, kwetsbaar bij stroomuitval. Het perfecte
+              testgebied voor een decentraal noodnetwerk dat dorpen verbindt.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--orange" aria-hidden="true">☀️</div>
+            <h3 class="card__title">Zelfvoorzienend</h3>
+            <p class="card__text">
+              Elke node draait op een klein zonnepaneel en batterij.
+              Geen abonnement, geen stroom uit het net. Dag en nacht operationeel.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--green" aria-hidden="true">🔓</div>
+            <h3 class="card__title">Open Source</h3>
+            <p class="card__text">
+              Alle software, firmware en hardware-ontwerpen zijn openbaar.
+              Curve25519 key exchange en XChaCha20-Poly1305 encryptie beschermen elk bericht.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--blue" aria-hidden="true">🏫</div>
+            <h3 class="card__title">MeshCore Academy</h3>
+            <p class="card__text">
+              19 gratis cursusmodules van beginner tot expert. Interactieve oefeningen,
+              tools en een eindexamen met certificaat. Kennis delen is de kern.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--orange" aria-hidden="true">🤝</div>
+            <h3 class="card__title">Community-gedreven</h3>
+            <p class="card__text">
+              Van soldeerexperts tot beginners — er is een rol voor iedereen.
+              Elke woensdag bouwavond in De Nieuwe Veste, Coevorden.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Waarom Sponsoren
+         ======================================== -->
+    <section id="waarom" class="section section--alt" aria-labelledby="waarom-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Waarom meedoen?</p>
+          <h2 id="waarom-title">Wat levert sponsoring op?</h2>
+          <p class="section__desc">
+            Als sponsor investeer je in maatschappelijke impact, technologische innovatie
+            en directe zichtbaarheid bij een geëngageerd technisch publiek.
+          </p>
+        </div>
+
+        <div class="grid grid--2">
+          <div>
+            <ul class="features" role="list">
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">🎪</span>
+                <div class="features__text">
+                  <strong>Stand op evenementen</strong>
+                  <p>Uw organisatie is welkom met een eigen stand tijdens alle MeshCore-evenementen,
+                  van de kick-off in mei tot de uitrol-events in de zomer en het najaar.</p>
+                </div>
+              </li>
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">🌐</span>
+                <div class="features__text">
+                  <strong>Logo op alle uitingen</strong>
+                  <p>Website drenthenoodnetwerk.nl, presentaties, flyers, social media
+                  en de MeshCore Academy — altijd zichtbaar.</p>
+                </div>
+              </li>
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">📢</span>
+                <div class="features__text">
+                  <strong>Media &amp; PR exposure</strong>
+                  <p>Noodcommunicatie is actueel. Pers, radio en tech-blogs schrijven over dit
+                  project. Uw naam wordt onlosmakelijk verbonden met innovatieve veiligheid.</p>
+                </div>
+              </li>
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">🧑‍💻</span>
+                <div class="features__text">
+                  <strong>Netwerk van techneuten</strong>
+                  <p>Directe toegang tot een community van makers, hackers en IT-professionals.
+                  Ideaal voor werving, co-creatie of kennisdeling.</p>
+                </div>
+              </li>
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">�</span>
+                <div class="features__text">
+                  <strong>Personeel &amp; relaties welkom</strong>
+                  <p>Medewerkers en relaties van sponsors zijn van harte welkom tijdens alle evenementen
+                  om mee te doen, mee te denken en mee te bouwen. Teambuilding met maatschappelijke impact.</p>
+                </div>
+              </li>
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">�💚</span>
+                <div class="features__text">
+                  <strong>MVO &amp; maatschappelijke impact</strong>
+                  <p>Draag zichtbaar bij aan veiligheid en zelfredzaamheid in Drenthe.
+                  Open source, duurzaam (zonne-energie) en inclusief.</p>
+                </div>
+              </li>
+              <li class="features__item">
+                <span class="features__icon" aria-hidden="true">🎓</span>
+                <div class="features__text">
+                  <strong>Educatie sponsoring</strong>
+                  <p>Uw naam bij de MeshCore Academy — 19 modules, certificering en interactieve
+                  tools die door honderden techneuten gevolgd worden.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <!-- Bereik & Impact Infographic SVG -->
+            <div role="img" aria-label="Infographic: bereik en impact van het project">
+              <svg viewBox="0 0 400 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:24rem; margin:0 auto; display:block;">
+                <!-- Background -->
+                <rect x="0" y="0" width="400" height="480" rx="16" fill="var(--color-bg-alt)" stroke="var(--color-border)" stroke-width="1"/>
+
+                <!-- Title -->
+                <text x="200" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="var(--color-text)">Bereik &amp; Impact</text>
+
+                <!-- Province silhouette (simplified Drenthe shape) -->
+                <path d="M160,70 L200,60 L240,68 L260,90 L270,130 L260,170 L240,200 L220,215 L190,220 L160,210 L140,185 L130,150 L135,110 Z"
+                      fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
+
+                <!-- Node dots on map -->
+                <circle cx="195" cy="100" r="5" fill="var(--color-primary)">
+                  <title>Coevorden</title>
+                </circle>
+                <circle cx="220" cy="120" r="4" fill="var(--color-accent)">
+                  <title>Emmen</title>
+                </circle>
+                <circle cx="170" cy="140" r="4" fill="var(--color-accent)">
+                  <title>Hoogeveen</title>
+                </circle>
+                <circle cx="200" cy="160" r="3" fill="var(--color-secondary)">
+                  <title>Planned node</title>
+                </circle>
+                <circle cx="240" cy="150" r="3" fill="var(--color-secondary)">
+                  <title>Planned node</title>
+                </circle>
+
+                <!-- Coverage ranges -->
+                <circle cx="195" cy="100" r="30" fill="var(--color-primary)" opacity="0.08"/>
+                <circle cx="220" cy="120" r="25" fill="var(--color-accent)" opacity="0.08"/>
+
+                <!-- Stats boxes -->
+                <rect x="20" y="250" width="170" height="60" rx="8" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1"/>
+                <text x="105" y="275" text-anchor="middle" font-size="22" font-weight="800" fill="var(--color-primary)">2.680 km²</text>
+                <text x="105" y="295" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">Oppervlakte Drenthe</text>
+
+                <rect x="210" y="250" width="170" height="60" rx="8" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1"/>
+                <text x="295" y="275" text-anchor="middle" font-size="22" font-weight="800" fill="var(--color-primary)">500K+</text>
+                <text x="295" y="295" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">Inwoners bereikbaar</text>
+
+                <rect x="20" y="325" width="170" height="60" rx="8" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1"/>
+                <text x="105" y="350" text-anchor="middle" font-size="22" font-weight="800" fill="var(--color-primary)">€0</text>
+                <text x="105" y="370" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">Abonnementskosten</text>
+
+                <rect x="210" y="325" width="170" height="60" rx="8" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="1"/>
+                <text x="295" y="350" text-anchor="middle" font-size="22" font-weight="800" fill="var(--color-primary)">100%</text>
+                <text x="295" y="370" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">Open source</text>
+
+                <rect x="20" y="400" width="360" height="60" rx="8" fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1"/>
+                <text x="200" y="425" text-anchor="middle" font-size="13" font-weight="700" fill="var(--color-primary)">Alles is bespreekbaar</text>
+                <text x="200" y="445" text-anchor="middle" font-size="11" fill="var(--color-text-muted)">Maatwerk sponsoring in onderling overleg</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         PDCA Aanpak
+         ======================================== -->
+    <section id="pdca" class="section" aria-labelledby="pdca-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Kwaliteitsborging</p>
+          <h2 id="pdca-title">PDCA — Onze aanpak</h2>
+          <p class="section__desc">
+            Het Meshcore Drenthe project werkt volgens het Plan-Do-Check-Act principe.
+            Elke fase is transparant en meetbaar.
+          </p>
+        </div>
+
+        <div class="pdca">
+          <!-- PDCA Cycle SVG -->
+          <div class="pdca__svg-wrap">
+            <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PDCA-cyclus diagram: Plan, Do, Check, Act in een doorlopende cirkel" style="max-width:20rem;">
+              <!-- Plan (top-right) -->
+              <path class="pdca-arc" d="M150,150 L150,30 A120,120 0 0,1 270,150 Z" fill="#3b82f6" opacity="0.75" tabindex="0" role="button" aria-label="Plan fase">
+                <title>Plan</title>
+              </path>
+              <text x="205" y="105" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">PLAN</text>
+
+              <!-- Do (bottom-right) -->
+              <path class="pdca-arc" d="M150,150 L270,150 A120,120 0 0,1 150,270 Z" fill="#22c55e" opacity="0.75" tabindex="0" role="button" aria-label="Do fase">
+                <title>Do</title>
+              </path>
+              <text x="205" y="210" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">DO</text>
+
+              <!-- Check (bottom-left) -->
+              <path class="pdca-arc" d="M150,150 L150,270 A120,120 0 0,1 30,150 Z" fill="#f59e0b" opacity="0.75" tabindex="0" role="button" aria-label="Check fase">
+                <title>Check</title>
+              </path>
+              <text x="95" y="210" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">CHECK</text>
+
+              <!-- Act (top-left) -->
+              <path class="pdca-arc" d="M150,150 L30,150 A120,120 0 0,1 150,30 Z" fill="#ef4444" opacity="0.75" tabindex="0" role="button" aria-label="Act fase">
+                <title>Act</title>
+              </path>
+              <text x="95" y="105" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">ACT</text>
+
+              <!-- Center circle -->
+              <circle cx="150" cy="150" r="32" fill="var(--color-bg)" stroke="var(--color-border)" stroke-width="2"/>
+              <text x="150" y="146" text-anchor="middle" font-size="10" font-weight="700" fill="var(--color-text)">PDCA</text>
+              <text x="150" y="160" text-anchor="middle" font-size="8" fill="var(--color-text-muted)">Continu</text>
+
+              <!-- Arrow indicators -->
+              <path d="M150,28 L155,38 L145,38 Z" fill="#3b82f6"/>
+              <path d="M272,150 L262,145 L262,155 Z" fill="#22c55e"/>
+              <path d="M150,272 L145,262 L155,262 Z" fill="#f59e0b"/>
+              <path d="M28,150 L38,155 L38,145 Z" fill="#ef4444"/>
+            </svg>
+          </div>
+
+          <!-- PDCA Details -->
+          <div>
+            <ul class="pdca__list" role="list" id="pdcaList">
+              <li class="pdca__item is-active" data-phase="plan">
+                <p class="pdca__item-title">
+                  <span aria-hidden="true" style="color:#3b82f6;">●</span> Plan — Ontwerp &amp; Strategie
+                </p>
+                <p class="pdca__item-text">
+                  Netwerkontwerp voor Drenthe: node-locaties, hardware-selectie, frequentieplan
+                  (Netherlands preset: SF7, CR5, 869.618 MHz, 62.5 kHz),
+                  budgettering en sponsorwerving. MeshCore Academy curriculum ontwikkeld.
+                  Kick-off event gepland op 6 mei 2026.
+                </p>
+              </li>
+              <li class="pdca__item" data-phase="do">
+                <p class="pdca__item-title">
+                  <span aria-hidden="true" style="color:#22c55e;">●</span> Do — Bouwen &amp; Uitrollen
+                </p>
+                <p class="pdca__item-text">
+                  Mei Meshcore Maand: firmware flashen, nodes assembleren, 3D-print behuizingen,
+                  solar setup solderen. Wekelijkse bouw-avonden in De Nieuwe Veste.
+                  Eerste prototype-nodes geplaatst in Zuidoost-Drenthe.
+                </p>
+              </li>
+              <li class="pdca__item" data-phase="check">
+                <p class="pdca__item-title">
+                  <span aria-hidden="true" style="color:#f59e0b;">●</span> Check — Testen &amp; Meten
+                </p>
+                <p class="pdca__item-text">
+                  Bereiktesten tussen nodes, RSSI-metingen, link budget validatie.
+                  Netwerk monitoring, troubleshooting en dekking in kaart brengen.
+                  Academy-voortgang en certificeringsresultaten evalueren.
+                </p>
+              </li>
+              <li class="pdca__item" data-phase="act">
+                <p class="pdca__item-title">
+                  <span aria-hidden="true" style="color:#ef4444;">●</span> Act — Verbeteren &amp; Opschalen
+                </p>
+                <p class="pdca__item-text">
+                  Antenne-optimalisatie, firmware-updates, nieuwe node-locaties.
+                  Lessen vertalen naar verbeterde handleidingen en Academy-modules.
+                  Uitbreiding naar heel Drenthe in 2027.
+                </p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Sponsorpakketten
+         ======================================== -->
+    <section id="pakketten" class="section section--alt" aria-labelledby="pakketten-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Investeer in veiligheid</p>
+          <h2 id="pakketten-title">Sponsorpakketten</h2>
+          <p class="section__desc">
+            Vier niveaus, elk met duidelijke tegenprestaties. Maatwerk is altijd mogelijk —
+            alles is bespreekbaar. Neem vrijblijvend contact op.
+          </p>
+        </div>
+
+        <div class="grid grid--4" role="list" aria-label="Sponsorpakketten overzicht">
+
+          <!-- Bronze -->
+          <article class="tier" role="listitem" aria-label="Brons sponsorpakket">
+            <div class="tier__icon tier__icon--bronze" aria-hidden="true">🥉</div>
+            <h3 class="tier__name">Brons</h3>
+            <p class="tier__price">€250</p>
+            <p class="tier__period">per jaar</p>
+            <ul class="tier__features" role="list">
+              <li><span class="tier__check" aria-hidden="true">✓</span> Logo op website</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Vermelding in presentaties</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Sociale media shout-out</li>
+              <li><span class="tier__cross" aria-hidden="true">—</span> <span style="opacity:0.5">Stand op evenementen</span></li>
+              <li><span class="tier__cross" aria-hidden="true">—</span> <span style="opacity:0.5">Logo op Academy</span></li>
+              <li><span class="tier__cross" aria-hidden="true">—</span> <span style="opacity:0.5">Node sponsoring</span></li>
+            </ul>
+            <a href="#contact" class="btn btn--outline" style="width:100%;">Kies Brons</a>
+          </article>
+
+          <!-- Silver -->
+          <article class="tier" role="listitem" aria-label="Zilver sponsorpakket">
+            <div class="tier__icon tier__icon--silver" aria-hidden="true">🥈</div>
+            <h3 class="tier__name">Zilver</h3>
+            <p class="tier__price">€500</p>
+            <p class="tier__period">per jaar</p>
+            <ul class="tier__features" role="list">
+              <li><span class="tier__check" aria-hidden="true">✓</span> Alles van Brons</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Stand op 2 evenementen</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Logo op flyers &amp; prints</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> 1 gesponsorde node met naam</li>
+              <li><span class="tier__cross" aria-hidden="true">—</span> <span style="opacity:0.5">Logo op Academy</span></li>
+              <li><span class="tier__cross" aria-hidden="true">—</span> <span style="opacity:0.5">Keynote-slot</span></li>
+            </ul>
+            <a href="#contact" class="btn btn--outline" style="width:100%;">Kies Zilver</a>
+          </article>
+
+          <!-- Gold -->
+          <article class="tier tier--featured" role="listitem" aria-label="Goud sponsorpakket — aanbevolen">
+            <div class="tier__badge">Meest gekozen</div>
+            <div class="tier__icon tier__icon--gold" aria-hidden="true">🥇</div>
+            <h3 class="tier__name">Goud</h3>
+            <p class="tier__price">€1.000</p>
+            <p class="tier__period">per jaar</p>
+            <ul class="tier__features" role="list">
+              <li><span class="tier__check" aria-hidden="true">✓</span> Alles van Zilver</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Stand op alle evenementen</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Logo op MeshCore Academy</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> 3 gesponsorde nodes met naam</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Vermelding in persberichten</li>
+              <li><span class="tier__cross" aria-hidden="true">—</span> <span style="opacity:0.5">Keynote-slot</span></li>
+            </ul>
+            <a href="#contact" class="btn btn--primary" style="width:100%;">Kies Goud</a>
+          </article>
+
+          <!-- Platinum -->
+          <article class="tier" role="listitem" aria-label="Platina sponsorpakket">
+            <div class="tier__icon tier__icon--platinum" aria-hidden="true">💎</div>
+            <h3 class="tier__name">Platina</h3>
+            <p class="tier__price">€2.500</p>
+            <p class="tier__period">per jaar</p>
+            <ul class="tier__features" role="list">
+              <li><span class="tier__check" aria-hidden="true">✓</span> Alles van Goud</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Keynote-slot bij kick-off</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Exclusieve workshop met team</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> 5+ gesponsorde nodes</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Co-branding op hardware</li>
+              <li><span class="tier__check" aria-hidden="true">✓</span> Maandelijkse voortgangsrapportage</li>
+            </ul>
+            <a href="#contact" class="btn btn--accent" style="width:100%;">Kies Platina</a>
+          </article>
+        </div>
+
+        <!-- Comparison Table -->
+        <div style="margin-top: var(--space-2xl);">
+          <h3 class="text-center" style="margin-bottom: var(--space-lg);">Vergelijkingsoverzicht</h3>
+          <div class="table-wrap" role="region" aria-label="Vergelijking van sponsorpakketten" tabindex="0">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Voordeel</th>
+                  <th scope="col">Brons</th>
+                  <th scope="col">Zilver</th>
+                  <th scope="col">Goud</th>
+                  <th scope="col">Platina</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Logo op website</td><td>✓</td><td>✓</td><td>✓ (prominent)</td><td>✓ (top)</td></tr>
+                <tr><td>Sociale media</td><td>1× per kwartaal</td><td>1× per maand</td><td>2× per maand</td><td>Wekelijks</td></tr>
+                <tr><td>Stand op events</td><td>—</td><td>2 events</td><td>Alle events</td><td>Alle events + VIP</td></tr>
+                <tr><td>Logo op flyers</td><td>—</td><td>✓</td><td>✓</td><td>✓ (hoofdsponsor)</td></tr>
+                <tr><td>Logo op Academy</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+                <tr><td>Gesponsorde nodes</td><td>—</td><td>1</td><td>3</td><td>5+</td></tr>
+                <tr><td>Persberichten</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+                <tr><td>Keynote-slot</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+                <tr><td>Co-branding hardware</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+                <tr><td>Maandrapportage</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+                <tr><td>Personeel &amp; relaties welkom op events</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Sponsoring in natura
+         ======================================== -->
+    <section class="section" aria-labelledby="natura-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Niet alleen geld</p>
+          <h2 id="natura-title">Sponsoring in natura</h2>
+          <p class="section__desc">
+            Naast financiële bijdragen verwelkomen we ook materiële sponsoring, diensten
+            en expertise. Enkele mogelijkheden:
+          </p>
+        </div>
+
+        <div class="grid grid--3">
+          <article class="card">
+            <div class="card__icon card__icon--green" aria-hidden="true">🔧</div>
+            <h3 class="card__title">Hardware &amp; Componenten</h3>
+            <p class="card__text">
+              LoRa-boards, antennes, zonnepanelen, batterijen, behuizingen of
+              3D-printmateriaal. Elk onderdeel helpt een nieuwe node het netwerk in.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--blue" aria-hidden="true">📍</div>
+            <h3 class="card__title">Locaties</h3>
+            <p class="card__text">
+              Een dak, toren, mast of hoog punt voor een repeater-node.
+              Strategische plaatsing is cruciaal voor netwerkdekking in Drenthe.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--orange" aria-hidden="true">🧑‍🏫</div>
+            <h3 class="card__title">Kennis &amp; Expertise</h3>
+            <p class="card__text">
+              RF-engineering, IoT, embedded systems, netwerksecurity —
+              elk uur professionele begeleiding versterkt het project.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Tijdlijn / Roadmap
+         ======================================== -->
+    <section id="tijdlijn" class="section section--alt" aria-labelledby="tijdlijn-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Roadmap</p>
+          <h2 id="tijdlijn-title">Projecttijdlijn 2026–2027</h2>
+          <p class="section__desc">
+            Van voorbereiding tot provinciebrede dekking — de concrete stappen en
+            momenten waarop uw sponsoring impact maakt.
+          </p>
+        </div>
+
+        <div style="max-width: 40rem; margin: 0 auto;">
+          <div class="timeline" role="list" aria-label="Projecttijdlijn">
+
+            <div class="timeline__item timeline__item--done" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">April 2026</span>
+              <p class="timeline__title">Voorbereiding</p>
+              <p class="timeline__text">
+                Materiaal bestellen, hardware-ontwerpen finaliseren, website lanceren,
+                sponsorwerving starten en kwartiermakers verzamelen.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">6 mei 2026</span>
+              <p class="timeline__title">Kick-off — Mei Meshcore Maand</p>
+              <p class="timeline__text">
+                Presentatie, live demo en eerste prototype in De Nieuwe Veste, Coevorden.
+                Sponsors welkom met stand. Start van wekelijkse bouw-avonden.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">13 mei 2026</span>
+              <p class="timeline__title">Firmware flashen &amp; configureren</p>
+              <p class="timeline__text">
+                Eerste nodes worden geflasht met MeshCore firmware (v1.14.1+), geconfigureerd op
+                de Netherlands preset (SF7/CR5, 869.618 MHz, 62.5 kHz) en getest.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">20 mei 2026</span>
+              <p class="timeline__title">3D-print behuizingen</p>
+              <p class="timeline__text">
+                Weerbestendige behuizingen printen, testen en verbeteren.
+                STL-bestanden delen met de community.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">27 mei 2026</span>
+              <p class="timeline__title">Solar setup &amp; locatiescouting</p>
+              <p class="timeline__text">
+                Zonnepaneel-laadcircuits solderen, eerste autonome nodes bouwen.
+                Strategische locaties in kaart brengen.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">Zomer 2026</span>
+              <p class="timeline__title">Eerste permanente nodes</p>
+              <p class="timeline__text">
+                Nodes permanent geplaatst op strategische locaties in Zuidoost-Drenthe
+                (Emmen, Coevorden). Sponsor-events bij plaatsing.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">Najaar 2026</span>
+              <p class="timeline__title">Testnetwerk operationeel</p>
+              <p class="timeline__text">
+                Kernnetwerk Zuid-Oost Drenthe draait betrouwbaar.
+                Eerste dekkingskaart openbaar. Evaluatie-event met sponsors.
+              </p>
+            </div>
+
+            <div class="timeline__item" role="listitem">
+              <div class="timeline__dot" aria-hidden="true"></div>
+              <span class="timeline__date">2027</span>
+              <p class="timeline__title">Uitbreiding heel Drenthe</p>
+              <p class="timeline__text">
+                Meer vrijwilligers, meer nodes, meer bereik.
+                Van testnetwerk naar provinciebrede noodcommunicatie-infrastructuur.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         MeshCore Academy
+         ======================================== -->
+    <section id="academy" class="section" aria-labelledby="academy-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Educatie</p>
+          <h2 id="academy-title">MeshCore Academy</h2>
+          <p class="section__desc">
+            19 gratis cursusmodules, van beginner tot expert. Uw logo als sponsor zichtbaar
+            bij het leerplatform dat honderden techneuten bereikt.
+          </p>
+        </div>
+
+        <div class="academy-modules" role="list" aria-label="Overzicht Academy modules">
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 1</span>
+            <p class="academy-module__title">Wat is een Mesh?</p>
+            <span class="academy-module__level academy-module__level--beginner">Beginner</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 2</span>
+            <p class="academy-module__title">Waarom een Noodnetwerk?</p>
+            <span class="academy-module__level academy-module__level--beginner">Beginner</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 3</span>
+            <p class="academy-module__title">LoRa Radio Basis</p>
+            <span class="academy-module__level academy-module__level--beginner">Beginner</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 4</span>
+            <p class="academy-module__title">LoRa Regelgeving</p>
+            <span class="academy-module__level academy-module__level--beginner">Beginner</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 5</span>
+            <p class="academy-module__title">MeshCore Hardware</p>
+            <span class="academy-module__level academy-module__level--beginner">Beginner</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 6</span>
+            <p class="academy-module__title">Firmware Installeren</p>
+            <span class="academy-module__level academy-module__level--beginner">Beginner</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 7</span>
+            <p class="academy-module__title">Eerste Configuratie</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 8</span>
+            <p class="academy-module__title">Antenne Types</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 9</span>
+            <p class="academy-module__title">Antenne Plaatsing &amp; RF</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 10</span>
+            <p class="academy-module__title">Link Budget &amp; Planning</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 11</span>
+            <p class="academy-module__title">Stroomverbruik &amp; Batterij</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 12</span>
+            <p class="academy-module__title">MeshCore Kanalen &amp; Rooms</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 13</span>
+            <p class="academy-module__title">MeshCore Packet Types</p>
+            <span class="academy-module__level academy-module__level--gemiddeld">Gemiddeld</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 14</span>
+            <p class="academy-module__title">Routering &amp; Flooding</p>
+            <span class="academy-module__level academy-module__level--gevorderd">Gevorderd</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 15</span>
+            <p class="academy-module__title">Protocollen Vergelijken</p>
+            <span class="academy-module__level academy-module__level--gevorderd">Gevorderd</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 16</span>
+            <p class="academy-module__title">Beveiliging &amp; Encryptie</p>
+            <span class="academy-module__level academy-module__level--gevorderd">Gevorderd</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 17</span>
+            <p class="academy-module__title">Onderhoud &amp; Troubleshooting</p>
+            <span class="academy-module__level academy-module__level--gevorderd">Gevorderd</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Module 18</span>
+            <p class="academy-module__title">Netwerk Ontwerp &amp; Scenario's</p>
+            <span class="academy-module__level academy-module__level--expert">Expert</span>
+          </div>
+          <div class="academy-module" role="listitem">
+            <span class="academy-module__num">Eindexamen</span>
+            <p class="academy-module__title">Certificering</p>
+            <span class="academy-module__level academy-module__level--expert">Expert</span>
+          </div>
+        </div>
+
+        <p class="text-center" style="margin-top: var(--space-xl); color: var(--color-text-muted);">
+          Inclusief 5 interactieve verdiepingstools: Device Feature Matrix, Antenne Feature Matrix,
+          Antenne Plaatsing Gids, Protocol &amp; Payload Vergelijker en Device Setup &amp; Sync.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Evenementen
+         ======================================== -->
+    <section class="section section--alt" aria-labelledby="events-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">Zichtbaarheid</p>
+          <h2 id="events-title">Evenementen &amp; Activiteiten</h2>
+          <p class="section__desc">
+            Sponsors zijn welkom met een stand bij al onze activiteiten.
+            Zichtbaar zijn waar techneuten samenkomen.
+          </p>
+        </div>
+
+        <div class="grid grid--2">
+          <article class="card">
+            <div class="card__icon card__icon--green" aria-hidden="true">🚀</div>
+            <h3 class="card__title">Kick-off — 6 mei 2026</h3>
+            <p class="card__text">
+              De Nieuwe Veste, Coevorden. Presentatie, live demo van het mesh-netwerk,
+              technische uitleg en het eerste prototype. De perfecte plek voor een sponsorstand.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--blue" aria-hidden="true">🔨</div>
+            <h3 class="card__title">Wekelijkse Hak-avonden</h3>
+            <p class="card__text">
+              Elke woensdag 19:00–21:00 in De Nieuwe Veste. Firmware flashen, solderen,
+              3D-printen, testen. Een actieve community die elke week groeit.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--orange" aria-hidden="true">📡</div>
+            <h3 class="card__title">Node Deployment Events</h3>
+            <p class="card__text">
+              Bij elke permanente plaatsing van een node organiseren we een publiek
+              event. Uw gesponsorde node, uw naam, samen gevierd.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="card__icon card__icon--green" aria-hidden="true">🎓</div>
+            <h3 class="card__title">Academy Workshops</h3>
+            <p class="card__text">
+              Hands-on workshops gekoppeld aan de MeshCore Academy modules.
+              Van beginner-sessies tot expert-niveau. Co-branded met sponsors.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Over Hackerspace Drenthe
+         ======================================== -->
+    <section class="section" aria-labelledby="over-title">
+      <div class="container">
+        <div class="section__header">
+          <p class="section__subtitle">De organisatie</p>
+          <h2 id="over-title">Een project van Hackerspace Drenthe</h2>
+          <p class="section__desc">
+            Hackerspace Drenthe is een open werkplaats voor hackers, makers en techneuten
+            in Coevorden en omstreken. Meshcore Drenthe is ons nieuwste project.
+          </p>
+        </div>
+
+        <div class="grid grid--3">
+          <article class="card text-center">
+            <div class="card__icon card__icon--green" style="margin:0 auto var(--space-md);" aria-hidden="true">📍</div>
+            <h3 class="card__title">Locatie</h3>
+            <p class="card__text">
+              De Nieuwe Veste<br>
+              Graaf van Heiden Reinesteinlaan<br>
+              Coevorden
+            </p>
+          </article>
+
+          <article class="card text-center">
+            <div class="card__icon card__icon--blue" style="margin:0 auto var(--space-md);" aria-hidden="true">📅</div>
+            <h3 class="card__title">Bijeenkomsten</h3>
+            <p class="card__text">
+              Elke woensdag<br>
+              19:00 – 21:00<br>
+              Iedereen is welkom
+            </p>
+          </article>
+
+          <article class="card text-center">
+            <div class="card__icon card__icon--orange" style="margin:0 auto var(--space-md);" aria-hidden="true">🏛️</div>
+            <h3 class="card__title">Organisatie</h3>
+            <p class="card__text">
+              KVK: 82345023<br>
+              <a href="https://www.hackerspace-drenthe.nl/" rel="noopener noreferrer">hackerspace-drenthe.nl</a><br>
+              <a href="https://drenthenoodnetwerk.nl" rel="noopener noreferrer">drenthenoodnetwerk.nl</a>
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================
+         Contact CTA
+         ======================================== -->
+    <section id="contact" class="cta-section" aria-labelledby="contact-title">
+      <div class="container">
+        <h2 id="contact-title" style="margin-bottom: var(--space-md);">
+          Word sponsor van het Drenthe Noodnetwerk
+        </h2>
+        <p style="max-width: 36rem; margin: 0 auto var(--space-xl); font-size: 1.15rem;">
+          Neem vrijblijvend contact op voor een gesprek over de mogelijkheden.
+          Elk sponsorpakket is bespreekbaar en op maat te maken.
+        </p>
+
+        <div class="impact-counter" role="list" aria-label="Projectimpact in cijfers">
+          <div class="impact-counter__item" role="listitem">
+            <div class="impact-counter__value" style="color:#fff;" data-count="12">0</div>
+            <div class="impact-counter__label" style="color:rgba(255,255,255,0.8);">Geplande nodes</div>
+          </div>
+          <div class="impact-counter__item" role="listitem">
+            <div class="impact-counter__value" style="color:#fff;" data-count="19">0</div>
+            <div class="impact-counter__label" style="color:rgba(255,255,255,0.8);">Academy modules</div>
+          </div>
+          <div class="impact-counter__item" role="listitem">
+            <div class="impact-counter__value" style="color:#fff;">15 km</div>
+            <div class="impact-counter__label" style="color:rgba(255,255,255,0.8);">Bereik per node</div>
+          </div>
+          <div class="impact-counter__item" role="listitem">
+            <div class="impact-counter__value" style="color:#fff;">500K+</div>
+            <div class="impact-counter__label" style="color:rgba(255,255,255,0.8);">Inwoners Drenthe</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-md);">
+          <a href="mailto:bestuur@hackerspace-drenthe.nl" class="btn btn--accent btn--lg">
+            ✉ bestuur@hackerspace-drenthe.nl
+          </a>
+          <a href="https://www.hackerspace-drenthe.nl/" class="btn btn--outline btn--lg" rel="noopener noreferrer">
+            Hackerspace Drenthe
+          </a>
+          <a href="https://drenthenoodnetwerk.nl" class="btn btn--outline btn--lg" rel="noopener noreferrer">
+            Drenthe Noodnetwerk
+          </a>
+          <a href="https://t.me/+GTTYOvZTRVNhNThk" class="btn btn--outline btn--lg" rel="noopener noreferrer">
+            Telegram groep
+          </a>
+        </div>
+
+        <p style="margin-top: var(--space-xl); font-size: 0.95rem; opacity: 0.85;">
+          ✉ <a href="mailto:bestuur@hackerspace-drenthe.nl" style="color:#fff; text-decoration:underline;">bestuur@hackerspace-drenthe.nl</a>
+          — Locatie: De Nieuwe Veste, Coevorden — Elke woensdag 19:00–21:00
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================
+       Footer
+       ======================================== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <p class="footer__title">Project</p>
+          <ul class="footer__links" role="list">
+            <li><a href="https://drenthenoodnetwerk.nl/wat-is-meshcore.html" rel="noopener noreferrer">Wat is Meshcore?</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/hoe-werkt-het.html" rel="noopener noreferrer">Hoe werkt het?</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/netwerk-drenthe.html" rel="noopener noreferrer">Netwerk Kaart</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/apparaten.html" rel="noopener noreferrer">Apparaten</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer__title">Meedoen</p>
+          <ul class="footer__links" role="list">
+            <li><a href="https://drenthenoodnetwerk.nl/meedoen.html" rel="noopener noreferrer">Doe mee</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/planning.html" rel="noopener noreferrer">Planning</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/faq.html" rel="noopener noreferrer">FAQ</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/handleidingen.html" rel="noopener noreferrer">Handleidingen</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer__title">Academy</p>
+          <ul class="footer__links" role="list">
+            <li><a href="https://drenthenoodnetwerk.nl/MeshAcademy/course-hub.html" rel="noopener noreferrer">Cursusoverzicht</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/MeshAcademy/meshcore-device-feature-matrix.html" rel="noopener noreferrer">Device Matrix</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/MeshAcademy/meshcore-antenne-feature-matrix.html" rel="noopener noreferrer">Antenne Matrix</a></li>
+            <li><a href="https://drenthenoodnetwerk.nl/MeshAcademy/meshcore-antenne-plaatsing.html" rel="noopener noreferrer">Antenne Plaatsing</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer__title">Hackerspace Drenthe</p>
+          <ul class="footer__links" role="list">
+            <li><a href="https://www.hackerspace-drenthe.nl/" rel="noopener noreferrer">Website</a></li>
+            <li><a href="https://t.me/+GTTYOvZTRVNhNThk" rel="noopener noreferrer">Telegram</a></li>
+            <li>KVK: 82345023</li>
+            <li>Coevorden — De Nieuwe Veste</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p>
+          Meshcore Drenthe — Een open-source noodnetwerk voor de provincie<br>
+          Hackerspace Drenthe — KVK: 82345023 —
+          <a href="https://drenthenoodnetwerk.nl" rel="noopener noreferrer">drenthenoodnetwerk.nl</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================
+       JavaScript
+       ======================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ----------------------------------------
+         Theme Toggle
+         ---------------------------------------- */
+      const ThemeManager = {
+        STORAGE_KEY: 'meshcore-theme',
+        THEMES: { LIGHT: 'light', DARK: 'dark' },
+
+        init() {
+          this.toggle = document.getElementById('themeToggle');
+          if (!this.toggle) return;
+
+          const saved = localStorage.getItem(this.STORAGE_KEY);
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = saved || (prefersDark ? this.THEMES.DARK : this.THEMES.LIGHT);
+          this.apply(theme);
+
+          this.toggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === this.THEMES.DARK ? this.THEMES.LIGHT : this.THEMES.DARK;
+            this.apply(next);
+            localStorage.setItem(this.STORAGE_KEY, next);
+          });
+        },
+
+        apply(theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+          const icon = this.toggle.querySelector('span');
+          if (icon) icon.textContent = theme === this.THEMES.DARK ? '☀️' : '🌙';
+          this.toggle.setAttribute('aria-label',
+            theme === this.THEMES.DARK
+              ? 'Wissel naar licht thema'
+              : 'Wissel naar donker thema'
+          );
+        }
+      };
+
+      /* ----------------------------------------
+         Mobile Navigation
+         ---------------------------------------- */
+      const MobileNav = {
+        init() {
+          this.toggleBtn = document.getElementById('navToggle');
+          this.menu = document.getElementById('mobileNav');
+          if (!this.toggleBtn || !this.menu) return;
+
+          this.toggleBtn.addEventListener('click', () => this.toggle());
+
+          // Close on link click
+          this.menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => this.close());
+          });
+
+          // Close on Escape
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen()) this.close();
+          });
+
+          // Close on outside click
+          document.addEventListener('click', (e) => {
+            if (this.isOpen() && !this.menu.contains(e.target) && !this.toggleBtn.contains(e.target)) {
+              this.close();
+            }
+          });
+        },
+
+        isOpen() {
+          return this.menu.classList.contains('is-open');
+        },
+
+        toggle() {
+          this.isOpen() ? this.close() : this.open();
+        },
+
+        open() {
+          this.menu.classList.add('is-open');
+          this.toggleBtn.setAttribute('aria-expanded', 'true');
+          this.toggleBtn.setAttribute('aria-label', 'Menu sluiten');
+          // Focus first link
+          const firstLink = this.menu.querySelector('a');
+          if (firstLink) firstLink.focus();
+        },
+
+        close() {
+          this.menu.classList.remove('is-open');
+          this.toggleBtn.setAttribute('aria-expanded', 'false');
+          this.toggleBtn.setAttribute('aria-label', 'Menu openen');
+        }
+      };
+
+      /* ----------------------------------------
+         Counter Animation (Intersection Observer)
+         ---------------------------------------- */
+      const CounterAnimation = {
+        init() {
+          const counters = document.querySelectorAll('[data-count]');
+          if (!counters.length) return;
+
+          // Respect reduced motion preference
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            counters.forEach(el => { el.textContent = el.dataset.count; });
+            return;
+          }
+
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                this.animate(entry.target);
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.5 });
+
+          counters.forEach(el => observer.observe(el));
+        },
+
+        animate(el) {
+          const target = parseInt(el.dataset.count, 10);
+          if (isNaN(target)) return;
+
+          const duration = 1200;
+          const start = performance.now();
+
+          const step = (now) => {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(eased * target);
+
+            if (progress < 1) {
+              requestAnimationFrame(step);
+            }
+          };
+
+          requestAnimationFrame(step);
+        }
+      };
+
+      /* ----------------------------------------
+         PDCA Interactivity
+         ---------------------------------------- */
+      const PDCAInteraction = {
+        init() {
+          const arcs = document.querySelectorAll('.pdca-arc');
+          const items = document.querySelectorAll('.pdca__item');
+          if (!arcs.length || !items.length) return;
+
+          const phases = ['plan', 'do', 'check', 'act'];
+
+          arcs.forEach((arc, i) => {
+            const handler = () => {
+              items.forEach(item => item.classList.remove('is-active'));
+              const target = document.querySelector(`.pdca__item[data-phase="${phases[i]}"]`);
+              if (target) target.classList.add('is-active');
+            };
+
+            arc.addEventListener('click', handler);
+            arc.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handler();
+              }
+            });
+          });
+        }
+      };
+
+      /* ----------------------------------------
+         Smooth scroll for anchor links
+         ---------------------------------------- */
+      const SmoothScroll = {
+        init() {
+          document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+              const target = document.querySelector(link.getAttribute('href'));
+              if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Move focus for accessibility
+                target.setAttribute('tabindex', '-1');
+                target.focus({ preventScroll: true });
+              }
+            });
+          });
+        }
+      };
+
+      /* ----------------------------------------
+         Initialize all modules
+         ---------------------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        ThemeManager.init();
+        MobileNav.init();
+        CounterAnimation.init();
+        PDCAInteraction.init();
+        SmoothScroll.init();
+      });
+    })();
+  </script>
+</body>
+</html>

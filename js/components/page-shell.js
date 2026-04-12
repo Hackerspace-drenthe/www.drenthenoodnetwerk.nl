@@ -17,6 +17,7 @@ const SECONDARY_ITEMS = [
   { href: 'apparaten.html', label: 'Apparaten' },
   { href: 'woordenlijst.html', label: 'Woordenlijst' },
   { href: 'faq.html', label: 'FAQ' },
+  { href: 'sponsor-drenthe-noodnetwerk.html', label: 'Sponsor' },
 ];
 
 /**

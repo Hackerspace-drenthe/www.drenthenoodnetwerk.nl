@@ -40,4 +40,8 @@
     <loc>woordenlijst.html</loc>
     <priority>0.6</priority>
   </url>
+  <url>
+    <loc>sponsor-drenthe-noodnetwerk.html</loc>
+    <priority>0.7</priority>
+  </url>
 </urlset>

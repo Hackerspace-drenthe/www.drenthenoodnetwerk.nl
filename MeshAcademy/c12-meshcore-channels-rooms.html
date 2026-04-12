@@ -201,7 +201,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📡</div>
         <h4>Frequentie</h4>
-        <p>De radiofrequentie waarop wordt uitgezonden, bijv. 869.525 MHz. Nodes op een andere frequentie horen niets.</p>
+        <p>De radiofrequentie waarop wordt uitgezonden, bijv. 869.618 MHz. Nodes op een andere frequentie horen niets.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📊</div>
@@ -245,7 +245,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout green">
       <span class="callout-icon" aria-hidden="true">💡</span>
-      <div class="callout-text"><strong>HSD Drenthe standaard:</strong> Het primaire kanaal voor HSD Drenthe is <strong>869.525 MHz, SF11, BW250</strong>. Alle repeaters en clients in het netwerk gebruiken deze instellingen.</div>
+      <div class="callout-text"><strong>HSD Drenthe standaard:</strong> Het primaire kanaal voor HSD Drenthe is de <strong>Netherlands preset: 869.618 MHz, SF7, CR5, BW62.5</strong>. Alle repeaters en clients in het netwerk gebruiken deze instellingen.</div>
     </div>
   </section>
 
@@ -329,7 +329,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     <table class="comp-table" aria-label="Kanaalplan HSD Drenthe">
       <thead><tr><th>Type</th><th>Naam</th><th>Doel</th></tr></thead>
       <tbody>
-        <tr><td><strong>Primair kanaal</strong></td><td>HSD-Mesh (869.525 MHz, SF11, BW250)</td><td>Hoofdkanaal — alle repeaters, clients en Room Servers gebruiken dit.</td></tr>
+        <tr><td><strong>Primair kanaal</strong></td><td>HSD-Mesh (869.618 MHz, SF7, BW62.5 — Netherlands preset)</td><td>Hoofdkanaal — alle repeaters, clients en Room Servers gebruiken dit.</td></tr>
         <tr><td><strong>Room</strong></td><td>Noodkanaal</td><td>Alleen voor noodcommunicatie. Wordt gemonitord door alle hulpverleners.</td></tr>
         <tr><td><strong>Room</strong></td><td>HSD-Algemeen</td><td>Dagelijkse communicatie, aankondigingen, statusupdates van het netwerk.</td></tr>
         <tr><td><strong>Room</strong></td><td>Techniek</td><td>Technische discussies: firmware-updates, antenneplaatsing, storingen.</td></tr>
@@ -441,9 +441,9 @@ const quizQuestions = [
   },
   {
     question: 'Welke radio-instellingen gebruikt HSD Drenthe als primair kanaal?',
-    options: ['868.000 MHz, SF7, BW125', '869.525 MHz, SF11, BW250', '433.175 MHz, SF12, BW500', '915.000 MHz, SF10, BW125'],
+    options: ['868.000 MHz, SF7, BW125', '869.618 MHz, SF7, BW62.5', '433.175 MHz, SF12, BW500', '915.000 MHz, SF10, BW125'],
     correct: 1,
-    explanation: 'Het primaire kanaal van HSD Drenthe is 869.525 MHz met Spreading Factor 11 en Bandbreedte 250 kHz.'
+    explanation: 'Het primaire kanaal van HSD Drenthe gebruikt de Netherlands preset: 869.618 MHz met Spreading Factor 7 en Bandbreedte 62.5 kHz.'
   },
   {
     question: 'Welke informatie biedt een Room Server over gebruikers?',

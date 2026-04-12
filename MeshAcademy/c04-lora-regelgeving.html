@@ -422,7 +422,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout yellow">
       <span class="callout-icon" aria-hidden="true">⚠️</span>
-      <div class="callout-text"><strong>Belangrijk:</strong> MeshCore gebruikt standaard <strong>SF11 BW250</strong>. Door de bredere bandbreedte (250 kHz i.p.v. 125 kHz) wordt de airtime gehalveerd, wat een slimme balans geeft tussen bereik en duty cycle budget.</div>
+      <div class="callout-text"><strong>Belangrijk:</strong> Het Nederlandse MeshCore-netwerk gebruikt sinds mei 2026 de <strong>Netherlands preset: SF7 CR5 BW62.5</strong>. De smalle bandbreedte (62.5 kHz) compenseert de lagere spreading factor, waardoor het bereik acceptabel blijft terwijl de kanaalcapaciteit bijna 3× toeneemt.</div>
     </div>
 
     <h3>Interactieve Duty Cycle Calculator</h3>
@@ -431,11 +431,11 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="calc-row">
         <span class="calc-label">Spreading Factor:</span>
         <select class="calc-select" id="dc-sf">
-          <option value="7">SF7 (BW125)</option>
+          <option value="7" selected>SF7 (BW62.5) — MeshCore NL</option>
           <option value="8">SF8 (BW125)</option>
           <option value="9">SF9 (BW125)</option>
           <option value="10">SF10 (BW125)</option>
-          <option value="11" selected>SF11 (BW250) — MeshCore</option>
+          <option value="11">SF11 (BW250)</option>
           <option value="12">SF12 (BW125)</option>
         </select>
       </div>
@@ -454,15 +454,15 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       </div>
       <div class="calc-results-grid">
         <div class="calc-result-box">
-          <div class="num" id="dc-airtime">414 ms</div>
+          <div class="num" id="dc-airtime">195 ms</div>
           <div class="label">Airtime per bericht</div>
         </div>
         <div class="calc-result-box">
-          <div class="num" id="dc-msgs">87</div>
+          <div class="num" id="dc-msgs">184</div>
           <div class="label">Berichten per uur</div>
         </div>
         <div class="calc-result-box">
-          <div class="num" id="dc-wait">41 s</div>
+          <div class="num" id="dc-wait">19 s</div>
           <div class="label">Wachttijd na zenden</div>
         </div>
       </div>
@@ -499,10 +499,10 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       </div>
     </div>
 
-    <h3>Waarom SF11 BW250?</h3>
-    <p>MeshCore kiest standaard voor <strong>SF11 met 250 kHz bandbreedte</strong>. Dit is een bewuste afweging:</p>
+    <h3>Waarom SF7 BW62.5 (Netherlands preset)?</h3>
+    <p>Sinds mei 2026 gebruikt het Nederlandse MeshCore-netwerk de <strong>Netherlands preset: SF7 met 62.5 kHz bandbreedte en CR5</strong>. Community-tests in maart 2026 toonden aan dat SF7 bijna 3× meer kanaalcapaciteit biedt dan het eerdere SF8, terwijl het verlies in gevoeligheid slechts ~3 dB bedraagt:</p>
 
-    <table class="comp-table" aria-label="SF11 BW250 versus alternatieven">
+    <table class="comp-table" aria-label="SF7 BW62.5 versus alternatieven">
       <thead>
         <tr>
           <th>Instelling</th>
@@ -514,29 +514,36 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       </thead>
       <tbody>
         <tr>
+          <td style="color:var(--green);font-weight:700;">SF7 BW62.5 ✔</td>
+          <td>Goed (3–10 km)</td>
+          <td>~195 ms</td>
+          <td>~184</td>
+          <td>MeshCore NL standaard</td>
+        </tr>
+        <tr>
           <td><strong>SF7 BW125</strong></td>
-          <td>Kort (2-5 km)</td>
+          <td>Kort (2–5 km)</td>
           <td>~72 ms</td>
           <td>~500</td>
           <td>Stedelijk, veel verkeer</td>
         </tr>
         <tr>
           <td><strong>SF9 BW125</strong></td>
-          <td>Gemiddeld (5-8 km)</td>
+          <td>Gemiddeld (5–8 km)</td>
           <td>~247 ms</td>
           <td>~145</td>
           <td>Voorstedelijk</td>
         </tr>
         <tr>
-          <td style="color:var(--green);font-weight:700;">SF11 BW250 ✓</td>
-          <td>Goed (8-15 km)</td>
+          <td><strong>SF11 BW250</strong></td>
+          <td>Goed (8–15 km)</td>
           <td>~414 ms</td>
           <td>~87</td>
-          <td>MeshCore standaard</td>
+          <td>Vorige MeshCore standaard</td>
         </tr>
         <tr>
           <td><strong>SF12 BW125</strong></td>
-          <td>Maximaal (10-20 km)</td>
+          <td>Maximaal (10–20 km)</td>
           <td>~1483 ms</td>
           <td>~24</td>
           <td>Extreme afstand</td>
@@ -546,7 +553,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout green">
       <span class="callout-icon" aria-hidden="true">💡</span>
-      <div class="callout-text"><strong>Kernpunt:</strong> SF11 BW250 biedt bijna het bereik van SF12, maar met slechts ~28% van de airtime. Dat betekent <strong>3,5× meer berichten per uur</strong> — cruciaal voor een mesh-netwerk waar nodes berichten doorsturen.</div>
+      <div class="callout-text"><strong>Kernpunt:</strong> SF7 BW62.5 biedt ~2× meer berichten per uur dan SF11 BW250, terwijl het bereik dankzij de smalle bandbreedte acceptabel blijft. De community-test toonde een stijging van traceroute-succes van ~38% (SF8) naar ~53% (SF7).</div>
     </div>
 
     <h3>Gevolgen van overtreding</h3>
@@ -634,7 +641,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">🎯</span>
-      <div class="callout-text"><strong>Conclusie:</strong> Voor een mesh-netwerk is duty cycle de belangrijkste bottleneck. Kies de laagste SF die je bereik toelaat, houd berichten klein, en plan je netwerk slim. MeshCore's keuze van SF11 BW250 is een uitstekend compromis voor de meeste noodnetwerk-scenario's.</div>
+      <div class="callout-text"><strong>Conclusie:</strong> Voor een mesh-netwerk is duty cycle de belangrijkste bottleneck. Kies de laagste SF die je bereik toelaat, houd berichten klein, en plan je netwerk slim. De overstap van het Nederlandse MeshCore-netwerk naar SF7 BW62.5 is hier een goed voorbeeld van: meer capaciteit met acceptabel bereik.</div>
     </div>
   </section>
 
@@ -654,7 +661,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 /* ─── DUTY CYCLE CALCULATOR ─── */
 (function(){
   const sfData = {
-    7:  { bw: 125000, preamble: 8 },
+    7:  { bw: 62500, preamble: 8 },
     8:  { bw: 125000, preamble: 8 },
     9:  { bw: 125000, preamble: 8 },
     10: { bw: 125000, preamble: 8 },

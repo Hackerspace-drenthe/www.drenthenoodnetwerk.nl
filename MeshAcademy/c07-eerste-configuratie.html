@@ -274,11 +274,12 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       </div>
 
       <div class="config-panel active" id="panel-radio" role="tabpanel">
-        <div class="config-line"><span class="config-key">frequency</span><span class="config-val">869.525 MHz</span><span class="config-desc">ISM-band frequentie (EU: 869.4–869.65 sub-band, 10% duty cycle)</span></div>
-        <div class="config-line"><span class="config-key">spreading_factor</span><span class="config-val">SF11</span><span class="config-desc">Hoge spreading factor voor maximaal bereik in landelijk Drenthe</span></div>
-        <div class="config-line"><span class="config-key">bandwidth</span><span class="config-val">250 kHz</span><span class="config-desc">Goede balans tussen gevoeligheid en datasnelheid voor tekstberichten</span></div>
+        <div class="config-line"><span class="config-key">radio_preset</span><span class="config-val">Netherlands</span><span class="config-desc">Ingebouwd in de MeshCore app — configureert alle radio-parameters automatisch</span></div>
+        <div class="config-line"><span class="config-key">frequency</span><span class="config-val">869.618 MHz</span><span class="config-desc">ISM-band frequentie (EU: 869.4–869.65 sub-band, 10% duty cycle)</span></div>
+        <div class="config-line"><span class="config-key">spreading_factor</span><span class="config-val">SF7</span><span class="config-desc">Netherlands preset — maximale netwerkcapaciteit met acceptabel bereik</span></div>
+        <div class="config-line"><span class="config-key">bandwidth</span><span class="config-val">62.5 kHz</span><span class="config-desc">Smalle bandbreedte voor betere gevoeligheid dan standaard SF7 BW125</span></div>
         <div class="config-line"><span class="config-key">tx_power</span><span class="config-val">+22 dBm</span><span class="config-desc">Maximaal toegestaan zendvermogen (≈ 160 mW)</span></div>
-        <div class="config-line"><span class="config-key">coding_rate</span><span class="config-val">4/8</span><span class="config-desc">Maximale foutcorrectie — robuust in landelijk gebied met veel interferentie</span></div>
+        <div class="config-line"><span class="config-key">coding_rate</span><span class="config-val">4/5 (CR5)</span><span class="config-desc">Minimale overhead — meer capaciteit voor het groeiende mesh-netwerk</span></div>
       </div>
 
       <div class="config-panel" id="panel-network" role="tabpanel">
@@ -289,11 +290,11 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     </div>
 
     <h3>Waarom deze instellingen?</h3>
-    <p>De keuze voor SF11 met 250 kHz bandbreedte is een bewuste afweging voor de situatie in Drenthe:</p>
+    <p>Het Nederlandse MeshCore-netwerk is in mei 2026 overgestapt van SF8 naar de <strong>Netherlands preset</strong> (SF7/CR5/BW62.5). Dit is het resultaat van een community-brede test in maart 2026:</p>
     <ul>
-      <li><strong>SF11</strong> — geeft een groter bereik dan SF10, belangrijk in het dunbevolkte Drentse landschap met grote afstanden tussen nodes.</li>
-      <li><strong>250 kHz BW</strong> — snel genoeg voor tekstberichten, maar gevoeliger dan 500 kHz. Bij 125 kHz zou de airtime te lang worden.</li>
-      <li><strong>CR 4/8</strong> — maximale foutcorrectie zorgt voor betrouwbare communicatie, ook bij zwak signaal of interferentie.</li>
+      <li><strong>SF7</strong> — bijna 3× meer kanaalcapaciteit dan SF8, waardoor het groeiende netwerk minder last heeft van congestie. Het verschil in gevoeligheid is slechts ~3 dB.</li>
+      <li><strong>62.5 kHz BW</strong> — smaller dan standaard BW125, wat betere gevoeligheid geeft. Hierdoor behoudt SF7 BW62.5 een goed bereik ondanks de lagere spreading factor.</li>
+      <li><strong>CR 4/5</strong> — minimale overhead zodat er meer ruimte overblijft voor nuttig verkeer. Voldoende foutcorrectie voor de meeste situaties.</li>
       <li><strong>+22 dBm</strong> — maximaal toegestaan zendvermogen in de 869 MHz sub-band voor het grootste bereik.</li>
     </ul>
 
@@ -303,10 +304,10 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     <table class="comp-table" aria-label="HSD standaard kanaalinstellingen">
       <thead><tr><th>Parameter</th><th>Waarde</th><th>Reden</th></tr></thead>
       <tbody>
-        <tr><td><strong>Frequentie</strong></td><td>869.525 MHz</td><td>ISM sub-band, 10% duty cycle toegestaan</td></tr>
-        <tr><td><strong>SF</strong></td><td>SF11</td><td>Maximaal bereik voor landelijk Drenthe</td></tr>
-        <tr><td><strong>BW</strong></td><td>250 kHz</td><td>Goede balans gevoeligheid/snelheid</td></tr>
-        <tr><td><strong>CR</strong></td><td>4/8</td><td>Maximale foutcorrectie voor robuustheid</td></tr>
+        <tr><td><strong>Radio preset</strong></td><td>Netherlands</td><td>Ingebouwde preset in de MeshCore app</td></tr>
+        <tr><td><strong>Frequentie</strong></td><td>869.618 MHz</td><td>ISM sub-band, 10% duty cycle toegestaan</td></tr>
+        <tr><td><strong>SF / CR</strong></td><td>SF7 / CR5</td><td>Maximale netwerkcapaciteit met acceptabel bereik</td></tr>
+        <tr><td><strong>BW</strong></td><td>62.5 kHz</td><td>Smalle bandbreedte voor betere gevoeligheid</td></tr>
         <tr><td><strong>TX Power</strong></td><td>+22 dBm</td><td>Maximaal toegestaan in EU</td></tr>
       </tbody>
     </table>
@@ -411,15 +412,15 @@ const quizQuestions = [
   },
   {
     question: 'Welke frequentie gebruikt HSD Drenthe als standaard?',
-    options: ['868.000 MHz', '869.525 MHz', '433.175 MHz', '915.000 MHz'],
+    options: ['868.000 MHz', '869.618 MHz', '433.175 MHz', '915.000 MHz'],
     correct: 1,
-    explanation: 'HSD Drenthe gebruikt 869.525 MHz, in de ISM sub-band met 10% duty cycle.'
+    explanation: 'HSD Drenthe gebruikt de Netherlands preset op 869.618 MHz, in de ISM sub-band met 10% duty cycle.'
   },
   {
     question: 'Welke Spreading Factor en bandbreedte gebruikt HSD?',
-    options: ['SF7, BW 125 kHz', 'SF12, BW 500 kHz', 'SF11, BW 250 kHz', 'SF10, BW 125 kHz'],
-    correct: 2,
-    explanation: 'HSD gebruikt SF11 met 250 kHz bandbreedte — optimale balans tussen bereik en snelheid voor het Drentse landschap.'
+    options: ['SF7, BW 62.5 kHz', 'SF12, BW 500 kHz', 'SF11, BW 250 kHz', 'SF10, BW 125 kHz'],
+    correct: 0,
+    explanation: 'HSD gebruikt de Netherlands preset: SF7 met 62.5 kHz bandbreedte — maximale netwerkcapaciteit met goed bereik dankzij de smalle bandbreedte.'
   },
   {
     question: 'Waarom moeten alle nodes dezelfde radio-instellingen gebruiken?',

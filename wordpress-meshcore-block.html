@@ -1,0 +1,104 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     MeshCore pagina — WordPress Custom HTML Block
+     Plak dit in de Gutenberg editor (+ → Custom HTML)
+     Vervangt de huidige inhoud van /meshcore/
+     ═══════════════════════════════════════════════════════════════ -->
+
+<style>
+.mc-hero{background:linear-gradient(135deg,#050d1a 0%,#0a1628 100%)!important;border-radius:16px;padding:48px 36px;margin-bottom:32px;text-align:center;border:1px solid rgba(0,229,255,.15);color:#e0eaff!important}
+.mc-hero h2{color:#00ff88!important;font-size:2rem;margin:0 0 8px}
+.mc-hero p{color:#c0d0e8!important;font-size:1.05rem;max-width:640px;margin:0 auto 24px;line-height:1.7}
+.mc-hero .mc-btn{display:inline-block;padding:14px 36px;border-radius:28px;font-weight:700;font-size:1rem;text-decoration:none!important;transition:all .25s}
+.mc-btn-primary{background:linear-gradient(135deg,#00ff88,#00e5ff)!important;color:#050d1a!important}
+.mc-btn-primary:hover{filter:brightness(1.1);transform:translateY(-2px);color:#050d1a!important;text-decoration:none!important}
+.mc-btn-outline{border:2px solid rgba(0,229,255,.4)!important;color:#00e5ff!important;background:transparent!important;margin-left:12px}
+.mc-btn-outline:hover{background:rgba(0,229,255,.1)!important;color:#00e5ff!important;text-decoration:none!important}
+
+.mc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:32px}
+.mc-card{background:#0d1f3c!important;border:1px solid rgba(0,229,255,.12);border-radius:14px;padding:28px 24px;transition:transform .2s,border-color .2s;color:#c0d0e8!important}
+.mc-card:hover{transform:translateY(-3px);border-color:rgba(0,229,255,.35)}
+.mc-card .mc-icon{font-size:2rem;margin-bottom:10px}
+.mc-card h3{color:#e0eaff!important;font-size:1.1rem;margin:0 0 8px}
+.mc-card h3 a{color:#00e5ff!important;text-decoration:none}
+.mc-card h3 a:hover{text-decoration:underline}
+.mc-card p{color:#7090b0!important;font-size:.9rem;line-height:1.6;margin:0}
+
+.mc-academy{background:linear-gradient(135deg,rgba(0,255,136,.04),rgba(200,100,255,.04))!important;border:2px solid rgba(200,100,255,.2);border-radius:16px;padding:36px;text-align:center;margin-bottom:32px;color:#c0d0e8!important}
+.mc-academy h3{color:#c864ff!important;font-size:1.4rem;margin:0 0 8px}
+.mc-academy p{color:#c0d0e8!important;max-width:560px;margin:0 auto 20px;line-height:1.7}
+
+.mc-info{color:#7090b0!important;font-size:.88rem;text-align:center;margin-top:24px;line-height:1.7}
+.mc-info a{color:#00e5ff!important}
+
+@media(max-width:600px){
+  .mc-hero{padding:32px 20px}
+  .mc-hero h2{font-size:1.5rem}
+  .mc-btn-outline{margin-left:0;margin-top:10px}
+  .mc-grid{grid-template-columns:1fr}
+  .mc-academy{padding:24px 16px}
+}
+</style>
+
+<!-- Hero -->
+<div class="mc-hero">
+  <h2>🌐 Drenthe Noodnetwerk</h2>
+  <p>Een off-grid mesh-netwerk voor noodcommunicatie in Drenthe, gebouwd met MeshCore door vrijwilligers van Hackerspace Drenthe. Geen internet, geen stroom, geen provider nodig.</p>
+  <a href="https://drenthenoodnetwerk.nl/" class="mc-btn mc-btn-primary" target="_blank" rel="noopener">Naar de projectsite →</a>
+  <a href="https://drenthenoodnetwerk.nl/meedoen.html" class="mc-btn mc-btn-outline" target="_blank" rel="noopener">Meedoen</a>
+</div>
+
+<!-- Snellinks -->
+<div class="mc-grid">
+  <div class="mc-card">
+    <div class="mc-icon">📡</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/wat-is-meshcore.html" target="_blank" rel="noopener">Wat is MeshCore?</a></h3>
+    <p>Leer hoe MeshCore werkt: LoRa-radio, mesh-routering en versleutelde communicatie zonder internet.</p>
+  </div>
+  <div class="mc-card">
+    <div class="mc-icon">🗺️</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/netwerk-drenthe.html" target="_blank" rel="noopener">Netwerk Kaart</a></h3>
+    <p>Bekijk de huidige nodes in Drenthe op de interactieve kaart en het dekkingsgebied.</p>
+  </div>
+  <div class="mc-card">
+    <div class="mc-icon">🔧</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/apparaten.html" target="_blank" rel="noopener">Apparaten</a></h3>
+    <p>Vergelijk MeshCore-hardware: Heltec V3, T-Beam, T-Deck, Station G2 en meer.</p>
+  </div>
+  <div class="mc-card">
+    <div class="mc-icon">📖</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/handleidingen.html" target="_blank" rel="noopener">Handleidingen</a></h3>
+    <p>Stapsgewijze handleidingen om je node te flashen, configureren en op het netwerk te krijgen.</p>
+  </div>
+  <div class="mc-card">
+    <div class="mc-icon">📅</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/planning.html" target="_blank" rel="noopener">Planning</a></h3>
+    <p>Aankomende bijeenkomsten, workshops en bouwdagen voor het noodnetwerk.</p>
+  </div>
+  <div class="mc-card">
+    <div class="mc-icon">❓</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/faq.html" target="_blank" rel="noopener">FAQ</a></h3>
+    <p>Veelgestelde vragen over kosten, bereik, wetgeving en hoe je kunt meedoen.</p>
+  </div>
+</div>
+
+<!-- MeshCore Academy -->
+<div class="mc-academy">
+  <h3>🎓 MeshCore Academy</h3>
+  <p>19 gratis interactieve cursussen — van LoRa-basis tot netwerk-ontwerp. Leer alles over mesh-netwerken en verdien je certificaat.</p>
+  <a href="https://drenthenoodnetwerk.nl/MeshAcademy/course-hub.html" class="mc-btn mc-btn-primary" target="_blank" rel="noopener">Start de Academy →</a>
+</div>
+
+<!-- Sponsor -->
+<div class="mc-grid" style="grid-template-columns:1fr">
+  <div class="mc-card" style="text-align:center;border-color:rgba(0,255,136,.2)">
+    <div class="mc-icon">💚</div>
+    <h3><a href="https://drenthenoodnetwerk.nl/sponsor-drenthe-noodnetwerk.html" target="_blank" rel="noopener">Sponsor het Noodnetwerk</a></h3>
+    <p>Help mee het netwerk uit te breiden met repeater-nodes op strategische locaties in Drenthe.</p>
+  </div>
+</div>
+
+<p class="mc-info">
+  Een project van <a href="https://www.hackerspace-drenthe.nl/">Hackerspace Drenthe</a> · 
+  Deelnemers schaffen zelf hardware aan (~€25–€80) · 
+  <a href="https://drenthenoodnetwerk.nl/hoe-werkt-het.html" target="_blank" rel="noopener">Hoe werkt het?</a>
+</p>

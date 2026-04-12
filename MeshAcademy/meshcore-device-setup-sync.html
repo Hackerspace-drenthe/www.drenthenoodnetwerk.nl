@@ -351,7 +351,7 @@ pre{
         </div>
         <div class="field">
           <label for="frequency">Frequentie (MHz)</label>
-          <input id="frequency" type="number" value="868.1" step="0.1" min="433" max="960">
+          <input id="frequency" type="number" value="869.618" step="0.001" min="433" max="960">
         </div>
       </div>
 
@@ -359,10 +359,10 @@ pre{
         <div class="field">
           <label for="sf">Spreading Factor</label>
           <select id="sf">
-            <option value="7">SF7</option>
+            <option value="7" selected>SF7</option>
             <option value="8">SF8</option>
             <option value="9">SF9</option>
-            <option value="10" selected>SF10</option>
+            <option value="10">SF10</option>
             <option value="11">SF11</option>
             <option value="12">SF12</option>
           </select>
@@ -370,11 +370,25 @@ pre{
         <div class="field">
           <label for="bw">Bandbreedte</label>
           <select id="bw">
-            <option value="125" selected>125 kHz</option>
+            <option value="62.5" selected>62.5 kHz</option>
+            <option value="125">125 kHz</option>
             <option value="250">250 kHz</option>
             <option value="500">500 kHz</option>
           </select>
         </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label for="cr">Coding Rate</label>
+          <select id="cr">
+            <option value="5" selected>4/5</option>
+            <option value="6">4/6</option>
+            <option value="7">4/7</option>
+            <option value="8">4/8</option>
+          </select>
+        </div>
+        <div class="field"></div>
       </div>
 
       <div class="field">
@@ -472,7 +486,7 @@ pre{
     </article>
     <article class="guide-card">
       <h4>Stap 2 - regio en frequentie</h4>
-      <p>Voor dit netwerk: <strong>EU_868</strong>, doorgaans rond 868.1 MHz. Buiten bereik of verkeerde regio veroorzaakt directe incompatibiliteit.</p>
+      <p>Voor dit netwerk: <strong>EU_868</strong>, Netherlands preset op 869.618 MHz, SF7, BW62.5, CR 4/5. Verkeerde radio-instellingen veroorzaken directe incompatibiliteit.</p>
     </article>
     <article class="guide-card">
       <h4>Stap 3 - kanaalsleutel</h4>
@@ -493,9 +507,10 @@ pre{
 <script>
 const HSD_DEFAULT = {
   region: 'EU_868',
-  frequency: 868.1,
-  sf: 10,
-  bw: 125,
+  frequency: 869.618,
+  sf: 7,
+  bw: 62.5,
+  cr: 5,
   txPower: 20,
   channelName: 'HSD-Meshcore',
   channelId: 'hsd-main-01',
@@ -509,8 +524,9 @@ const DEVICE_PRESETS = {
     role: 'fixed',
     antennaGain: 3,
     txPower: 17,
-    sf: 10,
-    bw: 125,
+    sf: 7,
+    bw: 62.5,
+    cr: 5,
     cableLoss: 0.8,
   },
   portable: {
@@ -518,8 +534,9 @@ const DEVICE_PRESETS = {
     role: 'portable',
     antennaGain: 2,
     txPower: 14,
-    sf: 9,
-    bw: 125,
+    sf: 7,
+    bw: 62.5,
+    cr: 5,
     cableLoss: 0.2,
   },
   relay: {
@@ -527,8 +544,9 @@ const DEVICE_PRESETS = {
     role: 'relay',
     antennaGain: 8,
     txPower: 20,
-    sf: 11,
-    bw: 125,
+    sf: 7,
+    bw: 62.5,
+    cr: 5,
     cableLoss: 1.8,
   },
 };
@@ -544,6 +562,7 @@ const refs = {
   frequency: document.getElementById('frequency'),
   sf: document.getElementById('sf'),
   bw: document.getElementById('bw'),
+  cr: document.getElementById('cr'),
   txPower: document.getElementById('tx-power'),
   txPowerVal: document.getElementById('tx-power-val'),
   cableLoss: document.getElementById('cable-loss'),
@@ -589,6 +608,7 @@ function getFormData() {
     frequency: Number(refs.frequency.value),
     sf: Number(refs.sf.value),
     bw: Number(refs.bw.value),
+    cr: Number(refs.cr.value),
     txPower: Number(refs.txPower.value),
     cableLoss: Number(refs.cableLoss.value),
     channelName: refs.channelName.value.trim(),
@@ -619,6 +639,7 @@ function buildPayload(data) {
       frequencyMHz: data.frequency,
       spreadingFactor: data.sf,
       bandwidthKHz: data.bw,
+      codingRate: '4/' + data.cr,
       txPowerDbm: data.txPower,
       antennaGainDbi: data.antennaGain,
       cableLossDb: data.cableLoss,
@@ -641,6 +662,7 @@ function buildJoinCode(data) {
     freq: data.frequency,
     sf: data.sf,
     bw: data.bw,
+    cr: data.cr,
     hop: data.hopLimit,
     mode: data.channelMode,
   };
@@ -897,6 +919,7 @@ function applyHsdDefaults() {
   refs.frequency.value = String(HSD_DEFAULT.frequency);
   refs.sf.value = String(HSD_DEFAULT.sf);
   refs.bw.value = String(HSD_DEFAULT.bw);
+  refs.cr.value = String(HSD_DEFAULT.cr);
   refs.txPower.value = String(HSD_DEFAULT.txPower);
   refs.channelName.value = HSD_DEFAULT.channelName;
   refs.channelId.value = HSD_DEFAULT.channelId;
@@ -915,6 +938,7 @@ function applyDevicePreset(name) {
   refs.txPower.value = String(p.txPower);
   refs.sf.value = String(p.sf);
   refs.bw.value = String(p.bw);
+  if (p.cr) refs.cr.value = String(p.cr);
   refs.cableLoss.value = String(p.cableLoss);
   addLog('Device preset toegepast: ' + name + '.', 'ok');
   renderAll();
@@ -1029,6 +1053,7 @@ function loadLocalState() {
     refs.frequency.value = String(data.frequency || refs.frequency.value);
     refs.sf.value = String(data.sf || refs.sf.value);
     refs.bw.value = String(data.bw || refs.bw.value);
+    if (data.cr) refs.cr.value = String(data.cr);
     refs.txPower.value = String(data.txPower || refs.txPower.value);
     refs.cableLoss.value = String(data.cableLoss || refs.cableLoss.value);
     refs.channelName.value = data.channelName || refs.channelName.value;
@@ -1045,7 +1070,7 @@ function bindEvents() {
   const inputs = [
     refs.deviceType, refs.deviceRole, refs.nodeName, refs.connectionType,
     refs.firmwareVersion, refs.antennaGain, refs.region, refs.frequency,
-    refs.sf, refs.bw, refs.txPower, refs.cableLoss, refs.channelName,
+    refs.sf, refs.bw, refs.cr, refs.txPower, refs.cableLoss, refs.channelName,
     refs.channelId, refs.channelMode, refs.channelKey, refs.hopLimit,
   ];
   inputs.forEach(el => {

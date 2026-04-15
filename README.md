@@ -29,6 +29,24 @@ Statische site — puur HTML, CSS en JavaScript. Geen frameworks, geen build-sta
 | `faq.html` | Veelgestelde vragen |
 | `woordenlijst.html` | Begrippenlijst |
 
+### MeshCore Academy (`MeshAcademy/`)
+
+Gratis interactieve cursusreeks over MeshCore mesh-netwerken voor noodcommunicatie — 19 modules met quizzen, interactieve tools en certificering.
+
+| Module | Onderwerp |
+|---|---|
+| `c01` – `c02` | Introductie mesh-netwerken & noodcommunicatie |
+| `c03` – `c04` | LoRa-radio basis & regelgeving |
+| `c05` – `c07` | Hardware, firmware & eerste configuratie |
+| `c08` – `c10` | Antennes, plaatsing & link-budget planning |
+| `c11` | Stroomverbruik & batterij |
+| `c12` – `c14` | Channels, rooms, packet-types & routering |
+| `c15` – `c16` | Protocollen vergelijken & beveiliging |
+| `c17` – `c18` | Onderhoud, troubleshooting & netwerk-ontwerp |
+| `c19` | Eindexamen |
+
+Instappagina: `MeshAcademy/index.html` — Cursus-hub: `MeshAcademy/course-hub.html`
+
 ### Lokaal draaien
 
 ```bash

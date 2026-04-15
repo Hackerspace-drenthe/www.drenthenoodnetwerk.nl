@@ -168,6 +168,7 @@ function injectFooter() {
           <h4>Hackerspace Drenthe</h4>
           <ul>
             <li><a href="https://www.hackerspace-drenthe.nl/" rel="noopener noreferrer">Website</a></li>
+            <li><a href="mailto:bestuur@hackerspace-drenthe.nl">bestuur@hackerspace-drenthe.nl</a></li>
             <li><a href="https://t.me/+GTTYOvZTRVNhNThk" rel="noopener noreferrer">Telegram</a></li>
             <li>Elke woensdag 19:00–21:00</li>
             <li>Coevorden — De Nieuwe Veste</li>

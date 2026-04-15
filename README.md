@@ -67,7 +67,7 @@ Open [http://localhost:8000](http://localhost:8000)
 
 ## Meedoen
 
-Wil je bijdragen aan de website of het project? Kom langs op woensdagavond bij [Hackerspace Drenthe](https://www.hackerspace-drenthe.nl/) of neem contact op via de [Telegram-groep](https://t.me/+GTTYOvZTRVNhNThk).
+Wil je bijdragen aan de website of het project? Kom langs op woensdagavond bij [Hackerspace Drenthe](https://www.hackerspace-drenthe.nl/), neem contact op via de [Telegram-groep](https://t.me/+GTTYOvZTRVNhNThk) of mail naar [bestuur@hackerspace-drenthe.nl](mailto:bestuur@hackerspace-drenthe.nl).
 
 ## Licentie
 

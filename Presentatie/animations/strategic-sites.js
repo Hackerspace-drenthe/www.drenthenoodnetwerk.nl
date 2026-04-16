@@ -1,19 +1,174 @@
-// strategic-sites.js — Animation stub (Cyclus 2: replace with real implementation)
-import { createStub } from './_interface.js';
+// strategic-sites.js — A9: Strategische locaties in Drenthe
+// Kerktorens, watertorens, gemeentegebouwen — hoog = ver bereik.
 
 export function init(container, options = {}) {
-  // Placeholder visual
-  const el = document.createElement('div');
-  el.style.cssText = 'display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--color-text-muted);font-size:1.25rem;border:2px dashed var(--color-border);border-radius:1rem;';
-  el.textContent = '🎬 strategic-sites';
-  container.appendChild(el);
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let destroyed = false;
+  let animId = null;
+  let completeCallback = null;
+  let startTime = 0;
+  const DURATION = options.duration || 10000;
 
-  const stub = createStub('strategic-sites');
-  return {
-    ...stub,
-    destroy() {
-      el.remove();
-      stub.destroy();
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 800 500');
+  svg.style.cssText = 'width:100%;height:100%;';
+  container.appendChild(svg);
+
+  // Simplified Drenthe outline (reuse from drenthe-coverage)
+  const drenthePath = 'M340,30 L410,25 L470,40 L520,80 L540,140 L530,200 L520,260 L500,310 L470,360 L430,400 L380,430 L330,440 L280,430 L240,400 L210,360 L200,310 L210,250 L230,190 L260,130 L290,80 Z';
+  const outline = document.createElementNS(NS, 'path');
+  outline.setAttribute('d', drenthePath);
+  outline.setAttribute('fill', 'rgba(116,198,157,0.05)');
+  outline.setAttribute('stroke', 'var(--color-primary, #74c69d)');
+  outline.setAttribute('stroke-width', '2');
+  svg.appendChild(outline);
+
+  // Strategic sites
+  const sites = [
+    { name: 'Kerktoren Assen', emoji: '⛪', x: 370, y: 180, type: 'kerk', height: '35m', rangeKm: 12 },
+    { name: 'Watertoren Coevorden', emoji: '🏢', x: 430, y: 350, type: 'watertoren', height: '40m', rangeKm: 15 },
+    { name: 'Brandweertoren Emmen', emoji: '🚒', x: 490, y: 290, type: 'hulpdienst', height: '25m', rangeKm: 10 },
+    { name: 'Gemeentehuis Hoogeveen', emoji: '🏛️', x: 350, y: 310, type: 'gemeente', height: '20m', rangeKm: 8 },
+    { name: 'Kerktoren Meppel', emoji: '⛪', x: 290, y: 390, type: 'kerk', height: '30m', rangeKm: 11 },
+    { name: 'TV-toren Smilde', emoji: '📡', x: 320, y: 230, type: 'toren', height: '303m', rangeKm: 50 },
+    { name: 'Boerenschuur Beilen', emoji: '🏠', x: 340, y: 260, type: 'particulier', height: '10m', rangeKm: 5 }
+  ];
+
+  const typeColors = {
+    kerk: 'var(--color-neon-cyan, #00fff5)',
+    watertoren: 'var(--color-signal, #48cae4)',
+    hulpdienst: '#ff6b6b',
+    gemeente: 'var(--color-accent, #f4a261)',
+    toren: 'var(--color-neon-green, #39ff14)',
+    particulier: 'var(--color-primary, #74c69d)'
+  };
+
+  // Create site groups
+  const siteEls = sites.map(s => {
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('opacity', '0');
+
+    // Range circle
+    const rangeR = s.rangeKm * 3;
+    const range = document.createElementNS(NS, 'circle');
+    range.setAttribute('cx', s.x); range.setAttribute('cy', s.y);
+    range.setAttribute('r', '0');
+    range.setAttribute('fill', typeColors[s.type]);
+    range.setAttribute('opacity', '0.1');
+    range.setAttribute('stroke', typeColors[s.type]);
+    range.setAttribute('stroke-width', '1'); range.setAttribute('stroke-dasharray', '4,2');
+    g.appendChild(range);
+
+    // Icon
+    const icon = document.createElementNS(NS, 'text');
+    icon.setAttribute('x', s.x); icon.setAttribute('y', s.y + 6);
+    icon.setAttribute('text-anchor', 'middle'); icon.setAttribute('font-size', '22');
+    icon.textContent = s.emoji;
+    g.appendChild(icon);
+
+    // Label
+    const label = document.createElementNS(NS, 'text');
+    label.setAttribute('x', s.x); label.setAttribute('y', s.y + 30);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('fill', typeColors[s.type]);
+    label.setAttribute('font-size', '10'); label.setAttribute('font-weight', 'bold');
+    label.textContent = s.name;
+    g.appendChild(label);
+
+    svg.appendChild(g);
+    return { el: g, range, rangeR, site: s };
+  });
+
+  // Legend (right side)
+  const legend = document.createElementNS(NS, 'g');
+  legend.setAttribute('transform', 'translate(620, 60)');
+  legend.setAttribute('opacity', '0');
+  const lgBg = document.createElementNS(NS, 'rect');
+  lgBg.setAttribute('x', '-10'); lgBg.setAttribute('y', '-20');
+  lgBg.setAttribute('width', '180'); lgBg.setAttribute('height', '200');
+  lgBg.setAttribute('fill', 'var(--color-bg-alt, #22223a)'); lgBg.setAttribute('rx', '8');
+  lgBg.setAttribute('stroke', 'var(--color-border, #3a3a50)');
+  legend.appendChild(lgBg);
+
+  const lgTitle = document.createElementNS(NS, 'text');
+  lgTitle.setAttribute('y', '0'); lgTitle.setAttribute('fill', 'var(--color-text, #e0e0e0)');
+  lgTitle.setAttribute('font-size', '14'); lgTitle.setAttribute('font-weight', 'bold');
+  lgTitle.textContent = 'Locatietypes';
+  legend.appendChild(lgTitle);
+
+  Object.entries(typeColors).forEach(([type, color], i) => {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', '6'); c.setAttribute('cy', 25 + i * 24);
+    c.setAttribute('r', '5'); c.setAttribute('fill', color);
+    legend.appendChild(c);
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', '18'); t.setAttribute('y', 29 + i * 24);
+    t.setAttribute('fill', 'var(--color-text, #e0e0e0)'); t.setAttribute('font-size', '12');
+    t.textContent = type;
+    legend.appendChild(t);
+  });
+  svg.appendChild(legend);
+
+  // Insight text
+  const insight = document.createElementNS(NS, 'text');
+  insight.setAttribute('x', '400'); insight.setAttribute('y', '480');
+  insight.setAttribute('text-anchor', 'middle');
+  insight.setAttribute('fill', 'var(--color-text-muted, #888)'); insight.setAttribute('font-size', '14');
+  insight.setAttribute('opacity', '0');
+  insight.textContent = '💡 Hoog = ver bereik. Vraag toestemming, check stroomvoorziening.';
+  svg.appendChild(insight);
+
+  function animate(ts) {
+    if (destroyed) return;
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    const progress = elapsed / DURATION;
+
+    // Stagger reveal sites
+    siteEls.forEach((se, i) => {
+      const siteStart = (i / siteEls.length) * 0.7;
+      const siteProgress = Math.max(0, (progress - siteStart) / 0.3);
+      if (siteProgress > 0) {
+        se.el.setAttribute('opacity', String(Math.min(1, siteProgress * 2)));
+        se.range.setAttribute('r', String(se.rangeR * Math.min(1, siteProgress)));
+      }
+    });
+
+    if (progress > 0.5) legend.setAttribute('opacity', String(Math.min(1, (progress - 0.5) * 4)));
+    if (progress > 0.8) insight.setAttribute('opacity', String(Math.min(1, (progress - 0.8) * 5)));
+
+    if (elapsed < DURATION) {
+      animId = requestAnimationFrame(animate);
+    } else {
+      if (completeCallback) completeCallback();
     }
+  }
+
+  return {
+    play() {
+      if (destroyed) return;
+      startTime = 0;
+      if (reducedMotion) {
+        siteEls.forEach(se => {
+          se.el.setAttribute('opacity', '1');
+          se.range.setAttribute('r', String(se.rangeR));
+        });
+        legend.setAttribute('opacity', '1');
+        insight.setAttribute('opacity', '1');
+        if (completeCallback) completeCallback();
+        return;
+      }
+      animId = requestAnimationFrame(animate);
+    },
+    pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
+    reset() {
+      this.pause(); startTime = 0;
+      siteEls.forEach(se => { se.el.setAttribute('opacity', '0'); se.range.setAttribute('r', '0'); });
+      legend.setAttribute('opacity', '0');
+      insight.setAttribute('opacity', '0');
+    },
+    destroy() { destroyed = true; this.pause(); svg.remove(); },
+    onComplete(cb) { completeCallback = cb; }
   };
 }

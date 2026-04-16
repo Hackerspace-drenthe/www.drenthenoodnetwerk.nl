@@ -16,13 +16,45 @@
     lastSync: DATA_BASE + '/last-sync.txt'
   };
 
-  var MAP_CENTER = [52.75, 6.55];
-  var MAP_ZOOM = 10;
+  var MAP_CENTER = [52.72, 6.75];
+  var MAP_ZOOM = 11;
 
   // Freshness threshold: nodes seen in last 24h are "active"
   var FRESH_HOURS = 24;
 
   var map, layerRepeaters, layerCompanions, layerLinks, layerRange;
+  var drentheOnly = true; // filter active by default
+  var rawData = null;     // stored after fetch for re-render on filter toggle
+
+  // Simplified Drenthe province boundary polygon (lat/lon pairs)
+  var DRENTHE_POLY = [
+    [53.18, 6.15], [53.17, 6.25], [53.13, 6.35], [53.10, 6.47],
+    [53.12, 6.58], [53.10, 6.70], [53.07, 6.80], [53.00, 6.87],
+    [52.95, 6.92], [52.90, 6.95], [52.85, 6.97], [52.80, 7.00],
+    [52.75, 7.05], [52.70, 7.09], [52.65, 7.09], [52.60, 7.05],
+    [52.55, 6.99], [52.50, 6.90], [52.48, 6.83], [52.47, 6.73],
+    [52.45, 6.65], [52.42, 6.55], [52.40, 6.45], [52.40, 6.35],
+    [52.42, 6.25], [52.45, 6.18], [52.50, 6.10], [52.55, 6.07],
+    [52.60, 6.08], [52.65, 6.10], [52.70, 6.10], [52.75, 6.08],
+    [52.80, 6.07], [52.85, 6.10], [52.90, 6.12], [52.95, 6.10],
+    [53.00, 6.10], [53.05, 6.12], [53.10, 6.10], [53.15, 6.12],
+    [53.18, 6.15]
+  ];
+
+  /**
+   * Ray-casting point-in-polygon test.
+   */
+  function inDrenthe(lat, lon) {
+    var inside = false;
+    for (var i = 0, j = DRENTHE_POLY.length - 1; i < DRENTHE_POLY.length; j = i++) {
+      var yi = DRENTHE_POLY[i][0], xi = DRENTHE_POLY[i][1];
+      var yj = DRENTHE_POLY[j][0], xj = DRENTHE_POLY[j][1];
+      if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
 
   function isFresh(lastSeen) {
     if (!lastSeen) return false;
@@ -107,7 +139,7 @@
     }).addTo(map);
 
     // Layer groups
-    layerRange = L.layerGroup().addTo(map);
+    layerRange = L.layerGroup();           // off by default
     layerLinks = L.layerGroup().addTo(map);
     layerRepeaters = L.layerGroup().addTo(map);
     layerCompanions = L.layerGroup().addTo(map);
@@ -120,6 +152,32 @@
       'Bereik-cirkels': layerRange
     };
     L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
+    // Drenthe province outline
+    L.polyline(DRENTHE_POLY, {
+      color: '#74c69d',
+      weight: 1.5,
+      opacity: 0.35,
+      dashArray: '6,4',
+      interactive: false
+    }).addTo(map);
+
+    // Drenthe filter control
+    var FilterControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function () {
+        var div = L.DomUtil.create('div', 'leaflet-bar radar-filter-control');
+        div.innerHTML = '<label><input type="checkbox" id="filter-drenthe"' +
+          (drentheOnly ? ' checked' : '') + '> Alleen Drenthe</label>';
+        L.DomEvent.disableClickPropagation(div);
+        div.querySelector('input').addEventListener('change', function (e) {
+          drentheOnly = e.target.checked;
+          renderAll();
+        });
+        return div;
+      }
+    });
+    new FilterControl().addTo(map);
 
     loadData();
   }
@@ -134,33 +192,65 @@
       fetchJSON(ENDPOINTS.links),
       fetch(ENDPOINTS.lastSync).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; })
     ]).then(function (results) {
-      var repeaters = results[0];
-      var companions = results[1];
-      var links = results[2];
-      var lastSync = (results[3] || '').trim();
+      rawData = {
+        repeaters: results[0],
+        companions: results[1],
+        links: results[2],
+        lastSync: (results[3] || '').trim()
+      };
 
-      // Data is pre-filtered to Drenthe region by the sync workflow
-      var ranges = computeRanges(links);
-
-      renderRepeaters(repeaters, ranges);
-      renderCompanions(companions, ranges);
-      renderLinks(links);
-      renderRangeCircles(repeaters, ranges);
-
-      if (statusEl) {
-        var syncInfo = lastSync ? ' (sync: ' + hoursAgo(lastSync) + ')' : '';
-        statusEl.textContent = repeaters.length + ' repeaters, ' +
-          companions.length + ' companions, ' +
-          links.length + ' bewezen links' + syncInfo;
-      }
-
-      // Stats
-      updateStats(repeaters, companions, links);
+      renderAll();
 
     }).catch(function (err) {
       console.error('Radar map error:', err);
       if (statusEl) statusEl.textContent = 'Fout bij laden — probeer het later opnieuw.';
     });
+  }
+
+  function filterNode(node) {
+    if (!drentheOnly) return true;
+    return node.location && inDrenthe(node.location.latitude, node.location.longitude);
+  }
+
+  function filterLink(link, nodeKeys) {
+    if (!drentheOnly) return true;
+    return nodeKeys[link.node_a] || nodeKeys[link.node_b];
+  }
+
+  function renderAll() {
+    if (!rawData) return;
+
+    // Clear layers
+    layerRepeaters.clearLayers();
+    layerCompanions.clearLayers();
+    layerLinks.clearLayers();
+    layerRange.clearLayers();
+
+    var repeaters = rawData.repeaters.filter(filterNode);
+    var companions = rawData.companions.filter(filterNode);
+
+    // Build key set for link filtering
+    var nodeKeys = {};
+    repeaters.concat(companions).forEach(function (n) { nodeKeys[n.public_key] = true; });
+
+    var links = rawData.links.filter(function (l) { return filterLink(l, nodeKeys); });
+    var ranges = computeRanges(links);
+
+    renderRepeaters(repeaters, ranges);
+    renderCompanions(companions, ranges);
+    renderLinks(links);
+    renderRangeCircles(repeaters, ranges);
+
+    var statusEl = document.getElementById('radar-status');
+    if (statusEl) {
+      var syncInfo = rawData.lastSync ? ' (sync: ' + hoursAgo(rawData.lastSync) + ')' : '';
+      var filterInfo = drentheOnly ? ' — Drenthe' : '';
+      statusEl.textContent = repeaters.length + ' repeaters, ' +
+        companions.length + ' companions, ' +
+        links.length + ' bewezen links' + filterInfo + syncInfo;
+    }
+
+    updateStats(repeaters, companions, links);
   }
 
   function renderRepeaters(nodes, ranges) {

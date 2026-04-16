@@ -173,3 +173,26 @@
   border-radius: 2px;
   flex-shrink: 0;
 }
+
+/* Drenthe filter control */
+.radar-filter-control {
+  background: rgba(26, 26, 46, 0.9);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+
+.radar-filter-control label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.radar-filter-control input[type="checkbox"] {
+  accent-color: var(--color-primary, #74c69d);
+}

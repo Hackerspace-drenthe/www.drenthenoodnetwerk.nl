@@ -249,7 +249,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout green">
       <span class="callout-icon" aria-hidden="true">💡</span>
-      <div class="callout-text"><strong>Tip:</strong> Gebruik een duidelijke naamconventie voor je node, zoals "HSD-[naam]-[nummer]". Zo herken je snel welk apparaat van wie is in het netwerk.</div>
+      <div class="callout-text"><strong>Tip:</strong> Gebruik een duidelijke naamconventie voor je node, zoals "HSD-[naam]-[nummer]". Of gebruik de <a href="https://unece.org/trade/cefact/unlocode-code-list-country-and-territory" target="_blank" rel="noopener">UN/LOCODE</a>-standaard, bijvoorbeeld <strong>NL-DR-MM-[naam]-[nummer]</strong>. Zo herken je snel welk apparaat van wie is en waar het zich bevindt in het netwerk.</div>
     </div>
 
     <div class="callout yellow">
@@ -278,7 +278,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         <div class="config-line"><span class="config-key">frequency</span><span class="config-val">869.618 MHz</span><span class="config-desc">ISM-band frequentie (EU: 869.4–869.65 sub-band, 10% duty cycle)</span></div>
         <div class="config-line"><span class="config-key">spreading_factor</span><span class="config-val">SF7</span><span class="config-desc">Netherlands preset — maximale netwerkcapaciteit met acceptabel bereik</span></div>
         <div class="config-line"><span class="config-key">bandwidth</span><span class="config-val">62.5 kHz</span><span class="config-desc">Smalle bandbreedte voor betere gevoeligheid dan standaard SF7 BW125</span></div>
-        <div class="config-line"><span class="config-key">tx_power</span><span class="config-val">+22 dBm</span><span class="config-desc">Maximaal toegestaan zendvermogen (≈ 160 mW)</span></div>
+        <div class="config-line"><span class="config-key">tx_power</span><span class="config-val">+22 dBm</span><span class="config-desc">Chipvermogen SX1262 — ETSI-maximum is 27 dBm ERP (500 mW)</span></div>
         <div class="config-line"><span class="config-key">coding_rate</span><span class="config-val">4/5 (CR5)</span><span class="config-desc">Minimale overhead — meer capaciteit voor het groeiende mesh-netwerk</span></div>
       </div>
 
@@ -292,10 +292,10 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     <h3>Waarom deze instellingen?</h3>
     <p>Het Nederlandse MeshCore-netwerk is in mei 2026 overgestapt van SF8 naar de <strong>Netherlands preset</strong> (SF7/CR5/BW62.5). Dit is het resultaat van een community-brede test in maart 2026:</p>
     <ul>
-      <li><strong>SF7</strong> — bijna 3× meer kanaalcapaciteit dan SF8, waardoor het groeiende netwerk minder last heeft van congestie. Het verschil in gevoeligheid is slechts ~3 dB.</li>
+      <li><strong>SF7</strong> — bijna 3× meer kanaalcapaciteit dan SF8, waardoor het groeiende netwerk minder last heeft van congestie. Het verschil in gevoeligheid is slechts ~2,5 dB.</li>
       <li><strong>62.5 kHz BW</strong> — smaller dan standaard BW125, wat betere gevoeligheid geeft. Hierdoor behoudt SF7 BW62.5 een goed bereik ondanks de lagere spreading factor.</li>
       <li><strong>CR 4/5</strong> — minimale overhead zodat er meer ruimte overblijft voor nuttig verkeer. Voldoende foutcorrectie voor de meeste situaties.</li>
-      <li><strong>+22 dBm</strong> — maximaal toegestaan zendvermogen in de 869 MHz sub-band voor het grootste bereik.</li>
+      <li><strong>+22 dBm</strong> — chipvermogen van de SX1262. Het ETSI-maximum in sub-band g3 is 27 dBm ERP (500 mW); met antennewinst zit je daar dichtbij.</li>
     </ul>
 
     <h3>HSD kanaalconfiguratie</h3>

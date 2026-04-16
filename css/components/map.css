@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Map Component — Live MeshCore kaart (iframe embed)
+   Map Component — Live MeshCore kaart (iframe embed + radar map)
    ========================================================================== */
 
 .map-wrapper {
@@ -52,4 +52,124 @@
     min-height: 80vh;
     height: 80vh;
   }
+}
+
+/* ==========================================================================
+   Radar Map — live mc-radar data on Leaflet
+   ========================================================================== */
+
+.radar-map-container {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-height: 70vh;
+}
+
+#radar-map {
+  width: 100%;
+  height: 70vh;
+  background: #1a1a2e;
+}
+
+#radar-status {
+  position: absolute;
+  bottom: var(--space-sm);
+  left: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  background: rgba(26, 26, 46, 0.85);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  z-index: 500;
+  pointer-events: none;
+}
+
+.radar-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.radar-stat {
+  background: var(--color-bg-alt, #f5f5f5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  text-align: center;
+}
+
+.radar-stat__value {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.radar-stat__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Leaflet popup override */
+.radar-popup {
+  font-family: var(--font-body, sans-serif);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.radar-popup__type {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: var(--color-primary, #74c69d);
+  color: #1a1a2e;
+}
+
+/* Leaflet layer control contrast fix for dark themes */
+[data-theme="dark"] .leaflet-control-layers {
+  background: rgba(26, 26, 46, 0.9);
+  color: #e0e0e0;
+  border-color: #3a3a50;
+}
+
+[data-theme="dark"] .leaflet-control-layers label {
+  color: #e0e0e0;
+}
+
+.radar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
+  margin-top: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.radar-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.radar-legend__swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.radar-legend__line {
+  display: inline-block;
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }

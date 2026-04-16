@@ -1,24 +1,19 @@
 /**
- * Live Radar Map — Fetches repeaters, companions, and proven links from
- * mc-radar.woodwar.com and renders them on a Leaflet map with range circles.
+ * Live Radar Map — Loads repeaters, companions, and proven links from
+ * locally cached mc-radar data (synced via GitHub Actions) and renders
+ * them on a Leaflet map with range circles.
  */
 
 (function () {
   'use strict';
 
-  var API_BASE = 'https://mc-radar.woodwar.com/api';
+  // Local cached copies (synced every 15 min by .github/workflows/sync-radar-data.yml)
+  var DATA_BASE = 'data/mc-radar';
   var ENDPOINTS = {
-    repeaters: API_BASE + '/nodes/repeaters',
-    companions: API_BASE + '/nodes/companions',
-    links: API_BASE + '/proven-links'
-  };
-
-  // Drenthe bounding box (with some padding for links that cross borders)
-  var BOUNDS = {
-    latMin: 52.25,
-    latMax: 53.25,
-    lonMin: 5.9,
-    lonMax: 7.15
+    repeaters: DATA_BASE + '/repeaters.json',
+    companions: DATA_BASE + '/companions.json',
+    links: DATA_BASE + '/links.json',
+    lastSync: DATA_BASE + '/last-sync.txt'
   };
 
   var MAP_CENTER = [52.75, 6.55];
@@ -28,11 +23,6 @@
   var FRESH_HOURS = 24;
 
   var map, layerRepeaters, layerCompanions, layerLinks, layerRange;
-
-  function isInBounds(lat, lon) {
-    return lat >= BOUNDS.latMin && lat <= BOUNDS.latMax &&
-           lon >= BOUNDS.lonMin && lon <= BOUNDS.lonMax;
-  }
 
   function isFresh(lastSeen) {
     if (!lastSeen) return false;
@@ -136,50 +126,36 @@
 
   function loadData() {
     var statusEl = document.getElementById('radar-status');
-    if (statusEl) statusEl.textContent = 'Data laden van mc-radar…';
+    if (statusEl) statusEl.textContent = 'Data laden…';
 
     Promise.all([
       fetchJSON(ENDPOINTS.repeaters),
       fetchJSON(ENDPOINTS.companions),
-      fetchJSON(ENDPOINTS.links)
+      fetchJSON(ENDPOINTS.links),
+      fetch(ENDPOINTS.lastSync).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; })
     ]).then(function (results) {
       var repeaters = results[0];
       var companions = results[1];
       var links = results[2];
+      var lastSync = (results[3] || '').trim();
 
-      // Filter to Drenthe area
-      var drentheRepeaters = repeaters.filter(function (n) {
-        return n.location && isInBounds(n.location.latitude, n.location.longitude);
-      });
-      var drentheCompanions = companions.filter(function (n) {
-        return n.location && isInBounds(n.location.latitude, n.location.longitude);
-      });
+      // Data is pre-filtered to Drenthe region by the sync workflow
+      var ranges = computeRanges(links);
 
-      // Build a set of Drenthe node keys for link filtering
-      var drentheKeys = {};
-      drentheRepeaters.concat(drentheCompanions).forEach(function (n) {
-        drentheKeys[n.public_key] = true;
-      });
-
-      var drentheLinks = links.filter(function (l) {
-        return drentheKeys[l.node_a] || drentheKeys[l.node_b];
-      });
-
-      var ranges = computeRanges(drentheLinks);
-
-      renderRepeaters(drentheRepeaters, ranges);
-      renderCompanions(drentheCompanions, ranges);
-      renderLinks(drentheLinks);
-      renderRangeCircles(drentheRepeaters, ranges);
+      renderRepeaters(repeaters, ranges);
+      renderCompanions(companions, ranges);
+      renderLinks(links);
+      renderRangeCircles(repeaters, ranges);
 
       if (statusEl) {
-        statusEl.textContent = drentheRepeaters.length + ' repeaters, ' +
-          drentheCompanions.length + ' companions, ' +
-          drentheLinks.length + ' bewezen links';
+        var syncInfo = lastSync ? ' (sync: ' + hoursAgo(lastSync) + ')' : '';
+        statusEl.textContent = repeaters.length + ' repeaters, ' +
+          companions.length + ' companions, ' +
+          links.length + ' bewezen links' + syncInfo;
       }
 
       // Stats
-      updateStats(drentheRepeaters, drentheCompanions, drentheLinks);
+      updateStats(repeaters, companions, links);
 
     }).catch(function (err) {
       console.error('Radar map error:', err);

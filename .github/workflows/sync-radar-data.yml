@@ -1,0 +1,62 @@
+name: Sync mc-radar data
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch mc-radar data
+        run: |
+          mkdir -p data/mc-radar
+          curl -sf --max-time 30 "https://mc-radar.woodwar.com/api/nodes/repeaters" -o /tmp/repeaters.json || echo "[]" > /tmp/repeaters.json
+          curl -sf --max-time 30 "https://mc-radar.woodwar.com/api/nodes/companions" -o /tmp/companions.json || echo "[]" > /tmp/companions.json
+          curl -sf --max-time 30 "https://mc-radar.woodwar.com/api/proven-links" -o /tmp/links.json || echo "[]" > /tmp/links.json
+
+      - name: Filter to Drenthe region
+        run: |
+          python3 -c "
+          import json
+
+          LATMIN, LATMAX = 52.25, 53.25
+          LONMIN, LONMAX = 5.9, 7.15
+
+          def in_bounds(loc):
+              return loc and LATMIN <= loc['latitude'] <= LATMAX and LONMIN <= loc['longitude'] <= LONMAX
+
+          for src, dst in [('/tmp/repeaters.json', 'data/mc-radar/repeaters.json'),
+                           ('/tmp/companions.json', 'data/mc-radar/companions.json')]:
+              with open(src) as f:
+                  data = json.load(f)
+              filtered = [n for n in data if in_bounds(n.get('location'))]
+              with open(dst, 'w') as f:
+                  json.dump(filtered, f, separators=(',', ':'))
+
+          with open('/tmp/links.json') as f:
+              links = json.load(f)
+          drenthe_links = [l for l in links if in_bounds(l.get('node_a_location')) or in_bounds(l.get('node_b_location'))]
+          with open('data/mc-radar/links.json', 'w') as f:
+              json.dump(drenthe_links, f, separators=(',', ':'))
+          "
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > data/mc-radar/last-sync.txt
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/mc-radar/
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "chore: sync mc-radar data $(cat data/mc-radar/last-sync.txt)"
+            git push
+          fi

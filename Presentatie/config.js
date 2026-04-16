@@ -241,9 +241,9 @@ export default {
       speaker: ['maurice', 'rein'],
       act: 'samen',
       layout: 'D',
-      animation: null,
-      animationOptions: {},
-      triggerMode: 'none'
+      animation: 'three-pillars',
+      animationOptions: { highlight: null },
+      triggerMode: 'click'
     }
   ],
 

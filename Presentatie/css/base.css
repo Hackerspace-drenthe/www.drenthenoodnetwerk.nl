@@ -411,3 +411,40 @@ body.presenter-mode #presenter-view {
   color: var(--color-text-muted);
   white-space: nowrap;
 }
+
+/* --- QR-codes (slide 20) --- */
+
+.qr-codes {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.qr-item {
+  text-align: center;
+}
+
+.qr-img {
+  width: 150px;
+  height: 150px;
+  background: white;
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 0.5rem;
+}
+
+.qr-item p {
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.slide-cta {
+  margin-top: 2rem;
+  font-size: 1.25rem;
+}
+
+.slide-cta-sub {
+  font-size: 1.1rem;
+  color: var(--color-neon-green, #39ff14);
+  margin-top: 0.5rem;
+}

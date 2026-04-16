@@ -141,7 +141,7 @@ export default {
       act: 'hoe',
       layout: 'C',
       animation: 'hardware-gallery',
-      animationOptions: { dataSource: 'data/hardware.json' },
+      animationOptions: {},
       triggerMode: 'click'
     },
     {

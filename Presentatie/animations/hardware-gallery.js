@@ -4,7 +4,6 @@
 
 export function init(container, options = {}) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const dataUrl = options.dataUrl || 'data/hardware.json';
   let destroyed = false;
   let animId = null;
   let completeCallback = null;
@@ -20,13 +19,14 @@ export function init(container, options = {}) {
   `;
   container.appendChild(wrapper);
 
-  // Fallback data in case fetch fails
+  // Device data sourced from MeshAcademy/meshcore-device-feature-matrix.html
   const fallbackDevices = [
-    { name: 'Heltec V3', price: '±€20', role: 'Repeater', emoji: '📡', highlight: 'Goedkoopste instap' },
-    { name: 'T-Deck', price: '±€55', role: 'Companion', emoji: '⌨️', highlight: 'Ingebouwd toetsenbord' },
-    { name: 'T-Beam', price: '±€45', role: 'Repeater/GPS', emoji: '📍', highlight: 'GPS + grote batterij' },
-    { name: 'RAK WisBlock', price: '±€35', role: 'Repeater', emoji: '🧱', highlight: 'Modulair (LEGO)' },
-    { name: 'Station G2', price: '±€70', role: 'Room Server', emoji: '🖥️', highlight: 'Krachtigste — meerdere rooms' }
+    { name: 'Heltec V3', price: '€18–25', role: 'Companion / Repeater', emoji: '📡', highlight: 'Goedkoopste instap — direct flashen via browser' },
+    { name: 'Heltec T114', price: '€25–40', role: 'Companion / Repeater', emoji: '⭐', highlight: 'Beste prijs-kwaliteit 2026 — weken op batterij' },
+    { name: 'RAK WisMesh Tag', price: '€28–35', role: 'Companion / Repeater', emoji: '🌧️', highlight: 'IP66 waterdicht — GPS ingebouwd' },
+    { name: 'SenseCAP Solar P1', price: '€68–80', role: 'Repeater', emoji: '☀️', highlight: 'Zonnepaneel ingebouwd — weken autonoom' },
+    { name: 'T-LoRa Pager', price: '€55–70', role: 'Standalone', emoji: '📟', highlight: 'Toetsenbord + scherm — geen telefoon nodig' },
+    { name: 'T-Deck Plus', price: '€75–95', role: 'Standalone', emoji: '⌨️', highlight: 'Populairste standalone — QWERTY + touchscreen' }
   ];
 
   function buildCards(data) {
@@ -111,16 +111,8 @@ export function init(container, options = {}) {
   }
 
   return {
-    async play() {
+    play() {
       if (destroyed) return;
-      try {
-        const resp = await fetch(dataUrl);
-        if (resp.ok) {
-          const json = await resp.json();
-          buildCards(json.devices || json);
-          return;
-        }
-      } catch { /* fallback */ }
       buildCards(fallbackDevices);
     },
     pause() { /* CSS transitions, no rAF to cancel */ },

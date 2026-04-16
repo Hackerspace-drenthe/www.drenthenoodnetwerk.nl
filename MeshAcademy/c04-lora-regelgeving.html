@@ -254,7 +254,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <td>868,0 – 868,6 MHz</td>
           <td>1%</td>
           <td>25 mW (+14 dBm)</td>
-          <td>LoRa hoofdband</td>
+          <td>LoRaWAN uplink</td>
         </tr>
         <tr>
           <td><strong>g2</strong></td>
@@ -268,7 +268,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <td>869,4 – 869,65 MHz</td>
           <td>10%</td>
           <td>500 mW (+27 dBm)</td>
-          <td>Hoog-vermogen band</td>
+          <td>MeshCore / hoog-vermogen</td>
         </tr>
         <tr>
           <td><strong>g4</strong></td>
@@ -282,8 +282,43 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout yellow">
       <span class="callout-icon" aria-hidden="true">⚠️</span>
-      <div class="callout-text"><strong>Let op:</strong> MeshCore en de meeste LoRa-apparaten gebruiken sub-band g1 (868,0–868,6 MHz). Hier geldt <strong>1% duty cycle</strong> en maximaal <strong>25 mW (+14 dBm) ERP</strong>.</div>
+      <div class="callout-text"><strong>Let op:</strong> MeshCore en de meeste LoRa-modules gebruiken sub-band <strong>g3</strong> (869,4–869,65 MHz). Hier geldt <strong>10% duty cycle</strong> en maximaal <strong>500 mW (+27 dBm) ERP</strong>. LoRaWAN gebruikt doorgaans g1 (868,0–868,6 MHz) met 1% duty cycle en 25 mW.</div>
     </div>
+
+    <h3>Kanalen in sub-band g3</h3>
+    <p>De bruikbare bandbreedte van g3 (869,4–869,65 MHz) is slechts 250 kHz. Het aantal beschikbare kanalen hangt af van de gekozen bandbreedte:</p>
+
+    <table class="comp-table" aria-label="Kanaalindeling sub-band g3">
+      <thead>
+        <tr>
+          <th>Bandbreedte (BW)</th>
+          <th>Kanalen</th>
+          <th>Toelichting</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>250 kHz</strong></td>
+          <td>1</td>
+          <td>Gebruikt de volledige breedte van g3. Center-frequentie: 869,525 MHz.</td>
+        </tr>
+        <tr>
+          <td><strong>125 kHz</strong></td>
+          <td>2</td>
+          <td>Meest gebruikte instelling. Twee gescheiden kanalen zonder interferentie.</td>
+        </tr>
+        <tr>
+          <td style="color:var(--green);font-weight:700;">62,5 kHz ✔</td>
+          <td>4</td>
+          <td>Hogere gevoeligheid (meer link budget), lagere datasnelheid. MeshCore NL standaard.</td>
+        </tr>
+        <tr>
+          <td><strong>31,25 kHz</strong></td>
+          <td>8</td>
+          <td>Zeer smalbandig; vereist nauwkeurige kristallen (TCXO) om frequentiedrift te voorkomen.</td>
+        </tr>
+      </tbody>
+    </table>
 
     <h3>ETSI EN 300 220</h3>
     <p>Alle regels voor de 868 MHz band zijn vastgelegd in de Europese standaard <strong>ETSI EN 300 220</strong>. Dit is de norm die fabrikanten moeten volgen om het CE-keurmerk te krijgen. De belangrijkste eisen:</p>
@@ -298,7 +333,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🇪🇺</div>
         <h4>Europa: 868 MHz</h4>
-        <p>25 mW ERP, 1% duty cycle op de hoofdband. Gereguleerd door ETSI EN 300 220.</p>
+        <p>Sub-band g3: 500 mW ERP, 10% duty cycle — gebruikt door MeshCore. Overige banden: 25 mW, 1%. Gereguleerd door ETSI EN 300 220.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🇺🇸</div>
@@ -328,16 +363,16 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     <p>Duty cycle is het <strong>percentage van de tijd dat je mag zenden</strong>. Het is de belangrijkste beperking waar je als LoRa-gebruiker mee te maken krijgt. Begrijp je dit concept goed, dan kun je je netwerk veel beter ontwerpen.</p>
 
     <h3>De basisberekening</h3>
-    <p>Bij 1% duty cycle mag je maximaal <strong>1% van elk uur</strong> zenden:</p>
+    <p>Duty cycle is de maximale fractie van de tijd dat je mag zenden. Bij <strong>1% duty cycle</strong> (sub-banden g, g1, g4) is dat 36 seconden per uur. MeshCore gebruikt sub-band <strong>g3 met 10% duty cycle</strong>, wat neerkomt op:</p>
     <ul>
       <li>1 uur = 3600 seconden</li>
-      <li>1% van 3600 = <strong>36 seconden zendtijd per uur</strong></li>
+      <li>10% van 3600 = <strong>360 seconden zendtijd per uur</strong></li>
     </ul>
-    <p>Dat klinkt als weinig — en dat ís het ook. Maar LoRa-berichten zijn klein (meestal &lt;100 bytes), dus je kunt nog steeds tientallen berichten per uur versturen.</p>
+    <p>Dat is tien keer zoveel zendbudget als de 1%-banden. LoRa-berichten zijn klein (meestal &lt;100 bytes), dus je kunt honderden tot duizenden berichten per uur versturen.</p>
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">🧮</span>
-      <div class="callout-text"><strong>Rekenvoorbeeld:</strong> Een bericht duurt 1 seconde om te versturen. Na het zenden moet je <strong>99 seconden wachten</strong> (1 / 0,01 − 1 = 99). Bij 1% duty cycle kun je dus max 36 berichten van 1 seconde per uur versturen.</div>
+      <div class="callout-text"><strong>Rekenvoorbeeld (g3, 10% DC):</strong> Een bericht duurt 1 seconde om te versturen. De theoretische wachttijd is 1 / 0,1 − 1 = <strong>9 seconden</strong>. Bij 10% duty cycle kun je dus max 360 berichten van 1 seconde per uur versturen. <em>De werkelijke wachttijd hangt af van de firmware-implementatie.</em></div>
     </div>
 
     <h3>Waarom duty cycle?</h3>
@@ -370,8 +405,8 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <th>SF</th>
           <th>Bandbreedte</th>
           <th>Airtime (50 bytes)</th>
-          <th>Berichten/uur (1% DC)</th>
-          <th>Wachttijd na 1 bericht</th>
+          <th>Berichten/uur (10% DC — g3)</th>
+          <th>Theoretische wachttijd*</th>
         </tr>
       </thead>
       <tbody>
@@ -379,46 +414,48 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <td><strong>SF7</strong></td>
           <td>125 kHz</td>
           <td>~72 ms</td>
-          <td>~500</td>
-          <td>~7 seconden</td>
+          <td>~5 000</td>
+          <td>~0,6 seconden</td>
         </tr>
         <tr>
           <td><strong>SF8</strong></td>
           <td>125 kHz</td>
           <td>~134 ms</td>
-          <td>~268</td>
-          <td>~13 seconden</td>
+          <td>~2 686</td>
+          <td>~1,2 seconden</td>
         </tr>
         <tr>
           <td><strong>SF9</strong></td>
           <td>125 kHz</td>
           <td>~247 ms</td>
-          <td>~145</td>
-          <td>~25 seconden</td>
+          <td>~1 457</td>
+          <td>~2,2 seconden</td>
         </tr>
         <tr>
           <td><strong>SF10</strong></td>
           <td>125 kHz</td>
           <td>~453 ms</td>
-          <td>~79</td>
-          <td>~45 seconden</td>
+          <td>~795</td>
+          <td>~4,1 seconden</td>
         </tr>
         <tr>
           <td><strong>SF11</strong></td>
           <td>250 kHz</td>
           <td>~414 ms</td>
-          <td>~87</td>
-          <td>~41 seconden</td>
+          <td>~869</td>
+          <td>~3,7 seconden</td>
         </tr>
         <tr>
           <td><strong>SF12</strong></td>
           <td>125 kHz</td>
           <td>~1483 ms</td>
-          <td>~24</td>
-          <td>~147 seconden</td>
+          <td>~243</td>
+          <td>~13,3 seconden</td>
         </tr>
       </tbody>
     </table>
+
+    <p style="font-size:.82rem;color:var(--dim);margin-top:-12px;">* De werkelijke wachttijd is afhankelijk van de firmware-implementatie. Er wordt gewerkt aan een <strong>burst-mode</strong> waarmee meerdere berichten achter elkaar verzonden kunnen worden, gevolgd door een langere pauze.</p>
 
     <div class="callout yellow">
       <span class="callout-icon" aria-hidden="true">⚠️</span>
@@ -448,8 +485,8 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         <span class="calc-label">Duty cycle:</span>
         <select class="calc-select" id="dc-duty">
           <option value="0.1">0,1% (sub-band g2)</option>
-          <option value="1" selected>1% (sub-band g1 — standaard)</option>
-          <option value="10">10% (sub-band g3)</option>
+          <option value="1">1% (sub-band g1)</option>
+          <option value="10" selected>10% (sub-band g3 — MeshCore)</option>
         </select>
       </div>
       <div class="calc-results-grid">
@@ -517,35 +554,35 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <td style="color:var(--green);font-weight:700;">SF7 BW62.5 ✔</td>
           <td>Goed (3–10 km)</td>
           <td>~195 ms</td>
-          <td>~184</td>
+          <td>~1 846</td>
           <td>MeshCore NL standaard</td>
         </tr>
         <tr>
           <td><strong>SF7 BW125</strong></td>
           <td>Kort (2–5 km)</td>
           <td>~72 ms</td>
-          <td>~500</td>
+          <td>~5 000</td>
           <td>Stedelijk, veel verkeer</td>
         </tr>
         <tr>
           <td><strong>SF9 BW125</strong></td>
           <td>Gemiddeld (5–8 km)</td>
           <td>~247 ms</td>
-          <td>~145</td>
+          <td>~1 457</td>
           <td>Voorstedelijk</td>
         </tr>
         <tr>
           <td><strong>SF11 BW250</strong></td>
           <td>Goed (8–15 km)</td>
           <td>~414 ms</td>
-          <td>~87</td>
+          <td>~869</td>
           <td>Vorige MeshCore standaard</td>
         </tr>
         <tr>
           <td><strong>SF12 BW125</strong></td>
           <td>Maximaal (10–20 km)</td>
           <td>~1483 ms</td>
-          <td>~24</td>
+          <td>~243</td>
           <td>Extreme afstand</td>
         </tr>
       </tbody>
@@ -595,9 +632,9 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     </div>
 
     <h3>Duty cycle budget per SF-instelling</h3>
-    <p>Onderstaande tabel laat zien hoeveel "nuttige data" je per uur kunt versturen bij 1% duty cycle:</p>
+    <p>Onderstaande tabel laat zien hoeveel "nuttige data" je per uur kunt versturen bij 10% duty cycle (sub-band g3, zoals MeshCore):</p>
 
-    <table class="comp-table" aria-label="Data-doorvoer per SF bij 1% duty cycle">
+    <table class="comp-table" aria-label="Data-doorvoer per SF bij 10% duty cycle">
       <thead>
         <tr>
           <th>SF</th>
@@ -611,37 +648,37 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         <tr>
           <td><strong>SF7 BW125</strong></td>
           <td>72 ms</td>
-          <td>500</td>
-          <td>~25 kB</td>
-          <td class="check">Ruim budget</td>
+          <td>5 000</td>
+          <td>~250 kB</td>
+          <td class="check">Zeer ruim budget</td>
         </tr>
         <tr>
           <td><strong>SF9 BW125</strong></td>
           <td>247 ms</td>
-          <td>145</td>
-          <td>~7,3 kB</td>
-          <td class="check">Voldoende</td>
+          <td>1 457</td>
+          <td>~73 kB</td>
+          <td class="check">Ruim voldoende</td>
         </tr>
         <tr>
           <td><strong>SF11 BW250</strong></td>
           <td>414 ms</td>
-          <td>87</td>
-          <td>~4,3 kB</td>
-          <td style="color:var(--yellow);">Acceptabel</td>
+          <td>869</td>
+          <td>~43 kB</td>
+          <td class="check">Voldoende</td>
         </tr>
         <tr>
           <td><strong>SF12 BW125</strong></td>
           <td>1483 ms</td>
-          <td>24</td>
-          <td>~1,2 kB</td>
-          <td class="cross">Zeer beperkt</td>
+          <td>243</td>
+          <td>~12 kB</td>
+          <td style="color:var(--yellow);">Acceptabel</td>
         </tr>
       </tbody>
     </table>
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">🎯</span>
-      <div class="callout-text"><strong>Conclusie:</strong> Voor een mesh-netwerk is duty cycle de belangrijkste bottleneck. Kies de laagste SF die je bereik toelaat, houd berichten klein, en plan je netwerk slim. De overstap van het Nederlandse MeshCore-netwerk naar SF7 BW62.5 is hier een goed voorbeeld van: meer capaciteit met acceptabel bereik.</div>
+      <div class="callout-text"><strong>Conclusie:</strong> Voor een mesh-netwerk is airtime de belangrijkste bottleneck. Dankzij sub-band g3 (10% DC, 500 mW) heeft MeshCore veel meer zendbudget dan LoRaWAN op g1 (1% DC, 25 mW). De overstap naar SF7 BW62.5 combineert dat ruime budget met een goede balans tussen bereik en kanaalcapaciteit.</div>
     </div>
   </section>
 
@@ -714,10 +751,10 @@ const quizQuestions = [
     explanation: '1% duty cycle betekent dat je maximaal 1% van de tijd mag zenden: 1% × 3600 seconden = 36 seconden per uur.'
   },
   {
-    question: 'Wat is het maximale zendvermogen (ERP) in de EU 868 MHz hoofdband?',
+    question: 'Wat is het maximale zendvermogen (ERP) in sub-band g3, die MeshCore gebruikt?',
     options: ['100 mW (+20 dBm)', '10 mW (+10 dBm)', '25 mW (+14 dBm)', '500 mW (+27 dBm)'],
-    correct: 2,
-    explanation: 'In sub-band g1 (868,0–868,6 MHz) is het maximale ERP 25 mW, oftewel +14 dBm. De 500 mW geldt alleen voor de smalle g3 sub-band.'
+    correct: 3,
+    explanation: 'In sub-band g3 (869,4–869,65 MHz) is het maximale ERP 500 mW, oftewel +27 dBm. Dit is de band die MeshCore en de meeste LoRa-modules gebruiken. In g1 (LoRaWAN) geldt slechts 25 mW.'
   },
   {
     question: 'Waarom bestaat de duty cycle beperking?',
@@ -735,7 +772,7 @@ const quizQuestions = [
     question: 'Wat is het effect van een hogere Spreading Factor op je duty cycle budget?',
     options: ['Geen effect, duty cycle is onafhankelijk van SF', 'Lagere airtime, dus meer berichten per uur', 'Hogere airtime, dus minder berichten per uur', 'De duty cycle limiet wordt automatisch verhoogd'],
     correct: 2,
-    explanation: 'Een hogere SF betekent langere airtime per bericht. Bij SF12 BW125 duurt een bericht ~1,5 seconde versus ~72 ms bij SF7 — dat is 20× langer. Hierdoor kun je veel minder berichten per uur versturen binnen je 1% budget.'
+    explanation: 'Een hogere SF betekent langere airtime per bericht. Bij SF12 BW125 duurt een bericht ~1,5 seconde versus ~72 ms bij SF7 — dat is 20× langer. Hierdoor kun je veel minder berichten per uur versturen binnen je 10% budget (g3).'
   }
 ];
 

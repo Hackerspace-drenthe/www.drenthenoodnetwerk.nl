@@ -186,33 +186,99 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
   <section class="lesson-section" data-section="0" data-label="Populaire apparaten">
     <div class="section-counter">Sectie 1 van 3</div>
     <h2>Populaire MeshCore <span>Apparaten</span></h2>
-    <p>Er zijn diverse LoRa-boards die uitstekend werken met MeshCore. Hieronder vind je de vijf meest gebruikte apparaten, elk met hun eigen sterke punten en toepassingen.</p>
+    <p>Er zijn diverse LoRa-boards die uitstekend werken met MeshCore. Hieronder vind je alle gangbare apparaten, gegroepeerd per fabrikant.</p>
 
     <div class="info-grid">
+      <!-- ── Heltec ── -->
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📦</div>
         <h4>Heltec V3</h4>
-        <p>ESP32-S3 + SX1262 met ingebouwd 0.96" OLED-scherm. Compact, goedkoop (~€20) en ideaal als instapmodel voor BLE Companion of Repeater.</p>
+        <p>ESP32-S3 + SX1262 met ingebouwd 0.96" OLED-scherm. Compact, goedkoop (~€18–25) en ideaal als instapmodel voor BLE Companion of Repeater.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📡</div>
+        <h4>Heltec T114</h4>
+        <p>nRF52840 + SX1262 met 1.14" kleurenscherm. Ultra-zuinig, compact EDC-formaat. GPS-connector voor optionele L76K-module (~€25–40).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🔌</div>
+        <h4>Heltec V4</h4>
+        <p>ESP32-S3 + SX1262 (600 mW) met WiFi. GPS-connector voor L76K-module. Ideaal als Room Server of vaste repeater (~€25–40).</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📍</div>
+        <h4>Heltec Wireless Tracker</h4>
+        <p>ESP32-S3 + SX1262 met ingebouwde GPS en 0.96" kleurenscherm. WiFi + BLE. Compacte GPS-node voor tracking en IoT (~€28–40).</p>
+      </div>
+
+      <!-- ── Lilygo ── -->
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🛰️</div>
         <h4>T-Beam v1.2</h4>
         <p>ESP32 + SX1262, ingebouwde GPS-module en 18650 batterijslot. Perfect als GPS-tracker of mobiele node (~€30).</p>
       </div>
       <div class="info-card">
-        <div class="ic-icon" aria-hidden="true">⌨️</div>
-        <h4>T-Deck</h4>
-        <p>ESP32-S3 + SX1262 met 2.8" LCD-scherm en fysiek toetsenbord. Volledig standalone apparaat zonder telefoon (~€50).</p>
+        <div class="ic-icon" aria-hidden="true">🖋️</div>
+        <h4>Lilygo T-Echo</h4>
+        <p>nRF52840 + SX1262 met 1.54" E-Paper scherm, GPS en NFC. Ultra-zuinig, ideaal voor langere trips en outdoor gebruik (~€55–75).</p>
       </div>
       <div class="info-card">
-        <div class="ic-icon" aria-hidden="true">☀️</div>
-        <h4>Station G2</h4>
-        <p>nRF52 + SX1262, solar-ready ontwerp. Extreem laag stroomverbruik, ideaal voor off-grid repeaters op zonne-energie (~€45).</p>
+        <div class="ic-icon" aria-hidden="true">📟</div>
+        <h4>Lilygo T-LoRa Pager</h4>
+        <p>ESP32-S3 + SX1262 met 2.1" kleurenscherm, toetsenbord en GPS. Zakformaat standalone communicator (~€55–70).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">⌨️</div>
+        <h4>T-Deck Plus</h4>
+        <p>ESP32-S3 + SX1262 met 2.8" touchscreen, toetsenbord en GPS. Volledig standalone apparaat zonder telefoon (~€75–95).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🖥️</div>
+        <h4>T-Deck Pro</h4>
+        <p>ESP32-S3 + SX1262 met groot 3.7" touchscreen, toetsenbord en GPS. Premium standalone ervaring (~€90–110).</p>
+      </div>
+
+      <!-- ── RAK Wireless ── -->
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🏷️</div>
+        <h4>RAK WisMesh Tag</h4>
+        <p>nRF52840 + SX1262 met GPS, IP66 waterdicht. Geen scherm, maar compact en weerbestendig. Ideaal als outdoor tracker (~€28–35).</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🧩</div>
         <h4>RAK WisBlock (RAK4631)</h4>
-        <p>nRF52840 + SX1262, modulair systeem. Klik sensoren en I/O-modules aan. Uitstekend stroomverbruik, perfect voor zonne-repeaters.</p>
+        <p>nRF52840 + SX1262, modulair systeem. Klik sensoren en I/O-modules aan. Uitstekend stroomverbruik, perfect voor zonne-repeaters (~€30–55).</p>
+      </div>
+
+      <!-- ── SeeedStudio ── -->
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">🗺️</div>
+        <h4>Wio Tracker L1 Pro</h4>
+        <p>nRF52840 + SX1262 met 1.3" kleurenscherm en GPS. Compacte handheld voor actieve GPS-tracking en groepsactiviteiten (~€38–45).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">💊</div>
+        <h4>SenseCAP T1000-E</h4>
+        <p>nRF52840 + LR1110 met GPS, IP65. Creditcard-formaat, discrete tracker voor asset tracking (~€45–65).</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">☀️</div>
+        <h4>SenseCAP Solar P1 Pro</h4>
+        <p>nRF52840 + SX1262 met GPS, zonnepaneel en 5000 mAh batterij. IP67 waterdicht. Plug-and-play outdoor repeater (~€68–80).</p>
+      </div>
+
+      <!-- ── Elecrow ── -->
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📱</div>
+        <h4>ThinkNode M1</h4>
+        <p>nRF52840 + SX1262 met 1.54" E-Ink scherm en GPS. Zuinig door E-Ink, goed afleesbaar in zonlicht (~€32–40).</p>
+      </div>
+
+      <!-- ── Overig ── -->
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">☀️</div>
+        <h4>Station G2</h4>
+        <p>nRF52 + SX1262, solar-ready ontwerp. Extreem laag stroomverbruik, ideaal voor off-grid repeaters op zonne-energie (~€45).</p>
       </div>
     </div>
 
@@ -237,25 +303,133 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <td class="cross">✗</td>
           <td>0.96" OLED</td>
           <td>Extern (LiPo)</td>
-          <td>~€20</td>
+          <td>~€18–25</td>
+        </tr>
+        <tr>
+          <td><strong>Heltec T114</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td>Connector (L76K)</td>
+          <td>1.14" TFT kleur</td>
+          <td>Li-Po SH1.25</td>
+          <td>~€25–40</td>
+        </tr>
+        <tr>
+          <td><strong>Heltec V4</strong></td>
+          <td>ESP32-S3</td>
+          <td>SX1262 (600mW)</td>
+          <td>Connector (L76K)</td>
+          <td>0.96" OLED</td>
+          <td>Li-Po via connector</td>
+          <td>~€25–40</td>
+        </tr>
+        <tr>
+          <td><strong>Heltec Wireless Tracker</strong></td>
+          <td>ESP32-S3</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>0.96" TFT kleur</td>
+          <td>Li-Po via connector</td>
+          <td>~€28–40</td>
         </tr>
         <tr>
           <td><strong>T-Beam v1.2</strong></td>
           <td>ESP32</td>
           <td>SX1262</td>
-          <td class="check">✓</td>
+          <td class="check">✓ Ingebouwd</td>
           <td>Optioneel</td>
           <td>18650 slot</td>
           <td>~€30</td>
         </tr>
         <tr>
-          <td><strong>T-Deck</strong></td>
+          <td><strong>Lilygo T-Echo</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>1.54" E-Paper</td>
+          <td>Li-Po ingebouwd</td>
+          <td>~€55–75</td>
+        </tr>
+        <tr>
+          <td><strong>T-LoRa Pager</strong></td>
           <td>ESP32-S3</td>
           <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>2.1" TFT + KB</td>
+          <td>Li-Po ingebouwd</td>
+          <td>~€55–70</td>
+        </tr>
+        <tr>
+          <td><strong>T-Deck Plus</strong></td>
+          <td>ESP32-S3</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>2.8" TFT + KB</td>
+          <td>2000 mAh ingebouwd</td>
+          <td>~€75–95</td>
+        </tr>
+        <tr>
+          <td><strong>T-Deck Pro</strong></td>
+          <td>ESP32-S3</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>3.7" TFT + KB</td>
+          <td>Li-Po ingebouwd</td>
+          <td>~€90–110</td>
+        </tr>
+        <tr>
+          <td><strong>RAK WisMesh Tag</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
           <td class="cross">✗</td>
-          <td>2.8" LCD + KB</td>
-          <td>Intern LiPo</td>
-          <td>~€50</td>
+          <td>Li-Po ingebouwd (IP66)</td>
+          <td>~€28–35</td>
+        </tr>
+        <tr>
+          <td><strong>RAK WisBlock</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td>Optioneel (module)</td>
+          <td>Optioneel (module)</td>
+          <td>Extern (LiPo)</td>
+          <td>~€30–55</td>
+        </tr>
+        <tr>
+          <td><strong>Wio Tracker L1 Pro</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>1.3" TFT kleur</td>
+          <td>1100 mAh ingebouwd</td>
+          <td>~€38–45</td>
+        </tr>
+        <tr>
+          <td><strong>SenseCAP T1000-E</strong></td>
+          <td>nRF52840</td>
+          <td>LR1110</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td class="cross">✗</td>
+          <td>700 mAh ingebouwd (IP65)</td>
+          <td>~€45–65</td>
+        </tr>
+        <tr>
+          <td><strong>SenseCAP Solar P1 Pro</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td class="cross">✗</td>
+          <td>5000 mAh + solar (IP67)</td>
+          <td>~€68–80</td>
+        </tr>
+        <tr>
+          <td><strong>ThinkNode M1</strong></td>
+          <td>nRF52840</td>
+          <td>SX1262</td>
+          <td class="check">✓ Ingebouwd</td>
+          <td>1.54" E-Ink</td>
+          <td>Li-Po via connector</td>
+          <td>~€32–40</td>
         </tr>
         <tr>
           <td><strong>Station G2</strong></td>
@@ -266,25 +440,16 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
           <td>Solar + LiPo</td>
           <td>~€45</td>
         </tr>
-        <tr>
-          <td><strong>RAK WisBlock</strong></td>
-          <td>nRF52840</td>
-          <td>SX1262</td>
-          <td>Optioneel</td>
-          <td>Optioneel</td>
-          <td>Extern (LiPo)</td>
-          <td>~€30–50</td>
-        </tr>
       </tbody>
     </table>
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">💡</span>
-      <div class="callout-text"><strong>Tip:</strong> Voor beginners is de Heltec V3 de beste keuze: goedkoop, compact en met een handig OLED-scherm om direct je berichten te zien. Wil je GPS-tracking? Kies dan de T-Beam.</div>
+      <div class="callout-text"><strong>Tip:</strong> Voor beginners is de Heltec V3 de beste keuze: goedkoop, compact en met een handig OLED-scherm om direct je berichten te zien. Wil je GPS-tracking? De <strong>Heltec T114</strong> en <strong>V4</strong> hebben een connector voor de <strong>L76K GPS-module</strong> (verkrijgbaar bij o.a. <a href="https://www.tinytronics.nl/nl/search?q=L76K" rel="noopener noreferrer">Tinytronics</a>). De T-Beam heeft GPS ingebouwd.</div>
     </div>
   </section>
 
-  <!-- SECTIE 2: LoRa Radio Chips -->
+    <!-- SECTIE 2: LoRa Radio Chips -->
   <section class="lesson-section" data-section="1" data-label="LoRa radio chips">
     <div class="section-counter">Sectie 2 van 3</div>
     <h2>LoRa <span>Radio Chips</span></h2>
@@ -477,9 +642,9 @@ const quizQuestions = [
   },
   {
     question: 'Welk apparaat heeft een ingebouwd toetsenbord en scherm?',
-    options: ['Heltec V3', 'T-Beam', 'T-Deck', 'RAK WisBlock'],
+    options: ['Heltec V3', 'T-Beam', 'T-Deck Plus', 'RAK WisBlock'],
     correct: 2,
-    explanation: 'De T-Deck heeft een 2.8" LCD-scherm en een fysiek toetsenbord, waardoor het volledig standalone werkt zonder telefoon.'
+    explanation: 'De T-Deck Plus heeft een 2.8" touchscreen en een fysiek toetsenbord, waardoor het volledig standalone werkt zonder telefoon.'
   },
   {
     question: 'Wat is het verschil tussen een SMA- en een IPEX-connector?',
@@ -495,7 +660,7 @@ const quizQuestions = [
   },
   {
     question: 'Welk apparaat heeft een ingebouwde GPS en een 18650-batterijslot?',
-    options: ['Heltec V3', 'T-Deck', 'RAK WisBlock', 'T-Beam'],
+    options: ['Heltec V3', 'T-Deck Plus', 'RAK WisBlock', 'T-Beam'],
     correct: 3,
     explanation: 'De T-Beam heeft een ingebouwde GPS-module en een 18650 batterijhouder, wat hem ideaal maakt als mobiele GPS-tracker.'
   }

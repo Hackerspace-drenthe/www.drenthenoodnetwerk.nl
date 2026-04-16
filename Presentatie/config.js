@@ -173,8 +173,8 @@ export default {
       speaker: ['rein', 'maurice'],
       act: 'hoe',
       layout: 'A',
-      animation: 'drenthe-coverage',
-      animationOptions: { mode: 'huidig' },
+      animation: 'live-radar-map',
+      animationOptions: { showLinks: false },
       triggerMode: 'click'
     },
     {
@@ -184,8 +184,8 @@ export default {
       speaker: ['rein', 'maurice'],
       act: 'hoe',
       layout: 'A',
-      animation: 'coverage-mapping',
-      animationOptions: {},
+      animation: 'live-radar-map',
+      animationOptions: { showLinks: true, showRange: true },
       triggerMode: 'click'
     },
     {

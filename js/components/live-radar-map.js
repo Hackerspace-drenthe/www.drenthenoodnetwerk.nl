@@ -332,10 +332,10 @@
       L.circle([node.location.latitude, node.location.longitude], {
         radius: rangeKm * 1000,
         fillColor: '#74c69d',
-        fillOpacity: 0.06,
+        fillOpacity: 0.03,
         color: '#74c69d',
         weight: 1,
-        opacity: 0.25,
+        opacity: 0.12,
         interactive: false
       }).addTo(layerRange);
     });

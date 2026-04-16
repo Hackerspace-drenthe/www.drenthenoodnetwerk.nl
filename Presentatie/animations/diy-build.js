@@ -11,7 +11,7 @@ export function init(container, options = {}) {
 
   const NS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', '0 0 800 500');
+  svg.setAttribute('viewBox', '0 0 900 500');
   svg.style.cssText = 'width:100%;height:100%;';
   container.appendChild(svg);
 
@@ -188,7 +188,7 @@ export function init(container, options = {}) {
   // Progress bar
   const barBg = document.createElementNS(NS, 'rect');
   barBg.setAttribute('x', '80'); barBg.setAttribute('y', '460');
-  barBg.setAttribute('width', '640'); barBg.setAttribute('height', '6');
+  barBg.setAttribute('width', '740'); barBg.setAttribute('height', '6');
   barBg.setAttribute('fill', 'var(--color-border, #3a3a50)'); barBg.setAttribute('rx', '3');
   svg.appendChild(barBg);
   const barFill = document.createElementNS(NS, 'rect');
@@ -240,7 +240,7 @@ export function init(container, options = {}) {
 
   // Hackerspace callout
   const callout = document.createElementNS(NS, 'text');
-  callout.setAttribute('x', '400'); callout.setAttribute('y', '430');
+  callout.setAttribute('x', '450'); callout.setAttribute('y', '430');
   callout.setAttribute('text-anchor', 'middle');
   callout.setAttribute('fill', 'var(--color-signal, #48cae4)'); callout.setAttribute('font-size', '15');
   callout.setAttribute('opacity', '0');
@@ -261,7 +261,7 @@ export function init(container, options = {}) {
     });
 
     // Progress bar
-    barFill.setAttribute('width', String(640 * Math.min(1, progress)));
+    barFill.setAttribute('width', String(740 * Math.min(1, progress)));
 
     // Callout at end
     if (progress > 0.85) {
@@ -281,7 +281,7 @@ export function init(container, options = {}) {
       startTime = 0;
       if (reducedMotion) {
         stepGroups.forEach(g => g.setAttribute('opacity', '1'));
-        barFill.setAttribute('width', '640');
+        barFill.setAttribute('width', '740');
         callout.setAttribute('opacity', '1');
         if (completeCallback) completeCallback();
         return;

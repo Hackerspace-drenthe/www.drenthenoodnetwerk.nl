@@ -222,37 +222,78 @@ code, .mono {
   display: none;
 }
 
+/* --- Slide Navigation --- */
+
+#slide-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-xs) var(--space-lg);
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+}
+
+#slide-nav button {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms;
+  user-select: none;
+}
+
+#slide-nav button:hover:not(:disabled) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+#slide-nav button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+#slide-number {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-width: 5ch;
+  text-align: center;
+}
+
 /* --- Progress Bar --- */
 
 #progress-bar {
   position: fixed;
   bottom: 0;
   left: 0;
-  height: 4px;
+  height: 3px;
   background: var(--color-primary);
   transition: width var(--transition-slide);
-  z-index: 100;
-}
-
-/* --- Slide Number --- */
-
-#slide-number {
-  position: fixed;
-  bottom: var(--space-sm);
-  right: var(--space-lg);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  z-index: 100;
+  z-index: 101;
 }
 
 /* --- Blackout --- */
 
 body.blackout #slide-container,
 body.blackout #progress-bar,
-body.blackout #slide-number {
+body.blackout #slide-nav {
   opacity: 0;
   transition: opacity 200ms ease;
+}
+
+body.presenter-mode #slide-nav {
+  display: none;
 }
 
 /* --- Reduced Motion --- */

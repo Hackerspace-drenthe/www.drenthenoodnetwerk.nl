@@ -32,6 +32,8 @@ let slideContainer;
 let progressBar;
 let slideNumber;
 let presenterView;
+let btnPrev;
+let btnNext;
 
 /* ========================================================================
    Initialization
@@ -44,6 +46,8 @@ export function init() {
   progressBar = document.getElementById('progress-bar');
   slideNumber = document.getElementById('slide-number');
   presenterView = document.getElementById('presenter-view');
+  btnPrev = document.getElementById('btn-prev');
+  btnNext = document.getElementById('btn-next');
 
   // BroadcastChannel for presenter ↔ beamer sync
   state.channel = new BroadcastChannel('meshcore-presentation');
@@ -55,6 +59,7 @@ export function init() {
   }
 
   bindKeyboard();
+  bindNavButtons();
   loadSlide(0);
 }
 
@@ -285,6 +290,16 @@ function goLast() {
    Keyboard Shortcuts
    ======================================================================== */
 
+function bindNavButtons() {
+  if (btnPrev) btnPrev.addEventListener('click', () => handleRetreat());
+  if (btnNext) btnNext.addEventListener('click', () => handleAdvance());
+}
+
+function updateNavButtons() {
+  if (btnPrev) btnPrev.disabled = state.currentIndex === 0;
+  if (btnNext) btnNext.disabled = state.currentIndex >= config.slides.length - 1;
+}
+
 function bindKeyboard() {
   document.addEventListener('keydown', (e) => {
     // Ignore if typing in an input
@@ -426,6 +441,7 @@ function updateProgress() {
   if (slideNumber) {
     slideNumber.textContent = `${current}/${total - 1}`;
   }
+  updateNavButtons();
 }
 
 /* ========================================================================

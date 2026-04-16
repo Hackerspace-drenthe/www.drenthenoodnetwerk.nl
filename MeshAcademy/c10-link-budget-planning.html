@@ -211,12 +211,229 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <p>Als het ontvangen vermogen <strong>hoger</strong> is dan de gevoeligheid van de ontvanger → de link werkt. Het verschil noemen we de <strong>link marge</strong>. Je wilt minimaal <strong>10 dB marge</strong> om betrouwbaar te zijn.</p>
 
+    <h3>Noise Floor, RSSI en SNR</h3>
+    <p>Om te begrijpen waarom link marge belangrijk is, moet je drie begrippen kennen:</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📉</div>
+        <h4>Noise Floor</h4>
+        <p>Het achtergrondruisniveau op de frequentie — alles wat niet jouw signaal is. Bij 868 MHz in een rustige omgeving typisch rond <strong>−120 tot −130 dBm</strong>. In stedelijk gebied of bij stoorbronnen kan dit hoger (slechter) zijn.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📊</div>
+        <h4>RSSI (Received Signal Strength Indicator)</h4>
+        <p>De totale ontvangen signaalsterkte, inclusief ruis. Wordt gemeten in <strong>dBm</strong>. Een RSSI van −90 dBm is sterk, −120 dBm is zwak. Let op: RSSI zegt niets over de kwaliteit van het signaal — alleen over de sterkte.</p>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon" aria-hidden="true">📈</div>
+        <h4>SNR (Signal-to-Noise Ratio)</h4>
+        <p>De verhouding tussen signaal en ruis, in <strong>dB</strong>. Dit is de échte maat voor verbindingskwaliteit. LoRa kan dankzij chirp spread spectrum werken met <strong>negatieve SNR</strong> (signaal zwakker dan de ruis!) — tot circa −20 dB bij SF12.</p>
+      </div>
+    </div>
+
+    <div class="callout cyan">
+      <span class="callout-icon" aria-hidden="true">🔍</span>
+      <div class="callout-text"><strong>Hoe hangen ze samen?</strong> De ontvanger pikt je signaal pas op als het voldoende boven de noise floor uitsteekt (positieve SNR), óf — bij LoRa — als de SNR boven de demodulatie-drempel van de gekozen SF ligt. Een "goede RSSI" met een lage SNR betekent veel ruis: de verbinding is dan fragiel. Kijk daarom altijd naar <strong>beide</strong> waarden.</div>
+    </div>
+
+    <table class="comp-table" aria-label="SNR drempelwaarden per SF">
+      <thead><tr><th>Spreading Factor</th><th>Minimale SNR</th><th>Gevoeligheid SX1262</th></tr></thead>
+      <tbody>
+        <tr><td>SF7</td><td>−7,5 dB</td><td>−124 dBm</td></tr>
+        <tr><td>SF8</td><td>−10 dB</td><td>−127 dBm</td></tr>
+        <tr><td>SF9</td><td>−12,5 dB</td><td>−130 dBm</td></tr>
+        <tr><td>SF10</td><td>−15 dB</td><td>−133 dBm</td></tr>
+        <tr><td>SF11</td><td>−17,5 dB</td><td>−137 dBm</td></tr>
+        <tr><td>SF12</td><td>−20 dB</td><td>−140 dBm</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ─── INTERACTIVE SNR VISUALISATIE ─── -->
+    <h3>Interactief: Noise Floor, RSSI &amp; SNR</h3>
+    <p>Versleep de schuifjes om te zien hoe signaalsterkte, ruisniveau en spreading factor samenwerken. De visualisatie toont een spectrumweergave met het LoRa-signaal en de noise floor.</p>
+
+    <div class="demo-wrap" id="snr-demo">
+      <div class="demo-bar">
+        <h4>📊 Spectrum Visualisatie</h4>
+        <span class="demo-hint">Pas de waarden aan en zie het effect</span>
+      </div>
+
+      <div style="padding:8px 20px 0;">
+        <svg id="snr-svg" viewBox="0 0 700 320" width="100%" style="display:block;max-width:700px;margin:0 auto;" aria-label="Interactieve spectrum visualisatie met noise floor, signaal en SNR" role="img">
+          <!-- Achtergrond -->
+          <rect x="60" y="10" width="600" height="260" rx="6" fill="#0a1628"/>
+          <!-- Grid lijnen -->
+          <g id="snr-grid" stroke="rgba(0,229,255,.08)" stroke-width="1"></g>
+          <!-- Y-as labels -->
+          <g id="snr-yaxis" font-size="11" fill="#7090b0" text-anchor="end" font-family="monospace"></g>
+          <!-- Noise floor gebied -->
+          <rect id="snr-noise-rect" x="60" y="200" width="600" height="70" fill="rgba(255,68,102,.08)"/>
+          <line id="snr-noise-line" x1="60" y1="200" x2="660" y2="200" stroke="#ff4466" stroke-width="2" stroke-dasharray="8,4"/>
+          <text id="snr-noise-label" x="665" y="204" font-size="10" fill="#ff4466" font-family="sans-serif" text-anchor="start">Noise floor</text>
+          <!-- Gevoeligheidsdrempel -->
+          <line id="snr-sens-line" x1="60" y1="240" x2="660" y2="240" stroke="#ffd060" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <text id="snr-sens-label" x="665" y="244" font-size="10" fill="#ffd060" font-family="sans-serif" text-anchor="start">RX sens.</text>
+          <!-- LoRa signaal -->
+          <g id="snr-signal-group">
+            <path id="snr-signal-path" fill="rgba(0,229,255,.25)" stroke="#00e5ff" stroke-width="2"/>
+          </g>
+          <!-- SNR brace -->
+          <g id="snr-brace">
+            <line id="snr-brace-top" x1="360" y1="100" x2="370" y2="100" stroke="#00ff88" stroke-width="2"/>
+            <line id="snr-brace-line" x1="365" y1="100" x2="365" y2="200" stroke="#00ff88" stroke-width="2"/>
+            <line id="snr-brace-bot" x1="360" y1="200" x2="370" y2="200" stroke="#00ff88" stroke-width="2"/>
+            <text id="snr-brace-text" x="378" y="155" font-size="13" fill="#00ff88" font-weight="700" font-family="sans-serif">SNR</text>
+          </g>
+          <!-- RSSI label -->
+          <g id="snr-rssi-group">
+            <line id="snr-rssi-arrow" x1="360" y1="100" x2="360" y2="10" stroke="rgba(0,229,255,.4)" stroke-width="1" stroke-dasharray="3,3"/>
+            <text id="snr-rssi-text" x="360" y="25" font-size="12" fill="#00e5ff" font-weight="700" font-family="sans-serif" text-anchor="middle">RSSI</text>
+          </g>
+          <!-- Status tekst -->
+          <text id="snr-status" x="360" y="300" font-size="14" font-weight="700" text-anchor="middle" font-family="sans-serif" fill="#00ff88"></text>
+        </svg>
+      </div>
+
+      <div class="demo-controls" style="flex-direction:column;align-items:stretch;gap:10px;padding:14px 20px 18px;">
+        <label>Signaalniveau (RSSI): <input type="range" id="snr-rssi" min="-140" max="-60" value="-100" step="1"><span class="val-out" id="snr-rssi-val">−100 dBm</span></label>
+        <label>Noise floor: <input type="range" id="snr-noise" min="-140" max="-90" value="-120" step="1"><span class="val-out" id="snr-noise-val">−120 dBm</span></label>
+        <label>Spreading Factor:
+          <select id="snr-sf" style="background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.85rem;">
+            <option value="7">SF7 (min SNR: −7,5 dB)</option>
+            <option value="8">SF8 (min SNR: −10 dB)</option>
+            <option value="9">SF9 (min SNR: −12,5 dB)</option>
+            <option value="10">SF10 (min SNR: −15 dB)</option>
+            <option value="11">SF11 (min SNR: −17,5 dB)</option>
+            <option value="12">SF12 (min SNR: −20 dB)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <script>
+    (function(){
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const rssiSlider  = document.getElementById('snr-rssi');
+      const noiseSlider = document.getElementById('snr-noise');
+      const sfSelect    = document.getElementById('snr-sf');
+      const rssiOut     = document.getElementById('snr-rssi-val');
+      const noiseOut    = document.getElementById('snr-noise-val');
+
+      /* dBm → Y coord (chart area: y=10 is -60dBm, y=270 is -150dBm) */
+      const TOP = 10, BOT = 270, DB_TOP = -60, DB_BOT = -150;
+      function dBtoY(db){ return TOP + (DB_TOP - db) / (DB_TOP - DB_BOT) * (BOT - TOP); }
+
+      /* SNR thresholds per SF */
+      const snrThresh = {7:-7.5, 8:-10, 9:-12.5, 10:-15, 11:-17.5, 12:-20};
+      /* Sensitivity per SF */
+      const sensdBm = {7:-124, 8:-127, 9:-130, 10:-133, 11:-137, 12:-140};
+
+      /* Draw grid + y-axis labels once */
+      const gridG = document.getElementById('snr-grid');
+      const yaxisG = document.getElementById('snr-yaxis');
+      for(let db = -60; db >= -150; db -= 10){
+        const y = dBtoY(db);
+        const line = document.createElementNS(svgNS,'line');
+        line.setAttribute('x1','60'); line.setAttribute('x2','660');
+        line.setAttribute('y1',y); line.setAttribute('y2',y);
+        gridG.appendChild(line);
+        const txt = document.createElementNS(svgNS,'text');
+        txt.setAttribute('x','56'); txt.setAttribute('y', y+4);
+        txt.textContent = db + '';
+        yaxisG.appendChild(txt);
+      }
+
+      function update(){
+        const rssi  = +rssiSlider.value;
+        const noise = +noiseSlider.value;
+        const sf    = +sfSelect.value;
+        const snr   = rssi - noise;
+        const minSNR = snrThresh[sf];
+        const sens   = sensdBm[sf];
+
+        rssiOut.textContent  = '\u2212' + Math.abs(rssi) + ' dBm';
+        noiseOut.textContent = '\u2212' + Math.abs(noise) + ' dBm';
+
+        /* Noise floor */
+        const noiseY = dBtoY(noise);
+        document.getElementById('snr-noise-rect').setAttribute('y', noiseY);
+        document.getElementById('snr-noise-rect').setAttribute('height', BOT - noiseY);
+        document.getElementById('snr-noise-line').setAttribute('y1', noiseY);
+        document.getElementById('snr-noise-line').setAttribute('y2', noiseY);
+        document.getElementById('snr-noise-label').setAttribute('y', noiseY - 4);
+
+        /* Sensitivity line */
+        const sensY = dBtoY(sens);
+        document.getElementById('snr-sens-line').setAttribute('y1', sensY);
+        document.getElementById('snr-sens-line').setAttribute('y2', sensY);
+        document.getElementById('snr-sens-label').setAttribute('y', sensY - 4);
+
+        /* Signal peak (LoRa chirp shape) */
+        const peakY  = dBtoY(rssi);
+        const baseY  = noiseY;
+        const cx = 360, hw = 50; /* center x, half-width of signal */
+        const path = `M${cx-hw*3},${baseY} C${cx-hw*2},${baseY} ${cx-hw},${baseY} ${cx-hw*0.5},${baseY-10} Q${cx},${peakY} ${cx},${peakY} Q${cx},${peakY} ${cx+hw*0.5},${baseY-10} C${cx+hw},${baseY} ${cx+hw*2},${baseY} ${cx+hw*3},${baseY}`;
+        document.getElementById('snr-signal-path').setAttribute('d', path);
+
+        /* SNR brace */
+        const braceX = cx + hw*3 + 20;
+        const braceTopY = Math.max(peakY, TOP);
+        document.getElementById('snr-brace-top').setAttribute('x1', braceX-5);
+        document.getElementById('snr-brace-top').setAttribute('x2', braceX+5);
+        document.getElementById('snr-brace-top').setAttribute('y1', braceTopY);
+        document.getElementById('snr-brace-top').setAttribute('y2', braceTopY);
+        document.getElementById('snr-brace-line').setAttribute('x1', braceX);
+        document.getElementById('snr-brace-line').setAttribute('x2', braceX);
+        document.getElementById('snr-brace-line').setAttribute('y1', braceTopY);
+        document.getElementById('snr-brace-line').setAttribute('y2', noiseY);
+        document.getElementById('snr-brace-bot').setAttribute('x1', braceX-5);
+        document.getElementById('snr-brace-bot').setAttribute('x2', braceX+5);
+        document.getElementById('snr-brace-bot').setAttribute('y1', noiseY);
+        document.getElementById('snr-brace-bot').setAttribute('y2', noiseY);
+        const braceMid = (braceTopY + noiseY) / 2;
+        const braceTxt = document.getElementById('snr-brace-text');
+        braceTxt.setAttribute('x', braceX + 12);
+        braceTxt.setAttribute('y', braceMid + 5);
+        braceTxt.textContent = snr.toFixed(1) + ' dB SNR';
+
+        /* RSSI label */
+        document.getElementById('snr-rssi-arrow').setAttribute('y1', braceTopY);
+        document.getElementById('snr-rssi-text').setAttribute('y', braceTopY - 8);
+        document.getElementById('snr-rssi-text').textContent = 'RSSI: ' + rssi + ' dBm';
+
+        /* Status */
+        const statusEl = document.getElementById('snr-status');
+        const works = rssi >= sens && snr >= minSNR;
+        if(works){
+          const margin = Math.min(rssi - sens, snr - minSNR);
+          statusEl.textContent = '\u2705 Link OK  \u2014  SNR marge: ' + (snr - minSNR).toFixed(1) + ' dB  |  Signaal boven gevoeligheid: ' + (rssi - sens).toFixed(1) + ' dB';
+          statusEl.setAttribute('fill','#00ff88');
+        } else if(rssi < sens){
+          statusEl.textContent = '\u274c Signaal te zwak \u2014 ' + (rssi - sens).toFixed(1) + ' dB onder gevoeligheid SF' + sf;
+          statusEl.setAttribute('fill','#ff4466');
+        } else {
+          statusEl.textContent = '\u274c SNR te laag \u2014 ' + snr.toFixed(1) + ' dB (nodig: ' + minSNR + ' dB voor SF' + sf + ')';
+          statusEl.setAttribute('fill','#ff4466');
+        }
+
+        /* Color signal based on status */
+        const sigPath = document.getElementById('snr-signal-path');
+        sigPath.setAttribute('fill', works ? 'rgba(0,255,136,.2)' : 'rgba(255,68,102,.2)');
+        sigPath.setAttribute('stroke', works ? '#00ff88' : '#ff4466');
+      }
+
+      rssiSlider.addEventListener('input', update);
+      noiseSlider.addEventListener('input', update);
+      sfSelect.addEventListener('change', update);
+      update();
+    })();
+    </script>
+
     <h3>Wat zit er in een Link Budget?</h3>
     <div class="info-grid">
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📡</div>
         <h4>TX Power</h4>
-        <p>Het zendvermogen van de radio. SX1262 levert maximaal +22 dBm (158 mW), het EU-maximum voor 868 MHz.</p>
+        <p>Het zendvermogen van de radio. SX1262 levert maximaal +22 dBm (158 mW). Het ETSI-maximum in sub-band g3 is 27 dBm ERP (500 mW).</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📶</div>
@@ -251,7 +468,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <tbody>
         <tr><td>TX power SX1262</td><td class="check">+22 dBm</td><td>Maximum EU 868 MHz</td></tr>
         <tr><td>Antenne gain (omni)</td><td class="check">+3 tot +6 dBi</td><td>Per kant (TX en RX)</td></tr>
-        <tr><td>Kabelverlies (1m RG58)</td><td class="cross">−0,3 dB</td><td>Per meter kabel</td></tr>
+        <tr><td>Kabelverlies (1m RG58)</td><td class="cross">−0,5 dB</td><td>Per meter kabel — gebruik liever Hyperflex-5 of LMR400</td></tr>
         <tr><td>Vrije-ruimte padverliezen (1 km)</td><td class="cross">−91 dB</td><td>FSPL bij 868 MHz</td></tr>
         <tr><td>Obstakelverliezen</td><td class="cross">−5 tot −30 dB</td><td>Bomen, muren, heuvels</td></tr>
         <tr><td>RX gevoeligheid (SF11)</td><td class="check">−137 dBm</td><td>SX1262 specificatie</td></tr>

@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Design Tokens — Presentatie "Mei MeshCore Maand"
+   Importeert website-tokens, overschrijft voor beamer-context (donker thema).
+   ========================================================================== */
+
+@import '../../css/variables.css';
+
+:root {
+  /* Presentatie forceert donker thema */
+  --color-primary: #74c69d;
+  --color-primary-light: #95d5b2;
+  --color-secondary: #b7e4c7;
+  --color-accent: #f4a261;
+  --color-bg: #1a1a2e;
+  --color-bg-alt: #22223a;
+  --color-text: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-node: #f4845f;
+  --color-signal: #48cae4;
+  --color-border: #3a3a50;
+  --color-focus: #74c69d;
+
+  /* Presentatie-specifieke tokens */
+  --slide-max-width: 1920px;
+  --slide-max-height: 1080px;
+  --slide-padding: var(--space-2xl);
+  --font-size-slide-title: 3rem;
+  --font-size-slide-body: 1.75rem;
+  --font-size-slide-subtitle: 2rem;
+  --transition-slide: 300ms ease-in-out;
+
+  /* Neon-accenten voor animaties */
+  --color-neon-green: #39ff14;
+  --color-neon-cyan: #00fff5;
+  --color-neon-glow: 0 0 10px var(--color-neon-green);
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Heltec LoRa32 V3",
+    "price": "±€20",
+    "role": "Repeater / Companion",
+    "image": null,
+    "features": ["ESP32-S3", "SX1262", "OLED display", "WiFi + BLE"],
+    "description": "De goedkoopste instap. Klein, krachtig, perfect als eerste node."
+  },
+  {
+    "name": "LilyGO T-Deck",
+    "price": "±€55",
+    "role": "Companion",
+    "image": null,
+    "features": ["ESP32-S3", "SX1262", "Keyboard", "Kleurenscherm", "Trackball"],
+    "description": "Standalone berichten sturen zonder telefoon. De wow-factor."
+  },
+  {
+    "name": "LilyGO T-Beam Supreme",
+    "price": "±€45",
+    "role": "Repeater / Room Server",
+    "image": null,
+    "features": ["ESP32-S3", "SX1262", "GPS", "18650 batterij", "WiFi + BLE"],
+    "description": "Krachtige node met GPS en grote batterij. Ideaal als vaste repeater."
+  },
+  {
+    "name": "RAK WisBlock",
+    "price": "±€35",
+    "role": "Repeater",
+    "image": null,
+    "features": ["nRF52840", "SX1262", "Modulair", "Ultra laag verbruik"],
+    "description": "Modulair systeem. Zuinig op stroom, ideaal voor zonnepaneel-setups."
+  },
+  {
+    "name": "Station G2",
+    "price": "±€70",
+    "role": "Room Server",
+    "image": null,
+    "features": ["ESP32-S3", "SX1262", "Ethernet", "PoE mogelijk"],
+    "description": "Vaste node met ethernet. Perfecte Room Server voor thuis of kantoor."
+  }
+]

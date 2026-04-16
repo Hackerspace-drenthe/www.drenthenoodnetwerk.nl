@@ -237,17 +237,17 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📏</div>
         <h4>Dipole / Whip</h4>
-        <p>De eenvoudigste antenne: een rechte staaf. Omnidirectioneel met 2–3 dBi gain. Wordt standaard meegeleverd bij de meeste LoRa-boards. Goede startoptie.</p>
+        <p>De eenvoudigste antenne. Een halfgolfdipool levert precies <strong>2,15 dBi</strong> (0 dBd) — de referentie in de radiotechniek. Een kort stompje (meegeleverd bij veel boards) haalt iets minder. Een lange whip (~40 cm) kan tot 4–5 dBi bereiken.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🔲</div>
         <h4>Ground Plane</h4>
-        <p>Een verbeterde dipole met radialen als grondvlak. Geeft 3–5 dBi gain. Heeft een metalen vlak of radialen nodig om goed te functioneren.</p>
+        <p>Een kwartgolfantenne met radialen als grondvlak. Presteert vergelijkbaar met een dipool (~2 dBi). Heeft een metalen vlak of radialen nodig om goed te functioneren.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📡</div>
         <h4>Colineaire Antenne</h4>
-        <p>Meerdere dipolen gestapeld voor hogere gain: 5–8 dBi. Het signaal wordt sterker "platgedrukt" (smallere verticale bundel). Ideaal voor vaste basisstations.</p>
+        <p>Meerdere dipolen gestapeld — lengte bepaalt de gain. Een 9 dBi colineair (bv. McGill) is al ~160 cm lang. Elke ~20 cm extra voegt ruwweg 0,1–1 dBi toe. Een omnidirectionele 15 dBi colineair is ~5,30 m lang.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🎯</div>
@@ -257,7 +257,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🦆</div>
         <h4>Rubber Duck</h4>
-        <p>Compact en draagbaar met lage gain: 1–2 dBi. Standaard op veel handheld apparaten. Geschikt voor testen en korte afstanden.</p>
+        <p>Compact en draagbaar, maar presteert iets minder dan een dipool: 0–2 dBi. Standaard op veel handheld apparaten. Geschikt voor testen en korte afstanden.</p>
       </div>
     </div>
 
@@ -267,10 +267,10 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         <tr><th>Type</th><th>Gain</th><th>Patroon</th><th>Gebruik</th><th>Prijs</th><th>Formaat</th></tr>
       </thead>
       <tbody>
-        <tr><td><strong>Rubber Duck</strong></td><td>1–2 dBi</td><td>Omni</td><td>Draagbaar, testen</td><td>€0 (bij board)</td><td>Klein (5–10 cm)</td></tr>
-        <tr><td><strong>Dipole / Whip</strong></td><td>2–3 dBi</td><td>Omni</td><td>Algemeen gebruik</td><td>€5–10</td><td>Klein (15–20 cm)</td></tr>
-        <tr><td><strong>Ground Plane</strong></td><td>3–5 dBi</td><td>Omni</td><td>Vaste repeater</td><td>€10–20</td><td>Medium (20–30 cm)</td></tr>
-        <tr><td><strong>Colineair</strong></td><td>5–8 dBi</td><td>Omni</td><td>Basisstation, hoofdknooppunt</td><td>€20–45</td><td>Groot (50–100 cm)</td></tr>
+        <tr><td><strong>Rubber Duck</strong></td><td>0–2 dBi</td><td>Omni</td><td>Draagbaar, testen</td><td>€0 (bij board)</td><td>Klein (5–10 cm)</td></tr>
+        <tr><td><strong>Lange Whip</strong></td><td>3–5 dBi</td><td>Omni</td><td>Algemeen gebruik</td><td>€5–15</td><td>Medium (~40 cm)</td></tr>
+        <tr><td><strong>Ground Plane</strong></td><td>~2 dBi</td><td>Omni</td><td>Vaste repeater</td><td>€10–20</td><td>Medium (20–30 cm)</td></tr>
+        <tr><td><strong>Colineair</strong></td><td>3–9+ dBi</td><td>Omni</td><td>Basisstation, hoofdknooppunt</td><td>€20–80</td><td>Groot (60–160+ cm)</td></tr>
         <tr><td><strong>Yagi</strong></td><td>8–12 dBi</td><td>Directioneel</td><td>Punt-naar-punt</td><td>€15–50</td><td>Groot (30–80 cm)</td></tr>
       </tbody>
     </table>
@@ -367,7 +367,7 @@ const quizQuestions = [
     question: "Welk antennetype is omnidirectioneel en wordt standaard meegeleverd bij de meeste LoRa-boards?",
     options: ["Yagi", "Colineair", "Dipole / Whip", "Panel"],
     correct: 2,
-    explanation: "De dipole/whip antenne is omnidirectioneel (360°) en wordt standaard bij de meeste LoRa-modules geleverd."
+    explanation: "De dipole/whip antenne is omnidirectioneel (360°) en wordt standaard bij de meeste LoRa-modules geleverd. Een halfgolfdipool levert 2,15 dBi."
   },
   {
     question: "Hoeveel signaalverlies veroorzaakt cross-polarisatie (verticaal vs. horizontaal)?",
@@ -389,9 +389,9 @@ const quizQuestions = [
   },
   {
     question: "Welke gain heeft een typische rubber duck antenne?",
-    options: ["5–8 dBi", "8–12 dBi", "3–5 dBi", "1–2 dBi"],
+    options: ["5–8 dBi", "8–12 dBi", "3–5 dBi", "0–2 dBi"],
     correct: 3,
-    explanation: "Een rubber duck antenne heeft slechts 1–2 dBi gain. Het is compact en draagbaar, maar heeft beperkt bereik."
+    explanation: "Een rubber duck antenne heeft slechts 0–2 dBi gain — iets minder dan een dipool. Het is compact en draagbaar, maar heeft beperkt bereik."
   },
   {
     question: "Waarom is impedantie-aanpassing belangrijk?",
@@ -419,7 +419,7 @@ const quizQuestions = [
       "Geen grondvlak nodig"
     ],
     correct: 1,
-    explanation: "Een colineaire antenne stapelt meerdere dipolen om een hogere gain te bereiken (5–8 dBi), terwijl het signaal omnidirectioneel blijft."
+    explanation: "Een colineaire antenne stapelt meerdere dipolen om een hogere gain te bereiken. De gain hangt direct af van de lengte: een 9 dBi colineair (bv. McGill) is ~160 cm lang."
   },
   {
     question: "Met welk meetinstrument kun je de VSWR van een antenne controleren?",

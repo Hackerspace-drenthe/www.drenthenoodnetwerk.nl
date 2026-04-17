@@ -112,50 +112,37 @@ export function init(container, options = {}) {
     return { el: g, bg };
   });
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const progress = elapsed / DURATION;
+  let _currentStep = -1;
 
+  function showUpTo(n) {
     roleEls.forEach((re, i) => {
-      const appStart = (i / roleEls.length) * 0.6;
-      const appProgress = Math.max(0, Math.min(1, (progress - appStart) / 0.15));
-      re.el.setAttribute('opacity', String(appProgress));
-
-      // Highlight pulse
-      const hlPhase = ((progress - 0.7) * roleEls.length + i) % roleEls.length;
-      if (progress > 0.7 && hlPhase >= 0 && hlPhase < 1) {
-        re.bg.setAttribute('stroke-width', '3');
-        re.bg.setAttribute('filter', `drop-shadow(0 0 6px ${roles[i].color})`);
+      if (i <= n) {
+        re.el.setAttribute('opacity', '1');
+        re.bg.setAttribute('stroke-width', i === n ? '3' : '2');
+        re.bg.setAttribute('filter', i === n ? `drop-shadow(0 0 6px ${roles[i].color})` : '');
       } else {
+        re.el.setAttribute('opacity', '0');
         re.bg.setAttribute('stroke-width', '2');
         re.bg.setAttribute('filter', '');
       }
     });
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      if (completeCallback) completeCallback();
-    }
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        roleEls.forEach(re => re.el.setAttribute('opacity', '1'));
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return roles.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= roles.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === roles.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
-      roleEls.forEach(re => re.el.setAttribute('opacity', '0'));
+      this.pause();
+      _currentStep = -1;
+      roleEls.forEach(re => { re.el.setAttribute('opacity', '0'); re.bg.setAttribute('filter', ''); });
     },
     destroy() { destroyed = true; this.pause(); svg.remove(); },
     onComplete(cb) { completeCallback = cb; }

@@ -102,101 +102,47 @@ export function init(container, options = {}) {
   msgLabel.textContent = '📨';
   svg.appendChild(msgLabel);
 
-  function activateNode(index) {
-    const { glow } = nodeGroups[index];
-    glow.setAttribute('opacity', '0.8');
-    if (index > 0) {
-      edges[index - 1].setAttribute('stroke', 'var(--color-neon-green, #39ff14)');
-      edges[index - 1].setAttribute('stroke-width', '3');
-    }
-    // Fade glow after 800ms
-    setTimeout(() => {
-      if (destroyed) return;
-      glow.setAttribute('opacity', '0.2');
-    }, 800 / speed);
-  }
+  let _currentStep = -1;
 
-  function animateHop(fromIdx, toIdx, onDone) {
-    if (destroyed) return;
-    const from = NODES[fromIdx];
-    const to = NODES[toIdx];
-    const duration = reducedMotion ? 50 : (600 / speed);
-    const start = performance.now();
+  function showUpTo(n) {
+    // Reset all
+    nodeGroups.forEach(({ glow }) => glow.setAttribute('opacity', '0'));
+    edges.forEach(e => { e.setAttribute('stroke', '#3a3a50'); e.setAttribute('stroke-width', '2'); });
+    packet.setAttribute('opacity', '0');
+    msgLabel.setAttribute('opacity', '0');
 
-    packet.setAttribute('opacity', '1');
-    msgLabel.setAttribute('opacity', '1');
-
-    function tick(now) {
-      if (destroyed) return;
-      const t = Math.min((now - start) / duration, 1);
-      const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-      const x = from.x + (to.x - from.x) * ease;
-      const y = from.y + (to.y - from.y) * ease;
-      packet.setAttribute('cx', x);
-      packet.setAttribute('cy', y);
-      msgLabel.setAttribute('x', x);
-      msgLabel.setAttribute('y', y - 20);
-      if (t < 1) {
-        animFrameId = requestAnimationFrame(tick);
-      } else {
-        activateNode(toIdx);
-        onDone();
+    // Activate nodes up to n
+    for (let i = 0; i <= n && i < NODES.length; i++) {
+      nodeGroups[i].glow.setAttribute('opacity', i === n ? '0.8' : '0.2');
+      if (i > 0) {
+        edges[i - 1].setAttribute('stroke', 'var(--color-neon-green, #39ff14)');
+        edges[i - 1].setAttribute('stroke-width', '3');
       }
     }
-    animFrameId = requestAnimationFrame(tick);
-  }
-
-  function runSequence() {
-    hopIndex = 0;
-    activateNode(0);
-    packet.setAttribute('cx', NODES[0].x);
-    packet.setAttribute('cy', NODES[0].y);
-
-    function nextHop() {
-      if (destroyed || hopIndex >= NODES.length - 1) {
-        packet.setAttribute('opacity', '0');
-        msgLabel.setAttribute('opacity', '0');
-        if (!destroyed && completeCallback) completeCallback();
-        return;
-      }
-      animateHop(hopIndex, hopIndex + 1, () => {
-        hopIndex++;
-        // Pause between hops
-        setTimeout(nextHop, reducedMotion ? 50 : (400 / speed));
-      });
-    }
-
-    setTimeout(nextHop, reducedMotion ? 50 : (500 / speed));
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      playing = true;
-      this.reset();
-      runSequence();
+    get totalSteps() { return NODES.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= NODES.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === NODES.length - 1 && completeCallback) completeCallback();
     },
-
+    play() { if (!destroyed) this.goToStep(0); },
     pause() {
-      playing = false;
       if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     },
-
     reset() {
       this.pause();
-      hopIndex = -1;
+      _currentStep = -1;
       nodeGroups.forEach(({ glow }) => glow.setAttribute('opacity', '0'));
       edges.forEach(e => { e.setAttribute('stroke', '#3a3a50'); e.setAttribute('stroke-width', '2'); });
       packet.setAttribute('opacity', '0');
       msgLabel.setAttribute('opacity', '0');
     },
-
-    destroy() {
-      destroyed = true;
-      this.pause();
-      svg.remove();
-    },
-
+    destroy() { destroyed = true; this.pause(); svg.remove(); },
     onComplete(cb) { completeCallback = cb; }
   };
 }

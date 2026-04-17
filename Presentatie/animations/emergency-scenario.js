@@ -165,9 +165,60 @@ export function init(container, options = {}) {
   blackout.setAttribute('opacity', '0');
   svg.appendChild(blackout);
 
-  function schedule(fn, delay) {
-    const id = setTimeout(() => { if (!destroyed) fn(); }, reducedMotion ? delay * 0.1 : delay);
-    timeouts.push(id);
+  let _currentStep = -1;
+  const TOTAL_STEPS = 4;
+
+  function showStep(n) {
+    // Reset everything first
+    towerEls.forEach(t => {
+      t.setAttribute('opacity', '0');
+      const waves = t.querySelectorAll('.signal-wave');
+      waves.forEach(w => { w.setAttribute('stroke', 'var(--color-signal, #48cae4)'); w.setAttribute('stroke-opacity', '0.45'); });
+    });
+    houseEls.forEach(h => {
+      h.setAttribute('opacity', '0');
+      const win = h.querySelector('.house-light');
+      if (win) win.setAttribute('fill', '#ffd700');
+    });
+    meshEls.forEach(el => el.setAttribute('opacity', '0'));
+    meshLines.forEach(l => l.setAttribute('stroke-opacity', '0'));
+    blackout.setAttribute('opacity', '0');
+    textOverlay.style.opacity = '0';
+
+    // Phase 0: Normal — towers and houses visible
+    if (n >= 0) {
+      towerEls.forEach(t => t.setAttribute('opacity', '1'));
+      houseEls.forEach(h => h.setAttribute('opacity', '1'));
+      setText('Alles werkt. GSM, WiFi, stroom.', 'var(--color-text, #e0e0e0)');
+    }
+
+    // Phase 1: Blackout — towers fail, lights out
+    if (n >= 1) {
+      towerEls.forEach(t => {
+        const waves = t.querySelectorAll('.signal-wave');
+        waves.forEach(w => w.setAttribute('stroke-opacity', '0'));
+      });
+      houseEls.forEach(h => {
+        const win = h.querySelector('.house-light');
+        if (win) win.setAttribute('fill', '#333');
+      });
+      blackout.setAttribute('opacity', '0.6');
+      setText('Geen bereik. Geen internet. Stilte.', '#ff6b6b');
+    }
+
+    // Phase 2: Mesh activates
+    if (n >= 2) {
+      blackout.setAttribute('opacity', '0.3');
+      meshEls.forEach(el => el.setAttribute('opacity', '1'));
+      meshLines.forEach(l => l.setAttribute('stroke-opacity', '0.7'));
+      setText('Maar dan… het mesh-netwerk!', 'var(--color-neon-green, #39ff14)');
+    }
+
+    // Phase 3: Final — mesh saves the day
+    if (n >= 3) {
+      blackout.setAttribute('opacity', '0.1');
+      setText('Het mesh-netwerk draait door. Berichten komen aan. 🔗', 'var(--color-neon-green, #39ff14)');
+    }
   }
 
   function setText(text, color) {
@@ -176,83 +227,19 @@ export function init(container, options = {}) {
     if (color) textOverlay.style.color = color;
   }
 
-  function clearText() {
-    textOverlay.style.opacity = '0';
-  }
-
   return {
-    play() {
-      if (destroyed) return;
-      this.reset();
-
-      // Phase 1: Normal — towers and houses visible (2s)
-      schedule(() => {
-        towerEls.forEach(t => t.setAttribute('opacity', '1'));
-        houseEls.forEach(h => h.setAttribute('opacity', '1'));
-        setText('Alles werkt. GSM, WiFi, stroom.', 'var(--color-text, #e0e0e0)');
-      }, 200);
-
-      // Phase 2: Blackout — towers fail, lights out (starts at 2.5s)
-      schedule(() => clearText(), 2200);
-      schedule(() => {
-        setText('⚡ Storm. Stroomuitval.', 'var(--color-accent, #f4a261)');
-        // Red flash on towers
-        towerEls.forEach(t => {
-          const waves = t.querySelectorAll('.signal-wave');
-          waves.forEach(w => { w.setAttribute('stroke', '#ff4444'); w.setAttribute('stroke-opacity', '0.8'); });
-        });
-      }, 2800);
-
-      // Towers go dark, lights off
-      schedule(() => {
-        towerEls.forEach(t => {
-          const waves = t.querySelectorAll('.signal-wave');
-          waves.forEach(w => w.setAttribute('stroke-opacity', '0'));
-        });
-        houseEls.forEach(h => {
-          const win = h.querySelector('.house-light');
-          if (win) win.setAttribute('fill', '#333');
-        });
-        blackout.setAttribute('opacity', '0.6');
-        setText('Geen bereik. Geen internet. Stilte.', '#ff6b6b');
-      }, 4000);
-
-      // Phase 3: Mesh activates (starts at 6s)
-      schedule(() => clearText(), 5800);
-      schedule(() => {
-        blackout.setAttribute('opacity', '0.3');
-        setText('Maar dan…', 'var(--color-neon-green, #39ff14)');
-      }, 6200);
-
-      // Mesh nodes light up
-      meshEls.forEach((el, i) => {
-        schedule(() => el.setAttribute('opacity', '1'), 7000 + i * 500);
-      });
-
-      // Mesh connections
-      meshLines.forEach((line, i) => {
-        schedule(() => line.setAttribute('stroke-opacity', '0.7'), 8200 + i * 400);
-      });
-
-      // Final message
-      schedule(() => {
-        blackout.setAttribute('opacity', '0.1');
-        setText('Het mesh-netwerk draait door. Berichten komen aan. 🔗', 'var(--color-neon-green, #39ff14)');
-      }, 9200);
-
-      // Complete
-      schedule(() => {
-        if (completeCallback) completeCallback();
-      }, 11000);
+    get totalSteps() { return TOTAL_STEPS; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= TOTAL_STEPS) return;
+      _currentStep = n;
+      showStep(n);
+      if (n === TOTAL_STEPS - 1 && completeCallback) completeCallback();
     },
-
-    pause() {
-      if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-    },
-
+    play() { if (!destroyed) this.goToStep(0); },
+    pause() {},
     reset() {
-      timeouts.forEach(clearTimeout);
-      timeouts = [];
+      _currentStep = -1;
       towerEls.forEach(t => {
         t.setAttribute('opacity', '0');
         const waves = t.querySelectorAll('.signal-wave');
@@ -268,13 +255,7 @@ export function init(container, options = {}) {
       blackout.setAttribute('opacity', '0');
       textOverlay.style.opacity = '0';
     },
-
-    destroy() {
-      destroyed = true;
-      this.reset();
-      wrapper.remove();
-    },
-
+    destroy() { destroyed = true; this.reset(); wrapper.remove(); },
     onComplete(cb) { completeCallback = cb; }
   };
 }

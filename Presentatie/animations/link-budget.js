@@ -162,37 +162,22 @@ export function init(container, options = {}) {
     signalLabel.setAttribute('fill', colors[idx]);
   }
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const segLen = DURATION / scenarios.length;
-    const idx = Math.min(Math.floor(elapsed / segLen), scenarios.length - 1);
-    const segProgress = (elapsed - idx * segLen) / segLen;
-
-    showScenario(idx, segProgress);
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      if (completeCallback) completeCallback();
-    }
-  }
+  let _currentStep = -1;
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        showScenario(scenarios.length - 1, 1);
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return scenarios.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= scenarios.length) return;
+      _currentStep = n;
+      showScenario(n, 1);
+      if (n === scenarios.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
+      this.pause();
+      _currentStep = -1;
       signalGroup.setAttribute('opacity', '0');
       snrText.setAttribute('opacity', '0');
       snrSubtext.setAttribute('opacity', '0');

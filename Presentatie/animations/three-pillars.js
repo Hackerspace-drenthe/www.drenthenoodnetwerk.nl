@@ -66,92 +66,36 @@ export function init(container, options = {}) {
   pillarEls.forEach(el => wrapper.appendChild(el));
   container.appendChild(wrapper);
 
-  function showPillar(el, delayMs) {
-    if (reducedMotion) {
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
-      el.querySelector('.pillar-bar').style.transform = 'scaleX(1)';
-      return;
-    }
-    setTimeout(() => {
-      if (destroyed) return;
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
-      setTimeout(() => {
-        if (destroyed) return;
-        el.querySelector('.pillar-bar').style.transform = 'scaleX(1)';
-      }, 300);
-    }, delayMs);
-  }
+  let _currentStep = -1;
 
-  function highlightPillar(name) {
-    pillarEls.forEach(el => {
-      const isTarget = name === null || el.dataset.pillar === name;
-      el.style.opacity = isTarget ? '1' : '0.3';
-      el.style.filter = isTarget ? 'none' : 'grayscale(0.8)';
-    });
-  }
-
-  function pulseLoop(timestamp) {
-    if (destroyed || !playing) return;
-    if (!startTime) startTime = timestamp;
-    const elapsed = timestamp - startTime;
-    const cycle = 9000;
-    const phase = (elapsed % cycle) / cycle;
-    const activeIndex = Math.floor(phase * 3);
-
+  function showUpTo(n) {
     pillarEls.forEach((el, i) => {
-      const localPhase = ((phase * 3) - i + 3) % 3;
-      let glow = 0;
-      let scale = 1;
-      if (i === activeIndex) {
-        const t = localPhase % 1;
-        glow = Math.sin(t * Math.PI) * 0.6;
-        scale = 1 + glow * 0.05;
+      if (i <= n) {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        el.querySelector('.pillar-bar').style.transform = 'scaleX(1)';
+        el.style.filter = 'none';
+      } else {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(40px)';
+        el.querySelector('.pillar-bar').style.transform = 'scaleX(0)';
       }
-      el.style.transform = `translateY(0) scale(${scale})`;
-      el.style.filter = glow > 0.1
-        ? `drop-shadow(0 0 ${8 + glow * 12}px ${PILLARS[i].color})`
-        : 'none';
     });
-
-    animFrameId = requestAnimationFrame(pulseLoop);
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      playing = true;
-
-      if (mode === 'slow-pulse') {
-        pillarEls.forEach(el => {
-          el.style.opacity = '1';
-          el.style.transform = 'translateY(0)';
-          el.querySelector('.pillar-bar').style.transform = 'scaleX(1)';
-        });
-        if (!reducedMotion) {
-          startTime = null;
-          animFrameId = requestAnimationFrame(pulseLoop);
-        }
-      } else {
-        pillarEls.forEach((el, i) => showPillar(el, i * 500));
-        const totalRevealTime = (pillarEls.length - 1) * 500 + 1200;
-        setTimeout(() => {
-          if (destroyed) return;
-          if (highlight !== undefined) highlightPillar(highlight);
-          if (completeCallback) completeCallback();
-        }, reducedMotion ? 100 : totalRevealTime);
-      }
+    get totalSteps() { return PILLARS.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= PILLARS.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === PILLARS.length - 1 && completeCallback) completeCallback();
     },
-
-    pause() {
-      playing = false;
-      if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-    },
-
+    play() { if (!destroyed) this.goToStep(0); },
+    pause() {},
     reset() {
-      this.pause();
-      startTime = null;
+      _currentStep = -1;
       pillarEls.forEach(el => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(40px)';
@@ -159,13 +103,7 @@ export function init(container, options = {}) {
         el.querySelector('.pillar-bar').style.transform = 'scaleX(0)';
       });
     },
-
-    destroy() {
-      destroyed = true;
-      this.pause();
-      wrapper.remove();
-    },
-
+    destroy() { destroyed = true; wrapper.remove(); },
     onComplete(cb) { completeCallback = cb; }
   };
 }

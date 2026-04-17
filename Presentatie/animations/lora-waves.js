@@ -116,35 +116,26 @@ export function init(container, options = {}) {
     { sf: 'SF12', maxR: 700, speed: 0.5, color: 'var(--color-neon-cyan, #00fff5)' }
   ];
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const phaseLen = DURATION / sfPhases.length;
-    const phaseIdx = Math.min(Math.floor(elapsed / phaseLen), sfPhases.length - 1);
-    const phase = sfPhases[phaseIdx];
-    const phaseElapsed = elapsed - phaseIdx * phaseLen;
+  let _currentStep = -1;
 
+  function showPhase(n) {
+    const phase = sfPhases[n];
     sfValue.textContent = phase.sf;
 
+    // Static wave display for this phase
     waves.forEach((w, i) => {
-      const delay = i * (800 / phase.speed);
-      const t = ((phaseElapsed - delay) % (WAVE_COUNT * 800 / phase.speed));
-      if (t < 0) { w.setAttribute('opacity', '0'); return; }
-      const progress = t / (WAVE_COUNT * 800 / phase.speed);
-      const r = progress * phase.maxR;
+      const r = ((i + 1) / WAVE_COUNT) * phase.maxR;
       w.setAttribute('rx', r);
       w.setAttribute('ry', r * 0.6);
       w.setAttribute('stroke', phase.color);
-      w.setAttribute('opacity', Math.max(0, 1 - progress));
-      w.setAttribute('stroke-width', Math.max(1, 3 * (1 - progress)));
+      w.setAttribute('opacity', String(0.6 - i * 0.08));
+      w.setAttribute('stroke-width', String(Math.max(1, 3 * (1 - i / WAVE_COUNT))));
     });
 
-    // Light up receivers when wave reaches them
+    // Light up receivers within range
     rxEls.forEach(rx => {
       const dist = rx.x - 100;
-      const waveReach = (phaseElapsed / (phaseLen * 0.8)) * phase.maxR;
-      if (waveReach >= dist) {
+      if (dist <= phase.maxR) {
         rx.el.setAttribute('opacity', '1');
         rx.el.querySelector('circle').setAttribute('fill', phase.color);
       } else {
@@ -152,39 +143,22 @@ export function init(container, options = {}) {
         rx.el.querySelector('circle').setAttribute('fill', 'var(--color-text-muted, #888)');
       }
     });
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      if (completeCallback) completeCallback();
-    }
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        // Show final state instantly
-        sfValue.textContent = 'SF12';
-        waves.forEach((w, i) => {
-          const r = (i + 1) * 100;
-          w.setAttribute('rx', r); w.setAttribute('ry', r * 0.6);
-          w.setAttribute('opacity', String(0.6 - i * 0.1));
-          w.setAttribute('stroke', 'var(--color-neon-cyan, #00fff5)');
-        });
-        rxEls.forEach(rx => {
-          rx.el.setAttribute('opacity', '1');
-          rx.el.querySelector('circle').setAttribute('fill', 'var(--color-neon-cyan, #00fff5)');
-        });
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return sfPhases.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= sfPhases.length) return;
+      _currentStep = n;
+      showPhase(n);
+      if (n === sfPhases.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
+      this.pause();
+      _currentStep = -1;
       waves.forEach(w => { w.setAttribute('rx', '0'); w.setAttribute('ry', '0'); w.setAttribute('opacity', '0'); });
       rxEls.forEach(rx => { rx.el.setAttribute('opacity', '0.3'); });
       sfValue.textContent = 'SF7';

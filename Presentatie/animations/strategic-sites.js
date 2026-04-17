@@ -119,51 +119,36 @@ export function init(container, options = {}) {
   insight.textContent = '💡 Hoog = ver bereik. Vraag toestemming, check stroomvoorziening.';
   svg.appendChild(insight);
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const progress = elapsed / DURATION;
+  let _currentStep = -1;
 
-    // Stagger reveal sites
+  function showUpTo(n) {
     siteEls.forEach((se, i) => {
-      const siteStart = (i / siteEls.length) * 0.7;
-      const siteProgress = Math.max(0, (progress - siteStart) / 0.3);
-      if (siteProgress > 0) {
-        se.el.setAttribute('opacity', String(Math.min(1, siteProgress * 2)));
-        se.range.setAttribute('r', String(se.rangeR * Math.min(1, siteProgress)));
+      if (i <= n) {
+        se.el.setAttribute('opacity', '1');
+        se.range.setAttribute('r', String(se.rangeR));
+      } else {
+        se.el.setAttribute('opacity', '0');
+        se.range.setAttribute('r', '0');
       }
     });
-
-    if (progress > 0.5) legend.setAttribute('opacity', String(Math.min(1, (progress - 0.5) * 4)));
-    if (progress > 0.8) insight.setAttribute('opacity', String(Math.min(1, (progress - 0.8) * 5)));
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      if (completeCallback) completeCallback();
-    }
+    legend.setAttribute('opacity', n >= 3 ? '1' : '0');
+    insight.setAttribute('opacity', n >= sites.length - 1 ? '1' : '0');
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        siteEls.forEach(se => {
-          se.el.setAttribute('opacity', '1');
-          se.range.setAttribute('r', String(se.rangeR));
-        });
-        legend.setAttribute('opacity', '1');
-        insight.setAttribute('opacity', '1');
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return sites.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= sites.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === sites.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
+      this.pause();
+      _currentStep = -1;
       siteEls.forEach(se => { se.el.setAttribute('opacity', '0'); se.range.setAttribute('r', '0'); });
       legend.setAttribute('opacity', '0');
       insight.setAttribute('opacity', '0');

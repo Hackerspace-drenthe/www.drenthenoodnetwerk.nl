@@ -136,89 +136,37 @@ export function init(container, options = {}) {
   adHocText.textContent = '💡 Companion kan ook tijdelijk als repeater werken (ad-hoc modus)';
   svg.appendChild(adHocText);
 
-  function schedule(fn, delay) {
-    const id = setTimeout(() => { if (!destroyed) fn(); }, reducedMotion ? 50 : delay);
-    timeouts.push(id);
-    return id;
-  }
+  let _currentStep = -1;
 
-  function showRole(index, delay) {
-    schedule(() => {
-      roleGroups[index].setAttribute('opacity', '1');
-      if (index > 0) {
-        lines[index - 1].setAttribute('opacity', '1');
-      }
-    }, delay);
-  }
-
-  function showFlow(delay) {
-    // Animate a dot from repeater → companion → room server
-    schedule(() => {
-      const points = ROLES.map(r => ({ x: r.x, y: r.y }));
-      let step = 0;
-      const dur = reducedMotion ? 100 : 500;
-
-      function moveNext() {
-        if (destroyed || step >= points.length - 1) {
-          flowDots.forEach(d => d.setAttribute('opacity', '0'));
-          return;
-        }
-        const from = points[step];
-        const to = points[step + 1];
-        const dot = flowDots[step];
-        dot.setAttribute('opacity', '0.8');
-        const start = performance.now();
-
-        function tick(now) {
-          if (destroyed) return;
-          const t = Math.min((now - start) / dur, 1);
-          dot.setAttribute('cx', from.x + (to.x - from.x) * t);
-          dot.setAttribute('cy', from.y + (to.y - from.y) * t);
-          if (t < 1) {
-            requestAnimationFrame(tick);
-          } else {
-            step++;
-            moveNext();
-          }
-        }
-        requestAnimationFrame(tick);
-      }
-      moveNext();
-    }, delay);
+  function showUpTo(n) {
+    roleGroups.forEach((g, i) => {
+      g.setAttribute('opacity', i <= n ? '1' : '0');
+      if (i <= n && i > 0) lines[i - 1].setAttribute('opacity', '1');
+    });
+    // Show ad-hoc text on last step
+    adHocText.setAttribute('opacity', n >= ROLES.length - 1 ? '1' : '0');
+    flowDots.forEach(d => d.setAttribute('opacity', '0'));
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      this.reset();
-      // Stagger: show each role card
-      ROLES.forEach((_, i) => showRole(i, i * 600));
-      // Show flow after all roles visible
-      showFlow(ROLES.length * 600 + 400);
-      // Show ad-hoc note
-      schedule(() => {
-        adHocText.setAttribute('opacity', '1');
-        if (completeCallback) completeCallback();
-      }, ROLES.length * 600 + 2000);
+    get totalSteps() { return ROLES.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= ROLES.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === ROLES.length - 1 && completeCallback) completeCallback();
     },
-
+    play() { if (!destroyed) this.goToStep(0); },
     pause() {},
-
     reset() {
-      timeouts.forEach(clearTimeout);
-      timeouts = [];
+      _currentStep = -1;
       roleGroups.forEach(g => g.setAttribute('opacity', '0'));
       lines.forEach(l => l.setAttribute('opacity', '0'));
       flowDots.forEach(d => d.setAttribute('opacity', '0'));
       adHocText.setAttribute('opacity', '0');
     },
-
-    destroy() {
-      destroyed = true;
-      this.reset();
-      svg.remove();
-    },
-
+    destroy() { destroyed = true; this.reset(); svg.remove(); },
     onComplete(cb) { completeCallback = cb; }
   };
 }

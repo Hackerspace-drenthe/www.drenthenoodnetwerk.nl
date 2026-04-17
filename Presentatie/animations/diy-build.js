@@ -247,55 +247,34 @@ export function init(container, options = {}) {
   callout.textContent = '🏭 Solderen & 3D-printen kan bij de Hackerspace — elke woensdagavond!';
   svg.appendChild(callout);
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const progress = elapsed / DURATION;
+  let _currentStep = -1;
 
-    // Reveal steps one by one
+  function showUpTo(n) {
     stepGroups.forEach((g, i) => {
-      const stepStart = (i / steps.length) * 0.8;
-      const stepProg = Math.max(0, Math.min(1, (progress - stepStart) / 0.15));
-      g.setAttribute('opacity', String(stepProg));
+      g.setAttribute('opacity', i <= n ? '1' : '0');
     });
-
-    // Progress bar
-    barFill.setAttribute('width', String(740 * Math.min(1, progress)));
-
-    // Callout at end
-    if (progress > 0.85) {
-      callout.setAttribute('opacity', String(Math.min(1, (progress - 0.85) * 7)));
-    }
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      if (completeCallback) completeCallback();
-    }
+    barFill.setAttribute('width', String(740 * ((n + 1) / steps.length)));
+    callout.setAttribute('opacity', n >= steps.length - 1 ? '1' : '0');
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        stepGroups.forEach(g => g.setAttribute('opacity', '1'));
-        barFill.setAttribute('width', '740');
-        callout.setAttribute('opacity', '1');
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return steps.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= steps.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === steps.length - 1 && completeCallback) completeCallback();
     },
-    pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
+    play() { if (!destroyed) this.goToStep(0); },
+    pause() {},
     reset() {
-      this.pause(); startTime = 0;
+      _currentStep = -1;
       stepGroups.forEach(g => g.setAttribute('opacity', '0'));
       barFill.setAttribute('width', '0');
       callout.setAttribute('opacity', '0');
     },
-    destroy() { destroyed = true; this.pause(); svg.remove(); },
+    destroy() { destroyed = true; svg.remove(); },
     onComplete(cb) { completeCallback = cb; }
   };
 }

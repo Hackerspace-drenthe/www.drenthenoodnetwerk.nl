@@ -163,54 +163,37 @@ export function init(container, options = {}) {
   stepLabels.appendChild(stepText);
   svg.appendChild(stepLabels);
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const progress = elapsed / DURATION;
+  let _currentStep = -1;
 
-    // Reveal phases
+  function showUpTo(n) {
     phases.forEach((g, i) => {
-      const start = (i / phases.length) * 0.75;
-      const phaseP = Math.max(0, Math.min(1, (progress - start) / 0.15));
-      g.setAttribute('opacity', String(phaseP));
+      g.setAttribute('opacity', i <= n ? '1' : '0');
     });
-
-    // Grow coverage in phase 4
-    if (progress > 0.6) {
-      const covP = (progress - 0.6) / 0.35;
-      const r = Math.min(200, covP * 200);
-      coverage.setAttribute('r', String(r));
-      if (covP > 0.5) coverLabel.setAttribute('opacity', String(Math.min(1, (covP - 0.5) * 4)));
-    }
-
-    // Step labels
-    if (progress > 0.85) stepLabels.setAttribute('opacity', String(Math.min(1, (progress - 0.85) * 7)));
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
+    // Grow coverage in phase 3 (last phase)
+    if (n >= 3) {
+      coverage.setAttribute('r', '200');
+      coverLabel.setAttribute('opacity', '1');
     } else {
-      if (completeCallback) completeCallback();
+      coverage.setAttribute('r', '0');
+      coverLabel.setAttribute('opacity', '0');
     }
+    stepLabels.setAttribute('opacity', n >= phases.length - 1 ? '1' : '0');
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        phases.forEach(g => g.setAttribute('opacity', '1'));
-        coverage.setAttribute('r', '200');
-        coverLabel.setAttribute('opacity', '1');
-        stepLabels.setAttribute('opacity', '1');
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return phases.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= phases.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === phases.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
+      this.pause();
+      _currentStep = -1;
       phases.forEach(g => g.setAttribute('opacity', '0'));
       coverage.setAttribute('r', '0');
       coverLabel.setAttribute('opacity', '0');

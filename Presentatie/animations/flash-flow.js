@@ -129,58 +129,39 @@ export function init(container, options = {}) {
   timeLabel.textContent = '⏱ Totale tijd: ±5 minuten';
   svg.appendChild(timeLabel);
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const progress = elapsed / DURATION;
+  let _currentStep = -1;
 
-    // Reveal steps
+  function showUpTo(n) {
     stepEls.forEach((g, i) => {
-      const start = (i / steps.length) * 0.7;
-      const p = Math.max(0, Math.min(1, (progress - start) / 0.12));
-      g.setAttribute('opacity', String(p));
+      g.setAttribute('opacity', i <= n ? '1' : '0');
     });
-
-    // Progress bar during flash step (60-85%)
-    if (progress > 0.55 && progress < 0.85) {
+    // Show progress bar on step 3+
+    if (n >= 3) {
       barGroup.setAttribute('opacity', '1');
-      const barProgress = (progress - 0.55) / 0.3;
-      barFill.setAttribute('width', String(400 * barProgress));
-      barLabel.textContent = `Firmware installeren… ${Math.round(barProgress * 100)}%`;
-    } else if (progress >= 0.85) {
-      barFill.setAttribute('width', '400');
-      barLabel.textContent = 'Firmware installeren… 100%';
-    }
-
-    // Time label
-    if (progress > 0.9) timeLabel.setAttribute('opacity', String(Math.min(1, (progress - 0.9) * 10)));
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
+      barFill.setAttribute('width', n >= 4 ? '400' : '200');
+      barLabel.textContent = n >= 4 ? 'Firmware installeren… 100%' : 'Firmware installeren… 50%';
     } else {
-      if (completeCallback) completeCallback();
+      barGroup.setAttribute('opacity', '0');
+      barFill.setAttribute('width', '0');
     }
+    // Time label on last step
+    timeLabel.setAttribute('opacity', n >= steps.length - 1 ? '1' : '0');
   }
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        stepEls.forEach(g => g.setAttribute('opacity', '1'));
-        barGroup.setAttribute('opacity', '1');
-        barFill.setAttribute('width', '400');
-        barLabel.textContent = 'Firmware installeren… 100%';
-        timeLabel.setAttribute('opacity', '1');
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return steps.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= steps.length) return;
+      _currentStep = n;
+      showUpTo(n);
+      if (n === steps.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
+      this.pause();
+      _currentStep = -1;
       stepEls.forEach(g => g.setAttribute('opacity', '0'));
       barGroup.setAttribute('opacity', '0'); barFill.setAttribute('width', '0');
       timeLabel.setAttribute('opacity', '0');

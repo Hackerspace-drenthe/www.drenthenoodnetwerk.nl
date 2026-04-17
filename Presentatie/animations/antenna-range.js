@@ -135,37 +135,22 @@ export function init(container, options = {}) {
     infoHeight.textContent = 'Hoogte: ' + (400 - tipY > 200 ? '15m (toren)' : 400 - tipY > 100 ? '5m (dak)' : '1.5m (hand)');
   }
 
-  function animate(ts) {
-    if (destroyed) return;
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const segLen = DURATION / configs.length;
-    const idx = Math.min(Math.floor(elapsed / segLen), configs.length - 1);
-    const segProgress = (elapsed - idx * segLen) / segLen;
-
-    drawAntenna(configs[idx], segProgress);
-
-    if (elapsed < DURATION) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      if (completeCallback) completeCallback();
-    }
-  }
+  let _currentStep = -1;
 
   return {
-    play() {
-      if (destroyed) return;
-      startTime = 0;
-      if (reducedMotion) {
-        drawAntenna(configs[configs.length - 1], 1);
-        if (completeCallback) completeCallback();
-        return;
-      }
-      animId = requestAnimationFrame(animate);
+    get totalSteps() { return configs.length; },
+    get currentStep() { return _currentStep; },
+    goToStep(n) {
+      if (destroyed || n < 0 || n >= configs.length) return;
+      _currentStep = n;
+      drawAntenna(configs[n], 1);
+      if (n === configs.length - 1 && completeCallback) completeCallback();
     },
+    play() { if (!destroyed) this.goToStep(0); },
     pause() { if (animId) { cancelAnimationFrame(animId); animId = null; } },
     reset() {
-      this.pause(); startTime = 0;
+      this.pause();
+      _currentStep = -1;
       antennaGroup.innerHTML = '';
       rangeCircle.setAttribute('opacity', '0');
       info.setAttribute('opacity', '0');

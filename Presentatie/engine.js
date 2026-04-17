@@ -146,7 +146,19 @@ async function loadSlide(index) {
   if (slideConfig.triggerMode === 'auto' && state.currentAnimation) {
     state.currentAnimation.play();
     state.animationPlayed = true;
+    // For auto-trigger with step-based animations, show all steps immediately
+    if (typeof state.currentAnimation.totalSteps === 'number' && state.currentAnimation.totalSteps > 0) {
+      state.currentAnimation.goToStep(state.currentAnimation.totalSteps - 1);
+    }
   }
+
+  // Step-based animations with click/sequential trigger: auto-show step 0 on slide load
+  if (slideConfig.triggerMode !== 'auto' && state.currentAnimation && typeof state.currentAnimation.totalSteps === 'number' && state.currentAnimation.totalSteps > 0) {
+    state.currentAnimation.goToStep(0);
+    state.animationPlayed = true;
+  }
+
+  updateStepDots();
 
   // Prefetch next slide
   if (index + 1 < config.slides.length) {
@@ -187,9 +199,10 @@ async function initSlideAnimation(slideConfig) {
         console.warn(`Animation ${animationName[i]}: load failed`, err);
       }
     }
-    // Set current to first for reference
+    // Set current to first for reference, sequentialStep points to next
     if (state.sequentialAnimations.length > 0) {
       state.currentAnimation = state.sequentialAnimations[0];
+      state.sequentialStep = 1;
     }
   } else {
     // Single animation
@@ -228,6 +241,34 @@ function destroyCurrentAnimation() {
 
 function handleAdvance() {
   const slideConfig = config.slides[state.currentIndex];
+  const anim = state.currentAnimation;
+
+  // Step-based animation: advance through steps
+  if (anim && typeof anim.totalSteps === 'number' && anim.totalSteps > 0) {
+    if (anim.currentStep < anim.totalSteps - 1) {
+      anim.goToStep(anim.currentStep + 1);
+      updateStepDots();
+      return;
+    }
+    // All steps shown — check if sequential mode has more animations
+    if (slideConfig.triggerMode === 'sequential' && state.sequentialStep < state.sequentialAnimations.length) {
+      const nextAnim = state.sequentialAnimations[state.sequentialStep];
+      state.currentAnimation = nextAnim;
+      state.sequentialStep++;
+      // Auto-show step 0 of next sequential animation
+      if (typeof nextAnim.totalSteps === 'number' && nextAnim.totalSteps > 0) {
+        nextAnim.goToStep(0);
+      } else {
+        nextAnim.play();
+      }
+      updateStepDots();
+      return;
+    }
+    // All done → next slide
+    goNext();
+    return;
+  }
+
   const mode = slideConfig.triggerMode || (slideConfig.animation ? 'click' : 'none');
 
   switch (mode) {
@@ -263,6 +304,13 @@ function handleAdvance() {
 }
 
 function handleRetreat() {
+  const anim = state.currentAnimation;
+  // Step-based: go back through steps
+  if (anim && typeof anim.totalSteps === 'number' && anim.currentStep > 0) {
+    anim.goToStep(anim.currentStep - 1);
+    updateStepDots();
+    return;
+  }
   goPrev();
 }
 
@@ -442,6 +490,36 @@ function updateProgress() {
     slideNumber.textContent = `${current}/${total - 1}`;
   }
   updateNavButtons();
+}
+
+function updateStepDots() {
+  const dotsEl = document.getElementById('step-dots');
+  if (!dotsEl) return;
+
+  const anim = state.currentAnimation;
+  if (!anim || typeof anim.totalSteps !== 'number' || anim.totalSteps <= 0) {
+    dotsEl.classList.remove('visible');
+    dotsEl.innerHTML = '';
+    return;
+  }
+
+  dotsEl.classList.add('visible');
+
+  // Rebuild dots if count changed
+  if (dotsEl.children.length !== anim.totalSteps) {
+    dotsEl.innerHTML = '';
+    for (let i = 0; i < anim.totalSteps; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'step-dot';
+      dotsEl.appendChild(dot);
+    }
+  }
+
+  // Update active state
+  Array.from(dotsEl.children).forEach((dot, i) => {
+    dot.classList.toggle('active', i < anim.currentStep);
+    dot.classList.toggle('current', i === anim.currentStep);
+  });
 }
 
 /* ========================================================================

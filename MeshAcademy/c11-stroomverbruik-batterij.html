@@ -203,13 +203,14 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <li><strong>Deep sleep:</strong> ~10 µA — bijna alles uit, alleen RTC-timer draait nog.</li>
     </ul>
 
-    <h3>nRF52840 power states</h3>
-    <p>De nRF52840 (gebruikt in RAK4631 WisBlock, T-Echo) is specifiek ontworpen voor laag energieverbruik:</p>
+    <h3>nRF52840 power states (MCU)</h3>
+    <p>De nRF52840 (gebruikt in RAK4631 WisBlock, T-Echo) is ontworpen voor laag energieverbruik, maar let op: dit zijn MCU-waarden zonder zware externe verbruikers:</p>
     <ul>
-      <li><strong>Active TX:</strong> ~7 mA — een fractie van de ESP32.</li>
-      <li><strong>Active RX:</strong> ~5 mA — extreem efficiënt luisteren.</li>
+      <li><strong>Active TX:</strong> ~5–8 mA (MCU/radio-core) — veel lager dan ESP32-compute in actieve modus.</li>
+      <li><strong>Active RX:</strong> ~4–6 mA — efficiënt luisteren op chipniveau.</li>
       <li><strong>Sleep:</strong> ~2 µA — vijf keer lager dan ESP32 deep sleep.</li>
     </ul>
+    <p>Belangrijk: <strong>LoRa TX op +22 dBm komt uit de SX1262 eindtrap</strong> en vraagt typisch ~120 mA. De lage nRF-waarden betekenen dus niet dat een complete node op +22 dBm met slechts enkele milliampere kan zenden.</p>
 
     <h3>LoRa radio (SX1262)</h3>
     <ul>
@@ -238,7 +239,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     </div>
 
     <h3>Verbruik per rol</h3>
-    <p>Het totale systeemverbruik wordt sterk bepaald door de <strong>rol</strong> van de node. Een repeater luistert altijd; een client kan slapen tussen berichten door.</p>
+    <p>Het totale systeemverbruik wordt sterk bepaald door de <strong>rol</strong> van de node. Een repeater luistert altijd; een client kan slapen tussen berichten door. Daarnaast tellen randmodules zwaar mee (GPS/GNSS, display, BLE, sensoren).</p>
 
     <table class="comp-table" aria-label="Gemiddeld stroomverbruik per apparaat en rol">
       <thead>
@@ -250,13 +251,13 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         <tr><td>RAK4631</td><td>Repeater</td><td>~15–20 mA</td><td>nRF52840 zeer efficiënt, radio in RX</td></tr>
         <tr><td>RAK4631</td><td>Client (sleep)</td><td class="check">~3–5 mA</td><td>Ultra-laag verbruik dankzij nRF52840</td></tr>
         <tr><td>T-Beam</td><td>Repeater + GPS</td><td class="cross">~100–130 mA</td><td>ESP32 + radio + GPS = hongerig</td></tr>
-        <tr><td>T-Echo</td><td>Client (sleep)</td><td class="check">~5–8 mA</td><td>nRF52840 + e-ink (geen continu verbruik)</td></tr>
+        <tr><td>T-Echo</td><td>Client (sleep)</td><td class="check">~5–12 mA</td><td>Sterk afhankelijk van GNSS/BLE/schermactiviteit en update-interval</td></tr>
       </tbody>
     </table>
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">🔍</span>
-      <div class="callout-text"><strong>Kernpunt:</strong> Een Heltec V3 als repeater verbruikt gemiddeld ~70–80 mA. Dezelfde Heltec als client met slaapstand: slechts ~15–20 mA. De rol bepaalt het verbruik meer dan de hardware.</div>
+      <div class="callout-text"><strong>Kernpunt:</strong> Een Heltec V3 als repeater verbruikt gemiddeld ~70–80 mA. Dezelfde Heltec als client met slaapstand: ~15–20 mA. De rol is bepalend, maar randapparatuur en duty-cycle kunnen het eindverbruik alsnog fors verhogen.</div>
     </div>
   </section>
 
@@ -348,8 +349,9 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
     <h3>Paneelkeuze</h3>
     <p>Vuistregel: het paneel moet minstens <strong>2× het dagelijks verbruik</strong> kunnen opwekken om bewolkte dagen op te vangen.</p>
     <ul>
-      <li><strong>Repeater (80 mA × 24h = 1920 mAh/dag):</strong> minimaal ~4000 mAh opwekking nodig → <strong>6W paneel</strong> is de standaard.</li>
-      <li><strong>Client (20 mA × 24h = 480 mAh/dag):</strong> een 2–3W paneel volstaat.</li>
+      <li><strong>Zuinige repeater (nRF-klasse, ~20 mA):</strong> 6W kan voldoende zijn met goede plaatsing en bufferaccu.</li>
+      <li><strong>ESP32-repeater (vaak 70–100+ mA):</strong> in de winter is 6W meestal krap; denk eerder aan 15–30W plus grotere accubuffer.</li>
+      <li><strong>Client (20 mA of lager):</strong> 2–6W kan werken, afhankelijk van duty-cycle en winterautonomie-eis.</li>
     </ul>
 
     <h3>Typische setup voor een buitennode</h3>
@@ -357,7 +359,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">☀️</div>
         <h4>Zonnepaneel</h4>
-        <p>6W (5V/6V) paneel. Groter is beter voor bewolkte periodes. Monocristallijn heeft het beste rendement.</p>
+        <p>Richtwaarde 6W (zuinige nodes), maar voor wintervaste ESP32-repeaters vaak 15–30W. Monocristallijn heeft doorgaans het beste rendement.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🔌</div>
@@ -367,7 +369,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">🔋</div>
         <h4>Batterij</h4>
-        <p>3000+ mAh 18650. Buffer voor nacht en bewolkte dagen. Twee cellen parallel (6000 mAh) voor extra marge.</p>
+        <p>Minimaal 3000+ mAh, maar in praktijk vaak 6000 mAh of meer. Voor winterzekerheid bij zwaardere nodes is een grotere pack logisch.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📦</div>
@@ -387,7 +389,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout green">
       <span class="callout-icon" aria-hidden="true">💡</span>
-      <div class="callout-text"><strong>Best practices voor plaatsing:</strong> Paneel op het zuiden gericht, 30–45° hellingshoek (optimaal voor Nederlandse breedtegraad ~52°N). Houd het paneel schoon — vuil en bladeren verlagen de opbrengst met 10–30%.</div>
+      <div class="callout-text"><strong>Best practices voor plaatsing:</strong> Zuidoriëntatie blijft meestal het best. Voor jaaropbrengst werkt 30–45° vaak goed, maar voor <strong>winterzekerheid</strong> is een steilere hoek (circa 60–90°, soms verticaal) vaak praktischer door lage zonnestand, minder vuilophoping en betere afvoer van regen/sneeuw.</div>
     </div>
 
     <h3>Wat is IP65?</h3>
@@ -419,7 +421,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">🔍</span>
-      <div class="callout-text"><strong>Samenvatting:</strong> Voor een permanente repeater in Drenthe adviseren we: 6W zonnepaneel, 2× 18650 (6000 mAh) parallel, TP4056 of beter als laadcontroller, en een IP65-behuizing. Paneel op het zuiden, 30–45° hoek.</div>
+      <div class="callout-text"><strong>Samenvatting:</strong> Dimensioneer op basis van je node. Voor zuinige repeaters kan 6W + 2×18650 werken; voor ESP32-repeaters in Drentse winter is vaak 15–30W en een grotere accubuffer nodig. Gebruik minimaal een degelijke laadcontroller, IP65-behuizing, en kies de paneelhoek op je doel: jaaropbrengst (30–45°) of winterzekerheid (steiler).</div>
     </div>
   </section>
 
@@ -453,16 +455,16 @@ const quizQuestions = [
     explanation: 'De ESP32 verbruikt ~10 µA in deep sleep — alleen de RTC-timer draait nog.'
   },
   {
-    question: 'Waarom is de nRF52840 beter voor batterijduur dan de ESP32?',
-    options: ['Hogere zendkracht', 'Veel lager stroomverbruik in actieve en slaapstand', 'Ingebouwd zonnepaneel', 'Groter intern geheugen'],
+    question: 'Waarom kan een nRF52840-node vaak langer op batterij draaien dan een ESP32-node?',
+    options: ['Hogere zendkracht', 'Lager basisverbruik, mits randapparatuur en duty-cycle ook zuinig zijn', 'Ingebouwd zonnepaneel', 'Groter intern geheugen'],
     correct: 1,
-    explanation: 'De nRF52840 verbruikt slechts ~7 mA bij TX en ~2 µA in slaapstand — veel efficiënter dan de ESP32.'
+    explanation: 'De nRF52840 heeft een lager basisverbruik, maar totaalverbruik blijft afhankelijk van LoRa-zendtijd, GNSS, display, BLE en firmware-instellingen.'
   },
   {
-    question: 'Welk formaat zonnepaneel is minimaal nodig voor een repeater-node in Drenthe?',
-    options: ['1W', '3W', '6W', '20W'],
-    correct: 2,
-    explanation: 'Een 6W paneel is de standaard voor een repeater. Het moet minstens 2× het dagverbruik opleveren, rekening houdend met beperkte zonuren.'
+    question: 'Welke uitspraak over paneelgrootte voor repeaters in Drenthe is het meest realistisch?',
+    options: ['6W is altijd genoeg voor elke repeater', 'Het hangt af van nodeverbruik: zuinige nodes kunnen met 6W, ESP32-repeaters vragen vaak 15–30W in de winter', '1W is doorgaans voldoende als je accu groot is', 'Paneelgrootte maakt niet uit als je MPPT gebruikt'],
+    correct: 1,
+    explanation: 'Er is geen one-size-fits-all: vooral in de winter bepaalt het werkelijke nodeverbruik (en de gewenste autonomie) de benodigde paneelgrootte.'
   },
   {
     question: 'Wat is de typische capaciteit van een 18650 Li-Ion cel?',
@@ -483,10 +485,10 @@ const quizQuestions = [
     explanation: 'IP65 = stofdicht (6) + beschermd tegen waterstralen uit alle richtingen (5). Geschikt voor buiten, maar niet voor onderdompeling.'
   },
   {
-    question: 'Onder welke hoek moet een zonnepaneel in Nederland geplaatst worden?',
-    options: ['0° (horizontaal)', '30–45°', '60–75°', '90° (verticaal)'],
-    correct: 1,
-    explanation: 'Voor de Nederlandse breedtegraad (~52°N) is een hellingshoek van 30–45° optimaal, gericht op het zuiden.'
+    question: 'Welke paneelhoek past het best bij winterzekerheid in Nederland?',
+    options: ['0° (horizontaal)', '30–45°', '60–90°', 'Alleen 15° werkt in de winter'],
+    correct: 2,
+    explanation: 'Voor winterbedrijf werkt vaak een steilere opstelling (ongeveer 60–90°) beter door de lage zonnestand en minder vuil/sneeuwophoping.'
   },
   {
     question: 'Hoelang gaat een 3000 mAh batterij mee bij 80 mA gemiddeld verbruik?',

@@ -354,7 +354,21 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 
     <div class="callout cyan">
       <span class="callout-icon" aria-hidden="true">🔍</span>
-      <div class="callout-text"><strong>MeshCore's aanpak:</strong> MeshCore combineert flooding en directed routing. Het eerste bericht naar een onbekende node gaat via flooding. Zodra het pad bekend is, schakelt MeshCore over naar directe routering — veel zuiniger met airtime en batterij.</div>
+      <div class="callout-text"><strong>MeshCore's aanpak:</strong> MeshCore gebruikt <strong>flooding als primaire routeringsmethode</strong>. Voor <strong>Direct Messages (DM's)</strong> en communicatie met een <strong>Room Server</strong> kan het systeem overschakelen op directed routing zodra het pad bekend is — dat bespaart airtime en batterij. Broadcast-berichten blijven altijd via flooding gaan.</div>
+    </div>
+
+    <h3>Best-effort delivery: geen TCP-garanties</h3>
+    <p>MeshCore (en Meshtastic) is een <strong>best-effort netwerkprotocol</strong> — vergelijkbaar met UDP, niet met TCP. Dit betekent:</p>
+    <ul>
+      <li><strong>Geen gegarandeerde levering:</strong> Een bericht kan verloren gaan door storingen, bereikproblemen of netwerkverzadiging.</li>
+      <li><strong>Onbetrouwbare ACKs:</strong> Zelfs als een DM aankomt, kan de bevestiging (ACK) verloren gaan op de terugweg. De verzender weet dan niet of het bericht is aangekomen.</li>
+      <li><strong>Point-and-shoot karakter:</strong> Zend een bericht en hoop dat het aankomt. Gebruik rooms of handmatige bevestigingen ("Roger, begrepen") voor belangrijke communicatie.</li>
+      <li><strong>Geen retransmissie-garantie:</strong> Anders dan TCP, dat automatisch hertransmits bij verlies, verwacht MeshCore dat de gebruiker of applicatie zelf beslist of en wanneer een bericht opnieuw verstuurd moet worden.</li>
+    </ul>
+
+    <div class="callout orange">
+      <span class="callout-icon" aria-hidden="true">🔥</span>
+      <div class="callout-text"><strong>Consequentie voor noodcommunicatie:</strong> Ga er nooit vanuit dat een bericht zeker is aangekomen, tenzij je een expliciete bevestiging hebt ontvangen. Bij cruciaal verkeer (bijv. coördinatie tijdens noodsituaties) vraag altijd om een handmatige bevestiging: "Bericht ontvangen, Roger."</div>
     </div>
   </section>
 
@@ -424,6 +438,18 @@ const quizQuestions = [
     options: ['Versleuteling van berichten', 'Overmatig airtime-verbruik en batterijverspilling', 'Het ontbreken van routeringstabellen', 'Te weinig nodes in het netwerk'],
     correct: 1,
     explanation: 'Flood control voorkomt dat overmatig doorsturen de beschikbare airtime opgebruikt en de batterijen van nodes leegtrekt.'
+  },
+  {
+    question: 'Waarom is flooding geschikt voor dynamische mesh-netwerken?',
+    options: ['Omdat het verplicht is door regelgeving', 'Omdat het geen routeringstabellen nodig heeft en automatisch aanpast bij topologieveranderingen', 'Omdat het de minste airtime verbruikt', 'Omdat het altijd de kortste route kiest'],
+    correct: 1,
+    explanation: 'Flooding past zich automatisch aan wanneer nodes bewegen, uitvallen of bijkomen — zonder dat er routeringstabellen bijgewerkt hoeven te worden.'
+  },
+  {
+    question: 'Hoe betrouwbaar is berichtlevering in MeshCore?',
+    options: ['Gegarandeerd, zoals TCP', 'Best-effort zoals UDP — berichten kunnen verloren gaan, ACKs ook', 'Alleen DM\'s zijn gegarandeerd', '100% betrouwbaar als je binnen bereik bent'],
+    correct: 1,
+    explanation: 'MeshCore is best-effort: berichten en ACKs kunnen verloren gaan door storingen, bereikproblemen of netwerkverzadiging. Gebruik handmatige bevestigingen voor kritische communicatie.'
   },
   {
     question: 'Waarom is een hop-limiet noodzakelijk?',

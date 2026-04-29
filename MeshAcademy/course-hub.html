@@ -190,6 +190,25 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 }
 .reset-btn:hover{background:rgba(255,68,102,.18);}
 
+/* ─── CREDITS ─── */
+.credits-section{
+  border-top:1px solid var(--border);padding:32px;text-align:center;
+  background:linear-gradient(180deg,var(--dark),rgba(0,229,255,.02));
+}
+.credits-section h3{
+  font-size:1.2rem;font-weight:700;color:var(--cyan);margin-bottom:16px;
+}
+.credits-list{
+  max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:10px;
+}
+.credit-item{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:.88rem;color:var(--text);flex-wrap:wrap;
+}
+.credit-role{color:var(--dim);font-weight:600;}
+.credit-name{color:var(--cyan);font-weight:600;}
+.credit-org{color:var(--dim);font-style:italic;}
+
 /* ─── FOOTER ─── */
 .site-footer{
   border-top:1px solid var(--border);padding:24px 32px;text-align:center;
@@ -330,6 +349,22 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
 <!-- RESET -->
 <section class="reset-section" aria-label="Voortgang resetten">
   <button class="reset-btn" id="btn-reset" aria-label="Alle voortgang verwijderen">🗑️ Voortgang resetten</button>
+</section>
+
+<!-- CREDITS -->
+<section class="credits-section" aria-label="Credits">
+  <h3>🏆 Credits</h3>
+  <div class="credits-list">
+    <div class="credit-item">
+      <span class="credit-role">Created by:</span>
+      <span class="credit-name">Rein Velt</span>
+      <span class="credit-org">(Hackerspace Drenthe)</span>
+    </div>
+    <div class="credit-item">
+      <span class="credit-role">Inhoudelijke aanvullingen en correcties:</span>
+      <span class="credit-name">Paul / PE1J0D</span>
+    </div>
+  </div>
 </section>
 
 <!-- FOOTER -->

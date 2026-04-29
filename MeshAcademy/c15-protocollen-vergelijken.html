@@ -361,6 +361,10 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       </div>
     </div>
 
+    <h3>GPS & Locatie</h3>
+    <p><strong>Meshtastic</strong> heeft een sterke GPS-focus en toont standaard locaties van alle nodes op een kaart. Dit werkt echter ook prima <strong>zonder GPS-hardware</strong>: je kunt handmatig een positie instellen. Voor nodes zonder GPS die niet in je contactenlijst staan, gebruikt Meshtastic een instelbare <strong>onzekerheidsstraal</strong> (bijvoorbeeld 100 km radius) om geschatte locaties weer te geven.</p>
+    <p><strong>MeshCore</strong> en <strong>Reticulum</strong> hebben GPS als optionele feature — locatiedeling is geen kernfunctionaliteit. <strong>LoRa APRS</strong> draait volledig om positietracking en vereist GPS voor zinvol gebruik.</p>
+
     <h3>Volledige vergelijkingstabel</h3>
     <div style="overflow-x:auto;">
     <table class="comp-table" aria-label="Diepgaande protocol vergelijking">
@@ -409,7 +413,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         </tr>
         <tr>
           <td><strong>Hardware</strong></td>
-          <td>ESP32 + SX1262</td>
+          <td>ESP32, nRF52840 + SX1262</td>
           <td>ESP32, nRF52, RP2040</td>
           <td>Diverse (LoRa, RPi, PC)</td>
           <td>ESP32 + LoRa 433 MHz</td>
@@ -426,7 +430,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
         <tr>
           <td><strong>GPS-tracking</strong></td>
           <td>Optioneel</td>
-          <td class="check">✓ Kernfunctie</td>
+          <td>Standaard, maar werkt ook zonder (handmatig + onzekerheidsstraal)</td>
           <td>Via applicatie</td>
           <td class="check">✓ Kernfunctie</td>
           <td class="cross">✗</td>

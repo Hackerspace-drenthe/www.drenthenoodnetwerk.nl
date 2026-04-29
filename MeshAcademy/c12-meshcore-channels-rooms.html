@@ -206,7 +206,7 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📊</div>
         <h4>Spreading Factor (SF)</h4>
-        <p>Bepaalt hoe "breed" het signaal wordt uitgesmeerd. Hogere SF = meer bereik, maar lagere snelheid.</p>
+        <p>Bepaalt hoe "breed" het signaal wordt uitgesmeerd. Hogere SF = meer bereik, maar lagere snelheid. <strong>Belangrijk: SF7 en SF8 kunnen elkaar niet horen</strong> — ze zijn orthogonaal.</p>
       </div>
       <div class="info-card">
         <div class="ic-icon" aria-hidden="true">📏</div>
@@ -224,6 +224,23 @@ a:focus-visible,button:focus-visible{outline:none;box-shadow:var(--focus-ring);}
       <span class="callout-icon" aria-hidden="true">🔍</span>
       <div class="callout-text"><strong>Kanaal-isolatie:</strong> Nodes op verschillende kanalen (andere frequentie, SF, BW of sleutel) kunnen elkaar niet horen. Ze bestaan als volledig gescheiden netwerken, zelfs als ze fysiek naast elkaar staan.</div>
     </div>
+
+    <h3>Spreading Factor orthogonaliteit</h3>
+    <p>Een cruciaal technisch detail: <strong>verschillende spreading factors kunnen elkaar niet "horen"</strong>. Een node op SF7 detecteert een SF8-signaal als willekeurige ruis — niet als data. Dit heet <em>orthogonaliteit</em>.</p>
+    <p>Praktisch betekent dit: als je netwerk op SF7 draait en iemand zet per ongeluk een node op SF8, dan zit die node volledig geïsoleerd — zelfs op dezelfde frequentie en met dezelfde sleutel.</p>
+
+    <div class="callout yellow">
+      <span class="callout-icon" aria-hidden="true">⚠️</span>
+      <div class="callout-text"><strong>Let op:</strong> Gebruik altijd exact dezelfde SF in je netwerk. Afwijkende SF zorgt voor onzichtbare isolatie en is een veelvoorkomende foutbron bij troubleshooting. <br><br><strong>Uitzondering:</strong> Geavanceerde hardware zoals de Semtech SX1302 gateway-chip kan meerdere SF's tegelijk ontvangen — maar deze hardware is prijzig (bijv. LilyGO LoRa HAT voor Raspberry Pi: ~€210+) en niet praktisch voor draagbare nodes.</div>
+    </div>
+
+    <h3>Verdieping: LoRa-berekeningen en technische achtergrond</h3>
+    <p>Voor wie dieper wil duiken in de technische achtergrond van LoRa-parameters, spreading factors en link-berekeningen:</p>
+    <ul>
+      <li><strong><a href="https://www.semtech.com/design-support/lora-calculator" target="_blank" rel="noopener">Semtech LoRa Calculator</a></strong> — officiële tool om airtime, bereik en datasnelheid te berekenen.</li>
+      <li><strong><a href="https://www.thethingsnetwork.org/docs/lorawan/spreading-factors/" target="_blank" rel="noopener">The Things Network: Spreading Factors</a></strong> — uitleg over SF, orthogonaliteit en trade-offs.</li>
+      <li><strong><a href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/" target="_blank" rel="noopener">The Things Network: RSSI en SNR</a></strong> — begrijpen hoe signaalsterkte en ruis-ratio werken.</li>
+    </ul>
 
     <h3>Berichttypen in MeshCore</h3>
     <p>Binnen een kanaal zijn er twee fundamentele manieren om berichten te versturen:</p>
@@ -402,6 +419,12 @@ const quizQuestions = [
     options: ['Alleen de frequentie', 'De combinatie van frequentie, SF, BW en kanaalsleutel', 'Het IP-adres van de node', 'De naam van de room'],
     correct: 1,
     explanation: 'Een kanaal is de combinatie van frequentie, Spreading Factor, bandbreedte én kanaalsleutel. Alle vier moeten overeenkomen om te communiceren.'
+  },
+  {
+    question: 'Wat gebeurt er als één node op SF7 draait en een andere op SF8 (maar dezelfde frequentie)?',
+    options: ['Ze kunnen elkaar perfect horen', 'Ze kunnen elkaar niet horen — verschillende SF zijn orthogonaal', 'SF8 kan SF7 wel horen, maar SF7 kan SF8 niet horen', 'Ze delen de helft van de berichten'],
+    correct: 1,
+    explanation: 'Verschillende spreading factors zijn orthogonaal: ze detecteren elkaars signalen als ruis, niet als data. Dit is een veelvoorkomende foutbron bij netwerkconfiguratie.'
   },
   {
     question: 'Wat is een Room Server in MeshCore?',

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meshcore Repeater Planning Tool — Drenthe Noodnetwerk</title>
+  <meta name="description" content="Interactieve planningtool voor het optimaliseren van Meshcore repeater-plaatsing in Drenthe">
+  
+  <!-- Base styles -->
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/base.css">
+  
+  <!-- OpenLayers CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.3.1/ol.css">
+  
+  <!-- Planning tool styles -->
+  <link rel="stylesheet" href="planning-map.css">
+  
+  <link rel="icon" href="../assets/images/favicon.png">
+</head>
+<body>
+  <!-- Skip Links for Keyboard Navigation (WCAG AAA) -->
+  <a href="#settlement-search-input" class="skip-link">Spring naar zoekfunctie</a>
+  <a href="#map" class="skip-link">Spring naar kaart</a>
+  <a href="#layer-controls" class="skip-link">Spring naar laagbediening</a>
+  
+  <!-- Header -->
+  <header class="planning-header">
+    <div class="planning-header__content">
+      <h1 class="planning-header__title">
+        <a href="../index.html">← Drenthe Noodnetwerk</a> / Repeater Planning Tool
+      </h1>
+      <div class="planning-header__actions">
+        <button id="btn-help" class="btn-icon" title="Help & Uitleg" aria-label="Help">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+          </svg>
+        </button>
+        <button id="btn-export" class="btn-secondary" title="Exporteer planning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Export
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="planning-container">
+    
+    <!-- Sidebar -->
+    <aside class="planning-sidebar">
+      
+      <!-- Settlement Search -->
+      <section class="panel panel--search">
+        <h2 class="panel__title" id="search-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          Zoek Plaats
+        </h2>
+        <div class="panel__content">
+          <div class="settlement-search" role="search">
+            <label for="settlement-search-input" class="visually-hidden">Zoek bewoonde kern in Drenthe</label>
+            <input 
+              type="search" 
+              id="settlement-search-input" 
+              class="settlement-search__input"
+              placeholder="Type plaats, dorp of stad..."
+              autocomplete="off"
+              aria-label="Zoek bewoonde kern in Drenthe"
+              aria-describedby="search-hint search-status"
+              aria-autocomplete="list"
+              aria-controls="settlement-search-results"
+              aria-expanded="false"
+              aria-activedescendant=""
+              role="combobox"
+            >
+            <div 
+              id="settlement-search-results" 
+              class="settlement-search__results" 
+              role="listbox" 
+              aria-label="Zoekresultaten voor bewoonde kernen"
+            ></div>
+            <div id="search-hint" class="settlement-search__hint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+              </svg>
+              <small>Typ om 127 locaties te doorzoeken. Gebruik pijltjestoetsen om te navigeren.</small>
+            </div>
+            <div 
+              id="search-status" 
+              class="visually-hidden" 
+              role="status" 
+              aria-live="polite" 
+              aria-atomic="true"
+            ></div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Control Panel -->
+      <section class="panel" id="layer-controls">
+        <h2 class="panel__title">Lagen</h2>
+        <div class="panel__content">
+          <div class="layer-group">
+            <label class="layer-label">
+              <input type="checkbox" id="layer-repeaters" checked>
+              <span class="layer-icon" style="background: #74c69d;"></span>
+              <span class="layer-name">Repeaters</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-companions" checked>
+              <span class="layer-icon" style="background: #48cae4;"></span>
+              <span class="layer-name">Companions</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-links">
+              <span class="layer-icon" style="background: #f4a261; height: 2px;"></span>
+              <span class="layer-name">Links (gefilterd)</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-ranges">
+              <span class="layer-icon" style="background: rgba(116, 198, 157, 0.1); border: 1px solid #74c69d;"></span>
+              <span class="layer-name">Bereik (gefilterd)</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-planned" checked>
+              <span class="layer-icon" style="background: #e76f51;"></span>
+              <span class="layer-name">Gepland</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-obstructions">
+              <span class="layer-icon" style="background: rgba(255, 152, 0, 0.3); border: 1px solid #ff9800;"></span>
+              <span class="layer-name">RF Obstructies</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-towers">
+              <span class="layer-icon" style="background: #ff6b35; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></span>
+              <span class="layer-name">Hoge Structuren</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-settlements">
+              <span class="layer-icon" style="background: #FFC107; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); border: 1px solid #FF6F00;"></span>
+              <span class="layer-name">Bewoonde Kernen</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-coverage">
+              <span class="layer-icon" style="background: radial-gradient(circle, #00ff00 0%, #ffff00 50%, #ff0000 100%);"></span>
+              <span class="layer-name">Dekking Sterkte</span>
+            </label>
+            <label class="layer-label">
+              <input type="checkbox" id="layer-nocoverage">
+              <span class="layer-icon" style="background: #ff0000; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); border: 2px solid #cc0000;"></span>
+              <span class="layer-name">Geen Dekking</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Range Factor Control -->
+      <section class="panel">
+        <h2 class="panel__title">Bereik</h2>
+        <div class="panel__content">
+          <div class="class-slider">
+            <label for="range-factor" class="slider-label">
+              Factor: <strong id="range-factor-value">60%</strong>
+            </label>
+            <input type="range" id="range-factor" min="0.4" max="1.0" value="0.6" step="0.05">
+            <div class="range-info">
+              <small style="color: var(--color-text-muted);">
+                <strong>40-50%:</strong> Conservatief · <strong>60-70%:</strong> Realistisch<br>
+                <strong>80-90%:</strong> Optimistisch · <strong>100%:</strong> Max
+              </small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Repeater Class Filter -->
+      <section class="panel">
+        <h2 class="panel__title">Classificatie</h2>
+        <div class="panel__content">
+          <div class="class-filter">
+            <div class="class-legend">
+              <div class="class-legend-item">
+                <span class="class-dot" style="background: #003f5c;"></span>
+                <span class="class-text">8: Backbone</span>
+              </div>
+              <div class="class-legend-item">
+                <span class="class-dot" style="background: #665191;"></span>
+                <span class="class-text">7-6: Betrouwbaar</span>
+              </div>
+              <div class="class-legend-item">
+                <span class="class-dot" style="background: #d45087;"></span>
+                <span class="class-text">5-4: Gemiddeld</span>
+              </div>
+              <div class="class-legend-item">
+                <span class="class-dot" style="background: #ff7c43;"></span>
+                <span class="class-text">3-2: Zwak</span>
+              </div>
+              <div class="class-legend-item">
+                <span class="class-dot" style="background: #d67000;"></span>
+                <span class="class-text">1-0: Onbetrouwbaar</span>
+              </div>
+            </div>
+            <div class="class-slider">
+              <label for="class-min" class="slider-label">
+                Min: <strong id="class-min-value">0</strong>
+              </label>
+              <input type="range" id="class-min" min="0" max="8" value="0" step="1">
+            </div>
+            <div class="class-slider">
+              <label for="class-max" class="slider-label">
+                Max: <strong id="class-max-value">8</strong>
+              </label>
+              <input type="range" id="class-max" min="0" max="8" value="8" step="1">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Planning Tools -->
+      <section class="panel">
+        <h2 class="panel__title">Tools</h2>
+        <div class="panel__content">
+          <button id="tool-add-repeater" class="btn-tool btn-tool--active">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            <span>Plaatsen</span>
+          </button>
+          <button id="tool-measure" class="btn-tool">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 3l18 18M3 3v18l18-18"/>
+            </svg>
+            <span>Meten</span>
+          </button>
+          <button id="tool-coverage" class="btn-tool">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <circle cx="12" cy="12" r="7" opacity="0.5"/>
+              <circle cx="12" cy="12" r="10" opacity="0.3"/>
+            </svg>
+            <span>Analyseren</span>
+          </button>
+          <button id="tool-clear" class="btn-tool btn-tool--danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            <span>Wissen</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Planning List -->
+      <section class="panel panel--flex">
+        <h2 class="panel__title">
+          Gepland
+          <span id="planned-count" class="badge">0</span>
+        </h2>
+        <div class="panel__content panel__content--scroll">
+          <ul id="planned-list" class="planned-list">
+            <li class="planned-list__empty">
+              Klik op de kaart om een repeater-locatie toe te voegen
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Stats Panel -->
+      <section class="panel">
+        <h2 class="panel__title">Stats</h2>
+        <div class="panel__content">
+          <dl class="stats-list">
+            <div class="stat-item">
+              <dt>Repeaters:</dt>
+              <dd id="stat-repeaters">—</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Links:</dt>
+              <dd id="stat-links">—</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Gepland:</dt>
+              <dd id="stat-planned">0</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Dekking:</dt>
+              <dd id="stat-coverage">—</dd>
+            </div>
+            <div class="stat-item">
+              <dt>Gem. afstand:</dt>
+              <dd id="stat-avg-distance">—</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- Map Container -->
+    <main class="planning-main">
+      <div id="map" class="planning-map"></div>
+      
+      <!-- Map Controls Info -->
+      <div class="map-info">
+        <div id="mouse-coords" class="map-info__coords">—</div>
+        <div id="map-status" class="map-info__status">Gereed</div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Help Modal -->
+  <div id="help-modal" class="modal" role="dialog" aria-labelledby="help-title" aria-hidden="true">
+    <div class="modal__overlay"></div>
+    <div class="modal__content">
+      <header class="modal__header">
+        <h2 id="help-title" class="modal__title">Help & Uitleg</h2>
+        <button id="btn-close-help" class="modal__close" aria-label="Sluiten">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+      <div class="modal__body">
+        <h3>Repeater Planning Tool</h3>
+        <p>
+          Deze tool helpt je bij het plannen van optimale repeater-locaties voor het Meshcore netwerk in Drenthe.
+          Je kunt bestaande infrastructuur bekijken en nieuwe locaties toevoegen met bereik-simulatie.
+        </p>
+        
+        <h4>Kaartlagen</h4>
+        <ul>
+          <li><strong>Bestaande Repeaters</strong> — Actieve repeaters in het netwerk (kleur per klasse)</li>
+          <li><strong>Companions</strong> — Client-apparaten (blauw)</li>
+          <li><strong>Bewezen Links</strong> — Geverifieerde verbindingen tussen nodes
+            <br><em>Let op: gefilterd op basis van zichtbare repeaters</em></li>
+          <li><strong>Betrouwbare Bereik</strong> — Geschatte range circles (groen gestippeld, instelbaar bereik)
+            <br><em>Let op: gefilterd op basis van zichtbare repeaters</em></li>
+          <li><strong>Geplande Locaties</strong> — Je toegevoegde repeater-planning met classificatie, hoogte en bereik</li>
+          <li><strong>RF Obstructies</strong> — Gebouwen en bossen die signalen blokkeren</li>
+          <li><strong>Hoge Structuren</strong> — Watertorens, zendmasten, kerktorens met hoogte-info (△ oranje = geschikt voor repeater)</li>
+          <li><strong>Bewoonde Kernen</strong> — Steden, plaatsen en dorpen (◆ goud/geel, grootte = inwonertal)</li>
+        </ul>
+
+        <h4>Slimme Filtering</h4>
+        <p>
+          Wanneer je de classificatie-sliders aanpast, worden automatisch ook de volgende lagen gefilterd:
+        </p>
+        <ul>
+          <li><strong>Bewezen Links</strong> — Alleen links waar beide eindpunten zichtbare repeaters zijn</li>
+          <li><strong>Betrouwbare Bereik</strong> — Alleen cirkels voor zichtbare repeaters</li>
+          <li><strong>Statistieken</strong> — Zichtbare links-teller toont aantal gefilterde verbindingen</li>
+        </ul>
+        <p>
+          <strong>Bereik berekening:</strong> De bereik-cirkels zijn instelbaar van conservatief tot
+          maximaal bewezen bereik via de slider. Standaard (60%) toont betrouwbaar bereik gebaseerd op
+          gemiddelde link-afstanden. Dit compenseert voor terrein, obstakels, en het feit dat lange links
+          vaak afhankelijk zijn van hoogte/bereik van de peer node.
+        </p>
+        <ul>
+          <li><strong>40-50%</strong> — Conservatief: gebruik voor planning met veilige marges</li>
+          <li><strong>60-70%</strong> — Realistisch: standaard, goede balans (aanbevolen)</li>
+          <li><strong>80-90%</strong> — Optimistisch: betere condities/line-of-sight</li>
+          <li><strong>100%</strong> — Maximum: toont langste bewezen link per node</li>
+        </ul>
+        <p>
+          Dit zorgt voor een schone visualisatie van specifieke netwerk-tiers zonder visuele ruis
+          van irrelevante verbindingen.
+        </p>
+
+        <h4>Repeater Classificatie</h4>
+        <p>
+          Repeaters worden ingedeeld in klassen 0-8 op basis van betrouwbaarheid, aantal links,
+          node-gewicht en bereik. Het kleurenschema gebruikt een blauw-naar-oranje spectrum
+          dat geschikt is voor mensen met rood/groen kleurenblindheid.
+        </p>
+        <ul>
+          <li><strong>Klasse 8</strong> — Backbone nodes: altijd online, hoog gewicht, veel stabiele links (donkerblauw)</li>
+          <li><strong>Klasse 7-6</strong> — Betrouwbaar: goede uptime, meerdere links (blauw-paars)</li>
+          <li><strong>Klasse 5-4</strong> — Gemiddeld: redelijke uptime, enkele links (paars-magenta)</li>
+          <li><strong>Klasse 3-2</strong> — Zwak: lage uptime, weinig links (roze-oranje)</li>
+          <li><strong>Klasse 1-0</strong> — Onbetrouwbaar: offline of geen stabiele links (oranje-bruin)</li>
+        </ul>
+        <p>
+          Gebruik de sliders om alleen repeaters van bepaalde klassen te tonen en zo
+          je planning te richten op het versterken van zwakke gebieden of het bouwen op
+          betrouwbare backbone-nodes. Links en bereik-cirkels worden automatisch gefilterd
+          om alleen verbindingen tussen zichtbare repeaters te tonen.
+        </p>
+
+        <h4>Tools</h4>
+        <ul>
+          <li><strong>Repeater Plaatsen</strong> — Klik op de kaart om een nieuwe locatie toe te voegen</li>
+          <li><strong>Afstand Meten</strong> — Meet afstanden tussen punten</li>
+          <li><strong>Dekking Analyseren</strong> — Bekijk totale netwerkdekking</li>
+          <li><strong>Wis Planning</strong> — Verwijder alle geplande locaties</li>
+        </ul>
+
+        <h4>Besturingselementen</h4>
+        <ul>
+          <li><strong>Kaart verplaatsen</strong> — Sleep met muis of gebruik pijltjestoetsen</li>
+          <li><strong>Zoom</strong> — Scrollwiel, +/- knoppen, of dubbel-klik</li>
+          <li><strong>RF Obstructies laag</strong> — Schakel de obstructie-overlay in om gebouwen, bossen en andere RF-blokkerende structuren te visualiseren voor betere planning</li>
+          <li><strong>Classificatie filter</strong> — Min/max sliders om repeater-klassen te filteren</li>
+          <li><strong>Bereik instelling</strong> — Slider om bereik-cirkels van conservatief tot max te schalen</li>
+        </ul>
+
+        <h4>Export</h4>
+        <p>
+          Gebruik de Export-knop om je planning op te slaan als JSON-bestand voor later gebruik
+          of delen met anderen.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Repeater Dialog -->
+  <div id="add-repeater-dialog" class="modal" role="dialog" aria-labelledby="add-repeater-title" aria-hidden="true">
+    <div class="modal__overlay"></div>
+    <div class="modal__content modal__content--small">
+      <header class="modal__header">
+        <h2 id="add-repeater-title" class="modal__title">Nieuwe Repeater Toevoegen</h2>
+        <button id="btn-close-add-repeater" class="modal__close" aria-label="Sluiten">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </header>
+      <div class="modal__body">
+        <form id="add-repeater-form">
+          <div class="form-group">
+            <label for="repeater-name">Naam:</label>
+            <input type="text" id="repeater-name" name="name" required placeholder="bijv. Repeater Assen">
+          </div>
+          <div class="form-group">
+            <label for="repeater-elevation">Hoogte (meter):</label>
+            <input type="number" id="repeater-elevation" name="elevation" min="0" max="500" step="0.5" required placeholder="bijv. 25">
+            <small>Hoogte boven grondniveau (antenne hoogte)</small>
+          </div>
+          <div class="form-group">
+            <label for="repeater-range">Verwacht bereik (km):</label>
+            <input type="number" id="repeater-range" name="range" min="0.5" max="50" step="0.5" value="5" required>
+            <small>Geschat bereik voor deze locatie</small>
+          </div>
+          <div class="form-group">
+            <label for="repeater-class">Geplande classificatie:</label>
+            <select id="repeater-class" name="class" required>
+              <option value="8">Klasse 8 - Backbone (altijd online, kritisch)</option>
+              <option value="7">Klasse 7 - Zeer betrouwbaar</option>
+              <option value="6" selected>Klasse 6 - Betrouwbaar</option>
+              <option value="5">Klasse 5 - Goed</option>
+              <option value="4">Klasse 4 - Gemiddeld</option>
+              <option value="3">Klasse 3 - Matig</option>
+              <option value="2">Klasse 2 - Zwak</option>
+              <option value="1">Klasse 1 - Zeer zwak</option>
+              <option value="0">Klasse 0 - Onbetrouwbaar</option>
+            </select>
+            <small>Verwachte betrouwbaarheid van deze locatie</small>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="btn-cancel-add-repeater" class="btn-secondary">Annuleren</button>
+            <button type="submit" class="btn-primary">Toevoegen</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- OpenLayers -->
+  <script src="https://cdn.jsdelivr.net/npm/ol@v10.3.1/dist/ol.js"></script>
+  
+  <!-- Planning Map Script -->
+  <script src="planning-map.js"></script>
+  
+</body>
+</html>

@@ -1,0 +1,2067 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "description": "Uitgebreide database van hoge gebouwen, torens, kerken, brandweerkazernes, ziekenhuizen en antenne locaties in Drenthe",
+    "last_updated": "2026-04-29",
+    "sources": [
+      "OpenStreetMap",
+      "Agentschap Telecom zendmastregister",
+      "Lokale monumentenregisters",
+      "Protestantse Kerk Nederland",
+      "RK Bisdom Groningen-Leeuwarden",
+      "Veiligheidsregio Drenthe",
+      "Nederlandse Zorgautoriteit"
+    ],
+    "total_structures": 120,
+    "categories": {
+      "kerktorens": 73,
+      "zendmasten": 14,
+      "watertorens": 12,
+      "brandweerkazernes": 15,
+      "ziekenhuizen": 4,
+      "overig": 2
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Assen",
+        "type": "watertoren",
+        "height_m": 48,
+        "year_built": 1928,
+        "address": "Vaart NZ, Assen",
+        "suitable_for_repeater": true,
+        "notes": "Rijksmonument, mogelijk voor antenne plaatsing",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5614, 53.0025]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Borger",
+        "type": "zendmast",
+        "height_m": 60,
+        "year_built": null,
+        "address": "Borger",
+        "suitable_for_repeater": true,
+        "notes": "Bestaande telecommunicatie mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7929, 52.9246]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Emmen",
+        "type": "watertoren",
+        "height_m": 45,
+        "year_built": 1935,
+        "address": "Emmen",
+        "suitable_for_repeater": true,
+        "notes": "Strategische locatie voor zuidoost Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9016, 52.7789]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Martinikerk Groningen",
+        "type": "kerktoren",
+        "height_m": 42,
+        "year_built": 1885,
+        "address": "Hoofdstraat, Hoogeveen",
+        "suitable_for_repeater": false,
+        "notes": "Historisch monument, beperkte toegang",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4762, 52.7224]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Meppel",
+        "type": "zendmast",
+        "height_m": 55,
+        "year_built": null,
+        "address": "Meppel",
+        "suitable_for_repeater": true,
+        "notes": "Telecom infrastructuur, mogelijk voor co-locatie",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1944, 52.6961]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Coevorden",
+        "type": "watertoren",
+        "height_m": 51,
+        "year_built": 1913,
+        "address": "Coevorden",
+        "suitable_for_repeater": true,
+        "notes": "Hoge locatie, goed zicht over omgeving",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7408, 52.6608]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Dwingeloo",
+        "type": "zendmast",
+        "height_m": 48,
+        "year_built": null,
+        "address": "Dwingeloo",
+        "suitable_for_repeater": true,
+        "notes": "Bij ASTRON radiotelescoop gebied",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3967, 52.8320]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Flat De Haar Assen",
+        "type": "flatgebouw",
+        "height_m": 38,
+        "year_built": 1960,
+        "address": "Assen-Oost",
+        "suitable_for_repeater": true,
+        "notes": "Hoog flatgebouw, geschikt voor dak-antenne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5787, 53.0047]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Beilen",
+        "type": "kerktoren",
+        "height_m": 35,
+        "year_built": 1836,
+        "address": "Beilen",
+        "suitable_for_repeater": false,
+        "notes": "Monument, waarschijnlijk geen antenne mogelijk",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5153, 52.8568]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Zuidlaren",
+        "type": "zendmast",
+        "height_m": 52,
+        "year_built": null,
+        "address": "Zuidlaren",
+        "suitable_for_repeater": true,
+        "notes": "Bestaande telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6853, 53.0935]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Rolde",
+        "type": "watertoren",
+        "height_m": 32,
+        "year_built": 1930,
+        "address": "Rolde",
+        "suitable_for_repeater": true,
+        "notes": "Centrale locatie in midden-Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6475, 52.9853]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Schoorsteen Emmtec Emmen",
+        "type": "schoorsteen",
+        "height_m": 65,
+        "year_built": 1970,
+        "address": "Industrieterrein Emmen",
+        "suitable_for_repeater": true,
+        "notes": "Hoogste structuur in regio, industrieel gebied",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8842, 52.7654]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Grote Kerk Assen",
+        "type": "kerktoren",
+        "height_m": 52,
+        "year_built": 1261,
+        "address": "Brink, Assen",
+        "suitable_for_repeater": false,
+        "notes": "Rijksmonument, 13e eeuw",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5616, 53.0010]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Emmen Centrum",
+        "type": "kerktoren",
+        "height_m": 38,
+        "year_built": 1951,
+        "address": "Hoofdstraat, Emmen",
+        "suitable_for_repeater": false,
+        "notes": "Moderne kerk, naoorlogse bouw",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8962, 52.7792]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Roden",
+        "type": "kerktoren",
+        "height_m": 44,
+        "year_built": 1776,
+        "address": "Roden",
+        "suitable_for_repeater": false,
+        "notes": "Hervormde kerk, karakteristiek voor Noordenveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4245, 53.1378]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Zuidlaren",
+        "type": "kerktoren",
+        "height_m": 39,
+        "year_built": 1882,
+        "address": "Zuidlaren",
+        "suitable_for_repeater": false,
+        "notes": "Dorpskerk met fraaie toren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6853, 53.0935]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Coevorden",
+        "type": "kerktoren",
+        "height_m": 47,
+        "year_built": 1645,
+        "address": "Kasteel, Coevorden",
+        "suitable_for_repeater": false,
+        "notes": "Bij historisch kasteel",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7408, 52.6608]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Norg",
+        "type": "kerktoren",
+        "height_m": 36,
+        "year_built": 1857,
+        "address": "Norg",
+        "suitable_for_repeater": false,
+        "notes": "Hervormde kerk",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4536, 53.0642]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Vries",
+        "type": "kerktoren",
+        "height_m": 38,
+        "year_built": 1868,
+        "address": "Vries",
+        "suitable_for_repeater": false,
+        "notes": "Dorpskerk Tynaarlo",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5739, 53.0742]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Eelde",
+        "type": "kerktoren",
+        "height_m": 34,
+        "year_built": 1874,
+        "address": "Eelde",
+        "suitable_for_repeater": false,
+        "notes": "Bij Groningen Airport",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5778, 53.1419]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Peize",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1843,
+        "address": "Peize",
+        "suitable_for_repeater": false,
+        "notes": "Dorpskerk Noordenveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4972, 53.1483]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Smilde",
+        "type": "kerktoren",
+        "height_m": 37,
+        "year_built": 1859,
+        "address": "Smilde",
+        "suitable_for_repeater": false,
+        "notes": "Herv. kerk Midden-Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4506, 52.9489]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Dwingeloo",
+        "type": "kerktoren",
+        "height_m": 33,
+        "year_built": 1860,
+        "address": "Dwingeloo",
+        "suitable_for_repeater": false,
+        "notes": "Dorp met radiotelescoop",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3697, 52.8331]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Diever",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1851,
+        "address": "Diever",
+        "suitable_for_repeater": false,
+        "notes": "Westerveld gemeente",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3239, 52.8581]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Havelte",
+        "type": "kerktoren",
+        "height_m": 34,
+        "year_built": 1873,
+        "address": "Havelte",
+        "suitable_for_repeater": false,
+        "notes": "Bij militair oefenterrein",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2361, 52.7833]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Rolde",
+        "type": "kerktoren",
+        "height_m": 35,
+        "year_built": 1852,
+        "address": "Rolde",
+        "suitable_for_repeater": false,
+        "notes": "Dorpskerk Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6475, 52.9853]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Gieten",
+        "type": "kerktoren",
+        "height_m": 36,
+        "year_built": 1868,
+        "address": "Gieten",
+        "suitable_for_repeater": false,
+        "notes": "Herv. kerk Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7639, 53.0056]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Annen",
+        "type": "kerktoren",
+        "height_m": 34,
+        "year_built": 1871,
+        "address": "Annen",
+        "suitable_for_repeater": false,
+        "notes": "Dorpskerk",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7006, 53.0619]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Gasselte",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1856,
+        "address": "Gasselte",
+        "suitable_for_repeater": false,
+        "notes": "Dorpskerk Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7897, 53.0156]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Borger",
+        "type": "kerktoren",
+        "height_m": 38,
+        "year_built": 1863,
+        "address": "Borger",
+        "suitable_for_repeater": false,
+        "notes": "Bij hunebedden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7929, 52.9246]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Odoorn",
+        "type": "kerktoren",
+        "height_m": 33,
+        "year_built": 1858,
+        "address": "Odoorn",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8539, 52.8531]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Westerbork",
+        "type": "kerktoren",
+        "height_m": 35,
+        "year_built": 1861,
+        "address": "Westerbork",
+        "suitable_for_repeater": false,
+        "notes": "Historische locatie",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6022, 52.8514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Hooghalen",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1854,
+        "address": "Hooghalen",
+        "suitable_for_repeater": false,
+        "notes": "Midden-Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5528, 52.9239]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Ruinen",
+        "type": "kerktoren",
+        "height_m": 36,
+        "year_built": 1866,
+        "address": "Ruinen",
+        "suitable_for_repeater": false,
+        "notes": "De Wolden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3494, 52.7558]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Zuidwolde",
+        "type": "kerktoren",
+        "height_m": 37,
+        "year_built": 1871,
+        "address": "Zuidwolde",
+        "suitable_for_repeater": false,
+        "notes": "De Wolden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4336, 52.6731]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren De Wijk",
+        "type": "kerktoren",
+        "height_m": 33,
+        "year_built": 1869,
+        "address": "De Wijk",
+        "suitable_for_repeater": false,
+        "notes": "De Wolden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2969, 52.6600]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Meppel Grote Kerk",
+        "type": "kerktoren",
+        "height_m": 57,
+        "year_built": 1446,
+        "address": "Grote Kerk, Meppel",
+        "suitable_for_repeater": false,
+        "notes": "Rijksmonument, hoogste kerktoren Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1942, 52.6961]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Nijeveen",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1858,
+        "address": "Nijeveen",
+        "suitable_for_repeater": false,
+        "notes": "Meppel",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1297, 52.7414]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Klazienaveen",
+        "type": "kerktoren",
+        "height_m": 34,
+        "year_built": 1898,
+        "address": "Klazienaveen",
+        "suitable_for_repeater": false,
+        "notes": "Veenkolonie kerk",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9839, 52.7239]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Nieuw-Amsterdam",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1892,
+        "address": "Nieuw-Amsterdam",
+        "suitable_for_repeater": false,
+        "notes": "Veenkolonie",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8394, 52.7097]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Schoonebeek",
+        "type": "kerktoren",
+        "height_m": 33,
+        "year_built": 1887,
+        "address": "Schoonebeek",
+        "suitable_for_repeater": false,
+        "notes": "Oliedorp",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8797, 52.6578]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Sleen",
+        "type": "kerktoren",
+        "height_m": 34,
+        "year_built": 1862,
+        "address": "Sleen",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8081, 52.7719]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Dalen",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1864,
+        "address": "Dalen",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7508, 52.6989]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Schoonoord",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1855,
+        "address": "Schoonoord",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7497, 52.8522]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Emmer-Compascuum",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1893,
+        "address": "Emmer-Compascuum",
+        "suitable_for_repeater": false,
+        "notes": "Veenkolonie",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0436, 52.8069]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Nieuw-Buinen",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1896,
+        "address": "Nieuw-Buinen",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9511, 52.9736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Buinen",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1859,
+        "address": "Buinen",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8094, 52.9514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Gasselternijveen",
+        "type": "kerktoren",
+        "height_m": 30,
+        "year_built": 1901,
+        "address": "Gasselternijveen",
+        "suitable_for_repeater": false,
+        "notes": "Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8658, 53.0047]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Exloo",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1857,
+        "address": "Exloo",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8719, 52.8842]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Anderen",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1854,
+        "address": "Anderen",
+        "suitable_for_repeater": false,
+        "notes": "Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6631, 53.0456]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Tynaarlo",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1861,
+        "address": "Tynaarlo",
+        "suitable_for_repeater": false,
+        "notes": "Tynaarlo",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5994, 53.0872]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Paterswolde",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1876,
+        "address": "Paterswolde",
+        "suitable_for_repeater": false,
+        "notes": "Tynaarlo",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5858, 53.1261]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Midlaren",
+        "type": "kerktoren",
+        "height_m": 30,
+        "year_built": 1872,
+        "address": "Midlaren",
+        "suitable_for_repeater": false,
+        "notes": "Tynaarlo",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6536, 53.1108]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Zeijen",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1855,
+        "address": "Zeijen",
+        "suitable_for_repeater": false,
+        "notes": "Tynaarlo",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5083, 53.0517]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Hollandscheveld",
+        "type": "kerktoren",
+        "height_m": 32,
+        "year_built": 1885,
+        "address": "Hollandscheveld",
+        "suitable_for_repeater": false,
+        "notes": "Hoogeveen",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5406, 52.7328]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Vledder",
+        "type": "kerktoren",
+        "height_m": 30,
+        "year_built": 1852,
+        "address": "Vledder",
+        "suitable_for_repeater": false,
+        "notes": "Westerveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2078, 52.8542]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Uffelte",
+        "type": "kerktoren",
+        "height_m": 31,
+        "year_built": 1867,
+        "address": "Uffelte",
+        "suitable_for_repeater": false,
+        "notes": "Westerveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2761, 52.7964]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Echten",
+        "type": "kerktoren",
+        "height_m": 30,
+        "year_built": 1870,
+        "address": "Echten",
+        "suitable_for_repeater": false,
+        "notes": "De Wolden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1422, 52.7106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Eext",
+        "type": "kerktoren",
+        "height_m": 30,
+        "year_built": 1853,
+        "address": "Eext",
+        "suitable_for_repeater": false,
+        "notes": "Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6467, 53.0169]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Langelo",
+        "type": "kerktoren",
+        "height_m": 29,
+        "year_built": 1856,
+        "address": "Langelo",
+        "suitable_for_repeater": false,
+        "notes": "Noordenveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4742, 53.0983]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Grolloo",
+        "type": "kerktoren",
+        "height_m": 29,
+        "year_built": 1851,
+        "address": "Grolloo",
+        "suitable_for_repeater": false,
+        "notes": "Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5886, 53.0106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Wijster",
+        "type": "kerktoren",
+        "height_m": 30,
+        "year_built": 1858,
+        "address": "Wijster",
+        "suitable_for_repeater": false,
+        "notes": "Midden-Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5194, 52.9022]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Orvelte",
+        "type": "kerktoren",
+        "height_m": 28,
+        "year_built": 1861,
+        "address": "Orvelte",
+        "suitable_for_repeater": false,
+        "notes": "Museumkerk in beschermd dorpsgezicht",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5589, 52.8831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Elp",
+        "type": "kerktoren",
+        "height_m": 29,
+        "year_built": 1857,
+        "address": "Elp",
+        "suitable_for_repeater": false,
+        "notes": "Midden-Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3228, 52.9111]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Gasteren",
+        "type": "kerktoren",
+        "height_m": 28,
+        "year_built": 1854,
+        "address": "Gasteren",
+        "suitable_for_repeater": false,
+        "notes": "Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7414, 52.9911]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Frederiksoord",
+        "type": "kerktoren",
+        "height_m": 27,
+        "year_built": 1850,
+        "address": "Frederiksoord",
+        "suitable_for_repeater": false,
+        "notes": "Historisch kolonie dorp",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2806, 52.8547]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Wilhelminaoord",
+        "type": "kerktoren",
+        "height_m": 26,
+        "year_built": 1852,
+        "address": "Wilhelminaoord",
+        "suitable_for_repeater": false,
+        "notes": "Kolonie dorp",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2656, 52.8361]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Drouwen",
+        "type": "kerktoren",
+        "height_m": 28,
+        "year_built": 1856,
+        "address": "Drouwen",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8294, 52.9736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Zweeloo",
+        "type": "kerktoren",
+        "height_m": 27,
+        "year_built": 1853,
+        "address": "Zweeloo",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7467, 52.8389]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Oosterhesselen",
+        "type": "kerktoren",
+        "height_m": 28,
+        "year_built": 1859,
+        "address": "Oosterhesselen",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6525, 52.7231]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Erica",
+        "type": "kerktoren",
+        "height_m": 29,
+        "year_built": 1891,
+        "address": "Erica",
+        "suitable_for_repeater": false,
+        "notes": "Veenkolonie, Emmen",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9269, 52.7181]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Weiteveen",
+        "type": "kerktoren",
+        "height_m": 28,
+        "year_built": 1894,
+        "address": "Weiteveen",
+        "suitable_for_repeater": false,
+        "notes": "Emmen",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0011, 52.7519]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Barger-Compascuum",
+        "type": "kerktoren",
+        "height_m": 28,
+        "year_built": 1893,
+        "address": "Barger-Compascuum",
+        "suitable_for_repeater": false,
+        "notes": "Veenkolonie, Emmen",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0264, 52.7769]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Noord-Sleen",
+        "type": "kerktoren",
+        "height_m": 27,
+        "year_built": 1860,
+        "address": "Noord-Sleen",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8086, 52.7939]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Schipborg",
+        "type": "kerktoren",
+        "height_m": 27,
+        "year_built": 1855,
+        "address": "Schipborg",
+        "suitable_for_repeater": false,
+        "notes": "Aa en Hunze",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6733, 53.0814]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Nieuw-Roden",
+        "type": "kerktoren",
+        "height_m": 26,
+        "year_built": 1908,
+        "address": "Nieuw-Roden",
+        "suitable_for_repeater": false,
+        "notes": "Noordenveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3833, 53.1544]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Tweede Exloërmond",
+        "type": "kerktoren",
+        "height_m": 26,
+        "year_built": 1897,
+        "address": "2e Exloërmond",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9317, 52.9258]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Valthermond",
+        "type": "kerktoren",
+        "height_m": 27,
+        "year_built": 1895,
+        "address": "Valthermond",
+        "suitable_for_repeater": false,
+        "notes": "Borger-Odoorn",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9272, 52.8811]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Witteveen",
+        "type": "kerktoren",
+        "height_m": 26,
+        "year_built": 1861,
+        "address": "Witteveen",
+        "suitable_for_repeater": false,
+        "notes": "Midden-Drenthe",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6342, 52.8194]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Wateren",
+        "type": "kerktoren",
+        "height_m": 25,
+        "year_built": 1854,
+        "address": "Wateren",
+        "suitable_for_repeater": false,
+        "notes": "Westerveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2875, 52.8764]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Wapse",
+        "type": "kerktoren",
+        "height_m": 25,
+        "year_built": 1856,
+        "address": "Wapse",
+        "suitable_for_repeater": false,
+        "notes": "Westerveld",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3753, 52.8067]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Nieuw-Schoonebeek",
+        "type": "kerktoren",
+        "height_m": 26,
+        "year_built": 1888,
+        "address": "Nieuw-Schoonebeek",
+        "suitable_for_repeater": false,
+        "notes": "Coevorden",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8831, 52.6628]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kerktoren Taarlo",
+        "type": "kerktoren",
+        "height_m": 25,
+        "year_built": 1857,
+        "address": "Taarlo",
+        "suitable_for_repeater": false,
+        "notes": "Tynaarlo",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6286, 53.0361]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Assen Hoofdkwartier",
+        "type": "brandweerkazerne",
+        "height_m": 18,
+        "year_built": 2015,
+        "address": "Molenstraat 5, Assen",
+        "suitable_for_repeater": true,
+        "notes": "Moderne kazerne met oefentoren, geschikt voor antenne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5531, 53.0022]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Emmen",
+        "type": "brandweerkazerne",
+        "height_m": 16,
+        "year_built": 2010,
+        "address": "Emmen",
+        "suitable_for_repeater": true,
+        "notes": "Kazerne met oefentoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8889, 52.7792]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Hoogeveen",
+        "type": "brandweerkazerne",
+        "height_m": 17,
+        "year_built": 2008,
+        "address": "Hoogeveen",
+        "suitable_for_repeater": true,
+        "notes": "Kazerne met oefentoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4819, 52.7236]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Meppel",
+        "type": "brandweerkazerne",
+        "height_m": 16,
+        "year_built": 2012,
+        "address": "Meppel",
+        "suitable_for_repeater": true,
+        "notes": "Kazerne met oefentoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1878, 52.6967]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Coevorden",
+        "type": "brandweerkazerne",
+        "height_m": 15,
+        "year_built": 2005,
+        "address": "Coevorden",
+        "suitable_for_repeater": true,
+        "notes": "Kazerne met oefentoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7456, 52.6614]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Beilen",
+        "type": "brandweerkazerne",
+        "height_m": 14,
+        "year_built": 2003,
+        "address": "Beilen",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5194, 52.8572]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Roden",
+        "type": "brandweerkazerne",
+        "height_m": 14,
+        "year_built": 2007,
+        "address": "Roden",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4269, 53.1383]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Zuidlaren",
+        "type": "brandweerkazerne",
+        "height_m": 13,
+        "year_built": 2009,
+        "address": "Zuidlaren",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6864, 53.0942]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Borger",
+        "type": "brandweerkazerne",
+        "height_m": 12,
+        "year_built": 2006,
+        "address": "Borger",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7947, 52.9253]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Klazienaveen",
+        "type": "brandweerkazerne",
+        "height_m": 13,
+        "year_built": 2004,
+        "address": "Klazienaveen",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9856, 52.7244]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Westerbork",
+        "type": "brandweerkazerne",
+        "height_m": 12,
+        "year_built": 2008,
+        "address": "Westerbork",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6036, 52.8519]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Smilde",
+        "type": "brandweerkazerne",
+        "height_m": 12,
+        "year_built": 2005,
+        "address": "Smilde",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4522, 52.9494]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Gieten",
+        "type": "brandweerkazerne",
+        "height_m": 11,
+        "year_built": 2007,
+        "address": "Gieten",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7653, 53.0061]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Ruinen",
+        "type": "brandweerkazerne",
+        "height_m": 11,
+        "year_built": 2006,
+        "address": "Ruinen",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3508, 52.7564]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brandweer Dalen",
+        "type": "brandweerkazerne",
+        "height_m": 11,
+        "year_built": 2005,
+        "address": "Dalen",
+        "suitable_for_repeater": true,
+        "notes": "Vrijwilligers kazerne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7522, 52.6994]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treant Zorggroep Assen",
+        "type": "ziekenhuis",
+        "height_m": 42,
+        "year_built": 2010,
+        "address": "Hoogeveenseweg 38, Assen",
+        "suitable_for_repeater": true,
+        "notes": "Modern ziekenhuis, meerdere hoge gebouwen, geschikt voor dakantenne",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5403, 52.9947]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treant Zorggroep Emmen",
+        "type": "ziekenhuis",
+        "height_m": 38,
+        "year_built": 2008,
+        "address": "Bargeres 2, Emmen",
+        "suitable_for_repeater": true,
+        "notes": "Modern ziekenhuis met hoge gebouwen",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9547, 52.7692]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treant Zorggroep Hoogeveen",
+        "type": "ziekenhuis",
+        "height_m": 35,
+        "year_built": 2012,
+        "address": "Hoogeveen",
+        "suitable_for_repeater": true,
+        "notes": "Modern ziekenhuis",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4606, 52.7281]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Treant Zorggroep Stadskanaal",
+        "type": "ziekenhuis",
+        "height_m": 32,
+        "year_built": 2009,
+        "address": "Stadskanaal (nabij Drenthe)",
+        "suitable_for_repeater": true,
+        "notes": "Vlakbij Drenthe grens, dekking oostelijk gebied",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9628, 52.9908]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Hoogeveen",
+        "type": "watertoren",
+        "height_m": 43,
+        "year_built": 1927,
+        "address": "Hoogeveen",
+        "suitable_for_repeater": true,
+        "notes": "Monumentale watertoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4739, 52.7253]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Meppel",
+        "type": "watertoren",
+        "height_m": 40,
+        "year_built": 1930,
+        "address": "Meppel",
+        "suitable_for_repeater": true,
+        "notes": "Monumentale watertoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1906, 52.6978]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Beilen",
+        "type": "watertoren",
+        "height_m": 38,
+        "year_built": 1926,
+        "address": "Beilen",
+        "suitable_for_repeater": true,
+        "notes": "Monumentale watertoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5169, 52.8581]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Zuidlaren",
+        "type": "watertoren",
+        "height_m": 36,
+        "year_built": 1932,
+        "address": "Zuidlaren",
+        "suitable_for_repeater": true,
+        "notes": "Monumentale watertoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6867, 53.0947]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Eelde",
+        "type": "watertoren",
+        "height_m": 35,
+        "year_built": 1929,
+        "address": "Eelde",
+        "suitable_for_repeater": true,
+        "notes": "Bij vliegveld Groningen",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5789, 53.1431]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Roden",
+        "type": "watertoren",
+        "height_m": 34,
+        "year_built": 1928,
+        "address": "Roden",
+        "suitable_for_repeater": true,
+        "notes": "Monumentale watertoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4253, 53.1392]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Klazienaveen",
+        "type": "watertoren",
+        "height_m": 33,
+        "year_built": 1925,
+        "address": "Klazienaveen",
+        "suitable_for_repeater": true,
+        "notes": "Veenkolonie watertoren",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9847, 52.7253]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Watertoren Borger",
+        "type": "watertoren",
+        "height_m": 31,
+        "year_built": 1931,
+        "address": "Borger",
+        "suitable_for_repeater": true,
+        "notes": "Bij hunebeddengebied",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7936, 52.9258]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Eelde Airport",
+        "type": "zendmast",
+        "height_m": 75,
+        "year_built": 2005,
+        "address": "Groningen Airport Eelde",
+        "suitable_for_repeater": true,
+        "notes": "Luchtvaart communicatie mast, mogelijk co-locatie",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5794, 53.1200]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Hoogeveen Noord",
+        "type": "zendmast",
+        "height_m": 58,
+        "year_built": 2008,
+        "address": "Hoogeveen",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4786, 52.7336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Emmen Zuid",
+        "type": "zendmast",
+        "height_m": 62,
+        "year_built": 2010,
+        "address": "Emmen Zuid",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9014, 52.7681]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Klazienaveen",
+        "type": "zendmast",
+        "height_m": 54,
+        "year_built": 2007,
+        "address": "Klazienaveen",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast veenkoloniën",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9869, 52.7267]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Coevorden Zuid",
+        "type": "zendmast",
+        "height_m": 56,
+        "year_built": 2009,
+        "address": "Coevorden",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7439, 52.6542]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Westerbork",
+        "type": "zendmast",
+        "height_m": 51,
+        "year_built": 2006,
+        "address": "Westerbork",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6044, 52.8547]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Gieten",
+        "type": "zendmast",
+        "height_m": 49,
+        "year_built": 2008,
+        "address": "Gieten",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7664, 53.0081]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Smilde",
+        "type": "zendmast",
+        "height_m": 50,
+        "year_built": 2007,
+        "address": "Smilde",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4531, 52.9514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Vries",
+        "type": "zendmast",
+        "height_m": 47,
+        "year_built": 2009,
+        "address": "Vries",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5753, 53.0756]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zendmast Nieuw-Buinen",
+        "type": "zendmast",
+        "height_m": 53,
+        "year_built": 2008,
+        "address": "Nieuw-Buinen",
+        "suitable_for_repeater": true,
+        "notes": "Telecom mast veenkoloniën",
+        "verified": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9528, 52.9753]
+      }
+    }
+  ]
+}

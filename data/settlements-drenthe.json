@@ -1,0 +1,1663 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "description": "Volledige database van alle bewoonde plaatsen in Drenthe",
+    "last_updated": "2026-04-29",
+    "source": "OpenStreetMap, CBS, Kadaster BAG",
+    "total_settlements": 127,
+    "coverage": "Alle 12 gemeenten in Drenthe"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Assen",
+        "type": "stad",
+        "population": 68000,
+        "municipality": "Assen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5627, 53.0005]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Emmen",
+        "type": "stad",
+        "population": 57000,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8958, 52.7792]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hoogeveen",
+        "type": "stad",
+        "population": 37000,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4762, 52.7224]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Meppel",
+        "type": "stad",
+        "population": 34000,
+        "municipality": "Meppel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1944, 52.6961]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Coevorden",
+        "type": "plaats",
+        "population": 14000,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7408, 52.6608]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zuidlaren",
+        "type": "plaats",
+        "population": 10500,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6853, 53.0935]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Beilen",
+        "type": "plaats",
+        "population": 11000,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5153, 52.8568]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Roden",
+        "type": "plaats",
+        "population": 12000,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4245, 53.1378]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Klazienaveen",
+        "type": "plaats",
+        "population": 10000,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9839, 52.7239]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Borger",
+        "type": "dorp",
+        "population": 4500,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7929, 52.9246]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rolde",
+        "type": "dorp",
+        "population": 4000,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6475, 52.9853]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gieten",
+        "type": "dorp",
+        "population": 6000,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7639, 53.0056]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Vries",
+        "type": "dorp",
+        "population": 4800,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5739, 53.0742]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eelde",
+        "type": "dorp",
+        "population": 7000,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5778, 53.1419]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Peize",
+        "type": "dorp",
+        "population": 3500,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4972, 53.1483]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Norg",
+        "type": "dorp",
+        "population": 3800,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4536, 53.0642]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Smilde",
+        "type": "dorp",
+        "population": 4500,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4506, 52.9489]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dwingeloo",
+        "type": "dorp",
+        "population": 2700,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3697, 52.8331]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Diever",
+        "type": "dorp",
+        "population": 1700,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3239, 52.8581]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Havelte",
+        "type": "dorp",
+        "population": 3500,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2361, 52.7833]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Vledder",
+        "type": "dorp",
+        "population": 1300,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2078, 52.8542]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Oosterhesselen",
+        "type": "dorp",
+        "population": 2800,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6525, 52.7231]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dalen",
+        "type": "dorp",
+        "population": 2400,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7508, 52.6989]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Schoonebeek",
+        "type": "dorp",
+        "population": 3600,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8797, 52.6578]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuw-Amsterdam",
+        "type": "dorp",
+        "population": 2800,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8394, 52.7097]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuw-Dordrecht",
+        "type": "dorp",
+        "population": 2000,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9128, 52.7036]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Emmer-Compascuum",
+        "type": "dorp",
+        "population": 9000,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0436, 52.8069]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Odoorn",
+        "type": "dorp",
+        "population": 2200,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8539, 52.8531]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Exloo",
+        "type": "dorp",
+        "population": 1400,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8719, 52.8842]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zweelo",
+        "type": "dorp",
+        "population": 1500,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7331, 52.8694]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gasselte",
+        "type": "dorp",
+        "population": 2500,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7897, 53.0156]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gasselternijveen",
+        "type": "dorp",
+        "population": 1600,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8658, 53.0047]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Annen",
+        "type": "dorp",
+        "population": 6500,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7006, 53.0619]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Anderen",
+        "type": "dorp",
+        "population": 2200,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6631, 53.0456]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eext",
+        "type": "dorp",
+        "population": 1800,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6467, 53.0169]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuw-Roden",
+        "type": "dorp",
+        "population": 3500,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3833, 53.1544]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ruinen",
+        "type": "dorp",
+        "population": 4500,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3494, 52.7558]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "De Wijk",
+        "type": "dorp",
+        "population": 2800,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2969, 52.6600]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zuidwolde",
+        "type": "dorp",
+        "population": 4800,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4336, 52.6731]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elim",
+        "type": "dorp",
+        "population": 1500,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5503, 52.7092]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fluitenberg",
+        "type": "dorp",
+        "population": 1200,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4428, 52.6978]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pesse",
+        "type": "dorp",
+        "population": 500,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3372, 52.7817]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Westerbork",
+        "type": "dorp",
+        "population": 4700,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6022, 52.8514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hooghalen",
+        "type": "dorp",
+        "population": 3500,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5528, 52.9239]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Orvelte",
+        "type": "dorp",
+        "population": 320,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5589, 52.8831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Witteveen",
+        "type": "dorp",
+        "population": 1100,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6342, 52.8194]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wijster",
+        "type": "dorp",
+        "population": 1800,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5194, 52.9022]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Drouwen",
+        "type": "dorp",
+        "population": 1250,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8294, 52.9736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bronneger",
+        "type": "dorp",
+        "population": 850,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8347, 52.9442]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Buinen",
+        "type": "dorp",
+        "population": 3400,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8094, 52.9514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Valthe",
+        "type": "dorp",
+        "population": 680,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9028, 52.8669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Klijndijk",
+        "type": "dorp",
+        "population": 580,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9481, 52.8944]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "1e Exloërmond",
+        "type": "dorp",
+        "population": 2100,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9094, 52.9114]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "2e Exloërmond",
+        "type": "dorp",
+        "population": 1400,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9317, 52.9258]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Valthermond",
+        "type": "dorp",
+        "population": 2800,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9272, 52.8811]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zandpol",
+        "type": "dorp",
+        "population": 450,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9686, 52.9019]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuw-Buinen",
+        "type": "dorp",
+        "population": 4200,
+        "municipality": "Borger-Odoorn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9511, 52.9736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ter Apel",
+        "type": "dorp",
+        "population": 8500,
+        "municipality": "Westerwolde (Groningen)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0628, 52.8769]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bargeres",
+        "type": "dorp",
+        "population": 720,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9536, 52.7669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Weiteveen",
+        "type": "dorp",
+        "population": 1900,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0011, 52.7519]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zwartemeer",
+        "type": "dorp",
+        "population": 1600,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0517, 52.7339]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Roswinkel",
+        "type": "dorp",
+        "population": 1100,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9797, 52.7861]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Erica",
+        "type": "dorp",
+        "population": 10000,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9269, 52.7181]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuw-Weerdinge",
+        "type": "dorp",
+        "population": 2400,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9889, 52.8336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Weerdinge",
+        "type": "dorp",
+        "population": 1650,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9669, 52.8494]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Klazienaveen-Noord",
+        "type": "dorp",
+        "population": 1800,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9917, 52.7506]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Barger-Oosterveld",
+        "type": "dorp",
+        "population": 3200,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9481, 52.7942]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Barger-Compascuum",
+        "type": "dorp",
+        "population": 5500,
+        "municipality": "Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0264, 52.7769]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zwinderen",
+        "type": "dorp",
+        "population": 1250,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6947, 52.6703]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sleen",
+        "type": "dorp",
+        "population": 2500,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8081, 52.7719]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Schoonoord",
+        "type": "dorp",
+        "population": 2100,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7497, 52.8522]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zweeloo",
+        "type": "dorp",
+        "population": 1100,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7467, 52.8389]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Noord-Sleen",
+        "type": "dorp",
+        "population": 1800,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8086, 52.7939]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Erm",
+        "type": "dorp",
+        "population": 950,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7522, 52.7778]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuw-Schoonebeek",
+        "type": "dorp",
+        "population": 1800,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8831, 52.6628]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Geesbrug",
+        "type": "dorp",
+        "population": 850,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7156, 52.6936]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dalerpeel",
+        "type": "dorp",
+        "population": 650,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7847, 52.7058]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wachtum",
+        "type": "dorp",
+        "population": 550,
+        "municipality": "Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8289, 52.7411]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Papenvoort",
+        "type": "buurtschap",
+        "population": 350,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6753, 53.0081]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Schipborg",
+        "type": "dorp",
+        "population": 1100,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6733, 53.0814]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ekehaar",
+        "type": "buurtschap",
+        "population": 280,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7236, 53.0281]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Grolloo",
+        "type": "dorp",
+        "population": 900,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5886, 53.0106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gasteren",
+        "type": "dorp",
+        "population": 1050,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7414, 52.9911]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Marsdijk",
+        "type": "buurtschap",
+        "population": 420,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7544, 53.0325]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Oudemolen",
+        "type": "buurtschap",
+        "population": 350,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7111, 53.0539]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bonnerveen",
+        "type": "buurtschap",
+        "population": 380,
+        "municipality": "Aa en Hunze"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.8869, 53.0247]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Paterswolde",
+        "type": "dorp",
+        "population": 3800,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5858, 53.1261]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tynaarlo",
+        "type": "dorp",
+        "population": 2900,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5994, 53.0872]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zeijen",
+        "type": "dorp",
+        "population": 1150,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5083, 53.0517]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Taarlo",
+        "type": "dorp",
+        "population": 880,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6286, 53.0361]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eelderwolde",
+        "type": "dorp",
+        "population": 1600,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6089, 53.1544]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bunne",
+        "type": "buurtschap",
+        "population": 320,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5519, 53.0506]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Midlaren",
+        "type": "dorp",
+        "population": 2200,
+        "municipality": "Tynaarlo"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.6536, 53.1108]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Den Ham",
+        "type": "dorp",
+        "population": 1500,
+        "municipality": "Meppel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1678, 52.7106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nijeveen",
+        "type": "dorp",
+        "population": 3200,
+        "municipality": "Meppel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1297, 52.7414]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rogat",
+        "type": "dorp",
+        "population": 1100,
+        "municipality": "Meppel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2172, 52.7178]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Koekange",
+        "type": "dorp",
+        "population": 1900,
+        "municipality": "Meppel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2511, 52.7289]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuwlande",
+        "type": "dorp",
+        "population": 1300,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5675, 52.6939]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Nieuweroord",
+        "type": "dorp",
+        "population": 900,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4958, 52.6739]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hollandscheveld",
+        "type": "dorp",
+        "population": 5800,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5406, 52.7328]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tiendeveen",
+        "type": "dorp",
+        "population": 1400,
+        "municipality": "Hoogeveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4914, 52.7456]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Geelbroek",
+        "type": "buurtschap",
+        "population": 250,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5822, 52.8722]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Elp",
+        "type": "dorp",
+        "population": 1600,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3228, 52.9111]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Oranje",
+        "type": "buurtschap",
+        "population": 380,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4658, 52.9278]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Drijber",
+        "type": "dorp",
+        "population": 850,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2892, 52.8922]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Uffelte",
+        "type": "dorp",
+        "population": 1500,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2761, 52.7964]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Spier",
+        "type": "dorp",
+        "population": 750,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2422, 52.9461]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Frederiksoord",
+        "type": "dorp",
+        "population": 1200,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2806, 52.8547]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wilhelminaoord",
+        "type": "dorp",
+        "population": 900,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2656, 52.8361]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wapse",
+        "type": "dorp",
+        "population": 750,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3753, 52.8067]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wittelte",
+        "type": "dorp",
+        "population": 550,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1906, 52.8336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Doldersum",
+        "type": "dorp",
+        "population": 450,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2106, 52.8831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lhee",
+        "type": "buurtschap",
+        "population": 280,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4472, 52.8919]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lheebroek",
+        "type": "buurtschap",
+        "population": 320,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4617, 52.8786]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Laaghalerveen",
+        "type": "buurtschap",
+        "population": 240,
+        "municipality": "Midden-Drenthe"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.5772, 52.9028]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Donderen",
+        "type": "buurtschap",
+        "population": 290,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3897, 53.0919]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Langelo",
+        "type": "dorp",
+        "population": 950,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4742, 53.0983]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Roderesch",
+        "type": "buurtschap",
+        "population": 320,
+        "municipality": "Noordenveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.4506, 53.1225]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Alteveer",
+        "type": "buurtschap",
+        "population": 180,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3747, 52.6928]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Linde",
+        "type": "buurtschap",
+        "population": 220,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3578, 52.7436]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Meppen",
+        "type": "dorp",
+        "population": 780,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3619, 52.6858]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Echten",
+        "type": "dorp",
+        "population": 1400,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1422, 52.7106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kolderveen",
+        "type": "buurtschap",
+        "population": 160,
+        "municipality": "De Wolden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3875, 52.7167]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Dieverbrug",
+        "type": "buurtschap",
+        "population": 280,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.3419, 52.8436]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zorgvlied",
+        "type": "buurtschap",
+        "population": 190,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2833, 52.8194]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Wateren",
+        "type": "dorp",
+        "population": 580,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.2875, 52.8764]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Vledderveen",
+        "type": "buurtschap",
+        "population": 240,
+        "municipality": "Westerveld"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.1939, 52.8703]
+      }
+    }
+  ]
+}

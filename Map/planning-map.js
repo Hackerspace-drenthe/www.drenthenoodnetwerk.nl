@@ -929,8 +929,11 @@
       });
 
       const highlightStyle = new ol.style.Style({
-        image: new ol.style.Circle({
+        image: new ol.style.RegularShape({
+          points: 5,
           radius: 20,
+          radius2: 8, // Star inner radius
+          angle: 0,
           stroke: new ol.style.Stroke({
             color: '#2d6a4f',
             width: 3
@@ -962,9 +965,11 @@
       let pulseCount = 0;
       const pulseInterval = setInterval(() => {
         const radius = 20 + Math.sin(pulseCount * 0.5) * 5;
+        const radius2 = 8 + Math.sin(pulseCount * 0.5) * 2;
         const opacity = 0.3 + Math.sin(pulseCount * 0.5) * 0.2;
         
         style.getImage().setRadius(radius);
+        style.getImage().setRadius2(radius2);
         style.getImage().getFill().setColor(`rgba(45, 106, 79, ${opacity})`);
         
         feature.changed();
@@ -1152,33 +1157,40 @@
         data: props
       });
 
-      // Color based on type and suitability
+      // Color and icon based on type and suitability
       let color = props.suitable_for_repeater ? '#ff6b35' : '#888';
+      let iconType = getTowerIconType(props.type);
       
-      // Create triangle marker for towers
-      point.setStyle(createTowerStyle(color, props.height_m));
+      // Create marker for towers with appropriate icon
+      point.setStyle(createTowerStyle(color, props.height_m, iconType));
       source.addFeature(point);
     });
 
     // Add popup interaction
     addPopupInteraction();
   }
+  
+  /**
+   * Get appropriate icon type for tower type
+   */
+  function getTowerIconType(towerType) {
+    const iconMap = {
+      'watertoren': ICON_TYPES.HEXAGON,      // Water tower
+      'zendmast': ICON_TYPES.ANTENNA,        // Transmission tower
+      'kerktoren': ICON_TYPES.STAR,          // Church tower
+      'flatgebouw': ICON_TYPES.BUILDING,     // Apartment building
+      'schoorsteen': ICON_TYPES.TRIANGLE     // Chimney
+    };
+    return iconMap[towerType] || ICON_TYPES.TOWER;
+  }
 
-  function createTowerStyle(color, height) {
+  function createTowerStyle(color, height, iconType = ICON_TYPES.TOWER) {
     // Size based on height (higher = larger marker)
     const size = Math.min(8 + height / 10, 16);
     
-    return new ol.style.Style({
-      image: new ol.style.RegularShape({
-        points: 3,
-        radius: size,
-        fill: new ol.style.Fill({ color: color }),
-        stroke: new ol.style.Stroke({
-          color: '#fff',
-          width: 2
-        }),
-        rotation: 0
-      })
+    return createIconStyle(iconType, color, size, {
+      strokeColor: '#fff',
+      strokeWidth: 2
     });
   }
 
@@ -1213,37 +1225,34 @@
         data: props
       });
 
-      // Color and size based on settlement type and population
-      let color, radius;
+      // Color, size, and icon based on settlement type and population
+      let color, radius, iconType;
       if (props.type === 'stad') {
         color = '#FFC107'; // Amber/gold for cities
         radius = 8;
+        iconType = ICON_TYPES.OCTAGON; // 8-sided for cities
       } else if (props.type === 'plaats') {
         color = '#FFE082'; // Light amber for towns
         radius = 6;
+        iconType = ICON_TYPES.HEXAGON; // 6-sided for towns
       } else if (props.type === 'dorp') {
         color = '#FFF59D'; // Very light yellow for villages
         radius = 4;
+        iconType = ICON_TYPES.PENTAGON; // 5-sided for villages
       } else if (props.type === 'buurtschap') {
         color = '#FFFDE7'; // Extremely light yellow for hamlets
         radius = 3;
+        iconType = ICON_TYPES.DIAMOND; // Diamond for hamlets
       } else {
         color = '#FFF59D'; // Default to village color
         radius = 4;
+        iconType = ICON_TYPES.SQUARE;
       }
 
-      // Create square marker for settlements
-      point.setStyle(new ol.style.Style({
-        image: new ol.style.RegularShape({
-          points: 4,
-          radius: radius,
-          angle: Math.PI / 4, // Rotate 45° to make diamond/square
-          fill: new ol.style.Fill({ color: color }),
-          stroke: new ol.style.Stroke({
-            color: '#FF6F00',
-            width: 1.5
-          })
-        })
+      // Create marker for settlements with appropriate icon
+      point.setStyle(createIconStyle(iconType, color, radius, {
+        strokeColor: '#FF6F00',
+        strokeWidth: 1.5
       }));
 
       source.addFeature(point);
@@ -1393,7 +1402,7 @@
           data: props
         });
 
-        // Red warning marker - larger and more prominent
+        // Warning marker with alert icon - larger and more prominent
         let radius;
         if (props.type === 'stad') {
           radius = 10;
@@ -1403,20 +1412,12 @@
           radius = 6;
         }
 
-        point.setStyle(new ol.style.Style({
-          image: new ol.style.RegularShape({
-            points: 4,
-            radius: radius,
-            angle: Math.PI / 4,
-            fill: new ol.style.Fill({ color: '#ff0000' }),
-            stroke: new ol.style.Stroke({
-              color: '#cc0000',
-              width: 2
-            })
-          }),
-          zIndex: 100 // Always on top
+        point.setStyle(createIconStyle(ICON_TYPES.ALERT, '#ff0000', radius, {
+          strokeColor: '#cc0000',
+          strokeWidth: 2
         }));
-
+        
+        point.setProperties({ zIndex: 100 }); // Always on top
         source.addFeature(point);
       }
     });
@@ -1493,7 +1494,25 @@
 
       const color = isFresh ? getClassColor(classification) : '#555';
       const radius = 6 + classification * 0.5; // Size increases with class
-      feature.setStyle(createNodeStyle(color, radius));
+      
+      // Use different icon types based on classification
+      let iconType;
+      if (classification >= 7) {
+        iconType = ICON_TYPES.STAR; // High-class backbone nodes
+      } else if (classification >= 5) {
+        iconType = ICON_TYPES.HEXAGON; // Good/reliable nodes
+      } else if (classification >= 3) {
+        iconType = ICON_TYPES.PENTAGON; // Average nodes
+      } else if (classification >= 1) {
+        iconType = ICON_TYPES.CIRCLE; // Low-class nodes
+      } else {
+        iconType = ICON_TYPES.CROSS; // Unreliable nodes
+      }
+      
+      feature.setStyle(createIconStyle(iconType, color, radius, {
+        strokeColor: '#fff',
+        strokeWidth: isFresh ? 2 : 1
+      }));
       source.addFeature(feature);
     });
 
@@ -1524,7 +1543,12 @@
         data: node
       });
 
-      feature.setStyle(createNodeStyle(isFresh ? '#48cae4' : '#444', 6));
+      // Companions use diamond shape to distinguish from repeaters
+      const color = isFresh ? '#48cae4' : '#444';
+      feature.setStyle(createIconStyle(ICON_TYPES.DIAMOND, color, 6, {
+        strokeColor: '#fff',
+        strokeWidth: isFresh ? 2 : 1
+      }));
       source.addFeature(feature);
     });
   }
@@ -1757,7 +1781,25 @@
 
     const color = getClassColor(node.classification);
     const radius = 7 + node.classification * 0.5; // Same sizing as real repeaters
-    feature.setStyle(createNodeStyle(color, radius));
+    
+    // Use appropriate icon type based on classification (matching repeater icons)
+    let iconType;
+    if (node.classification >= 7) {
+      iconType = ICON_TYPES.STAR; // High-class backbone nodes
+    } else if (node.classification >= 5) {
+      iconType = ICON_TYPES.HEXAGON; // Good/reliable nodes
+    } else if (node.classification >= 3) {
+      iconType = ICON_TYPES.PENTAGON; // Average nodes
+    } else if (node.classification >= 1) {
+      iconType = ICON_TYPES.CIRCLE; // Low-class nodes
+    } else {
+      iconType = ICON_TYPES.CROSS; // Unreliable nodes
+    }
+    
+    feature.setStyle(createIconStyle(iconType, color, radius, {
+      strokeColor: '#fff',
+      strokeWidth: 2.5 // Slightly thicker to show it's planned
+    }));
     feature.setId(`planned-${node.id}`);
     source.addFeature(feature);
 
@@ -2092,17 +2134,272 @@
 
   // ========== Styles ==========
 
+  /**
+   * Icon type registry with different marker shapes
+   * Provides visual variety for different node types
+   */
+  const ICON_TYPES = {
+    // Standard shapes
+    CIRCLE: 'circle',
+    SQUARE: 'square',
+    TRIANGLE: 'triangle',
+    DIAMOND: 'diamond',
+    STAR: 'star',
+    HEXAGON: 'hexagon',
+    PENTAGON: 'pentagon',
+    OCTAGON: 'octagon',
+    
+    // Special markers
+    CROSS: 'cross',
+    PLUS: 'plus',
+    PIN: 'pin',
+    ANTENNA: 'antenna',
+    TOWER: 'tower',
+    BUILDING: 'building',
+    
+    // Status indicators
+    ALERT: 'alert',
+    WARNING: 'warning',
+    CHECK: 'check'
+  };
+
+  /**
+   * Create a style with specified icon type
+   * @param {string} iconType - Type from ICON_TYPES
+   * @param {string} color - Fill color
+   * @param {number} radius - Size
+   * @param {object} options - Additional options (strokeColor, strokeWidth, etc.)
+   */
+  function createIconStyle(iconType, color, radius, options = {}) {
+    const strokeColor = options.strokeColor || '#fff';
+    const strokeWidth = options.strokeWidth || 2;
+    const opacity = options.opacity || 1;
+    
+    // Adjust color opacity if specified
+    const fillColor = opacity < 1 ? adjustOpacity(color, opacity) : color;
+    
+    let image;
+    
+    switch(iconType) {
+      case ICON_TYPES.CIRCLE:
+        image = new ol.style.Circle({
+          radius: radius,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.SQUARE:
+        image = new ol.style.RegularShape({
+          points: 4,
+          radius: radius,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.TRIANGLE:
+        image = new ol.style.RegularShape({
+          points: 3,
+          radius: radius,
+          rotation: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.DIAMOND:
+        image = new ol.style.RegularShape({
+          points: 4,
+          radius: radius,
+          angle: Math.PI / 4, // Rotate 45°
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.STAR:
+        image = new ol.style.RegularShape({
+          points: 5,
+          radius: radius,
+          radius2: radius * 0.4, // Inner radius for star points
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.HEXAGON:
+        image = new ol.style.RegularShape({
+          points: 6,
+          radius: radius,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.PENTAGON:
+        image = new ol.style.RegularShape({
+          points: 5,
+          radius: radius,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.OCTAGON:
+        image = new ol.style.RegularShape({
+          points: 8,
+          radius: radius,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.CROSS:
+        // Create cross using two overlapping rectangles
+        image = new ol.style.RegularShape({
+          points: 4,
+          radius: radius,
+          radius2: radius * 0.3,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.PLUS:
+        // Plus sign - rotated cross
+        image = new ol.style.RegularShape({
+          points: 4,
+          radius: radius,
+          radius2: radius * 0.3,
+          angle: Math.PI / 4,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.PIN:
+        // Inverted triangle (pin/marker shape)
+        image = new ol.style.RegularShape({
+          points: 3,
+          radius: radius * 1.2,
+          rotation: Math.PI, // Point downward
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.ANTENNA:
+        // Triangle pointing up (antenna symbol)
+        image = new ol.style.RegularShape({
+          points: 3,
+          radius: radius * 1.3,
+          rotation: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.TOWER:
+        // Triangle (tower symbol)
+        image = new ol.style.RegularShape({
+          points: 3,
+          radius: radius,
+          rotation: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.BUILDING:
+        // Square representing building
+        image = new ol.style.RegularShape({
+          points: 4,
+          radius: radius,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      case ICON_TYPES.ALERT:
+        // Triangle with exclamation (pointing up for alert)
+        image = new ol.style.RegularShape({
+          points: 3,
+          radius: radius * 1.2,
+          rotation: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth * 1.5 })
+        });
+        break;
+        
+      case ICON_TYPES.WARNING:
+        // Octagon (stop sign shape) for warnings
+        image = new ol.style.RegularShape({
+          points: 8,
+          radius: radius,
+          angle: Math.PI / 8,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth * 1.5 })
+        });
+        break;
+        
+      case ICON_TYPES.CHECK:
+        // Pentagon for positive status
+        image = new ol.style.RegularShape({
+          points: 5,
+          radius: radius,
+          angle: 0,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+        break;
+        
+      default:
+        // Default to circle
+        image = new ol.style.Circle({
+          radius: radius,
+          fill: new ol.style.Fill({ color: fillColor }),
+          stroke: new ol.style.Stroke({ color: strokeColor, width: strokeWidth })
+        });
+    }
+    
+    return new ol.style.Style({ image: image });
+  }
+
+  /**
+   * Legacy function - now uses createIconStyle with CIRCLE type
+   */
   function createNodeStyle(color, radius) {
-    return new ol.style.Style({
-      image: new ol.style.Circle({
-        radius: radius,
-        fill: new ol.style.Fill({ color: color }),
-        stroke: new ol.style.Stroke({
-          color: '#fff',
-          width: 2
-        })
-      })
-    });
+    return createIconStyle(ICON_TYPES.CIRCLE, color, radius);
+  }
+  
+  /**
+   * Adjust color opacity
+   */
+  function adjustOpacity(color, opacity) {
+    // Handle hex colors
+    if (color.startsWith('#')) {
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    // Handle rgba
+    if (color.startsWith('rgba')) {
+      return color.replace(/[\d.]+\)$/g, `${opacity})`);
+    }
+    // Handle rgb
+    if (color.startsWith('rgb')) {
+      return color.replace('rgb', 'rgba').replace(')', `, ${opacity})`);
+    }
+    return color;
   }
 
   // ========== Utilities ==========

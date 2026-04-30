@@ -4,6 +4,38 @@ Een interactieve OpenLayers-gebaseerde planningstool voor het optimaliseren van 
 
 ## Functionaliteit
 
+### Iconen Systeem
+
+De tool gebruikt een uitgebreid iconensysteem met 18 verschillende markeervormtypes voor visuele duidelijkheid:
+
+**Repeaters (op basis van classificatie):**
+- **Klasse 8-7** (Backbone/Zeer betrouwbaar): ⭐ Ster
+- **Klasse 6-5** (Betrouwbaar/Goed): ⬡ Hexagon
+- **Klasse 4-3** (Gemiddeld/Matig): ⬠ Pentagon
+- **Klasse 2-1** (Zwak/Zeer zwak): ● Cirkel
+- **Klasse 0** (Onbetrouwbaar): ✕ Kruis
+
+**Andere nodes:**
+- **Companions**: ◆ Diamant (cyaan)
+
+**Infrastructuur (torens):**
+- **Watertoren**: ⬡ Hexagon
+- **Zendmast**: △ Antenne
+- **Kerktoren**: ⭐ Ster
+- **Flatgebouw**: ■ Vierkant
+- **Schoorsteen**: △ Driehoek
+
+**Bewoonde kernen (op bevolkingsgrootte):**
+- **Stad**: ⬢ Octagon (8-hoek)
+- **Plaats**: ⬡ Hexagon (6-hoek)
+- **Dorp**: ⬠ Pentagon (5-hoek)
+- **Buurtschap**: ◆ Diamant
+
+**Status indicatoren:**
+- **Geen dekking**: △ Rood waarschuwingsdriehoek
+
+Zie [ICON_SYSTEM.md](./ICON_SYSTEM.md) voor volledige documentatie.
+
 ### Kaartlagen
 - **Bestaande Repeaters** — Actieve en inactieve repeaters uit het live netwerk (kleur per classificatie)
 - **Companions** — Client-apparaten (blauw)

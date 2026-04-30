@@ -1567,8 +1567,11 @@
       // Width varies by strength: 1px (weak) to 4px (strong)
       const width = 1 + (strength / 100) * 3;
       
-      // Dashed line for low confidence
-      const lineDash = confidence < 50 ? [6, 4] : null;
+      // All links use dotted pattern for streaming effect
+      // Dot/dash pattern: stronger links have tighter spacing
+      const dashLength = 8 - (strength / 100) * 3; // 8px (weak) to 5px (strong)
+      const gapLength = dashLength * 1.5;
+      const lineDash = [dashLength, gapLength];
       
       const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
 
@@ -1576,7 +1579,8 @@
         stroke: new ol.style.Stroke({
           color: color,
           width: width,
-          lineDash: lineDash
+          lineDash: lineDash,
+          lineDashOffset: 0 // Will be animated
         })
       }));
       
@@ -1591,8 +1595,8 @@
   }
   
   /**
-   * Animate link lines with pulsing effect
-   * Stronger links pulse more prominently
+   * Animate link lines with streaming packet effect
+   * Shows moving dots/dashes along the line, faster for stronger links
    */
   function animateLinks() {
     const source = vectorLayers.links.getSource();
@@ -1613,7 +1617,7 @@
       }
       
       const features = source.getFeatures();
-      frame = (frame + 1) % 120; // 2 second cycle at 60fps
+      frame++;
       
       features.forEach(feature => {
         const link = feature.get('data');
@@ -1621,42 +1625,51 @@
         
         if (!link) return;
         
-        // Calculate pulse phase (0 to 1, smooth sine wave)
-        const phase = Math.sin((frame / 120) * Math.PI * 2);
-        
-        // Stronger links pulse more dramatically
-        const pulseIntensity = strength / 100;
-        const widthModifier = 1 + (phase * 0.4 * pulseIntensity); // 0-40% width variation
-        const opacityModifier = 1 + (phase * 0.25 * pulseIntensity); // 0-25% opacity variation
-        
         // Base metrics
         const confidence = link.confidence || 50;
         
         // Color based on distance
         let baseColor;
         if (link.distance_km > 15) {
-          baseColor = [244, 162, 97];
+          baseColor = [244, 162, 97]; // Orange
         } else if (link.distance_km > 5) {
-          baseColor = [72, 202, 228];
+          baseColor = [72, 202, 228]; // Cyan
         } else {
-          baseColor = [116, 198, 157];
+          baseColor = [116, 198, 157]; // Green
         }
         
-        // Apply animated modifiers
+        // Styling based on strength
         const baseOpacity = 0.3 + (strength / 100) * 0.6;
-        const opacity = Math.min(1.0, baseOpacity * opacityModifier);
-        
         const baseWidth = 1 + (strength / 100) * 3;
-        const width = baseWidth * widthModifier;
         
-        const lineDash = confidence < 50 ? [6, 4] : null;
-        const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
+        // Add subtle pulse to width (much smaller than before)
+        const pulsePhase = Math.sin((frame / 60) * Math.PI * 2);
+        const widthPulse = 1 + (pulsePhase * 0.15 * (strength / 100)); // Max 15% variation
+        const width = baseWidth * widthPulse;
+        
+        // Streaming animation: move the dash offset
+        // Stronger links = faster streaming (more packets/second)
+        const speedMultiplier = 0.5 + (strength / 100) * 1.5; // 0.5x to 2x speed
+        const dashOffset = -(frame * speedMultiplier * 0.5) % 100; // Negative = forward direction
+        
+        // Dash pattern: stronger links have tighter spacing
+        const dashLength = 8 - (strength / 100) * 3; // 8px to 5px
+        const gapLength = dashLength * 1.5;
+        const lineDash = [dashLength, gapLength];
+        
+        // Low confidence gets different pattern (longer gaps)
+        const finalLineDash = confidence < 50 
+          ? [dashLength * 0.6, gapLength * 1.8] 
+          : lineDash;
+        
+        const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${baseOpacity})`;
         
         feature.setStyle(new ol.style.Style({
           stroke: new ol.style.Stroke({
             color: color,
             width: width,
-            lineDash: lineDash
+            lineDash: finalLineDash,
+            lineDashOffset: dashOffset
           })
         }));
       });

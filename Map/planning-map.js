@@ -125,17 +125,6 @@
       })
     });
 
-    // Satellite (Esri World Imagery)
-    const satelliteLayer = new ol.layer.Tile({
-      title: 'Satelliet',
-      type: 'base',
-      visible: false,
-      source: new ol.source.XYZ({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attributions: 'Tiles © Esri'
-      })
-    });
-
     // OpenTopoMap
     const topoLayer = new ol.layer.Tile({
       title: 'Topografisch',
@@ -144,28 +133,6 @@
       source: new ol.source.XYZ({
         url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
         attributions: '© OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)'
-      })
-    });
-
-    // Stamen Terrain (terrain with hill shading)
-    const terrainLayer = new ol.layer.Tile({
-      title: 'Terrein',
-      type: 'base',
-      visible: false,
-      source: new ol.source.XYZ({
-        url: 'https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}.png',
-        attributions: '© Stamen Design, © OpenStreetMap contributors'
-      })
-    });
-
-    // ESRI World Street Map
-    const esriStreetLayer = new ol.layer.Tile({
-      title: 'Straten (ESRI)',
-      type: 'base',
-      visible: false,
-      source: new ol.source.XYZ({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
-        attributions: 'Tiles © Esri'
       })
     });
 
@@ -202,42 +169,23 @@
       })
     });
 
-    // Stamen Toner Lite - high contrast minimal
-    const tonerLiteLayer = new ol.layer.Tile({
-      title: 'Minimaal',
-      type: 'base',
-      visible: false,
-      source: new ol.source.XYZ({
-        url: 'https://tiles.stadiamaps.com/tiles/stamen_toner_lite/{z}/{x}/{y}.png',
-        attributions: '© Stamen Design, © OpenStreetMap contributors'
-      })
-    });
-
     map.addLayer(cartoDarkLayer);
     map.addLayer(positronLayer);
     map.addLayer(osmLayer);
-    map.addLayer(satelliteLayer);
     map.addLayer(topoLayer);
-    map.addLayer(terrainLayer);
-    map.addLayer(esriStreetLayer);
     map.addLayer(hotLayer);
     map.addLayer(wikimediaLayer);
     map.addLayer(cyclOSMLayer);
-    map.addLayer(tonerLiteLayer);
 
     // Add layer switcher control
     const layerSwitcher = createLayerSwitcher([
       { title: 'Dark', layer: cartoDarkLayer },
       { title: 'Light', layer: positronLayer },
       { title: 'OpenStreetMap', layer: osmLayer },
-      { title: 'Satelliet', layer: satelliteLayer },
       { title: 'Topografisch', layer: topoLayer },
-      { title: 'Terrein', layer: terrainLayer },
-      { title: 'Straten (ESRI)', layer: esriStreetLayer },
       { title: 'Humanitair', layer: hotLayer },
       { title: 'Wikimedia', layer: wikimediaLayer },
-      { title: 'CyclOSM', layer: cyclOSMLayer },
-      { title: 'Minimaal', layer: tonerLiteLayer }
+      { title: 'CyclOSM', layer: cyclOSMLayer }
     ]);
     map.addControl(layerSwitcher);
 

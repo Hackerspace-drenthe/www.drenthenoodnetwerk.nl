@@ -57,6 +57,7 @@
   let planIdCounter = 1;
   let repeaterClassFilter = { min: 0, max: 8 }; // Filter range
   let rangeFactor = 0.6; // Range calculation factor: 0.4 (conservative) to 1.0 (max proven)
+  let linkAnimationRunning = false; // Track animation state
 
   // ========== Initialization ==========
 
@@ -341,6 +342,9 @@
 
     document.getElementById('layer-links').addEventListener('change', function (e) {
       vectorLayers.links.setVisible(e.target.checked);
+      if (e.target.checked && !linkAnimationRunning) {
+        animateLinks(); // Restart animation if layer is shown
+      }
     });
 
     document.getElementById('layer-ranges').addEventListener('change', function (e) {
@@ -1533,20 +1537,134 @@
         data: link
       });
 
-      const color = link.distance_km > 15 ? '#f4a261' : 
-                    link.distance_km > 5 ? '#48cae4' : '#74c69d';
-      const opacity = 0.2 + (link.confidence || 50) / 200;
+      // Calculate link strength metrics
+      const confidence = link.confidence || 50;
+      const snr = link.snr || link.rxSnr || 0;
+      
+      // Determine link strength (0-100 scale)
+      // Higher confidence and SNR = stronger link
+      let strength = confidence;
+      if (snr > 0) {
+        // SNR typically ranges from -20 to +10 dB
+        // Normalize: -20dB=0, 10dB=100
+        const normalizedSnr = Math.max(0, Math.min(100, ((snr + 20) / 30) * 100));
+        strength = (confidence + normalizedSnr) / 2; // Average both metrics
+      }
+      
+      // Color based on distance (visual hierarchy)
+      let baseColor;
+      if (link.distance_km > 15) {
+        baseColor = [244, 162, 97]; // Orange for long distance
+      } else if (link.distance_km > 5) {
+        baseColor = [72, 202, 228]; // Cyan for medium distance
+      } else {
+        baseColor = [116, 198, 157]; // Green for short distance
+      }
+      
+      // Opacity varies by strength: 0.3 (weak) to 0.9 (strong)
+      const opacity = 0.3 + (strength / 100) * 0.6;
+      
+      // Width varies by strength: 1px (weak) to 4px (strong)
+      const width = 1 + (strength / 100) * 3;
+      
+      // Dashed line for low confidence
+      const lineDash = confidence < 50 ? [6, 4] : null;
+      
+      const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
 
       feature.setStyle(new ol.style.Style({
         stroke: new ol.style.Stroke({
           color: color,
-          width: link.distance_km > 10 ? 2.5 : 1.5,
-          lineDash: (link.confidence || 50) < 50 ? [6, 4] : null
+          width: width,
+          lineDash: lineDash
         })
       }));
+      
+      // Store strength for animation
+      feature.set('strength', strength);
 
       source.addFeature(feature);
     });
+    
+    // Start link animation
+    animateLinks();
+  }
+  
+  /**
+   * Animate link lines with pulsing effect
+   * Stronger links pulse more prominently
+   */
+  function animateLinks() {
+    const source = vectorLayers.links.getSource();
+    if (!source) return;
+    
+    // Prevent multiple animation loops
+    if (linkAnimationRunning) return;
+    linkAnimationRunning = true;
+    
+    let frame = 0;
+    const animate = () => {
+      const isVisible = vectorLayers.links.getVisible();
+      
+      if (!isVisible) {
+        // Pause animation if layer is hidden, but keep checking
+        linkAnimationRunning = false;
+        return;
+      }
+      
+      const features = source.getFeatures();
+      frame = (frame + 1) % 120; // 2 second cycle at 60fps
+      
+      features.forEach(feature => {
+        const link = feature.get('data');
+        const strength = feature.get('strength') || 50;
+        
+        if (!link) return;
+        
+        // Calculate pulse phase (0 to 1, smooth sine wave)
+        const phase = Math.sin((frame / 120) * Math.PI * 2);
+        
+        // Stronger links pulse more dramatically
+        const pulseIntensity = strength / 100;
+        const widthModifier = 1 + (phase * 0.4 * pulseIntensity); // 0-40% width variation
+        const opacityModifier = 1 + (phase * 0.25 * pulseIntensity); // 0-25% opacity variation
+        
+        // Base metrics
+        const confidence = link.confidence || 50;
+        
+        // Color based on distance
+        let baseColor;
+        if (link.distance_km > 15) {
+          baseColor = [244, 162, 97];
+        } else if (link.distance_km > 5) {
+          baseColor = [72, 202, 228];
+        } else {
+          baseColor = [116, 198, 157];
+        }
+        
+        // Apply animated modifiers
+        const baseOpacity = 0.3 + (strength / 100) * 0.6;
+        const opacity = Math.min(1.0, baseOpacity * opacityModifier);
+        
+        const baseWidth = 1 + (strength / 100) * 3;
+        const width = baseWidth * widthModifier;
+        
+        const lineDash = confidence < 50 ? [6, 4] : null;
+        const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
+        
+        feature.setStyle(new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: color,
+            width: width,
+            lineDash: lineDash
+          })
+        }));
+      });
+      
+      requestAnimationFrame(animate);
+    };
+    
+    requestAnimationFrame(animate);
   }
 
   function renderRanges(visibleRepeaterKeys) {

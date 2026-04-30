@@ -1567,10 +1567,25 @@
       // Width varies by strength: 1px (weak) to 4px (strong)
       const width = 1 + (strength / 100) * 3;
       
-      // All links use dotted pattern for streaming effect
-      // Dot/dash pattern: stronger links have tighter spacing
-      const dashLength = 8 - (strength / 100) * 3; // 8px (weak) to 5px (strong)
-      const gapLength = dashLength * 1.5;
+      // Dot pattern varies by distance type
+      // Long distance (Yagi/directional): sparse dots
+      // Short distance (omni): dense dots
+      let dashLength, gapLength;
+      
+      if (link.distance_km > 10) {
+        // Long distance directional (Yagi style) - SPARSE
+        dashLength = 3 + (strength / 100) * 2; // 3-5px
+        gapLength = 20 + (100 - strength) / 10; // 20-30px gaps
+      } else if (link.distance_km > 5) {
+        // Medium distance (semi-directional)
+        dashLength = 4 + (strength / 100) * 3; // 4-7px
+        gapLength = 12 + (100 - strength) / 10; // 12-22px gaps
+      } else {
+        // Short distance local (omni-directional) - DENSE
+        dashLength = 6 + (strength / 100) * 4; // 6-10px
+        gapLength = 6 + (100 - strength) / 20; // 6-11px gaps
+      }
+      
       const lineDash = [dashLength, gapLength];
       
       const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${opacity})`;
@@ -1652,14 +1667,32 @@
         const speedMultiplier = 0.5 + (strength / 100) * 1.5; // 0.5x to 2x speed
         const dashOffset = -(frame * speedMultiplier * 0.5) % 100; // Negative = forward direction
         
-        // Dash pattern: stronger links have tighter spacing
-        const dashLength = 8 - (strength / 100) * 3; // 8px to 5px
-        const gapLength = dashLength * 1.5;
+        // Dash pattern varies by BOTH strength AND distance
+        // Long distance (Yagi/directional): sparse dots (focused beam)
+        // Short distance (omni): dense dots (broadcast)
+        let dashLength, gapLength;
+        
+        if (link.distance_km > 10) {
+          // Long distance directional (Yagi antenna style)
+          // Very sparse, focused beam pattern
+          dashLength = 3 + (strength / 100) * 2; // 3-5px dots
+          gapLength = 20 + (100 - strength) / 10; // 20-30px gaps (SPARSE)
+        } else if (link.distance_km > 5) {
+          // Medium distance (semi-directional)
+          dashLength = 4 + (strength / 100) * 3; // 4-7px
+          gapLength = 12 + (100 - strength) / 10; // 12-22px gaps
+        } else {
+          // Short distance local (omni-directional)
+          // Dense pattern for local broadcast
+          dashLength = 6 + (strength / 100) * 4; // 6-10px dots
+          gapLength = 6 + (100 - strength) / 20; // 6-11px gaps (DENSE)
+        }
+        
         const lineDash = [dashLength, gapLength];
         
-        // Low confidence gets different pattern (longer gaps)
+        // Low confidence gets even sparser pattern
         const finalLineDash = confidence < 50 
-          ? [dashLength * 0.6, gapLength * 1.8] 
+          ? [dashLength * 0.7, gapLength * 2.0] 
           : lineDash;
         
         const color = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${baseOpacity})`;

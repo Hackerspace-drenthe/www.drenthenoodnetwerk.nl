@@ -20,7 +20,7 @@ Statische site — puur HTML, CSS en JavaScript. Geen frameworks, geen build-sta
 |---|---|
 | `index.html` | Homepage met introductie en overzicht |
 | `wat-is-meshcore.html` | Uitleg voor beginners + kennisquiz |
-| `hoe-werkt-het.html` | Technische uitleg (LoRa, Meshtastic, Meshcore) + mesh-simulator + bereik-calculator |
+| `hoe-werkt-het.html` | Technische uitleg (LoRa, Meshcore firmware) + mesh-simulator + bereik-calculator |
 | `netwerk-drenthe.html` | Live netwerkkaart (embed van map.meshcore.io) |
 | `meedoen.html` | Rollen, materialen, contact |
 | `planning.html` | Roadmap en tijdlijn |

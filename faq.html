@@ -87,7 +87,7 @@
         <details class="faq-item">
           <summary>Kan ik gewoon teksten sturen?</summary>
           <div class="faq-answer">
-            <p>Ja! Met de Meshtastic-app op je telefoon kun je tekstberichten versturen naar andere nodes in het netwerk. Je kunt ook je <a href="woordenlijst.html#gps">GPS-locatie</a> delen. Denk aan korte berichten zoals "alles goed hier" of "hulp nodig bij [locatie]".</p>
+            <p>Ja! Met de Meshcore-app op je telefoon kun je tekstberichten versturen naar andere nodes in het netwerk. Je kunt ook je <a href="woordenlijst.html#gps">GPS-locatie</a> delen. Denk aan korte berichten zoals "alles goed hier" of "hulp nodig bij [locatie]".</p>
             <p>Foto's of video's versturen kan niet — <a href="woordenlijst.html#lora">LoRa</a> is ontworpen voor kleine hoeveelheden data, niet voor grote bestanden.</p>
           </div>
         </details>
@@ -96,7 +96,7 @@
         <details class="faq-item">
           <summary>Hoe veilig en privé is de communicatie?</summary>
           <div class="faq-answer">
-            <p>Meshtastic versleutelt alle berichten met AES-256 encryptie. Alleen nodes die dezelfde kanaalsleutel hebben, kunnen berichten ontsleutelen en lezen. Andere mensen kunnen de radiogolven wel opvangen, maar zonder de sleutel zijn het onleesbare gegevens.</p>
+            <p>Meshcore versleutelt alle berichten met AES-256 encryptie. Alleen nodes die dezelfde room-sleutel hebben, kunnen berichten ontsleutelen en lezen. Andere mensen kunnen de radiogolven wel opvangen, maar zonder de sleutel zijn het onleesbare gegevens.</p>
             <p>Vergelijk het met een brief in een envelop: iedereen kan zien dat er een brief verstuurd wordt, maar alleen de ontvanger kan hem lezen.</p>
           </div>
         </details>
@@ -114,7 +114,7 @@
         <details class="faq-item">
           <summary>Moet ik kunnen programmeren?</summary>
           <div class="faq-answer">
-            <p>Nee! <a href="woordenlijst.html#flashen">Flashen</a> — het installeren van de <a href="woordenlijst.html#firmware">firmware</a> — doe je met een simpel programma via je webbrowser. Configureren kan via de Meshtastic-app op je telefoon. Geen code schrijven nodig.</p>
+            <p>Nee! <a href="woordenlijst.html#flashen">Flashen</a> — het installeren van de <a href="woordenlijst.html#firmware">firmware</a> — doe je met een simpel programma via je webbrowser. Configureren kan via de Meshcore-app op je telefoon. Geen code schrijven nodig.</p>
             <p>Tijdens de <a href="planning.html">hak-avonden</a> bij Hackerspace Drenthe helpen we je stap voor stap. En in de <a href="handleidingen.html">handleidingen</a> staat alles uitgelegd met afbeeldingen.</p>
           </div>
         </details>
@@ -151,8 +151,8 @@
         <details class="faq-item">
           <summary>Wat is het verschil tussen Meshtastic en Meshcore?</summary>
           <div class="faq-answer">
-            <p><a href="woordenlijst.html#meshtastic">Meshtastic</a> en <a href="woordenlijst.html#meshcore">Meshcore</a> zijn twee verschillende firmware-projecten die op dezelfde LoRa-hardware draaien. Meshtastic is geschikt voor persoonlijk gebruik, Meshcore is specifiek ontworpen voor betrouwbare community-netwerken.</p>
-            <p>Belangrijke verschillen: Meshcore scheidt client- en repeater-rollen strikt (clients herhalen geen berichten), gebruikt slimme routering (eerst flooding, daarna direct pad), en heeft end-to-end AES-256 encryptie met ondertekende advertenties tegen spoofing. Lees meer op de <a href="hoe-werkt-het.html#meshcore-heading">technische uitleg</a>.</p>
+            <p><strong>Dit project gebruikt Meshcore-firmware.</strong> <a href="woordenlijst.html#meshtastic">Meshtastic</a> en <a href="woordenlijst.html#meshcore">Meshcore</a> zijn twee verschillende firmware-projecten die op dezelfde LoRa-hardware draaien, maar ze zijn niet compatibel met elkaar.</p>
+            <p>Meshcore is speciaal ontworpen voor betrouwbare community-netwerken op grote schaal. Belangrijke voordelen: strikte scheiding tussen client- en repeater-rollen (clients herhalen geen berichten, voorkomt loops), slimme routering (eerst flooding, daarna direct pad), AES-256 encryptie met ondertekende advertenties tegen spoofing, en ondersteuning voor tot 64 hops. Lees meer op de <a href="hoe-werkt-het.html#meshcore-heading">technische uitleg</a>.</p>
           </div>
         </details>
 

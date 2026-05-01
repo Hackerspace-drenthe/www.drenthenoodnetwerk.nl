@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hoe werkt het? — Meshcore Drenthe</title>
-  <meta name="description" content="Van LoRa-radiogolven tot Meshtastic-protocollen: stap voor stap begrijpen hoe het mesh-netwerk van Meshcore Drenthe werkt.">
+  <meta name="description" content="Van LoRa-radiogolven tot Meshcore-firmware: stap voor stap begrijpen hoe het mesh-netwerk van Meshcore Drenthe werkt.">
 
   <!-- Open Graph -->
   <meta property="og:title" content="Hoe werkt het? — Meshcore Drenthe">
-  <meta property="og:description" content="Van LoRa-radiogolven tot Meshtastic-protocollen: stap voor stap begrijpen hoe het mesh-netwerk werkt.">
+  <meta property="og:description" content="Van LoRa-radiogolven tot Meshcore-firmware: stap voor stap begrijpen hoe het mesh-netwerk werkt.">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="nl_NL">
 
@@ -250,73 +250,66 @@
       </section>
 
       <!-- ============================================================
-           SECTIE C — Meshtastic Protocol
+           SECTIE C — Meshcore Firmware
            ============================================================ -->
-      <section class="info-section" aria-labelledby="meshtastic-heading">
-        <h2 id="meshtastic-heading">C — Meshtastic: de software</h2>
+      <section class="info-section" aria-labelledby="meshcore-heading">
+        <h2 id="meshcore-heading">C — Meshcore: de firmware</h2>
 
-        <h3>Wat is Meshtastic?</h3>
-        <p><a href="woordenlijst.html#meshtastic">Meshtastic</a> is open-source software die op LoRa-hardware draait. Het regelt alles wat bovenop de radio komt: berichten versturen, versleutelen, routeren, en verbinding maken met een telefoon-app.</p>
+        <h3>Wat is Meshcore?</h3>
+        <p><a href="woordenlijst.html#meshcore">Meshcore</a> is firmware die op LoRa-hardware draait en het mesh-netwerk mogelijk maakt. Het regelt alles wat bovenop de radio komt: berichten versturen, versleutelen, routeren, en verbinding maken met een telefoon-app.</p>
 
-        <h3>De relatie: LoRa → Meshtastic → Meshcore</h3>
+        <p>Meshcore is ontwikkeld door Scott van Ripple Radios en draait op boards als de Heltec V3, RAK WisBlock en T-Deck. Het is speciaal ontworpen voor betrouwbare community-netwerken op grote schaal.</p>
+
+        <h3>De relatie: Hardware → LoRa → Meshcore → Applicatie</h3>
         <p>Denk aan lagen:</p>
 
         <!-- Protocol Stack -->
-        <div class="protocol-stack" role="img" aria-label="Protocol-stack: Meshcore bovenop Meshtastic bovenop LoRa bovenop Hardware">
-          <div class="protocol-stack__layer protocol-stack__layer--app">Meshcore — extra functies</div>
-          <div class="protocol-stack__layer protocol-stack__layer--mesh">Meshtastic — berichten, encryptie, routering</div>
-          <div class="protocol-stack__layer protocol-stack__layer--lora">LoRa — lange-afstand radio</div>
+        <div class="protocol-stack" role="img" aria-label="Protocol-stack: Meshcore App bovenop Meshcore Firmware bovenop LoRa bovenop Hardware">
+          <div class="protocol-stack__layer protocol-stack__layer--app">Meshcore App — interface op je telefoon/computer</div>
+          <div class="protocol-stack__layer protocol-stack__layer--mesh">Meshcore Firmware — berichten, encryptie, routering</div>
+          <div class="protocol-stack__layer protocol-stack__layer--lora">LoRa — lange-afstand radio technologie</div>
           <div class="protocol-stack__layer protocol-stack__layer--hw">Hardware — chip, antenne, batterij</div>
         </div>
 
-        <h3>Node-rollen</h3>
-        <p>Niet elke node doet hetzelfde. In Meshtastic kun je rollen toewijzen:</p>
+        <h3>Meshcore node-rollen</h3>
+        <p>In Meshcore heeft elke node een specifieke firmware met een duidelijke rol. Dit voorkomt chaos en maakt het netwerk voorspelbaar:</p>
         <dl class="tech-detail">
-          <dt>Client</dt>
-          <dd>Een gewone gebruikersnode. Verstuurt en ontvangt berichten, maar stuurt ze niet door.</dd>
-
-          <dt>Router</dt>
-          <dd>Stuurt berichten door van andere nodes. Vormt de ruggengraat van het netwerk. Staat idealiter op een hoog punt.</dd>
+          <dt>BLE Companion / USB Serial Companion</dt>
+          <dd>Client-node die gekoppeld is aan je telefoon of computer. Verstuurt en ontvangt berichten, maar <strong>stuurt ze niet door</strong>. Dit voorkomt ongewenste loops en bespaart batterij.</dd>
 
           <dt><a href="woordenlijst.html#repeater">Repeater</a></dt>
-          <dd>Nog stiller dan een router: only but forward, stuurt berichten door met minimaal eigen verkeer. Ideaal voor onbemande zonne-energie-nodes.</dd>
+          <dd>Stuurt alle berichten door zonder zelf berichten te verzenden. Ideaal voor onbemande locaties op zonne-energie. Vormt de ruggengraat van het netwerk. Staat op strategische plekken zoals watertorens en kerktorens.</dd>
+
+          <dt>Room Server</dt>
+          <dd>Beheert een "room" (chatkanaal) en kan berichten doorsturen. Vaak gecombineerd met analytics voor netwerk-monitoring. Houdt bij wie online is en welke nodes actief zijn.</dd>
+
+          <dt>Standalone (T-Deck)</dt>
+          <dd>Zelfstandig apparaat met scherm en toetsenbord. Kan zonder telefoon berichten verzenden en ontvangen. Ideaal voor noodsituaties.</dd>
         </dl>
 
-        <h3>Kanalen en encryptie</h3>
-        <p>Meshtastic gebruikt kanalen — vergelijkbaar met groepschats. Elk kanaal heeft een versleutelingssleutel. Alleen apparaten met dezelfde sleutel kunnen berichten lezen. Zo blijft communicatie privé, zelfs als iedereen dezelfde radiogolven kan opvangen.</p>
+        <h3>Slimme routering</h3>
+        <p>Meshcore gebruikt een hybride aanpak:</p>
+        <ul style="margin-top:var(--space-sm);">
+          <li><strong>Eerste bericht naar nieuwe bestemming:</strong> via flooding — alle repeaters geven het door totdat het aankomt</li>
+          <li><strong>Vervolgberichten:</strong> direct via de snelste route die nu bekend is</li>
+          <li><strong>Tot 64 hops mogelijk:</strong> ruim genoeg om heel Drenthe te dekken</li>
+        </ul>
+        <p style="margin-top:var(--space-sm);">Dit bespaart bandbreedte en verlaagt de latency vergeleken met pure flooding.</p>
+
+        <h3>Rooms en encryptie</h3>
+        <p>Meshcore gebruikt rooms (kamers) — vergelijkbaar met groepschats. Elk room heeft een versleutelingssleutel (<a href="woordenlijst.html#aes-256">AES-256</a>). Alleen apparaten met dezelfde sleutel kunnen berichten lezen. Zo blijft communicatie privé, zelfs als iedereen dezelfde radiogolven kan opvangen.</p>
+        
+        <p style="margin-top:var(--space-sm);">Daarnaast zijn node-advertenties cryptografisch ondertekend, waardoor spoofing (je voordoen als een andere node) onmogelijk is.</p>
+
+        <h3>Meshcore App</h3>
+        <p>De Meshcore companion app (ontwikkeld door Liam Cottle) is beschikbaar voor Android, iOS, Windows, Mac en Linux. Koppel via Bluetooth of USB, stuur berichten en bekijk je netwerk — alles in één app. Het freemium model betekent dat basis-functies gratis zijn, geavanceerde features optioneel betaald.</p>
       </section>
 
       <!-- ============================================================
-           SECTIE D — Meshcore specifiek
+           SECTIE D — Het Drenthe Netwerk
            ============================================================ -->
-      <section class="info-section" aria-labelledby="meshcore-heading">
-        <h2 id="meshcore-heading">D — Meshcore: de volgende stap</h2>
-
-        <h3>Wat is Meshcore?</h3>
-        <p><a href="woordenlijst.html#meshcore">Meshcore</a> is een <strong>zelfstandig firmware-project</strong> voor dezelfde LoRa-hardware. Het is gemaakt door Scott van Ripple Radios en draait op boards als de Heltec V3, RAK WisBlock en T-Deck. Meshcore is geen uitbreiding van Meshtastic, maar een apart systeem met een eigen aanpak van routering, versleuteling en netwerkbeheer.</p>
-
-        <h3>Waarom Meshcore in plaats van Meshtastic?</h3>
-        <p>Meshtastic is fantastisch voor persoonlijk gebruik. Maar voor een betrouwbaar community-netwerk dat een hele provincie dekt, biedt Meshcore gerichte verbeteringen:</p>
-
-        <dl class="tech-detail">
-          <dt>Slimme routering (flood + direct)</dt>
-          <dd>Het eerste bericht naar een nieuwe ontvanger wordt via <em>flooding</em> verstuurd — alle nodes geven het door. Zodra een ontvangstbevestiging terugkomt, kent het netwerk de snelste route en worden vervolgberichten direct afgeleverd. Dit bespaart bandbreedte en verlaagt de latency.</dd>
-
-          <dt>AES-256 end-to-end encryptie met ondertekende advertenties</dt>
-          <dd>Alle berichten zijn versleuteld met <a href="woordenlijst.html#aes-256">AES-256</a>. Daarnaast zijn node-advertenties cryptografisch ondertekend, waardoor spoofing (je voordoen als een andere node) onmogelijk is.</dd>
-
-          <dt>Gescheiden rollen: client vs. repeater</dt>
-          <dd>In Meshcore herhalen <strong>clients geen berichten</strong> — alleen repeaters en room servers doen dat. Dit voorkomt ongewenste loops en maakt het netwerk voorspelbaarder. Elke node heeft een duidelijke firmware: BLE Companion, USB Serial Companion, Repeater, Room Server of Standalone.</dd>
-
-          <dt>Tot 64 hops</dt>
-          <dd>Meshcore ondersteunt intern tot 64 hops (knooppunten) per bericht. Dat is ruim genoeg om heel Drenthe te bereiken, zelfs via omwegen.</dd>
-
-          <dt>Eigen companion-app</dt>
-          <dd>Meshcore heeft een eigen app (ontwikkeld door Liam Cottle), beschikbaar voor Android, iOS, Windows, Mac en Linux. Koppel via Bluetooth of USB, stuur berichten en bekijk je netwerk — alles in één app.</dd>
-        </dl>
-
-        <h3>Open source en gratis</h3>
-        <p>Meshcore-firmware is open source onder de MIT-licentie. De companion-app en het T-Deck standalone-firmware zijn freemium: basis-functies zijn gratis, geavanceerde functies optioneel betaald.</p>
+      <section class="info-section" aria-labelledby="drenthe-heading">
+        <h2 id="drenthe-heading">D — Het Meshcore Drenthe netwerk</h2>
 
         <h3>Van experiment naar betrouwbaar netwerk</h3>
         <p>Het doel van Meshcore Drenthe is niet "even een walkietalkie-experiment", maar een netwerk dat je kunt vertrouwen als het er écht op aankomt. Dat betekent:</p>
@@ -327,6 +320,46 @@
           <li><strong>Getest</strong> — regelmatige netwerk-tests waarbij we opzettelijk nodes uitschakelen om te controleren of het netwerk zichzelf herstelt</li>
           <li><strong>Gedocumenteerd</strong> — elke node heeft een configuratie-document en een contactpersoon</li>
         </ul>
+
+        <h3>Backbone + Burgernetwerk</h3>
+        <p>De Veiligheidsregio Drenthe bouwt de <strong>backbone</strong>: grote verbindingen tussen Emmen, Hoogeveen en Assen, plus repeaters bij brandweerkazernes. Wij — burgers en bedrijven — maken het netwerk <strong>fijnmazig</strong> door eigen repeaters te plaatsen op:</p>
+
+        <ul style="margin-top:var(--space-sm);">
+          <li>Hoge gebouwen en flatdaken</li>
+          <li>Silo's en schuren in het buitengebied</li>
+          <li>Amateur-zendmasten</li>
+          <li>Je eigen dak (als je voldoende hoogte hebt)</li>
+        </ul>
+
+        <h3>Strategische plaatsing</h3>
+        <p>Voor optimale dekking plaatsen we repeaters op:</p>
+        
+        <dl class="tech-detail">
+          <dt>Watertorens en kerktorens</dt>
+          <dd>Hoogte is alles bij LoRa. Een repeater op 30 meter hoogte kan 10-15 km ver reiken in vlak terrein.</dd>
+
+          <dt>Hondsrug-lijn</dt>
+          <dd>De zandrug die van Emmen naar Groningen loopt is natuurlijk verhoogd terrein — ideaal voor repeaters die grote gebieden dekken.</dd>
+
+          <dt>Dorpskernen</dt>
+          <dd>Een repeater in elk dorp zorgt voor lokale dekking, zodat bewoners elkaar kunnen bereiken en contact kunnen maken met de backbone.</dd>
+
+          <dt>Buitengebied</dt>
+          <dd>Boerderijen, bedrijven en particulieren met hoge locaties kunnen het netwerk fijnmazig maken door eigen repeaters te plaatsen.</dd>
+        </dl>
+
+        <h3>Hoe kun je helpen?</h3>
+        <p>Je hoeft geen technisch expert te zijn. Hulp kan op verschillende manieren:</p>
+
+        <ul style="margin-top:var(--space-sm);">
+          <li><strong>Companion node</strong> — test het netwerk in jouw gebied, rapporteer bereik en verbindingen</li>
+          <li><strong>Repeater plaatsen</strong> — heb je een hoog gebouw of locatie? Plaats een repeater op zonne-energie</li>
+          <li><strong>Sponsoring</strong> — help mee betalen voor hardware, behuizingen of installatie</li>
+          <li><strong>Locaties regelen</strong> — ken je iemand met een watertoren, kerktoren of hoog gebouw? Leg contact</li>
+          <li><strong>Documenteren</strong> — help met handleidingen, foto's en instructies voor anderen</li>
+        </ul>
+
+        <p style="margin-top:var(--space-lg);">Bekijk de <a href="netwerk-drenthe.html">netwerkkaart</a> om te zien waar repeaters al staan en waar we nog dekking nodig hebben.</p>
       </section>
 
       <!-- CTA -->

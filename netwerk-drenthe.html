@@ -58,9 +58,24 @@
   <main id="main-content">
     <div class="container">
       <h1>Netwerk Kaart Drenthe</h1>
-      <p style="color:var(--color-text-muted);margin-bottom:var(--space-xl);max-width:65ch;">Bekijk de geplande en actieve <a href="woordenlijst.html#node">nodes</a> in het Meshcore Drenthe netwerk. Klik op een node voor meer informatie.</p>
+      <p style="color:var(--color-text-muted);margin-bottom:var(--space-xl);max-width:65ch;">Interactieve planning tool voor het Meshcore Drenthe netwerk. Bekijk geplande en actieve <a href="woordenlijst.html#node">nodes</a>, bewoonde kernen, hoge structuren en netwerkdekking.</p>
+
+      <!-- Planning Tool Embed -->
+      <div style="margin-bottom:var(--space-2xl);border:2px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;">
+        <iframe 
+          src="Map/index.html" 
+          style="width:100%;height:80vh;border:none;display:block;"
+          title="Meshcore Repeater Planning Tool"
+          loading="lazy"
+        ></iframe>
+      </div>
+
+      <p style="margin-bottom:var(--space-xl);">
+        <a href="Map/index.html" target="_blank" style="font-weight:600;color:var(--color-accent)">Open planning tool in volledig scherm →</a>
+      </p>
 
       <!-- Live Radar Kaart — mc-radar.woodwar.com API -->
+      <h2 style="margin-top:var(--space-3xl);margin-bottom:var(--space-lg)">Live Netwerk Status</h2>
       <div class="map-wrapper map-wrapper--live">
         <div class="radar-map-container">
           <div id="radar-map"></div>
@@ -100,10 +115,21 @@
 
       <!-- Toelichting -->
       <section style="margin-top:var(--space-2xl)">
-        <h2>Over de kaart</h2>
+        <h2>Over de kaarten</h2>
+        
+        <h3 style="margin-top:var(--space-lg)">Planning Tool (boven)</h3>
+        <p>De interactieve planning tool toont bewoonde kernen, hoge structuren (watertorens, kerktorens, zendmasten), RF-obstructies en netwerkdekking. Gebruik deze tool om:</p>
+        <ul style="margin-top:var(--space-sm)">
+          <li><strong>Bewoonde kernen te zoeken</strong> — 127 locaties in Drenthe met inwonertal</li>
+          <li><strong>Hoge structuren te vinden</strong> — potentiële repeater-locaties met hoogte-info</li>
+          <li><strong>Dekking te analyseren</strong> — welke gebieden hebben bereik nodig?</li>
+          <li><strong>Nieuwe locaties te plannen</strong> — simuleer repeater-plaatsing</li>
+        </ul>
+
+        <h3 style="margin-top:var(--space-xl)">Live Netwerk Status (onder)</h3>
         <p>Deze kaart toont live data van het MeshCore netwerk in de regio Drenthe, opgehaald via de <a href="https://mc-radar.woodwar.com" rel="noopener noreferrer">mc-radar</a> API. Je ziet repeaters, companions en bewezen verbindingen tussen nodes — inclusief het gemeten bereik.</p>
 
-        <h3 style="margin-top:var(--space-xl)">Wat zie je op de kaart?</h3>
+        <h3 style="margin-top:var(--space-xl)">Wat zie je op de live kaart?</h3>
         <ul style="margin-top:var(--space-sm)">
           <li><strong>Groene punten</strong> — actieve repeater-nodes die berichten doorsturen</li>
           <li><strong>Blauwe punten</strong> — companion-nodes (gekoppeld aan een telefoon)</li>

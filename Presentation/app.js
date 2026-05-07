@@ -48,10 +48,6 @@ class PresentationApp {
       
       // Initialize controllers
       const navigationController = new NavigationController(slideManager, {
-        btnPrev: elements.btnPrev,
-        btnNext: elements.btnNext,
-        currentSlide: elements.currentSlide,
-        totalSlides: elements.totalSlides,
         progressFill: elements.progressFill
       });
 
@@ -89,12 +85,6 @@ class PresentationApp {
       // Containers
       slideContainer: getElement('#slide-container'),
       
-      // Navigation
-      btnPrev: getElement('#btn-prev'),
-      btnNext: getElement('#btn-next'),
-      currentSlide: getElement('#current-slide'),
-      totalSlides: getElement('#total-slides'),
-      
       // Progress
       progressFill: getElement('#progress-fill'),
       
@@ -116,7 +106,7 @@ class PresentationApp {
    * @returns {boolean}
    */
   _validateElements(elements) {
-    const required = ['slideContainer', 'btnPrev', 'btnNext'];
+    const required = ['slideContainer'];
     
     for (const key of required) {
       if (!elements[key]) {

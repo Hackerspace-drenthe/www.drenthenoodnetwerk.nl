@@ -8,9 +8,13 @@ export class NavigationController {
   constructor(slideManager, elements) {
     this.slideManager = slideManager;
     this.elements = elements;
+    this.autoAdvanceEnabled = true;
+    this.autoAdvanceInterval = null;
+    this.autoAdvanceDelay = 60000; // 60 seconds per slide
     
     this._bindEvents();
     this._updateUI();
+    this._startAutoAdvance();
   }
 
   /**
@@ -18,17 +22,7 @@ export class NavigationController {
    * @private
    */
   _bindEvents() {
-    // Previous button
-    this.elements.btnPrev?.addEventListener('click', () => {
-      this.previous();
-    });
-
-    // Next button
-    this.elements.btnNext?.addEventListener('click', () => {
-      this.next();
-    });
-
-    // Keyboard navigation
+    // Keyboard navigation (for manual control)
     document.addEventListener('keydown', (e) => {
       this._handleKeyPress(e);
     });
@@ -36,6 +30,7 @@ export class NavigationController {
     // Listen to slide changes
     this.slideManager.onSlideChange(() => {
       this._updateUI();
+      this._restartAutoAdvance();
     });
   }
 
@@ -75,57 +70,12 @@ export class NavigationController {
   _updateUI() {
     const currentIndex = this.slideManager.getCurrentIndex();
     const totalSlides = this.slideManager.getTotalSlides();
-    const hasPrev = this.slideManager.hasPrevious();
-    const hasNext = this.slideManager.hasNext();
-
-    // Update counter
-    if (this.elements.currentSlide) {
-      this.elements.currentSlide.textContent = currentIndex + 1;
-    }
-    if (this.elements.totalSlides) {
-      this.elements.totalSlides.textContent = totalSlides;
-    }
-
-    // Update button states
-    if (this.elements.btnPrev) {
-      this.elements.btnPrev.disabled = !hasPrev;
-    }
-    if (this.elements.btnNext) {
-      this.elements.btnNext.disabled = !hasNext;
-    }
 
     // Update progress bar
     if (this.elements.progressFill) {
       const progress = this.slideManager.getProgress();
       this.elements.progressFill.style.width = `${progress}%`;
     }
-
-    // Update ARIA live region for accessibility
-    this._announceSlideChange(currentIndex + 1, totalSlides);
-  }
-
-  /**
-   * Announce slide change for screen readers
-   * @private
-   * @param {number} current
-   * @param {number} total
-   */
-  _announceSlideChange(current, total) {
-    const announcement = `Slide ${current} van ${total}`;
-    
-    // Create or update live region
-    let liveRegion = document.getElementById('slide-announcer');
-    if (!liveRegion) {
-      liveRegion = document.createElement('div');
-      liveRegion.id = 'slide-announcer';
-      liveRegion.className = 'sr-only';
-      liveRegion.setAttribute('role', 'status');
-      liveRegion.setAttribute('aria-live', 'polite');
-      liveRegion.setAttribute('aria-atomic', 'true');
-      document.body.appendChild(liveRegion);
-    }
-    
-    liveRegion.textContent = announcement;
   }
 
   /**
@@ -171,10 +121,48 @@ export class NavigationController {
   }
 
   /**
+   * Start auto-advance timer
+   * @private
+   */
+  _startAutoAdvance() {
+    if (!this.autoAdvanceEnabled) return;
+    
+    this._stopAutoAdvance();
+    
+    this.autoAdvanceInterval = setInterval(() => {
+      if (this.slideManager.hasNext()) {
+        this.next();
+      } else {
+        // Loop back to first slide
+        this.goToFirst();
+      }
+    }, this.autoAdvanceDelay);
+  }
+
+  /**
+   * Stop auto-advance timer
+   * @private
+   */
+  _stopAutoAdvance() {
+    if (this.autoAdvanceInterval) {
+      clearInterval(this.autoAdvanceInterval);
+      this.autoAdvanceInterval = null;
+    }
+  }
+
+  /**
+   * Restart auto-advance timer (called on slide change)
+   * @private
+   */
+  _restartAutoAdvance() {
+    this._startAutoAdvance();
+  }
+
+  /**
    * Cleanup
    */
   destroy() {
-    // Cleanup if needed
+    this._stopAutoAdvance();
   }
 }
 

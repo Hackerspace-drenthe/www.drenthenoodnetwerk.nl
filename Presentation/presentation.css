@@ -96,7 +96,7 @@ body {
   top: 0;
   left: 0;
   width: 100vw;
-  height: calc(100vh - 93px);
+  height: calc(100vh - 83px);
   object-fit: cover;
   object-position: center;
 }
@@ -116,11 +116,11 @@ body {
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1.5rem;
   flex-wrap: wrap;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-  min-height: 90px;
+  min-height: 80px;
   z-index: 100;
 }
 
@@ -128,7 +128,7 @@ body {
 .navigation-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .nav-btn {
@@ -285,7 +285,7 @@ body {
 /* Subtitles Display */
 .subtitles {
   position: fixed;
-  bottom: 110px;
+  bottom: 95px;
   left: 50%;
   transform: translateX(-50%);
   width: 92%;

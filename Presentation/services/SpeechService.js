@@ -9,6 +9,7 @@ export class SpeechService {
     this.synthesis = window.speechSynthesis;
     this.currentUtterance = null;
     this.isPaused = false;
+    this.isIntentionallyStopped = false;
     this.rate = 1.0;
     this.pitch = 1.0;
     this.volume = 1.0;
@@ -50,6 +51,7 @@ export class SpeechService {
   speak(text) {
     return new Promise((resolve, reject) => {
       // Stop any ongoing speech
+      this.isIntentionallyStopped = false;
       this.stop();
 
       if (!text || text.trim() === '') {
@@ -83,6 +85,12 @@ export class SpeechService {
       };
 
       this.currentUtterance.onerror = (event) => {
+        // Don't treat intentional stops as errors
+        if (this.isIntentionallyStopped && event.error === 'interrupted') {
+          resolve(); // Treat as successful completion
+          return;
+        }
+        
         console.error('Speech synthesis error:', event);
         this.currentUtterance = null;
         this.isPaused = false;
@@ -122,6 +130,7 @@ export class SpeechService {
    */
   stop() {
     if (this.synthesis.speaking) {
+      this.isIntentionallyStopped = true;
       this.synthesis.cancel();
       this.currentUtterance = null;
       this.isPaused = false;

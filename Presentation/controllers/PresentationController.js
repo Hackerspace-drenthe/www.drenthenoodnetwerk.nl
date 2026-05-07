@@ -224,6 +224,11 @@ export class PresentationController {
    * @private
    */
   _onSpeechError(error) {
+    // Ignore 'interrupted' errors as they're expected when changing slides
+    if (error.error === 'interrupted') {
+      return;
+    }
+    
     console.error('Speech error:', error);
     this.isPresenting = false;
     this._resetSpeechUI();

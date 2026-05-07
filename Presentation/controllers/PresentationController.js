@@ -15,6 +15,7 @@ export class PresentationController {
     this.pdcaPhase = 'Plan';  // Plan, Do, Check, Act
     this.isPresenting = false;
     this.autoSpeechEnabled = true; // Always auto-start speech
+    this.presentationStarted = false; // Track if presentation has been started by user
     this.metrics = {
       slidesViewed: new Set(),
       speechUsageCount: 0,
@@ -49,14 +50,27 @@ export class PresentationController {
     // Mark first slide as viewed
     this.metrics.slidesViewed.add(0);
     
-    // Auto-start speech for first slide after a brief delay
-    if (this.autoSpeechEnabled) {
-      setTimeout(() => {
-        this.speakCurrentSlide();
-      }, 500);
-    }
+    // Don't auto-start speech - wait for user interaction
+    // Speech will start after user clicks "Start Presentation" button
     
     console.log('✓ PLAN: Presentation initialized');
+  }
+
+  /**
+   * Start the presentation (called after user interaction)
+   */
+  startPresentation() {
+    if (this.presentationStarted) return;
+    
+    this.presentationStarted = true;
+    this.metrics.startTime = new Date();
+    
+    // Start speech for first slide
+    setTimeout(() => {
+      this.speakCurrentSlide();
+    }, 500);
+    
+    console.log('✓ Presentation started by user');
   }
 
   /**
@@ -124,8 +138,8 @@ export class PresentationController {
       this.stopSpeech();
     }
     
-    // Auto-start speech for new slide
-    if (this.autoSpeechEnabled) {
+    // Auto-start speech for new slide (only if presentation has been started)
+    if (this.autoSpeechEnabled && this.presentationStarted) {
       // Small delay to allow slide transition
       setTimeout(() => {
         this.speakCurrentSlide();

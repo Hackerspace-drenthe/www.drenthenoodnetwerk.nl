@@ -11,10 +11,11 @@ export class NavigationController {
     this.autoAdvanceEnabled = true;
     this.autoAdvanceInterval = null;
     this.autoAdvanceDelay = 60000; // 60 seconds per slide
+    this.isStarted = false; // Track if auto-advance should be active
     
     this._bindEvents();
     this._updateUI();
-    this._startAutoAdvance();
+    // Don't start auto-advance yet - wait for user to click start button
   }
 
   /**
@@ -125,7 +126,7 @@ export class NavigationController {
    * @private
    */
   _startAutoAdvance() {
-    if (!this.autoAdvanceEnabled) return;
+    if (!this.autoAdvanceEnabled || !this.isStarted) return;
     
     this._stopAutoAdvance();
     
@@ -137,6 +138,14 @@ export class NavigationController {
         this.goToFirst();
       }
     }, this.autoAdvanceDelay);
+  }
+
+  /**
+   * Start the presentation (public method)
+   */
+  start() {
+    this.isStarted = true;
+    this._startAutoAdvance();
   }
 
   /**

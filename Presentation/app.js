@@ -69,6 +69,9 @@ class PresentationApp {
       // Log system info
       this._logSystemInfo();
 
+      // Setup start button
+      this._setupStartButton();
+
     } catch (error) {
       log(`Initialization error: ${error.message}`, 'error');
       this._showError('Kon presentatie niet laden. Ververs de pagina.');
@@ -171,6 +174,34 @@ class PresentationApp {
           </button>
         </div>
       `;
+    }
+  }
+
+  /**
+   * Setup start button handler
+   * @private
+   */
+  _setupStartButton() {
+    const startBtn = getElement('#start-btn');
+    const startOverlay = getElement('#start-overlay');
+    
+    if (startBtn && startOverlay) {
+      startBtn.addEventListener('click', () => {
+        // Hide overlay
+        startOverlay.classList.add('hidden');
+        
+        // Start presentation and speech
+        if (this.presentationController) {
+          this.presentationController.startPresentation();
+          
+          // Start auto-advance timer
+          if (this.presentationController.navigationController) {
+            this.presentationController.navigationController.start();
+          }
+        }
+        
+        log('Presentation started', 'log');
+      });
     }
   }
 

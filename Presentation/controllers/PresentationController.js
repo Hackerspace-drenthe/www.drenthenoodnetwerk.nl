@@ -204,7 +204,9 @@ export class PresentationController {
     }
     
     this.elements.btnSpeak?.classList.add('speaking');
-    this.elements.btnPause?.style.display = 'flex';
+    if (this.elements.btnPause) {
+      this.elements.btnPause.style.display = 'flex';
+    }
   }
 
   /**
@@ -237,7 +239,9 @@ export class PresentationController {
   _resetSpeechUI() {
     this.elements.btnSpeak?.classList.remove('speaking');
     this.elements.btnSpeak?.setAttribute('aria-label', 'Spreek tekst uit');
-    this.elements.btnPause?.style.display = 'none';
+    if (this.elements.btnPause) {
+      this.elements.btnPause.style.display = 'none';
+    }
   }
 
   /**

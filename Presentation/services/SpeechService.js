@@ -22,16 +22,33 @@ export class SpeechService {
   }
 
   /**
-   * Initialize Dutch voice
+   * Initialize Dutch voice (prefer male)
    * @private
    */
   _initVoice() {
     const loadVoices = () => {
       const voices = this.synthesis.getVoices();
-      // Try to find Dutch voice, fallback to any available voice
-      this.voice = voices.find(voice => voice.lang.startsWith('nl')) || 
+      
+      // Prefer male Dutch voices
+      const dutchMaleVoice = voices.find(voice => 
+        voice.lang.startsWith('nl') && 
+        (voice.name.toLowerCase().includes('male') || 
+         voice.name.toLowerCase().includes('man') ||
+         voice.name.toLowerCase().includes('m'))
+      );
+      
+      // Fallback to any Dutch voice
+      const dutchVoice = voices.find(voice => voice.lang.startsWith('nl'));
+      
+      // Final fallback to English or first available
+      this.voice = dutchMaleVoice || 
+                   dutchVoice || 
                    voices.find(voice => voice.lang.startsWith('en')) ||
                    voices[0];
+      
+      if (this.voice) {
+        console.log(`Using voice: ${this.voice.name} (${this.voice.lang})`);
+      }
     };
 
     // Load voices immediately

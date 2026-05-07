@@ -92,32 +92,17 @@ body {
 
 /* ─── Slide Content ─── */
 .slide-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100vw;
-  height: calc(100vh - 200px);
-  object-fit: contain;
-  box-shadow: var(--shadow-lg);
-  transition: transform var(--transition-normal);
-}
-
-.slide-image:hover {
-  transform: scale(1.01);
+  height: calc(100vh - 93px);
+  object-fit: cover;
+  object-position: center;
 }
 
 .slide-title {
-  position: absolute;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-heading);
-  font-size: clamp(1.5rem, 3vw, 2.5rem);
-  font-weight: 800;
-  color: var(--color-light);
-  line-height: 1.2;
-  background: rgba(10, 22, 40, 0.85);
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
-  box-shadow: var(--shadow-md);
-  z-index: 10;
+  display: none;
 }
 
 .slide-description {
@@ -128,13 +113,15 @@ body {
 .controls-panel {
   background: var(--color-surface);
   border-top: 2px solid rgba(255, 255, 255, 0.1);
-  padding: 1.5rem 2rem;
+  padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  min-height: 90px;
+  z-index: 100;
 }
 
 /* Navigation Controls */
@@ -282,7 +269,7 @@ body {
 
 /* Progress Bar */
 .progress-bar {
-  height: 4px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
@@ -297,25 +284,26 @@ body {
 
 /* Subtitles Display */
 .subtitles {
-  position: absolute;
-  bottom: 120px;
+  position: fixed;
+  bottom: 110px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 1200px;
-  background: rgba(10, 22, 40, 0.95);
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
-  line-height: 1.8;
-  color: var(--color-text);
+  width: 92%;
+  max-width: 1400px;
+  background: rgba(10, 22, 40, 0.97);
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+  line-height: 1.9;
+  color: #ffffff;
   text-align: center;
-  z-index: 20;
+  z-index: 50;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-  border: 2px solid rgba(244, 162, 97, 0.3);
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  border: 3px solid rgba(244, 162, 97, 0.5);
+  backdrop-filter: blur(12px);
 }
 
 .subtitles.active {
@@ -326,12 +314,13 @@ body {
 .subtitles::before {
   content: '🔊';
   display: inline-block;
-  margin-right: 0.5rem;
-  font-size: 1.2em;
+  margin-right: 0.75rem;
+  font-size: 1.4em;
 }
 
 /* PDCA Indicator */
 .pdca-indicator {
+  display: none; /* Hidden for clean full-screen experience */
   position: absolute;
   top: 2rem;
   right: 2rem;

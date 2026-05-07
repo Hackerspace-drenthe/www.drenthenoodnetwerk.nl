@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meshcore Drenthe Presentatie</title>
+  <meta name="description" content="Interactieve presentatie over Meshcore Drenthe met gesproken uitleg">
+  <link rel="stylesheet" href="presentation.css">
+</head>
+<body>
+  <!-- Presentation Container -->
+  <div id="presentation-container" class="presentation">
+    
+    <!-- Slide Display Area -->
+    <div id="slide-container" class="slide-container">
+      <!-- Slides will be dynamically inserted here -->
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+      
+      <!-- Navigation Controls -->
+      <div class="navigation-controls">
+        <button id="btn-prev" class="nav-btn" aria-label="Vorige slide">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        
+        <div class="slide-counter">
+          <span id="current-slide">1</span>
+          <span>/</span>
+          <span id="total-slides">7</span>
+        </div>
+        
+        <button id="btn-next" class="nav-btn" aria-label="Volgende slide">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Speech Controls -->
+      <div class="speech-controls">
+        <button id="btn-speak" class="control-btn control-btn--primary" aria-label="Spreek tekst uit">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <span>Uitleg</span>
+        </button>
+        
+        <button id="btn-pause" class="control-btn" aria-label="Pauzeer" style="display:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        </button>
+        
+        <button id="btn-stop" class="control-btn" aria-label="Stop">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="5" width="14" height="14"></rect>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Settings -->
+      <div class="settings-controls">
+        <label for="speech-rate" class="setting-label">Snelheid:</label>
+        <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1" class="slider">
+        <span id="rate-value">1.0x</span>
+      </div>
+
+      <!-- Auto-play Toggle -->
+      <div class="autoplay-controls">
+        <label class="toggle-label">
+          <input type="checkbox" id="auto-play" class="toggle-input">
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Auto-play</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+
+    <!-- PDCA Status Indicator -->
+    <div id="pdca-indicator" class="pdca-indicator">
+      <span class="pdca-phase">Plan</span>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div id="loading" class="loading" style="display:none;">
+    <div class="spinner"></div>
+    <p>Presentatie laden...</p>
+  </div>
+
+  <!-- Scripts: Load in order following Dependency Inversion -->
+  <script type="module" src="config/slides.js"></script>
+  <script type="module" src="utils/helpers.js"></script>
+  <script type="module" src="services/SpeechService.js"></script>
+  <script type="module" src="services/SlideManager.js"></script>
+  <script type="module" src="controllers/NavigationController.js"></script>
+  <script type="module" src="controllers/PresentationController.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

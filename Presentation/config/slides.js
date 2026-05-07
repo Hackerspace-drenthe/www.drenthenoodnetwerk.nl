@@ -54,7 +54,11 @@ export const slidesData = [
     description: "Interactieve kaart van het geplande netwerk. Bekijk waar nodes komen en hoe ze Drenthe gaan bedekken.",
     speechText: `De netwerkkaart van Drenthe. 
     Op deze kaart zie je alle geplande en actieve node-locaties. 
+    De grote steden zijn al goed gedekt: Emmen, Assen en Hoogeveen hebben bereik dankzij zendamateurs van DARES. 
+    Maar daartussen is er weinig tot geen dekking. 
+    Plaatsen als Borger, Emmer-Compascuum en Weerdinge hebben meestal geen bereik. 
     Drenthe is het perfecte testgebied: grote afstanden, verspreide dorpen, en kwetsbaar bij stroomuitval. 
+    Daar kunnen we wat aan veranderen door in onze eigen omgeving aansluiting te zoeken en een fijnmazig netwerk op te zetten. 
     We richten ons eerst op strategische locaties: hoge gebouwen, kerktorens, en gemeenschapscentra. 
     Het doel is niet om overal direct dekking te hebben, maar om een robuuste basis te leggen 
     die kan groeien naarmate meer mensen meedoen. 

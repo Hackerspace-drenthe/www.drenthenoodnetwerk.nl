@@ -14,6 +14,7 @@ export class PresentationController {
     // PDCA state
     this.pdcaPhase = 'Plan';  // Plan, Do, Check, Act
     this.isPresenting = false;
+    this.autoSpeechEnabled = true; // Always auto-start speech
     this.metrics = {
       slidesViewed: new Set(),
       speechUsageCount: 0,
@@ -51,6 +52,13 @@ export class PresentationController {
     
     // Mark first slide as viewed
     this.metrics.slidesViewed.add(0);
+    
+    // Auto-start speech for first slide after a brief delay
+    if (this.autoSpeechEnabled) {
+      setTimeout(() => {
+        this.speakCurrentSlide();
+      }, 500);
+    }
     
     console.log('✓ PLAN: Presentation initialized');
   }
@@ -159,6 +167,14 @@ export class PresentationController {
       this.stopSpeech();
     }
     
+    // Auto-start speech for new slide
+    if (this.autoSpeechEnabled) {
+      // Small delay to allow slide transition
+      setTimeout(() => {
+        this.speakCurrentSlide();
+      }, 300);
+    }
+    
     // Check progress
     const progress = (this.metrics.slidesViewed.size / this.slideManager.getTotalSlides()) * 100;
     console.log(`✓ CHECK: Progress ${progress.toFixed(1)}% (${this.metrics.slidesViewed.size}/${this.slideManager.getTotalSlides()} slides viewed)`);
@@ -207,6 +223,9 @@ export class PresentationController {
     if (this.elements.btnPause) {
       this.elements.btnPause.style.display = 'flex';
     }
+    
+    // Show subtitles with current speech text
+    this._showSubtitles();
   }
 
   /**
@@ -216,6 +235,7 @@ export class PresentationController {
   _onSpeechEnd() {
     this.isPresenting = false;
     this._resetSpeechUI();
+    this._hideSubtitles();
     this.updatePDCAPhase('Check');
   }
 
@@ -246,6 +266,39 @@ export class PresentationController {
     this.elements.btnSpeak?.setAttribute('aria-label', 'Spreek tekst uit');
     if (this.elements.btnPause) {
       this.elements.btnPause.style.display = 'none';
+    }
+    this._hideSubtitles();
+  }
+
+  /**
+   * Show subtitles with current speech text
+   * @private
+   */
+  _showSubtitles() {
+    const slide = this.slideManager.getCurrentSlide();
+    const subtitlesElement = document.getElementById('subtitles');
+    
+    if (subtitlesElement && slide && slide.speechText) {
+      subtitlesElement.textContent = slide.speechText;
+      subtitlesElement.classList.add('active');
+    }
+  }
+
+  /**
+   * Hide subtitles
+   * @private
+   */
+  _hideSubtitles() {
+    const subtitlesElement = document.getElementById('subtitles');
+    
+    if (subtitlesElement) {
+      subtitlesElement.classList.remove('active');
+      // Clear text after fade out animation
+      setTimeout(() => {
+        if (!subtitlesElement.classList.contains('active')) {
+          subtitlesElement.textContent = '';
+        }
+      }, 300);
     }
   }
 

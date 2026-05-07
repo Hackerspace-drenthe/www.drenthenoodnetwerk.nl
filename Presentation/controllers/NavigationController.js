@@ -8,9 +8,6 @@ export class NavigationController {
   constructor(slideManager, elements) {
     this.slideManager = slideManager;
     this.elements = elements;
-    this.autoPlayEnabled = false;
-    this.autoPlayInterval = null;
-    this.autoPlayDelay = 10000; // 10 seconds per slide
     
     this._bindEvents();
     this._updateUI();
@@ -34,11 +31,6 @@ export class NavigationController {
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       this._handleKeyPress(e);
-    });
-
-    // Auto-play toggle
-    this.elements.autoPlayToggle?.addEventListener('change', (e) => {
-      this.setAutoPlay(e.target.checked);
     });
 
     // Listen to slide changes
@@ -179,72 +171,10 @@ export class NavigationController {
   }
 
   /**
-   * Enable/disable auto-play
-   * @param {boolean} enabled
-   */
-  setAutoPlay(enabled) {
-    this.autoPlayEnabled = enabled;
-    
-    if (enabled) {
-      this._startAutoPlay();
-    } else {
-      this._stopAutoPlay();
-    }
-  }
-
-  /**
-   * Start auto-play
-   * @private
-   */
-  _startAutoPlay() {
-    this._stopAutoPlay(); // Clear existing interval
-    
-    this.autoPlayInterval = setInterval(() => {
-      if (!this.slideManager.hasNext()) {
-        // Loop back to start
-        this.goToFirst();
-      } else {
-        this.next();
-      }
-    }, this.autoPlayDelay);
-  }
-
-  /**
-   * Stop auto-play
-   * @private
-   */
-  _stopAutoPlay() {
-    if (this.autoPlayInterval) {
-      clearInterval(this.autoPlayInterval);
-      this.autoPlayInterval = null;
-    }
-  }
-
-  /**
-   * Set auto-play delay
-   * @param {number} delay - Delay in milliseconds
-   */
-  setAutoPlayDelay(delay) {
-    this.autoPlayDelay = Math.max(1000, delay); // Minimum 1 second
-    
-    if (this.autoPlayEnabled) {
-      this._startAutoPlay(); // Restart with new delay
-    }
-  }
-
-  /**
-   * Get current auto-play state
-   * @returns {boolean}
-   */
-  isAutoPlayEnabled() {
-    return this.autoPlayEnabled;
-  }
-
-  /**
    * Cleanup
    */
   destroy() {
-    this._stopAutoPlay();
+    // Cleanup if needed
   }
 }
 

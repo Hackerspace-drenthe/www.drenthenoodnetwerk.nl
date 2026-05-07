@@ -70,21 +70,15 @@
         <input type="range" id="speech-rate" min="0.5" max="2" step="0.1" value="1" class="slider">
         <span id="rate-value">1.0x</span>
       </div>
-
-      <!-- Auto-play Toggle -->
-      <div class="autoplay-controls">
-        <label class="toggle-label">
-          <input type="checkbox" id="auto-play" class="toggle-input">
-          <span class="toggle-slider"></span>
-          <span class="toggle-text">Auto-play</span>
-        </label>
-      </div>
     </div>
 
     <!-- Progress Bar -->
     <div class="progress-bar">
       <div id="progress-fill" class="progress-fill"></div>
     </div>
+
+    <!-- Subtitles Display -->
+    <div id="subtitles" class="subtitles" aria-live="polite" aria-atomic="true"></div>
 
     <!-- PDCA Status Indicator -->
     <div id="pdca-indicator" class="pdca-indicator">

@@ -52,8 +52,7 @@ class PresentationApp {
         btnNext: elements.btnNext,
         currentSlide: elements.currentSlide,
         totalSlides: elements.totalSlides,
-        progressFill: elements.progressFill,
-        autoPlayToggle: elements.autoPlayToggle
+        progressFill: elements.progressFill
       });
 
       // Initialize main presentation controller (PDCA orchestrator)
@@ -111,10 +110,12 @@ class PresentationApp {
       // Settings
       speechRate: getElement('#speech-rate'),
       rateValue: getElement('#rate-value'),
-      autoPlayToggle: getElement('#auto-play'),
       
       // Progress
       progressFill: getElement('#progress-fill'),
+      
+      // Subtitles
+      subtitles: getElement('#subtitles'),
       
       // PDCA indicator
       pdcaIndicator: getElement('#pdca-indicator'),

@@ -10,11 +10,19 @@ export class NavigationController {
     this.elements = elements;
     this.autoAdvanceEnabled = true;
     this.autoAdvanceInterval = null;
+    this.timerInterval = null;
     this.autoAdvanceDelay = 60000; // 60 seconds per slide
     this.isStarted = false; // Track if auto-advance should be active
+    this.remainingSeconds = 60;
+    
+    // Get timer elements
+    this.timerSecondsElement = document.getElementById('timer-seconds');
+    this.timerProgressElement = document.getElementById('timer-progress');
+    this.timerCircumference = 2 * Math.PI * 45; // radius = 45
     
     this._bindEvents();
     this._updateUI();
+    this._updateTimer();
     // Don't start auto-advance yet - wait for user to click start button
   }
 
@@ -76,6 +84,53 @@ export class NavigationController {
     if (this.elements.progressFill) {
       const progress = this.slideManager.getProgress();
       this.elements.progressFill.style.width = `${progress}%`;
+    }
+  }
+
+  /**
+   * Update countdown timer display
+   * @private
+   */
+  _updateTimer() {
+    if (this.timerSecondsElement) {
+      this.timerSecondsElement.textContent = this.remainingSeconds;
+    }
+    
+    if (this.timerProgressElement) {
+      const progress = (this.remainingSeconds / 60) * this.timerCircumference;
+      this.timerProgressElement.style.strokeDashoffset = this.timerCircumference - progress;
+    }
+  }
+
+  /**
+   * Start timer countdown
+   * @private
+   */
+  _startTimer() {
+    this._stopTimer();
+    
+    this.remainingSeconds = 60;
+    this._updateTimer();
+    
+    this.timerInterval = setInterval(() => {
+      this.remainingSeconds--;
+      
+      if (this.remainingSeconds < 0) {
+        this.remainingSeconds = 60;
+      }
+      
+      this._updateTimer();
+    }, 1000);
+  }
+
+  /**
+   * Stop timer countdown
+   * @private
+   */
+  _stopTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
     }
   }
 
@@ -146,6 +201,7 @@ export class NavigationController {
   start() {
     this.isStarted = true;
     this._startAutoAdvance();
+    this._startTimer();
   }
 
   /**
@@ -165,6 +221,7 @@ export class NavigationController {
    */
   _restartAutoAdvance() {
     this._startAutoAdvance();
+    this._startTimer(); // Also restart countdown timer
   }
 
   /**
@@ -172,6 +229,7 @@ export class NavigationController {
    */
   destroy() {
     this._stopAutoAdvance();
+    this._stopTimer();
   }
 }
 

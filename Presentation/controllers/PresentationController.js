@@ -189,9 +189,6 @@ export class PresentationController {
     if (!this.metrics.startTime) {
       this.metrics.startTime = new Date();
     }
-    
-    // Show subtitles with current speech text
-    this._showSubtitles();
   }
 
   /**
@@ -201,7 +198,6 @@ export class PresentationController {
   _onSpeechEnd() {
     this.isPresenting = false;
     this._resetSpeechUI();
-    this._hideSubtitles();
     this.updatePDCAPhase('Check');
   }
 
@@ -228,39 +224,7 @@ export class PresentationController {
    * @private
    */
   _resetSpeechUI() {
-    this._hideSubtitles();
-  }
-
-  /**
-   * Show subtitles with current speech text
-   * @private
-   */
-  _showSubtitles() {
-    const slide = this.slideManager.getCurrentSlide();
-    const subtitlesElement = document.getElementById('subtitles');
-    
-    if (subtitlesElement && slide && slide.speechText) {
-      subtitlesElement.textContent = slide.speechText;
-      subtitlesElement.classList.add('active');
-    }
-  }
-
-  /**
-   * Hide subtitles
-   * @private
-   */
-  _hideSubtitles() {
-    const subtitlesElement = document.getElementById('subtitles');
-    
-    if (subtitlesElement) {
-      subtitlesElement.classList.remove('active');
-      // Clear text after fade out animation
-      setTimeout(() => {
-        if (!subtitlesElement.classList.contains('active')) {
-          subtitlesElement.textContent = '';
-        }
-      }, 300);
-    }
+    // Nothing to reset now that subtitles are removed
   }
 
   /**

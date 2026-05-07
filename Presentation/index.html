@@ -21,8 +21,18 @@
       <div id="progress-fill" class="progress-fill"></div>
     </div>
 
-    <!-- Subtitles Display -->
-    <div id="subtitles" class="subtitles" aria-live="polite" aria-atomic="true"></div>
+    <!-- Page Timer (60 seconds countdown) -->
+    <div id="page-timer" class="page-timer">
+      <div class="timer-circle">
+        <svg class="timer-svg" viewBox="0 0 100 100">
+          <circle class="timer-bg" cx="50" cy="50" r="45"></circle>
+          <circle id="timer-progress" class="timer-progress" cx="50" cy="50" r="45"></circle>
+        </svg>
+        <div class="timer-text">
+          <span id="timer-seconds">60</span>
+        </div>
+      </div>
+    </div>
 
     <!-- PDCA Status Indicator -->
     <div id="pdca-indicator" class="pdca-indicator">

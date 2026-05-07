@@ -60,14 +60,7 @@ class PresentationApp {
         slideManager,
         navigationController,
         speechService,
-        {
-          btnSpeak: elements.btnSpeak,
-          btnPause: elements.btnPause,
-          btnStop: elements.btnStop,
-          speechRate: elements.speechRate,
-          rateValue: elements.rateValue,
-          pdcaIndicator: elements.pdcaIndicator
-        }
+        {}
       );
 
       // Hide loading
@@ -102,15 +95,6 @@ class PresentationApp {
       currentSlide: getElement('#current-slide'),
       totalSlides: getElement('#total-slides'),
       
-      // Speech controls
-      btnSpeak: getElement('#btn-speak'),
-      btnPause: getElement('#btn-pause'),
-      btnStop: getElement('#btn-stop'),
-      
-      // Settings
-      speechRate: getElement('#speech-rate'),
-      rateValue: getElement('#rate-value'),
-      
       // Progress
       progressFill: getElement('#progress-fill'),
       
@@ -132,7 +116,7 @@ class PresentationApp {
    * @returns {boolean}
    */
   _validateElements(elements) {
-    const required = ['slideContainer', 'btnPrev', 'btnNext', 'btnSpeak'];
+    const required = ['slideContainer', 'btnPrev', 'btnNext'];
     
     for (const key of required) {
       if (!elements[key]) {

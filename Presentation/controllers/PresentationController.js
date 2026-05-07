@@ -33,10 +33,6 @@ export class PresentationController {
   _initialize() {
     this.updatePDCAPhase('Plan');
     
-    // Bind events
-    this._bindSpeechControls();
-    this._bindRateControl();
-    
     // Setup speech callbacks
     this.speechService.onStart(() => this._onSpeechStart());
     this.speechService.onEnd(() => this._onSpeechEnd());
@@ -64,41 +60,6 @@ export class PresentationController {
   }
 
   /**
-   * Bind speech control events
-   * @private
-   */
-  _bindSpeechControls() {
-    // Speak button
-    this.elements.btnSpeak?.addEventListener('click', () => {
-      this.speakCurrentSlide();
-    });
-
-    // Pause button
-    this.elements.btnPause?.addEventListener('click', () => {
-      this.pauseSpeech();
-    });
-
-    // Stop button
-    this.elements.btnStop?.addEventListener('click', () => {
-      this.stopSpeech();
-    });
-  }
-
-  /**
-   * Bind rate control
-   * @private
-   */
-  _bindRateControl() {
-    this.elements.speechRate?.addEventListener('input', (e) => {
-      const rate = parseFloat(e.target.value);
-      this.speechService.setRate(rate);
-      if (this.elements.rateValue) {
-        this.elements.rateValue.textContent = `${rate.toFixed(1)}x`;
-      }
-    });
-  }
-
-  /**
    * DO Phase: Execute presentation actions
    * Speak current slide
    */
@@ -114,10 +75,6 @@ export class PresentationController {
     try {
       this.isPresenting = true;
       this.metrics.speechUsageCount++;
-      
-      // Update UI
-      this.elements.btnSpeak?.classList.add('speaking');
-      this.elements.btnSpeak?.setAttribute('aria-label', 'Bezig met voorlezen...');
       
       await this.speechService.speak(slide.speechText);
       
@@ -219,11 +176,6 @@ export class PresentationController {
       this.metrics.startTime = new Date();
     }
     
-    this.elements.btnSpeak?.classList.add('speaking');
-    if (this.elements.btnPause) {
-      this.elements.btnPause.style.display = 'flex';
-    }
-    
     // Show subtitles with current speech text
     this._showSubtitles();
   }
@@ -262,11 +214,6 @@ export class PresentationController {
    * @private
    */
   _resetSpeechUI() {
-    this.elements.btnSpeak?.classList.remove('speaking');
-    this.elements.btnSpeak?.setAttribute('aria-label', 'Spreek tekst uit');
-    if (this.elements.btnPause) {
-      this.elements.btnPause.style.display = 'none';
-    }
     this._hideSubtitles();
   }
 

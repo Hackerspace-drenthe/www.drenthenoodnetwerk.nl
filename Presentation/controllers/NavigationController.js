@@ -186,11 +186,22 @@ export class NavigationController {
     this._stopAutoAdvance();
     
     this.autoAdvanceInterval = setInterval(() => {
+      const currentSlide = this.slideManager.getCurrentSlide();
+      
+      // Stop auto-advance if we're on the last slide
+      if (currentSlide && currentSlide.isLastSlide) {
+        this._stopAutoAdvance();
+        this._stopTimer();
+        console.log('✓ Reached final slide - auto-advance stopped');
+        return;
+      }
+      
       if (this.slideManager.hasNext()) {
         this.next();
       } else {
-        // Loop back to first slide
-        this.goToFirst();
+        // Stop at the end instead of looping
+        this._stopAutoAdvance();
+        this._stopTimer();
       }
     }, this.autoAdvanceDelay);
   }

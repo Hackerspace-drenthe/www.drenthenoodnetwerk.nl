@@ -11,7 +11,7 @@ export const slidesData = [
     image: "../assets/images/01-meshcoremaand.png",
     description: "Mei 2026 is Meshcore Maand bij Hackerspace Drenthe. Een hele maand gewijd aan het bouwen van een decentraal noodnetwerk voor Drenthe.",
     speechText: `Welkom bij de Meshcore Drenthe presentatie. 
-    Mei 2026 is Meshcore Maand. Een hele maand gewijd aan het bouwen van een decentraal noodnetwerk voor de provincie Drenthe. 
+    Mei 2026 is Meshcore Maand! Een hele maand gewijd aan het bouwen van een decentraal noodnetwerk voor de provincie Drenthe. 
     Elke woensdag komen we samen in De Nieuwe Veste in Coevorden om te werken aan dit bijzondere project. 
     De kick-off is vandaag, 6 mei, waar we beginnen met de eerste prototypes en iedereen kan meedoen.`,
     keywords: ["meshcore", "mei", "drenthe", "noodnetwerk", "hackerspace"],
@@ -24,9 +24,9 @@ export const slidesData = [
     description: "Stel je voor: een estafette van walkietalkies. Elk apparaat geeft berichten door aan het volgende. Geen zendmast, geen abonnement, geen internet.",
     speechText: `Wat is Meshcore precies? 
     Stel je voor: een estafette van walkietalkies. Elk apparaat geeft berichten door aan het volgende, totdat het bericht aankomt. 
-    Geen zendmast nodig, geen abonnement, geen internet. Dát is Meshcore. 
+    Geen zendmast nodig! geen abonnement! geen internet! Dát is Meshcore. 
     Het is een open-source mesh-netwerk dat draait op Lora-technologie. 
-    Nodes sturen berichten door van punt naar punt, volledig decentraal. 
+    Nodes sturen berichten door van punt naar punt, volledig de-centraal. 
     Als één punt uitvalt, vinden berichten automatisch een andere route. 
     Het netwerk heelt zichzelf.`,
     keywords: ["meshcore", "mesh netwerk", "lora", "decentraal", "open source"],
@@ -114,6 +114,21 @@ export const slidesData = [
     De Academy is toegankelijk via de website.`,
     keywords: ["academy", "cursus", "leren", "certificaat", "opleiding"],
     category: "education"
+  },
+  {
+    id: 8,
+    title: "Doe Mee!",
+    image: "../assets/images/08-call-to-action.jpeg",
+    description: "Bezoek onze websites voor meer informatie en om je aan te sluiten bij het netwerk.",
+    speechText: `Wil je meedoen met het Meshcore Drenthe project? 
+    Bezoek hackerspace-drenthe punt en el voor informatie over onze hackavonden en locatie. 
+    Of ga naar drenthenoodnetwerk punt en el voor technische details, handleidingen, en de live netwerkkaart. 
+    We hopen je snel te zien bij een van onze bijeenkomsten. 
+    Samen bouwen we een robuust, decentraal communicatienetwerk voor Drenthe. 
+    Tot snel!`,
+    keywords: ["call to action", "website", "meedoen", "contact", "informatie"],
+    category: "closing",
+    isLastSlide: true
   }
 ];
 

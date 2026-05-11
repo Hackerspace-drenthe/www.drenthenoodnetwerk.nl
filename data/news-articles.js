@@ -18,163 +18,129 @@
 
 export const newsData = [
   {
-    id: 8,
-    date: '2026-05-11',
-    category: 'voortgang',
-    title: 'Eerste 10 Nodes Actief in Drenthe',
-    summary: 'Een belangrijke mijlpaal: we hebben nu 10 actieve nodes in het netwerk, verspreid over Coevorden, Emmen en omgeving.',
-    content: `
-      <p>Het Meshcore Drenthe netwerk groeit gestaag! Deze week hebben we de 10e node geactiveerd, wat betekent dat we nu een werkend mesh-netwerk hebben dat meerdere dorpen verbindt.</p>
-      <p><strong>Actieve locaties:</strong></p>
-      <ul>
-        <li>Coevorden centrum (3 nodes)</li>
-        <li>Emmen noord (2 nodes)</li>
-        <li>Zweeloo (1 node)</li>
-        <li>Dalen (2 nodes)</li>
-        <li>Sleen (2 nodes)</li>
-      </ul>
-      <p>De gemiddelde hop-count tussen nodes is momenteel 2.3, wat betekent dat berichten gemiddeld via 2-3 tussenliggende nodes gaan voordat ze hun bestemming bereiken.</p>
-    `,
-    tags: ['netwerk', 'mijlpaal', 'nodes', 'dekking'],
-    featured: true
-  },
-  {
-    id: 7,
-    date: '2026-05-08',
-    category: 'evenement',
-    title: 'Presentatie Systeem Live',
-    summary: 'We hebben een automatische presentatie ontwikkeld die het Meshcore project uitlegt met Nederlandse voice-over.',
-    content: `
-      <p>Voor de komende evenementen hebben we een professioneel presentatiesysteem gebouwd. De presentatie draait automatisch, heeft Nederlandse spraaksynthese, en legt in 8 slides uit wat Meshcore is en hoe je kunt meedoen.</p>
-      <p>Perfect voor gebruik tijdens open dagen, marktplaatsen, of als iemand meer wil weten over het project!</p>
-    `,
-    tags: ['presentatie', 'automatisering', 'communicatie'],
-    link: 'Presentation/index.html'
-  },
-  {
-    id: 6,
-    date: '2026-05-07',
-    category: 'technisch',
-    title: 'MeshCore Academy Nu Live',
-    summary: 'Volledige cursusreeks met 19 modules om alles te leren over mesh-netwerken, van basis tot gevorderd.',
-    content: `
-      <p>De MeshCore Academy is gelanceerd! Een complete gratis cursus die je meeneemt van de basis van LoRa-technologie tot gevorderde onderwerpen zoals link budget planning en netwerk-ontwerp.</p>
-      <p><strong>Wat kun je leren?</strong></p>
-      <ul>
-        <li>Wat is mesh networking en waarom is het belangrijk?</li>
-        <li>Hoe werkt LoRa-technologie precies?</li>
-        <li>Regelgeving en frequentiebeheer</li>
-        <li>Hardware installeren en configureren</li>
-        <li>Antennes kiezen en plaatsen</li>
-        <li>Netwerk ontwerpen en troubleshooten</li>
-      </ul>
-      <p>Elke module bevat quizzen, praktische tools, en een certificaat na voltooiing!</p>
-    `,
-    tags: ['educatie', 'cursus', 'lora', 'training'],
-    link: 'MeshAcademy/index.html'
-  },
-  {
     id: 5,
-    date: '2026-05-06',
-    category: 'evenement',
-    title: 'Meshcore Maand van Start! 🎉',
-    summary: 'Mei 2026 is officieel Meshcore Maand. Elke woensdag werken we samen aan het netwerk bij Hackerspace Drenthe.',
+    date: '2026-05-07',
+    category: 'voortgang',
+    title: 'RTV Drenthe Publiceert Artikel over Meshcore Drenthe',
+    summary: 'RTV Drenthe publiceert uitgebreid artikel: "Hackerspace Drenthe werkt aan een noodnetwerk voor de provincie"',
     content: `
-      <p>Het is zover! Mei 2026 is Meshcore Maand bij Hackerspace Drenthe. Een hele maand gewijd aan het opzetten van een decentraal noodnetwerk voor Drenthe.</p>
-      <p><strong>Planning:</strong></p>
+      <p>Dinsdagavond 7 mei publiceerde RTV Drenthe een uitgebreid artikel over het Meshcore Drenthe project. Journalist Mart Beuker sprak met Maurice Kremer en Rein Velt over het noodnetwerk.</p>
+      
+      <p><strong>Hoogtepunten uit het artikel:</strong></p>
       <ul>
-        <li><strong>6 mei:</strong> Kick-off en eerste prototypes</li>
-        <li><strong>13 mei:</strong> Firmware configuratie en eerste tests</li>
-        <li><strong>20 mei:</strong> Antenne-installatie en bereik optimaliseren</li>
-        <li><strong>27 mei:</strong> Netwerk-analyse en documentatie</li>
+        <li><strong>Veiligheidsregio Drenthe</strong> bevestigt dat ook zij aan het experimenteren is met de technologie</li>
+        <li><strong>Huidige dekking:</strong> Grotere plaatsen zoals Emmen en Assen hebben al verbinding, kleinere dorpen zoals Erica, Weerdinge en Nieuw-Weerdinge nog niet</li>
+        <li><strong>Kosten:</strong> Basis node tussen €20-50, met zonnepaneel €60-100</li>
+        <li><strong>Droomscenario:</strong> Volgend jaar een dekkend netwerk in heel Drenthe</li>
+        <li><strong>Oproep:</strong> "Heb je een hoge plek, meld je bij ons, dan knallen we er een antenne op"</li>
       </ul>
-      <p>Locatie: De Nieuwe Veste, Coevorden<br>
-      Tijd: 19:00 deur open, 20:00 start</p>
-      <p>Iedereen is welkom, of je nu ervaring hebt of voor het eerst komt kijken!</p>
+      
+      <p>Het artikel beschrijft het netwerk als een "walkietalkie-estafette" waarbij berichten van apparaat naar apparaat springen. Een heldere uitleg voor een breed publiek!</p>
+      
+      <p>Ook wordt benadrukt dat we <strong>elke woensdag in het Fablab in Coevorden</strong> werken aan het project. Iedereen die hulp nodig heeft is welkom om langs te komen.</p>
+      
+      <p>De publiciteit via RTV Drenthe helpt enorm om meer mensen te bereiken en het belang van decentrale communicatie onder de aandacht te brengen.</p>
     `,
-    tags: ['evenement', 'hackavond', 'mei', 'kick-off'],
+    tags: ['rtv-drenthe', 'media', 'publiciteit', 'veiligheidsregio'],
+    link: 'https://www.rtvdrenthe.nl/nieuws/18438486/hackerspace-drenthe-werkt-aan-een-noodnetwerk-voor-de-provincie',
     featured: true
   },
   {
     id: 4,
-    date: '2026-04-28',
-    category: 'aankondiging',
-    title: 'Website Gelanceerd',
-    summary: 'De officiële Meshcore Drenthe website is nu live met alle informatie over het project.',
+    date: '2026-05-17',
+    category: 'evenement',
+    title: 'Radio Interview bij ZO!34',
+    summary: 'Live radio-interview bij ZO!34 over het Meshcore Drenthe project op zondag 17 mei om 10:10 uur.',
     content: `
-      <p>We zijn trots om de officiële Meshcore Drenthe website te lanceren! Hier vind je alle informatie over:</p>
+      <p>Zondag 17 mei om 10:10 uur is Meshcore Drenthe te gast bij lokale radiozender ZO!34 voor een uitgebreid interview over het project.</p>
+      <p>We vertellen over de kickoff, de deelnemers, en wat de plannen zijn voor de komende weken. Een mooie kans om het project onder de aandacht te brengen bij een breed publiek!</p>
+      <p><strong>Details:</strong></p>
       <ul>
-        <li>Wat Meshcore is en hoe het werkt</li>
-        <li>De netwerkkaart van Drenthe</li>
-        <li>Hoe je kunt meedoen</li>
-        <li>Handleidingen en documentatie</li>
-        <li>Planning en evenementen</li>
-        <li>Veelgestelde vragen</li>
+        <li>Datum: Zondag 17 mei 2026</li>
+        <li>Tijd: 10:10 uur</li>
+        <li>Zender: ZO!34</li>
       </ul>
-      <p>De site is volledig open-source en staat op GitHub. Suggesties en verbeteringen zijn altijd welkom!</p>
     `,
-    tags: ['website', 'documentatie', 'open-source']
+    tags: ['media', 'radio', 'zo34', 'interview'],
+    featured: false
   },
   {
     id: 3,
-    date: '2026-04-15',
-    category: 'technisch',
-    title: 'Hardware Keuze Gemaakt',
-    summary: 'Na uitgebreid testen hebben we gekozen voor de Heltec V3 en RAK WisBlock als primaire hardware platforms.',
+    date: '2026-05-08',
+    category: 'evenement',
+    title: 'Radio Interview bij RTV Drenthe',
+    summary: 'Vroeg op vrijdagochtend waren we live te gast bij RTV Drenthe om te vertellen over Meshcore Drenthe.',
     content: `
-      <p>We hebben verschillende LoRa-boards getest en vergeleken. Onze keuze is gevallen op:</p>
-      <p><strong>Voor beginners:</strong> Heltec LoRa 32 V3<br>
-      - Ingebouwd display<br>
-      - USB-C aansluiting<br>
-      - WiFi en Bluetooth<br>
-      - Goede documentatie<br>
-      - Prijs: ~€25</p>
-      <p><strong>Voor gevorderden:</strong> RAK WisBlock<br>
-      - Modulair systeem<br>
-      - Uitbreidbaar met sensoren<br>
-      - Zeer laag stroomverbruik<br>
-      - Professionele behuizingen<br>
-      - Prijs: vanaf €30</p>
-      <p>Beide platforms worden volledig ondersteund door Meshcore firmware en hebben actieve communities.</p>
+      <p>Vrijdag 8 mei om 8:45 uur waren we te gast in het ochtendprogramma van RTV Drenthe Radio. Een prachtige gelegenheid om het Meshcore Drenthe project te introduceren aan een breed publiek.</p>
+      <p>We bespraken wat mesh-netwerken zijn, waarom ze belangrijk zijn voor Drenthe, en hoe mensen kunnen meedoen met het project. De interesse was groot en de vragen waren scherp!</p>
+      <p><strong>Details:</strong></p>
+      <ul>
+        <li>Datum: Vrijdag 8 mei 2026</li>
+        <li>Tijd: 8:45 uur</li>
+        <li>Zender: RTV Drenthe Radio</li>
+      </ul>
     `,
-    tags: ['hardware', 'lora', 'heltec', 'rak', 'apparaten']
+    tags: ['media', 'radio', 'rtv-drenthe', 'interview'],
+    featured: true
   },
   {
     id: 2,
-    date: '2026-03-20',
-    category: 'voortgang',
-    title: 'Eerste Succesvolle Verbinding',
-    summary: 'We hebben de eerste werkende mesh-verbinding opgezet tussen Coevorden en Sleen (12 km).',
+    date: '2026-05-06',
+    category: 'evenement',
+    title: 'Succesvolle Kickoff Meshcore Maand! 🎉',
+    summary: 'Woensdag 6 mei was de kickoff van Meshcore Maand een groot succes met veel nieuwe deelnemers en expertise.',
     content: `
-      <p>Een belangrijke mijlpaal: de eerste succesvolle mesh-verbinding over 12 kilometer!</p>
-      <p>Twee nodes, één in Coevorden en één in Sleen, konden elkaar bereiken met een sterke signaalsterkte van -89 dBm. De verbinding bleef stabiel gedurende 48 uur continue testen.</p>
-      <p><strong>Setup:</strong></p>
+      <p>De kickoff van Meshcore Maand op 6 mei was een overweldigend succes! Veel meer deelnemers dan verwacht kwamen naar De Nieuwe Veste in Coevorden om kennis te maken met het project.</p>
+      
+      <p><strong>Hoogtepunten:</strong></p>
       <ul>
-        <li>Heltec V3 boards</li>
-        <li>868 MHz frequentie</li>
-        <li>Spreading Factor 10</li>
-        <li>5 dBi externe antennes op 8 meter hoogte</li>
+        <li>Grote opkomst van nieuwe deelnemers</li>
+        <li>Diverse expertise aanwezig, waaronder gecertificeerde radioamateurs</li>
+        <li>RTV Drenthe was aanwezig om opnames te maken</li>
+        <li>Eerste nodes zijn geconfigureerd en getest</li>
+        <li>Enthousiaste sfeer en veel technische discussies</li>
       </ul>
-      <p>Dit bewijst dat lange-afstand mesh-communicatie in Drenthe perfect mogelijk is!</p>
+      
+      <p>Bijzonder waardevol was de aanwezigheid van meerdere gecertificeerde radioamateurs. Hun kennis van RF-technologie, antennes en propagatie is van onschatbare waarde voor het project. Ze kunnen ons helpen met optimale plaatsing van nodes en bereik-optimalisatie.</p>
+      
+      <p>RTV Drenthe maakte opnames voor een reportage over het project. Dit zal helpen om nog meer mensen te bereiken en het belang van decentrale communicatie onder de aandacht te brengen.</p>
+      
+      <p>Komende woensdagen bouwen we verder op deze succesvolle start!</p>
     `,
-    tags: ['test', 'bereik', 'verbinding', 'mijlpaal']
+    tags: ['kickoff', 'hackavond', 'radioamateurs', 'rtv-drenthe', 'mei-2026'],
+    featured: true
   },
   {
     id: 1,
-    date: '2026-03-01',
+    date: '2026-04-28',
     category: 'aankondiging',
-    title: 'Project Meshcore Drenthe Aangekondigd',
-    summary: 'Hackerspace Drenthe start met het opzetten van een decentraal mesh-netwerk voor de hele provincie.',
+    title: 'Meshcore Maand Mei 2026 Aangekondigd',
+    summary: 'Hackerspace Drenthe kondigt Meshcore Maand aan: een hele maand gewijd aan het opzetten van een decentraal noodnetwerk.',
     content: `
-      <p>Vandaag kondigen we Project Meshcore Drenthe aan: een ambitieus plan om een decentraal mesh-communicatienetwerk op te zetten voor de gehele provincie Drenthe.</p>
-      <p><strong>Waarom?</strong></p>
-      <p>Bij stroomuitval of calamiteiten valt de reguliere communicatie-infrastructuur vaak uit. Een mesh-netwerk biedt een robuuste backup die werkt zonder stroom, internet of telecom-providers.</p>
-      <p><strong>De visie:</strong></p>
-      <p>Een netwerk van LoRa-nodes verspreid over Drenthe, beheerd door vrijwilligers en gemeenschappen. Open-source, decentraal, en toegankelijk voor iedereen.</p>
-      <p>We starten in mei 2026 met een kickstart-maand waarbij iedereen kan meedoen!</p>
+      <p>Mei 2026 wordt Meshcore Maand bij Hackerspace Drenthe! Een hele maand gewijd aan het bouwen van een decentraal mesh-communicatienetwerk voor de provincie Drenthe.</p>
+      
+      <p><strong>Wat is het plan?</strong></p>
+      <p>Elke woensdag in mei komen we samen in De Nieuwe Veste in Coevorden om te werken aan het netwerk. We starten met de kickoff op 6 mei, gevolgd door werkavonden op 13, 20 en 27 mei.</p>
+      
+      <p><strong>Waarom een mesh-netwerk?</strong></p>
+      <p>Bij stroomuitval of calamiteiten valt reguliere communicatie vaak uit. Een mesh-netwerk op LoRa-technologie biedt een robuuste backup:</p>
+      <ul>
+        <li>Werkt zonder internet of telefoonnetwerk</li>
+        <li>Lange afstanden (tot 15 km in open terrein)</li>
+        <li>Zeer laag stroomverbruik</li>
+        <li>Kan draaien op zonne-energie</li>
+        <li>Decentraal en zelfhelend</li>
+      </ul>
+      
+      <p><strong>Meedoen?</strong></p>
+      <p>Iedereen is welkom, ongeacht technische achtergrond. Of je nu ervaring hebt met radio, elektronica, programmeren, of gewoon nieuwsgierig bent - er is een rol voor iedereen!</p>
+      
+      <p>Locatie: De Nieuwe Veste, Coevorden<br>
+      Tijd: 19:00 deur open, 20:00 start<br>
+      Data: elke woensdag in mei 2026</p>
     `,
-    tags: ['aankondiging', 'start', 'visie', 'meshcore'],
-    featured: true
+    tags: ['aankondiging', 'meshcore-maand', 'mei-2026', 'kickoff'],
+    featured: false
   }
 ];
 

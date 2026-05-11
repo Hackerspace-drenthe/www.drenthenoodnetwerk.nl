@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: 'meedoen.html', label: 'Meedoen' },
   { href: 'planning.html', label: 'Planning' },
   { href: 'handleidingen.html', label: 'Handleidingen' },
+  { href: 'nieuws.html', label: 'Nieuws' },
 ];
 
 const SECONDARY_ITEMS = [

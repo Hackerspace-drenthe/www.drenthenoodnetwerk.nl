@@ -3,7 +3,7 @@
  * Displays and filters news articles dynamically
  */
 
-import { newsData } from '../data/news-articles.js';
+import { newsData } from '../../data/news-articles.js';
 
 class NewsFeed {
   constructor() {

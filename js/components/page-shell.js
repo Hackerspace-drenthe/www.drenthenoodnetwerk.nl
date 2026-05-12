@@ -5,19 +5,35 @@
 
 const NAV_ITEMS = [
   { href: 'index.html', label: 'Home' },
-  { href: 'wat-is-meshcore.html', label: 'Wat is Meshcore?' },
-  { href: 'hoe-werkt-het.html', label: 'Hoe werkt het?' },
-  { href: 'netwerk-drenthe.html', label: 'Netwerk Kaart' },
+  { 
+    label: 'Info', 
+    dropdown: [
+      { href: 'wat-is-meshcore.html', label: 'Wat is Meshcore?' },
+      { href: 'hoe-werkt-het.html', label: 'Hoe werkt het?' },
+      { href: 'woordenlijst.html', label: 'Woordenlijst' },
+      { href: 'faq.html', label: 'FAQ' },
+    ]
+  },
+  { 
+    label: 'Netwerk',
+    dropdown: [
+      { href: 'netwerk-drenthe.html', label: 'Netwerk Kaart' },
+      { href: 'planning.html', label: 'Planning' },
+    ]
+  },
+  { 
+    label: 'Leren',
+    dropdown: [
+      { href: 'MeshAcademy/course-hub.html', label: 'MeshAcademy' },
+      { href: 'handleidingen.html', label: 'Handleidingen' },
+      { href: 'apparaten.html', label: 'Apparaten' },
+    ]
+  },
   { href: 'meedoen.html', label: 'Meedoen' },
-  { href: 'planning.html', label: 'Planning' },
-  { href: 'handleidingen.html', label: 'Handleidingen' },
   { href: 'nieuws.html', label: 'Nieuws' },
 ];
 
 const SECONDARY_ITEMS = [
-  { href: 'apparaten.html', label: 'Apparaten' },
-  { href: 'woordenlijst.html', label: 'Woordenlijst' },
-  { href: 'faq.html', label: 'FAQ' },
   { href: 'sponsor-drenthe-noodnetwerk.html', label: 'Sponsor' },
 ];
 
@@ -50,6 +66,76 @@ function createNavLink(item, currentPage, className) {
   }
 
   return a;
+}
+
+/**
+ * Creates a dropdown menu item for desktop navigation.
+ * @param {Object} item - { label, dropdown: [] }
+ * @param {string} currentPage
+ * @returns {HTMLElement}
+ */
+function createDropdown(item, currentPage) {
+  const container = document.createElement('div');
+  container.className = 'site-nav__dropdown';
+
+  const button = document.createElement('button');
+  button.className = 'site-nav__link site-nav__link--dropdown';
+  button.textContent = item.label;
+  button.setAttribute('aria-haspopup', 'true');
+  button.setAttribute('aria-expanded', 'false');
+
+  const dropdownContent = document.createElement('div');
+  dropdownContent.className = 'site-nav__dropdown-content';
+  dropdownContent.setAttribute('role', 'menu');
+
+  // Check if any child is active
+  let hasActiveChild = false;
+  item.dropdown.forEach(child => {
+    const link = createNavLink(child, currentPage, 'site-nav__dropdown-link');
+    link.setAttribute('role', 'menuitem');
+    dropdownContent.appendChild(link);
+    
+    if (child.href === currentPage) {
+      hasActiveChild = true;
+    }
+  });
+
+  // Mark parent as active if child is active
+  if (hasActiveChild) {
+    button.classList.add('site-nav__link--active');
+  }
+
+  container.appendChild(button);
+  container.appendChild(dropdownContent);
+  return container;
+}
+
+/**
+ * Creates a mobile accordion item.
+ * @param {Object} item - { label, dropdown: [] }
+ * @param {string} currentPage
+ * @returns {HTMLElement}
+ */
+function createMobileAccordion(item, currentPage) {
+  const container = document.createElement('div');
+  container.className = 'site-nav__mobile-accordion';
+
+  const button = document.createElement('button');
+  button.className = 'site-nav__mobile-accordion-btn';
+  button.textContent = item.label;
+  button.setAttribute('aria-expanded', 'false');
+
+  const content = document.createElement('div');
+  content.className = 'site-nav__mobile-accordion-content';
+  content.setAttribute('aria-hidden', 'true');
+
+  item.dropdown.forEach(child => {
+    content.appendChild(createNavLink(child, currentPage, 'site-nav__mobile-link'));
+  });
+
+  container.appendChild(button);
+  container.appendChild(content);
+  return container;
 }
 
 /**
@@ -92,7 +178,11 @@ function injectNav(currentPage) {
   menu.setAttribute('role', 'menubar');
 
   NAV_ITEMS.forEach(item => {
-    menu.appendChild(createNavLink(item, currentPage, 'site-nav__link'));
+    if (item.dropdown) {
+      menu.appendChild(createDropdown(item, currentPage));
+    } else {
+      menu.appendChild(createNavLink(item, currentPage, 'site-nav__link'));
+    }
   });
 
   // Theme toggle placeholder (wordt door theme-toggle.js gevuld)
@@ -115,7 +205,16 @@ function injectNav(currentPage) {
   mobile.setAttribute('aria-hidden', 'true');
   mobile.setAttribute('role', 'menu');
 
-  [...NAV_ITEMS, ...SECONDARY_ITEMS].forEach(item => {
+  NAV_ITEMS.forEach(item => {
+    if (item.dropdown) {
+      mobile.appendChild(createMobileAccordion(item, currentPage));
+    } else {
+      mobile.appendChild(createNavLink(item, currentPage, 'site-nav__mobile-link'));
+    }
+  });
+
+  // Add secondary items at the bottom
+  SECONDARY_ITEMS.forEach(item => {
     mobile.appendChild(createNavLink(item, currentPage, 'site-nav__mobile-link'));
   });
 
@@ -161,6 +260,7 @@ function injectFooter() {
           <ul>
             <li><a href="meedoen.html">Doe mee</a></li>
             <li><a href="planning.html">Planning</a></li>
+            <li><a href="sponsor-drenthe-noodnetwerk.html">Sponsor worden</a></li>
             <li><a href="faq.html">FAQ</a></li>
             <li><a href="woordenlijst.html">Woordenlijst</a></li>
           </ul>

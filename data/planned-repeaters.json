@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 3
+    "total_planned": 4
   },
   "features": [
     {
@@ -62,6 +62,26 @@
       "geometry": {
         "type": "Point",
         "coordinates": [7.043216, 52.759137]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-emmer-compascuum-onsdorp",
+        "name": "NL-DR-EMC-ONSDORP",
+        "description": "Repeater bij Buurtvereniging 'Ons Dorp'",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 4,
+        "notes": "Locatie bij buurtvereniging in Emmer-Compascuum.",
+        "contact": "Veron",
+        "owner": "Buurtvereniging 'Ons Dorp'",
+        "address": "Esdoornlaan 5, 7881 JB Emmer-Compascuum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.03536849923694, 52.81067739734474]
       }
     }
   ]

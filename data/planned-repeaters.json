@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 1
+    "total_planned": 2
   },
   "features": [
     {
@@ -24,6 +24,26 @@
       "geometry": {
         "type": "Point",
         "coordinates": [6.7408, 52.6608]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-emmer-compascuum-viertorenbrug",
+        "name": "NL-DR-EMC-VIERTORENBRUG",
+        "description": "Repeater eigendom van Rein (Hackerspace Drenthe lid)",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 3,
+        "notes": "Locatie aan de Oosterdiep in Emmer-Compascuum. Helpt met dekking in het oosten van Drenthe.",
+        "contact": "Rein",
+        "owner": "Rein (Hackerspace Drenthe member)",
+        "address": "Oosterdiep Oostzijde 96, Emmer-Compascuum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.0450, 52.8080]
       }
     }
   ]

@@ -1,0 +1,30 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
+    "last_updated": "2026-05-13",
+    "status": "planning",
+    "total_planned": 1
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-coevorden-hackerspace",
+        "name": "Hackerspace Drenthe",
+        "description": "Thuisbasis van het project - De Nieuwe Veste",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "high",
+        "estimated_coverage_km": 10,
+        "notes": "Eerste geplande repeater voor het Meshcore Drenthe netwerk. Centrale locatie voor projectcoördinatie en testing.",
+        "contact": "bestuur@hackerspace-drenthe.nl",
+        "address": "Graaf van Heiden Reinesteinlaan, De Nieuwe Veste, Coevorden"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.7408, 52.6608]
+      }
+    }
+  ]
+}

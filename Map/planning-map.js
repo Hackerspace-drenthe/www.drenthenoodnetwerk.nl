@@ -70,6 +70,7 @@
     loadRadarData();
     loadTowersData();
     loadSettlementsData();
+    loadPlannedRepeatersData();
   }
 
   function initMap() {
@@ -1212,6 +1213,49 @@
 
     // Add popup interaction
     addPopupInteraction();
+  }
+
+  function loadPlannedRepeatersData() {
+    fetch('../data/planned-repeaters.json')
+      .then(r => r.json())
+      .then(data => {
+        const features = data.features || [];
+        renderPlannedRepeaters(features);
+      })
+      .catch(err => {
+        console.error('Error loading planned repeaters data:', err);
+      });
+  }
+
+  function renderPlannedRepeaters(features) {
+    features.forEach((feature, index) => {
+      const props = feature.properties;
+      const coords = feature.geometry.coordinates; // [lon, lat]
+      
+      // Create node object compatible with renderPlannedNode
+      const node = {
+        id: props.id || `planned-${planIdCounter++}`,
+        name: props.name || 'Geplande Repeater',
+        coords: ol.proj.fromLonLat(coords),
+        range: props.estimated_coverage_km || CONFIG.defaultRange,
+        elevation: props.elevation || 0,
+        classification: props.classification || 5, // Default to medium quality
+        description: props.description || '',
+        priority: props.priority || 'medium',
+        status: props.status || 'planned',
+        notes: props.notes || '',
+        address: props.address || ''
+      };
+      
+      plannedNodes.push(node);
+      renderPlannedNode(node);
+    });
+    
+    // Update stats and coverage if repeater data is already loaded
+    if (radarData.repeaters.length > 0) {
+      updateStats();
+      updateCoverageLayers();
+    }
   }
 
   // ========== Coverage Analysis ==========

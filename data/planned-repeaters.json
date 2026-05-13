@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 5
+    "total_planned": 6
   },
   "features": [
     {
@@ -101,6 +101,27 @@
       "geometry": {
         "type": "Point",
         "coordinates": [6.781710695703632, 52.921685629782864]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-oosterhesselen-esdalcollege",
+        "name": "NL-DR-OHS-ESDAL",
+        "description": "Repeater bij Esdal College Oosterhesselen",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 5,
+        "notes": "Locatie bij onderwijsinstelling in Oosterhesselen.",
+        "owner": "Esdal College",
+        "contact": "088 000 9670",
+        "website": "esdalcollege.nl",
+        "address": "Beatrixlaan 14A, 7861 AJ Oosterhesselen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.720353379422659, 52.759183849065714]
       }
     }
   ]

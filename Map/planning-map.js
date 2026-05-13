@@ -1309,6 +1309,7 @@
     // Create heatmap points from visible repeaters with weight based on classification and range
     radarData.repeaters.forEach(node => {
       if (!node.location) return;
+      if (!node.location.longitude || !node.location.latitude) return;
       if (!visibleRepeaterKeys || !visibleRepeaterKeys.has(node.public_key)) return;
 
       const classification = classifyRepeater(node, radarData.links);
@@ -1330,11 +1331,13 @@
 
     // Also add planned repeaters to heatmap
     plannedNodes.forEach(node => {
-      const coords = ol.proj.fromLonLat(node.coordinates);
+      // node.coords is already in OpenLayers projection format
+      if (!node.coords) return;
+      
       const weight = (node.classification + 1) / 9;
 
       const feature = new ol.Feature({
-        geometry: new ol.geom.Point(coords),
+        geometry: new ol.geom.Point(node.coords),
         weight: weight
       });
 

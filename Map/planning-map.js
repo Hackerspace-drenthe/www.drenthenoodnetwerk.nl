@@ -1356,6 +1356,7 @@
     
     radarData.repeaters.forEach(node => {
       if (!node.location) return;
+      if (!node.location.longitude || !node.location.latitude) return;
       if (!visibleRepeaterKeys || !visibleRepeaterKeys.has(node.public_key)) return;
 
       const classification = classifyRepeater(node, radarData.links);
@@ -1368,10 +1369,12 @@
       });
     });
 
-    // Add planned repeaters
+    // Add planned repeaters (node.coords is already projected)
     plannedNodes.forEach(node => {
+      if (!node.coords) return;
+      
       activeRepeaters.push({
-        coords: ol.proj.fromLonLat(node.coordinates),
+        coords: node.coords, // Already in OpenLayers projection format
         range: node.range * 1000, // Convert km to meters
         classification: node.classification
       });

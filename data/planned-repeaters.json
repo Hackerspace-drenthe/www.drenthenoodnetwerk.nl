@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 8
+    "total_planned": 9
   },
   "features": [
     {
@@ -164,6 +164,27 @@
       "geometry": {
         "type": "Point",
         "coordinates": [6.9875195435750905, 52.72277277211789]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-emmen-esdalcollege",
+        "name": "NL-DR-EMM-ESDAL",
+        "description": "Repeater bij Esdal College Emmen",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 5,
+        "notes": "Locatie bij onderwijsinstelling in Emmen.",
+        "owner": "Esdal College Emmen",
+        "contact": "088 000 9630",
+        "website": "esdalcollege.nl",
+        "address": "Oosterstraat 82, 7822 HG Emmen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.909663577039444, 52.78419612024435]
       }
     }
   ]

@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 6
+    "total_planned": 7
   },
   "features": [
     {
@@ -122,6 +122,27 @@
       "geometry": {
         "type": "Point",
         "coordinates": [6.720353379422659, 52.759183849065714]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-terapel-rsg",
+        "name": "NL-DR-TAP-RSG",
+        "description": "Repeater bij RSG Ter Apel",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 5,
+        "notes": "Locatie bij middelbare school in Ter Apel.",
+        "owner": "RSG Ter Apel",
+        "contact": "0599 581 226",
+        "website": "rsgterapel.nl",
+        "address": "Oude Weg 41, 9561 LB Ter Apel"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.066475801815762, 52.87789020029998]
       }
     }
   ]

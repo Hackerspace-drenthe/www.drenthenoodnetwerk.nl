@@ -14,6 +14,8 @@
     mapZoom: 10,
     defaultRange: 3, // km - realistic reliable range for planned repeaters
     freshHours: 24,
+    // Note: Data is filtered server-side to Drenthe + 50km buffer zone
+    // (lat: 51.80-53.70, lon: 5.15-7.90) in GitHub Actions workflow
     drentheBounds: [ // Simplified Drenthe province boundary [lon, lat]
       [6.15, 53.18], [6.25, 53.17], [6.35, 53.13], [6.47, 53.10],
       [6.58, 53.12], [6.70, 53.10], [6.80, 53.07], [6.87, 53.00],

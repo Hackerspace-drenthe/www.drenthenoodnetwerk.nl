@@ -22,13 +22,16 @@ jobs:
           curl -sf --max-time 30 "https://mc-radar.woodwar.com/api/nodes/companions" -o /tmp/companions.json || echo "[]" > /tmp/companions.json
           curl -sf --max-time 30 "https://mc-radar.woodwar.com/api/proven-links" -o /tmp/links.json || echo "[]" > /tmp/links.json
 
-      - name: Filter to Drenthe region
+      - name: Filter to Drenthe region (+50km)
         run: |
           python3 -c "
           import json
 
-          LATMIN, LATMAX = 52.25, 53.25
-          LONMIN, LONMAX = 5.9, 7.15
+          # Drenthe + 50km buffer zone
+          # Original Drenthe: lat 52.25-53.25, lon 5.9-7.15
+          # Expanded by ~50km in all directions
+          LATMIN, LATMAX = 51.80, 53.70
+          LONMIN, LONMAX = 5.15, 7.90
 
           def in_bounds(loc):
               return loc and LATMIN <= loc['latitude'] <= LATMAX and LONMIN <= loc['longitude'] <= LONMAX

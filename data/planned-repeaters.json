@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 4
+    "total_planned": 5
   },
   "features": [
     {
@@ -16,7 +16,7 @@
         "type": "repeater",
         "status": "planned",
         "priority": "high",
-        "estimated_coverage_km": 10,
+        "estimated_coverage_km": 5,
         "notes": "Eerste geplande repeater voor het Meshcore Drenthe netwerk. Centrale locatie voor projectcoördinatie en testing.",
         "contact": "bestuur@hackerspace-drenthe.nl",
         "address": "Graaf van Heiden Reinesteinlaan, De Nieuwe Veste, Coevorden"
@@ -82,6 +82,25 @@
       "geometry": {
         "type": "Point",
         "coordinates": [7.03536849923694, 52.81067739734474]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-borger-esdalcollege",
+        "name": "NL-DR-BOR-ESDAL",
+        "description": "Repeater bij Esdal College Borger",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 5,
+        "notes": "Locatie bij onderwijsinstelling in Borger.",
+        "owner": "Esdal College Borger",
+        "address": "IJzertijdstraat 2, 9531 RA Borger"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.781710695703632, 52.921685629782864]
       }
     }
   ]

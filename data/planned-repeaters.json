@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 2
+    "total_planned": 3
   },
   "features": [
     {
@@ -43,7 +43,25 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [7.0450, 52.8080]
+        "coordinates": [7.045233,52.788213]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-barger-compascuum-verlengde",
+        "name": "NL-DR-BGC-VERLENGDE",
+        "description": "Repeater in Barger-Compascuum",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 5,
+        "notes": "Locatie aan Verlengde Oosterdiep Oostzijde in Barger-Compascuum.",
+        "address": "Verlengde Oosterdiep Oostzijde 87, 7884 TG Barger-Compascuum"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.043216, 52.759137]
       }
     }
   ]

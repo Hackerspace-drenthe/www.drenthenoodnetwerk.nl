@@ -4,7 +4,7 @@
     "description": "Geplande Meshcore repeater locaties voor het Meshcore Drenthe netwerk",
     "last_updated": "2026-05-13",
     "status": "planning",
-    "total_planned": 7
+    "total_planned": 8
   },
   "features": [
     {
@@ -143,6 +143,27 @@
       "geometry": {
         "type": "Point",
         "coordinates": [7.066475801815762, 52.87789020029998]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "planned-klazienaveen-esdalcollege",
+        "name": "NL-DR-KLZ-ESDAL",
+        "description": "Repeater bij Esdal College Klazienaveen",
+        "type": "repeater",
+        "status": "planned",
+        "priority": "medium",
+        "estimated_coverage_km": 5,
+        "notes": "Locatie bij onderwijsinstelling in Klazienaveen.",
+        "owner": "Esdal College Klazienaveen",
+        "contact": "088 000 9660",
+        "website": "esdalcollege.nl",
+        "address": "Van Echtenstraat 22, 7891 LM Klazienaveen"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [6.9875195435750905, 52.72277277211789]
       }
     }
   ]

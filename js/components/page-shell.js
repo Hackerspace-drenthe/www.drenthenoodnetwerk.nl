@@ -46,18 +46,52 @@ const SECTION_PREFIX_MAP = {
 };
 
 const REQUIRED_SHELL_STYLES = [
+  'css/variables.css',
   'css/components/nav.css',
   'css/components/footer.css',
   'css/components/theme-toggle.css',
 ];
 
 /**
+ * Resolves the site root URL based on page-shell script location.
+ * Works for both server-hosted pages and local file previews.
+ * @returns {URL}
+ */
+function getSiteRootUrl() {
+  let scriptEl = document.currentScript;
+
+  if (!scriptEl || !scriptEl.getAttribute('src')) {
+    scriptEl = Array.from(document.querySelectorAll('script[src]')).find(el => {
+      const src = el.getAttribute('src') || '';
+      return src.includes('js/components/page-shell.js');
+    }) || null;
+  }
+
+  if (!scriptEl) {
+    return new URL('./', window.location.href);
+  }
+
+  const scriptSrc = scriptEl.getAttribute('src') || '';
+  const scriptUrl = new URL(scriptSrc, window.location.href);
+  return new URL('../../', scriptUrl);
+}
+
+const SITE_ROOT_URL = getSiteRootUrl();
+
+/**
  * Determines the current path from URL.
  * @returns {string} e.g. 'index.html' or 'MeshAcademy/c01-wat-is-mesh.html'
  */
 function getCurrentPath() {
-  const path = window.location.pathname || '';
-  const trimmed = path.replace(/^\/+/, '');
+  const currentUrl = new URL(window.location.href);
+  const rootPath = SITE_ROOT_URL.pathname;
+
+  let relativePath = currentUrl.pathname;
+  if (relativePath.startsWith(rootPath)) {
+    relativePath = relativePath.slice(rootPath.length);
+  }
+
+  const trimmed = decodeURIComponent(relativePath.replace(/^\/+/, ''));
 
   if (!trimmed || trimmed.endsWith('/')) {
     return 'index.html';
@@ -272,13 +306,27 @@ function ensureShellStyles(pathPrefix) {
 
 /**
  * Adds top spacing for pages without layout shell spacing.
+ * @param {string} currentPath
  */
-function ensureMainOffset() {
+function ensureMainOffset(currentPath) {
+  // Academy pages have their own top headers before <main>.
+  // Offset the whole page so the fixed global nav never overlaps course headers.
+  if (currentPath.startsWith('MeshAcademy/')) {
+    const bodyPaddingTop = parseFloat(window.getComputedStyle(document.body).paddingTop || '0');
+    if (bodyPaddingTop < 40) {
+      document.body.style.paddingTop = 'var(--nav-height, 64px)';
+    }
+    return;
+  }
+
   const main = document.querySelector('#main-content, main');
   if (!main) return;
 
-  const paddingTop = parseFloat(window.getComputedStyle(main).paddingTop || '0');
-  if (paddingTop < 40) {
+  const mainPaddingTop = parseFloat(window.getComputedStyle(main).paddingTop || '0');
+  const navHeightVar = window.getComputedStyle(document.documentElement).getPropertyValue('--nav-height');
+  const navHeight = parseFloat(navHeightVar) || 64;
+
+  if (mainPaddingTop < navHeight - 8) {
     main.style.paddingTop = 'calc(var(--nav-height, 64px) + 1rem)';
   }
 }
@@ -406,23 +454,13 @@ function injectNav(currentPage, currentPath, pathPrefix) {
   const logo = document.createElement('a');
   logo.href = withPrefix('index.html', pathPrefix);
   logo.className = 'site-nav__logo';
-  logo.setAttribute('aria-label', 'Meshcore Drenthe - Home');
+  logo.setAttribute('aria-label', 'Drenthe Noodnetwerk - Home');
   logo.innerHTML = `
-    <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
-      <circle cx="8" cy="8" r="3" fill="currentColor" opacity="0.7"/>
-      <circle cx="24" cy="8" r="3" fill="currentColor" opacity="0.7"/>
-      <circle cx="16" cy="24" r="3" fill="currentColor"/>
-      <circle cx="4" cy="20" r="2" fill="currentColor" opacity="0.5"/>
-      <circle cx="28" cy="20" r="2" fill="currentColor" opacity="0.5"/>
-      <line x1="8" y1="8" x2="24" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-      <line x1="8" y1="8" x2="16" y2="24" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-      <line x1="24" y1="8" x2="16" y2="24" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-      <line x1="4" y1="20" x2="16" y2="24" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-      <line x1="28" y1="20" x2="16" y2="24" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-      <line x1="4" y1="20" x2="8" y2="8" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-      <line x1="28" y1="20" x2="24" y2="8" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-    </svg>
-    <span>Meshcore Drenthe</span>`;
+    <img src="https://www.hackerspace-drenthe.nl/wp-content/uploads/2021/11/cropped-cropped-4018_Hackerspace-Drenthe_01_small.png" alt="Hackerspace Drenthe logo" width="40" height="40" loading="lazy" decoding="async">
+    <span class="site-nav__logo-text">
+      <span class="site-nav__logo-title">Drenthe Noodnetwerk</span>
+      <span class="site-nav__logo-subtitle">Hackerspace Drenthe</span>
+    </span>`;
 
   const menu = document.createElement('div');
   menu.className = 'site-nav__menu';
@@ -624,7 +662,7 @@ function initPageShell() {
   injectNav(currentPage, currentPath, pathPrefix);
   injectBreadcrumb(currentPage, currentPath, pathPrefix);
   injectFooter(pathPrefix);
-  ensureMainOffset();
+  ensureMainOffset(currentPath);
 }
 
 if (document.readyState === 'loading') {

@@ -459,7 +459,7 @@ function injectNav(currentPage, currentPath, pathPrefix) {
     <img src="https://www.hackerspace-drenthe.nl/wp-content/uploads/2021/11/cropped-cropped-4018_Hackerspace-Drenthe_01_small.png" alt="Hackerspace Drenthe logo" width="40" height="40" loading="lazy" decoding="async">
     <span class="site-nav__logo-text">
       <span class="site-nav__logo-title">Drenthe Noodnetwerk</span>
-      <span class="site-nav__logo-subtitle">Hackerspace Drenthe</span>
+      <span class="site-nav__logo-subtitle">een project van Hackerspace Drenthe</span>
     </span>`;
 
   const menu = document.createElement('div');

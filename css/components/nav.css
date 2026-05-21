@@ -38,10 +38,14 @@
 }
 
 .site-nav__logo img {
+  box-sizing: border-box;
   width: 2.25rem;
   height: 2.25rem;
+  padding: 0.125rem;
+  background-color: #ffffff;
   border-radius: var(--radius-sm);
-  object-fit: cover;
+  object-fit: contain;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.95), 0 0 14px rgba(255, 255, 255, 0.65);
 }
 
 .site-nav__logo-text {

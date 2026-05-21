@@ -645,6 +645,15 @@ function injectFooter(pathPrefix) {
 }
 
 /**
+ * Ensures the theme toggle is initialized when available.
+ */
+function ensureThemeToggle() {
+  if (typeof initTheme === 'function') {
+    initTheme();
+  }
+}
+
+/**
  * Initializes the page shell.
  */
 function initPageShell() {
@@ -660,6 +669,7 @@ function initPageShell() {
 
   ensureShellStyles(pathPrefix);
   injectNav(currentPage, currentPath, pathPrefix);
+  ensureThemeToggle();
   injectBreadcrumb(currentPage, currentPath, pathPrefix);
   injectFooter(pathPrefix);
   ensureMainOffset(currentPath);

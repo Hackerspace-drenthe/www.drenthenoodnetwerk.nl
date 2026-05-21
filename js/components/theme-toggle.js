@@ -7,6 +7,23 @@
 const STORAGE_KEY = 'meshcore-theme';
 const THEMES = ['light', 'dark'];
 
+// Legacy tokens used by standalone Academy/Tools pages with custom dark-only themes.
+// These are overridden in light mode so background/text actually switch with the global toggle.
+const LEGACY_LIGHT_TOKENS = {
+  '--dark': '#f6f8fb',
+  '--mid': '#ffffff',
+  '--card': '#ffffff',
+  '--card2': '#eef3f7',
+  '--text': '#1f2937',
+  '--dim': '#4b5563',
+  '--border': 'rgba(31, 41, 55, 0.16)',
+  '--bg': '#f6f8fb',
+  '--panel': '#ffffff',
+  '--muted': '#4b5563',
+};
+
+const LEGACY_TOKEN_KEYS = Object.keys(LEGACY_LIGHT_TOKENS);
+
 /**
  * Gets the current effective theme.
  * @returns {'light'|'dark'}
@@ -26,8 +43,29 @@ function getTheme() {
  */
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
+  applyLegacyThemeTokens(theme);
   localStorage.setItem(STORAGE_KEY, theme);
   updateToggleButton(theme);
+}
+
+/**
+ * Applies fallback token overrides for legacy pages that define their own dark tokens.
+ * @param {'light'|'dark'} theme
+ */
+function applyLegacyThemeTokens(theme) {
+  const rootStyle = document.documentElement.style;
+
+  if (theme === 'light') {
+    Object.entries(LEGACY_LIGHT_TOKENS).forEach(([key, value]) => {
+      rootStyle.setProperty(key, value);
+    });
+    return;
+  }
+
+  // Dark mode falls back to each page's native token definitions.
+  LEGACY_TOKEN_KEYS.forEach((key) => {
+    rootStyle.removeProperty(key);
+  });
 }
 
 /**
@@ -77,6 +115,11 @@ function createToggleButton() {
   const slot = document.getElementById('theme-toggle-slot');
   if (!slot) return;
 
+  // Prevent duplicate buttons when initTheme runs multiple times.
+  if (document.getElementById('theme-toggle-btn')) {
+    return;
+  }
+
   const btn = document.createElement('button');
   btn.id = 'theme-toggle-btn';
   btn.className = 'theme-toggle';
@@ -85,6 +128,9 @@ function createToggleButton() {
   btn.addEventListener('click', toggleTheme);
 
   slot.appendChild(btn);
+
+  // Ensure icon/label are correct when button is created after initial theme application.
+  updateToggleButton(getTheme());
 }
 
 /**
@@ -95,6 +141,12 @@ function initTheme() {
   const theme = getTheme();
   applyTheme(theme);
   createToggleButton();
+
+  if (window.__themeMediaListenerAttached) {
+    return;
+  }
+
+  window.__themeMediaListenerAttached = true;
 
   // Luister naar systeemwijzigingen
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {

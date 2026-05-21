@@ -27,6 +27,7 @@ const NAV_ITEMS = [
       { href: 'MeshAcademy/course-hub.html', label: 'MeshAcademy' },
       { href: 'handleidingen.html', label: 'Handleidingen' },
       { href: 'apparaten.html', label: 'Apparaten' },
+      { href: 'tools.html', label: 'Tools en simulatoren' },
     ]
   },
   { href: 'meedoen.html', label: 'Meedoen' },

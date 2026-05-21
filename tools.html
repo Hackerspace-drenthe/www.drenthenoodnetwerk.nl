@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tools en simulatoren - Meshcore Drenthe</title>
+  <meta name="description" content="Centrale pagina met alle Meshcore tools en simulatoren: airtime, link budget, device matrices, antenneplanning en protocolanalyse.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Tools en simulatoren - Meshcore Drenthe">
+  <meta property="og:description" content="Alle interactieve Meshcore tools op een plek: simulatoren, calculators en vergelijkingsmatrices.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="nl_NL">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/svg/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <link rel="preload" href="assets/fonts/SpaceGrotesk-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components/nav.css">
+  <link rel="stylesheet" href="css/components/footer.css">
+  <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/card.css">
+  <link rel="stylesheet" href="css/pages/tools.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ga naar inhoud</a>
+
+  <noscript>
+    <nav aria-label="Hoofdnavigatie">
+      <ul style="list-style:none;padding:1rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="wat-is-meshcore.html">Wat is Meshcore?</a></li>
+        <li><a href="hoe-werkt-het.html">Hoe werkt het?</a></li>
+        <li><a href="netwerk-drenthe.html">Netwerk Kaart</a></li>
+        <li><a href="meedoen.html">Meedoen</a></li>
+        <li><a href="planning.html">Planning</a></li>
+        <li><a href="handleidingen.html">Handleidingen</a></li>
+        <li><a href="tools.html">Tools</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+      </ul>
+    </nav>
+  </noscript>
+
+  <main id="main-content">
+    <div class="container">
+      <header class="tools-hero">
+        <p class="tools-eyebrow">Meshcore Drenthe</p>
+        <h1>Tools en simulatoren</h1>
+        <p class="tools-lead">
+          Alle interactieve tools uit de nieuwe Tools-map op een centrale plek.
+          Gebruik deze pagina voor planning, vergelijking en praktijktesten van je Meshcore-setup.
+        </p>
+      </header>
+
+      <section aria-labelledby="tools-overzicht-heading">
+        <h2 id="tools-overzicht-heading">Overzicht</h2>
+        <p class="tools-intro">
+          Van netwerkbelasting en link budget tot apparaatkeuze en antenneplaatsing.
+          Klik op een kaart om direct naar de juiste tool te gaan.
+        </p>
+
+        <div class="tools-grid">
+          <article class="highlight-card tool-card">
+            <h3>MeshCore Airtime Simulator</h3>
+            <p>Simuleer netwerk-topologie, pakketverkeer en airtime-gebruik om overbelasting en bottlenecks vroeg te zien.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Simulator</span>
+              <span class="tool-tag">Netwerkbelasting</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/meshcore-airtime.html">Open tool -></a>
+          </article>
+
+          <article class="highlight-card tool-card">
+            <h3>MeshCore Link Budget Calculator</h3>
+            <p>Bereken links, marges en zendlimieten met praktische invoer voor veldplanning en deploymentbeslissingen.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Calculator</span>
+              <span class="tool-tag">RF planning</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/meshcore-linkbudget-calculator.html">Open tool -></a>
+          </article>
+
+          <article class="highlight-card tool-card">
+            <h3>MeshCore Apparaten Matrix</h3>
+            <p>Vergelijk ondersteunde boards op functies, inzetprofiel en praktische eigenschappen voor jouw node-type.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Vergelijking</span>
+              <span class="tool-tag">Hardware</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/meshcore-device-feature-matrix.html">Open tool -></a>
+          </article>
+
+          <article class="highlight-card tool-card">
+            <h3>MeshCore Antenne Matrix</h3>
+            <p>Vergelijk antennes op gain, toepassing, formaat en montage om sneller de juiste keuze te maken.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Vergelijking</span>
+              <span class="tool-tag">Antennes</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/meshcore-antenne-feature-matrix.html">Open tool -></a>
+          </article>
+
+          <article class="highlight-card tool-card">
+            <h3>MeshCore Antenne Plaatsing</h3>
+            <p>Gebruik best practices en ingebouwde simulaties voor hoogte, Fresnel-zone en plaatsingskwaliteit.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Simulator</span>
+              <span class="tool-tag">Plaatsing</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/meshcore-antenne-plaatsing.html">Open tool -></a>
+          </article>
+
+          <article class="highlight-card tool-card">
+            <h3>MeshCore Device Setup en Sync</h3>
+            <p>Stapsgewijze ondersteuning voor device-instellingen, synchronisatie en praktische controlepunten.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Setup</span>
+              <span class="tool-tag">Checklist</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/meshcore-device-setup-sync.html">Open tool -></a>
+          </article>
+
+          <article class="highlight-card tool-card">
+            <h3>LoRa Hardware en Payload Types</h3>
+            <p>Interactief overzicht van LoRa hardware, protocolconcepten en payload-typen voor analyse en uitleg.</p>
+            <div class="tool-tags">
+              <span class="tool-tag">Protocol</span>
+              <span class="tool-tag">Analyse</span>
+            </div>
+            <a class="highlight-card__link" href="Tools/lora-protocol-payloads.html">Open tool -></a>
+          </article>
+        </div>
+      </section>
+
+      <section class="tools-links" aria-label="Snelle vervolglinks">
+        <h2>Verder leren</h2>
+        <p>Combineer de tools met de theorie uit de Academy en de praktische stappen uit de handleidingen.</p>
+        <div class="tools-links__actions">
+          <a class="tools-link-btn" href="MeshAcademy/course-hub.html">Naar MeshAcademy</a>
+          <a class="tools-link-btn" href="handleidingen.html">Naar Handleidingen</a>
+          <a class="tools-link-btn" href="planning.html">Naar Planning</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script defer src="js/components/page-shell.js"></script>
+  <script defer src="js/components/theme-toggle.js"></script>
+  <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

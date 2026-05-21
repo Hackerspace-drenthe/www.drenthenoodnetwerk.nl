@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="css/components/nav.css">
   <link rel="stylesheet" href="css/components/footer.css">
   <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/meetup-widget.css">
   <link rel="stylesheet" href="css/components/timeline.css">
   <link rel="stylesheet" href="css/components/cta-banner.css">
   <link rel="stylesheet" href="css/print.css" media="print">
@@ -61,6 +62,23 @@
         <div class="scenario">
           <strong id="visie-heading">Mei 2026 = de jumpstart</strong>
           <p>Mei is de maand om het project op gang te krijgen. Niet het eindresultaat, maar de vonk. Het doel: enthousiasmeren, eerste prototypes bouwen en een community vormen. Een dekkend netwerk over heel Drenthe is de stip op de horizon — niet de mei-deadline.</p>
+        </div>
+
+        <div class="meetup-widget" aria-labelledby="planning-meetup-heading">
+          <p class="meetup-widget__eyebrow">Praktisch</p>
+          <h2 id="planning-meetup-heading">Plan je deelname aan de eerstvolgende woensdagavond</h2>
+          <p class="meetup-widget__status"><strong data-meetup-next-date>Woensdag</strong> — <span data-meetup-next-relative>binnenkort om 19:00</span></p>
+          <p class="meetup-widget__meta">De Nieuwe Veste, Coevorden. Open inloop vanaf 19:00. Ideaal moment om je eerste node direct werkend te krijgen.</p>
+          <ul class="meetup-widget__checklist">
+            <li>Neem laptop + USB-kabel mee</li>
+            <li>Neem je board mee of kies vooraf een starter-board</li>
+            <li>Zet de serie woensdagavonden alvast in je agenda</li>
+          </ul>
+          <div class="meetup-widget__actions">
+            <a href="https://t.me/+GTTYOvZTRVNhNThk" rel="noopener noreferrer" class="meetup-widget__btn meetup-widget__btn--primary">Ik ben erbij (Telegram)</a>
+            <a href="assets/calendar/meshcore-woensdag.ics" class="meetup-widget__btn meetup-widget__btn--secondary" download>Zet in agenda (.ics)</a>
+            <a href="apparaten.html" class="meetup-widget__btn meetup-widget__btn--secondary">Hardware kiezen</a>
+          </div>
         </div>
       </section>
 
@@ -243,6 +261,7 @@
   <script defer src="js/components/page-shell.js"></script>
   <script defer src="js/components/theme-toggle.js"></script>
   <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/components/meetup-widget.js"></script>
   <script defer src="js/main.js"></script>
 </body>
 </html>

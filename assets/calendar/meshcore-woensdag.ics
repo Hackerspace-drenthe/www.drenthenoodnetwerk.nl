@@ -1,0 +1,18 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Hackerspace Drenthe//Meshcore Woensdagavond//NL
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:meshcore-woensdag@drenthenoodnetwerk.nl
+DTSTAMP:20260521T120000Z
+DTSTART;TZID=Europe/Amsterdam:20260527T190000
+DTEND;TZID=Europe/Amsterdam:20260527T210000
+RRULE:FREQ=WEEKLY;BYDAY=WE
+SUMMARY:Meshcore Drenthe woensdagavond
+DESCRIPTION:Open inloop vanaf 19:00. Koffie om 19:30. Start rond 20:00. Neem je laptop en node mee.
+LOCATION:De Nieuwe Veste\, Graaf van Heiden Reinesteinlaan\, Coevorden
+URL:https://www.drenthenoodnetwerk.nl/planning.html
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR

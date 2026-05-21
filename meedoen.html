@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="css/components/nav.css">
   <link rel="stylesheet" href="css/components/footer.css">
   <link rel="stylesheet" href="css/components/theme-toggle.css">
+  <link rel="stylesheet" href="css/components/meetup-widget.css">
   <link rel="stylesheet" href="css/components/card.css">
   <link rel="stylesheet" href="css/pages/info.css">
   <link rel="stylesheet" href="css/components/cta-banner.css">
@@ -57,6 +58,23 @@
       <img src="assets/images/05-meedoen.jpeg" alt="Doe mee met Meshcore Drenthe" style="width:100%;height:auto;border-radius:var(--radius-md);margin:var(--space-lg) 0;">
       <h1>Meedoen</h1>
       <p class="info-intro">Of je nu soldeer-ervaring hebt of voor het eerst een schroevendraaier vasthoudt — er is een rol voor iedereen. Het Meshcore Drenthe project draait op vrijwilligers.</p>
+
+      <section class="meetup-widget" aria-labelledby="meetup-heading">
+        <p class="meetup-widget__eyebrow">Volgende samenkomst</p>
+        <h2 id="meetup-heading">Reserveer je plek voor woensdagavond</h2>
+        <p class="meetup-widget__status"><strong data-meetup-next-date>Woensdag</strong> — <span data-meetup-next-relative>binnenkort om 19:00</span></p>
+        <p class="meetup-widget__meta">Locatie: De Nieuwe Veste, Coevorden. Open inloop 19:00, koffie 19:30, start rond 20:00.</p>
+        <ul class="meetup-widget__checklist">
+          <li>Neem laptop + USB-kabel mee</li>
+          <li>Neem je board mee, dan helpen we direct met flashen</li>
+          <li>Nog geen board? Kies hardware en sluit daarna aan</li>
+        </ul>
+        <div class="meetup-widget__actions">
+          <a href="https://t.me/+GTTYOvZTRVNhNThk" rel="noopener noreferrer" class="meetup-widget__btn meetup-widget__btn--primary">Ik ben erbij (Telegram)</a>
+          <a href="assets/calendar/meshcore-woensdag.ics" class="meetup-widget__btn meetup-widget__btn--secondary" download>Zet in agenda (.ics)</a>
+          <a href="mailto:bestuur@hackerspace-drenthe.nl?subject=Ik%20ben%20erbij%20op%20de%20woensdagavond&body=Hoi%20Hackerspace%20Drenthe%2C%0A%0AIk%20kom%20graag%20langs%20bij%20de%20volgende%20Meshcore%20woensdagavond.%0A%0AGroet%2C" class="meetup-widget__btn meetup-widget__btn--secondary">Ik kom langs (mail)</a>
+        </div>
+      </section>
 
       <!-- Rollen -->
       <section class="info-section" aria-labelledby="rollen-heading">
@@ -214,6 +232,7 @@
   <script defer src="js/components/page-shell.js"></script>
   <script defer src="js/components/theme-toggle.js"></script>
   <script defer src="js/components/navigation.js"></script>
+  <script defer src="js/components/meetup-widget.js"></script>
   <script defer src="js/main.js"></script>
 </body>
 </html>

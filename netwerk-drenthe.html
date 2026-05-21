@@ -61,6 +61,29 @@
       <img src="assets/images/04-netwerk-kaart.jpeg" alt="Netwerk kaart van Drenthe" style="width:100%;height:auto;border-radius:var(--radius-md);margin:var(--space-lg) 0;">
       <p style="color:var(--color-text-muted);margin-bottom:var(--space-xl);max-width:65ch;">Interactieve planning tool voor het Meshcore Drenthe netwerk. Bekijk geplande en actieve <a href="woordenlijst.html#node">nodes</a>, bewoonde kernen, hoge structuren en netwerkdekking.</p>
 
+      <section class="network-health" aria-label="Netwerk gezondheid samenvatting">
+        <div class="network-health__item">
+          <span class="network-health__value" id="health-online-total">...</span>
+          <span class="network-health__label">Online nodes nu</span>
+        </div>
+        <div class="network-health__item">
+          <span class="network-health__value" id="health-repeaters-online">...</span>
+          <span class="network-health__label">Repeaters online</span>
+        </div>
+        <div class="network-health__item">
+          <span class="network-health__value" id="health-companions-online">...</span>
+          <span class="network-health__label">Companions online</span>
+        </div>
+        <div class="network-health__item">
+          <span class="network-health__value" id="health-max-link">...</span>
+          <span class="network-health__label">Langste bewezen link</span>
+        </div>
+        <div class="network-health__item">
+          <span class="network-health__value" id="health-last-sync">...</span>
+          <span class="network-health__label">Laatste sync</span>
+        </div>
+      </section>
+
       <!-- Planning Tool Embed -->
       <div style="margin-bottom:var(--space-2xl);border:2px solid var(--color-border);border-radius:var(--radius-md);overflow:hidden;">
         <iframe 

@@ -344,6 +344,7 @@
   function updateStats(repeaters, companions, links) {
     var activeRepeaters = repeaters.filter(function (n) { return isFresh(n.last_seen); }).length;
     var activeCompanions = companions.filter(function (n) { return isFresh(n.last_seen); }).length;
+    var onlineTotal = activeRepeaters + activeCompanions;
 
     var maxLink = 0;
     var totalLinkKm = 0;
@@ -356,6 +357,12 @@
     setStatValue('stat-companions', companions.length + ' (' + activeCompanions + ' online)');
     setStatValue('stat-links', links.length);
     setStatValue('stat-max-range', maxLink.toFixed(1) + ' km');
+
+    setStatValue('health-online-total', onlineTotal);
+    setStatValue('health-repeaters-online', activeRepeaters);
+    setStatValue('health-companions-online', activeCompanions);
+    setStatValue('health-max-link', maxLink.toFixed(1) + ' km');
+    setStatValue('health-last-sync', rawData && rawData.lastSync ? hoursAgo(rawData.lastSync) : 'onbekend');
   }
 
   function setStatValue(id, value) {

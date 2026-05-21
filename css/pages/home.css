@@ -2,6 +2,75 @@
    Home — Pagina-specifieke styling voor index.html
    ========================================================================== */
 
+/* ─── Start-here funnel ─── */
+.start-here {
+  padding: var(--space-2xl) 0;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg));
+}
+
+.home-meetup {
+  padding: var(--space-xl) 0;
+}
+
+.start-here h2 {
+  text-align: center;
+  color: var(--color-primary);
+  font-size: var(--font-size-2xl);
+}
+
+.start-here__intro {
+  text-align: center;
+  color: var(--color-text-muted);
+  max-width: 66ch;
+  margin: var(--space-sm) auto var(--space-xl);
+}
+
+.start-here__card {
+  position: relative;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+}
+
+.start-here__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-sm);
+}
+
+.start-here__card h3 {
+  margin-bottom: var(--space-xs);
+  color: var(--color-text);
+}
+
+.start-here__card p {
+  margin-bottom: var(--space-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.start-here__link {
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  color: var(--color-primary);
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.start-here__link:hover {
+  border-bottom-color: var(--color-primary);
+}
+
 /* ─── Highlights-sectie ─── */
 .highlights {
   padding: var(--space-3xl) 0;

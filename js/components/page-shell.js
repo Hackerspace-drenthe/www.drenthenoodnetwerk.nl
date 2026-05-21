@@ -1,7 +1,15 @@
 /**
  * Page Shell - injects shared navigation, breadcrumb and footer.
  * Single point of maintenance for site-wide shell elements.
+ *
+ * Developed by: Rein Velt
+ * Project: https://github.com/Hackerspace-drenthe/www.drenthenoodnetwerk.nl
  */
+
+const PROJECT_ATTRIBUTION = Object.freeze({
+  developedBy: 'Rein Velt',
+  github: 'https://github.com/Hackerspace-drenthe/www.drenthenoodnetwerk.nl',
+});
 
 const NAV_ITEMS = [
   { href: 'index.html', label: 'Home' },
@@ -546,7 +554,19 @@ function injectBreadcrumb(currentPage, currentPath, pathPrefix) {
   nav.appendChild(list);
 
   if (main) {
-    main.prepend(nav);
+    // Align breadcrumbs with the same container as page heading/content.
+    const directChildren = Array.from(main.children || []);
+    const contentContainer = directChildren.find((child) => {
+      if (!child.classList) return false;
+      return child.classList.contains('container') || child.classList.contains('container--narrow');
+    });
+
+    if (contentContainer) {
+      contentContainer.prepend(nav);
+    } else {
+      main.prepend(nav);
+    }
+
     return;
   }
 
@@ -654,6 +674,22 @@ function ensureThemeToggle() {
 }
 
 /**
+ * Logs project attribution once per page load and exposes it for debugging.
+ */
+function showProjectAttribution() {
+  if (window.__projectAttributionShown) {
+    return;
+  }
+
+  window.__projectAttributionShown = true;
+  window.DrentheNoodnetwerkProject = PROJECT_ATTRIBUTION;
+
+  console.info(
+    `Drenthe Noodnetwerk - ontwikkeld door ${PROJECT_ATTRIBUTION.developedBy}. GitHub: ${PROJECT_ATTRIBUTION.github}`
+  );
+}
+
+/**
  * Initializes the page shell.
  */
 function initPageShell() {
@@ -667,6 +703,7 @@ function initPageShell() {
   const currentPage = getCurrentPage();
   const pathPrefix = getPathPrefix();
 
+  showProjectAttribution();
   ensureShellStyles(pathPrefix);
   injectNav(currentPage, currentPath, pathPrefix);
   ensureThemeToggle();

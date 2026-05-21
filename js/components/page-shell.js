@@ -28,6 +28,7 @@ const NAV_ITEMS = [
       { href: 'handleidingen.html', label: 'Handleidingen' },
       { href: 'apparaten.html', label: 'Apparaten' },
       { href: 'tools.html', label: 'Tools en simulatoren' },
+      { href: 'links-sites.html', label: 'Links / Sites' },
     ]
   },
   { href: 'meedoen.html', label: 'Meedoen' },

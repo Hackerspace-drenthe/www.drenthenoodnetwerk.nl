@@ -8,7 +8,7 @@ Een open-source noodnetwerk op LoRa-technologie. Nodes sturen berichten door van
 
 - **Kick-off:** woensdag 6 mei 2026, 19:00–21:00
 - **Locatie:** De Nieuwe Veste, Coevorden
-- **Elke woensdag:** hak-avond bij Hackerspace Drenthe
+- **Elke woensdag:** hack-avond bij Hackerspace Drenthe
 
 ## Website
 

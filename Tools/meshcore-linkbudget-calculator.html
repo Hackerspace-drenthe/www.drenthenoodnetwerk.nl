@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>MeshCore Link Budget + Send Limit Calculator</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+	<style>
+		:root {
+			--bg: #f4f6f8;
+			--ink: #111827;
+			--muted: #4b5563;
+			--card: #ffffff;
+			--line: #d2d9e1;
+			--accent: #1d4ed8;
+			--accent-2: #059669;
+			--warn: #d97706;
+			--bad: #dc2626;
+			--good: #16a34a;
+			--shadow: 0 14px 32px rgba(17, 24, 39, 0.08);
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			color: var(--ink);
+			font-family: "Manrope", "Segoe UI", sans-serif;
+			background:
+				radial-gradient(circle at 8% 0%, rgba(29, 78, 216, 0.1), transparent 30%),
+				radial-gradient(circle at 90% 10%, rgba(5, 150, 105, 0.12), transparent 34%),
+				var(--bg);
+		}
+
+		.wrap {
+			width: min(1300px, 94vw);
+			margin: 20px auto 44px;
+			display: grid;
+			gap: 16px;
+		}
+
+		.hero {
+			background: linear-gradient(130deg, #ffffff, #f8fbff);
+			border: 1px solid var(--line);
+			border-radius: 18px;
+			box-shadow: var(--shadow);
+			padding: 18px;
+		}
+
+		.hero h1 {
+			margin: 0;
+			font-family: "Space Grotesk", sans-serif;
+			font-size: clamp(1.4rem, 2.5vw, 2.1rem);
+			line-height: 1.15;
+			letter-spacing: 0.01em;
+		}
+
+		.hero p {
+			margin: 9px 0 0;
+			color: var(--muted);
+			max-width: 80ch;
+			line-height: 1.45;
+		}
+
+		.chips {
+			margin-top: 12px;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		.chip {
+			border-radius: 999px;
+			border: 1px solid var(--line);
+			background: #fff;
+			padding: 6px 10px;
+			font-size: 0.8rem;
+			font-weight: 700;
+			color: #1f2937;
+		}
+
+		.grid {
+			display: grid;
+			gap: 16px;
+			grid-template-columns: 1.1fr 0.9fr;
+		}
+
+		.panel {
+			background: var(--card);
+			border: 1px solid var(--line);
+			border-radius: 16px;
+			box-shadow: var(--shadow);
+			padding: 14px;
+		}
+
+		.panel h2,
+		.panel h3 {
+			margin: 0 0 10px;
+			font-family: "Space Grotesk", sans-serif;
+			letter-spacing: 0.01em;
+		}
+
+		.input-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 10px;
+		}
+
+		label {
+			display: block;
+			margin: 0 0 5px;
+			font-size: 0.8rem;
+			color: #374151;
+			font-weight: 700;
+		}
+
+		input,
+		select,
+		button {
+			width: 100%;
+			border: 1px solid #bfc9d6;
+			border-radius: 10px;
+			background: #fff;
+			color: #0f172a;
+			padding: 8px 9px;
+			font: inherit;
+		}
+
+		input:focus,
+		select:focus,
+		button:focus {
+			outline: 2px solid rgba(29, 78, 216, 0.25);
+			border-color: #4f7ef1;
+			outline-offset: 1px;
+		}
+
+		.btn-row {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 8px;
+			margin-top: 8px;
+		}
+
+		.btn {
+			font-weight: 700;
+			cursor: pointer;
+			background: #f8fbff;
+		}
+
+		.btn.active {
+			color: #fff;
+			border-color: #1d4ed8;
+			background: linear-gradient(120deg, #1d4ed8, #1f6feb);
+		}
+
+		.small-note {
+			margin-top: 10px;
+			font-size: 0.78rem;
+			color: var(--muted);
+			line-height: 1.4;
+		}
+
+		.preset-row {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 8px;
+			margin-top: 10px;
+		}
+
+		.preset-btn {
+			font-weight: 700;
+			cursor: pointer;
+			background: #f8fbff;
+		}
+
+		.preset-btn.active {
+			color: #fff;
+			border-color: #1d4ed8;
+			background: linear-gradient(120deg, #1d4ed8, #1f6feb);
+		}
+
+		.kpis {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 8px;
+		}
+
+		.kpi {
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			background: #f8fbff;
+			padding: 10px;
+			min-height: 84px;
+		}
+
+		.kpi .label {
+			font-size: 0.78rem;
+			color: #4b5563;
+			font-weight: 700;
+			margin-bottom: 6px;
+		}
+
+		.kpi .value {
+			font-family: "Space Grotesk", sans-serif;
+			font-size: 1.35rem;
+			font-weight: 700;
+			line-height: 1;
+		}
+
+		.kpi .sub {
+			margin-top: 4px;
+			font-size: 0.74rem;
+			color: #6b7280;
+		}
+
+		.margin-bar {
+			margin-top: 10px;
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			background: #fff;
+			padding: 10px;
+		}
+
+		.bar-track {
+			height: 16px;
+			border-radius: 999px;
+			background: #e5ebf2;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.bar-fill {
+			height: 100%;
+			width: 0%;
+			border-radius: inherit;
+			transition: width 0.25s ease;
+			background: linear-gradient(90deg, #dc2626, #d97706, #16a34a);
+		}
+
+		.bar-txt {
+			margin-top: 8px;
+			font-size: 0.82rem;
+			color: #374151;
+			font-weight: 700;
+		}
+
+		.range-profile {
+			margin-top: 10px;
+			border: 1px solid var(--line);
+			border-radius: 12px;
+			background: #fff;
+			padding: 10px;
+		}
+
+		.range-profile h3 {
+			margin: 0 0 8px;
+			font-size: 0.95rem;
+			font-family: "Space Grotesk", sans-serif;
+		}
+
+		.profile-grid {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 8px;
+		}
+
+		.profile-card {
+			border: 1px solid var(--line);
+			border-radius: 10px;
+			padding: 8px;
+			background: #f9fbff;
+		}
+
+		.profile-title {
+			font-size: 0.78rem;
+			color: #4b5563;
+			font-weight: 700;
+		}
+
+		.profile-value {
+			margin-top: 4px;
+			font-family: "Space Grotesk", sans-serif;
+			font-weight: 700;
+			font-size: 1.18rem;
+		}
+
+		.profile-sub {
+			margin-top: 3px;
+			font-size: 0.72rem;
+			color: #6b7280;
+		}
+
+		.map-panel {
+			background: var(--card);
+			border: 1px solid var(--line);
+			border-radius: 16px;
+			box-shadow: var(--shadow);
+			padding: 12px;
+		}
+
+		#map {
+			height: 560px;
+			border: 1px solid #c9d4e0;
+			border-radius: 12px;
+			overflow: hidden;
+			background: #eef2f6;
+		}
+
+		.map-tools {
+			display: grid;
+			gap: 8px;
+			grid-template-columns: 1fr 1fr 1fr;
+			margin-bottom: 10px;
+		}
+
+		.status {
+			margin-top: 8px;
+			font-size: 0.82rem;
+			color: #374151;
+			font-weight: 700;
+		}
+
+		.ok {
+			color: var(--good);
+		}
+
+		.warn {
+			color: var(--warn);
+		}
+
+		.bad {
+			color: var(--bad);
+		}
+
+		@media (max-width: 1100px) {
+			.grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		@media (max-width: 740px) {
+			.input-grid,
+			.kpis,
+			.btn-row,
+			.map-tools,
+			.preset-row,
+			.profile-grid {
+				grid-template-columns: 1fr;
+			}
+
+			#map {
+				height: 460px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<section class="hero">
+			<h1>MeshCore Interactive Link Budget + Send Limit Calculator</h1>
+			<p>
+				Estimate required TX power for a remote point using antenna gain, distance, antenna height, and terrain/building profile.
+				Defaults are tuned for SF7 + CR 4/5 + BW 62.5 kHz.
+			</p>
+			<div class="chips">
+				<span class="chip">LoRa preset: SF7</span>
+				<span class="chip">Coding: CR 4/5</span>
+				<span class="chip">Bandwidth: 62.5 kHz</span>
+				<span class="chip">Default tuned: 1W booster + short whip</span>
+				<span class="chip">Map: Leaflet + OpenStreetMap</span>
+			</div>
+		</section>
+
+		<section class="grid">
+			<article class="panel">
+				<h2>RF Parameters</h2>
+				<div class="input-grid">
+					<div>
+						<label for="txPower">TX Power (dBm)</label>
+						<input id="txPower" type="number" step="0.1" min="-5" max="30" value="30" />
+					</div>
+					<div>
+						<label for="freqMHz">Frequency (MHz)</label>
+						<input id="freqMHz" type="number" step="0.01" min="150" max="3000" value="868.1" />
+					</div>
+					<div>
+						<label for="txGain">TX Antenna Gain (dBi)</label>
+						<input id="txGain" type="number" step="0.1" min="-5" max="30" value="2.0" />
+					</div>
+					<div>
+						<label for="rxGain">RX Antenna Gain (dBi)</label>
+						<input id="rxGain" type="number" step="0.1" min="-5" max="30" value="2.0" />
+					</div>
+					<div>
+						<label for="txCable">TX Cable Loss (dB)</label>
+						<input id="txCable" type="number" step="0.1" min="0" max="20" value="1.2" />
+					</div>
+					<div>
+						<label for="rxCable">RX Cable Loss (dB)</label>
+						<input id="rxCable" type="number" step="0.1" min="0" max="20" value="1.0" />
+					</div>
+					<div>
+						<label for="distanceKm">Distance (km)</label>
+						<input id="distanceKm" type="number" step="0.01" min="0.05" max="2000" value="8" />
+					</div>
+					<div>
+						<label for="extraLoss">Extra Loss Margin (dB)</label>
+						<input id="extraLoss" type="number" step="0.1" min="0" max="60" value="2" />
+					</div>
+					<div>
+						<label for="txHeight">TX Antenna Height (m)</label>
+						<input id="txHeight" type="number" step="0.1" min="1" max="200" value="8" />
+					</div>
+					<div>
+						<label for="rxHeight">RX Antenna Height (m)</label>
+						<input id="rxHeight" type="number" step="0.1" min="1" max="200" value="8" />
+					</div>
+					<div>
+						<label for="terrain">Terrain / Profile</label>
+						<select id="terrain">
+							<option value="0.2">Flat open field (low clutter)</option>
+							<option value="0.8">Vlak mixed terrain</option>
+							<option value="1.6" selected>Suburban / mixed buildings</option>
+							<option value="2.8">Dense bebouwing (urban)</option>
+						</select>
+					</div>
+					<div>
+						<label for="obstruction">Line Of Sight Quality</label>
+						<select id="obstruction">
+							<option value="0">Clear LOS</option>
+							<option value="8" selected>Partial obstruction</option>
+							<option value="18">No clear LOS</option>
+						</select>
+					</div>
+					<div>
+						<label for="bandMismatch">Band Mismatch Loss (dB)</label>
+						<input id="bandMismatch" type="number" step="0.1" min="0" max="20" value="2.0" />
+					</div>
+					<div>
+						<label for="fadeMargin">Reliability Fade Margin (dB)</label>
+						<input id="fadeMargin" type="number" step="0.1" min="0" max="40" value="10" />
+					</div>
+					<div>
+						<label for="eirpLimit">Regulatory EIRP Limit (dBm)</label>
+						<input id="eirpLimit" type="number" step="0.1" min="0" max="40" value="16.15" />
+					</div>
+				</div>
+
+				<div class="preset-row">
+					<button id="presetKit" class="preset-btn active" type="button">My 1W + 8cm Kit</button>
+					<button id="presetLegal" class="preset-btn" type="button">EU868 Legal Profile</button>
+					<button id="presetLos" class="preset-btn" type="button">High LOS Site</button>
+				</div>
+
+				<h3 style="margin-top:14px;">Send Limit (Duty Cycle)</h3>
+				<div class="input-grid">
+					<div>
+						<label for="payloadBytes">Payload Bytes</label>
+						<input id="payloadBytes" type="number" step="1" min="1" max="255" value="20" />
+					</div>
+					<div>
+						<label for="dutyCycle">Duty Cycle (%)</label>
+						<input id="dutyCycle" type="number" step="0.1" min="0.1" max="100" value="1" />
+					</div>
+					<div>
+						<label for="preamble">Preamble Symbols</label>
+						<input id="preamble" type="number" step="1" min="6" max="20" value="8" />
+					</div>
+					<div>
+						<label for="bwKHz">Bandwidth (kHz, fixed profile)</label>
+						<input id="bwKHz" type="number" step="0.1" min="7.8" max="500" value="62.5" />
+					</div>
+				</div>
+
+				<div class="small-note">
+					Model assumptions: NF 6 dB, SNR threshold -7.5 dB for SF7, CR 4/5 payload coding term. Band mismatch helps model 915MHz antennas used on 868MHz systems.
+				</div>
+			</article>
+
+			<article class="panel">
+				<h2>Results</h2>
+				<div class="kpis">
+					<div class="kpi">
+						<div class="label">Received Power</div>
+						<div class="value" id="rxPowerOut">-</div>
+						<div class="sub">dBm at remote point</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Sensitivity (SF7 CR4/5)</div>
+						<div class="value" id="sensitivityOut">-</div>
+						<div class="sub">dBm</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Link Margin</div>
+						<div class="value" id="marginOut">-</div>
+						<div class="sub" id="marginStatus">-</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Required TX Power</div>
+						<div class="value" id="requiredTxOut">-</div>
+						<div class="sub">dBm to meet margin target</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Path Loss Total</div>
+						<div class="value" id="pathLossOut">-</div>
+						<div class="sub">FSPL + terrain + obstruction</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Radio Horizon</div>
+						<div class="value" id="horizonOut">-</div>
+						<div class="sub" id="horizonStatus">-</div>
+					</div>
+					<div class="kpi">
+						<div class="label">EIRP Check</div>
+						<div class="value" id="eirpOut">-</div>
+						<div class="sub" id="eirpStatus">-</div>
+					</div>
+					<div class="kpi">
+						<div class="label">LoRa Airtime</div>
+						<div class="value" id="airtimeOut">-</div>
+						<div class="sub">ms per packet</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Max Packets / Hour</div>
+						<div class="value" id="pktsHourOut">-</div>
+						<div class="sub">duty-cycle limited</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Min Gap</div>
+						<div class="value" id="minGapOut">-</div>
+						<div class="sub">seconds between packets</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Max Packets / Day</div>
+						<div class="value" id="pktsDayOut">-</div>
+						<div class="sub">at selected payload</div>
+					</div>
+					<div class="kpi">
+						<div class="label">Distance Source</div>
+						<div class="value" id="distanceSrcOut">manual</div>
+						<div class="sub" id="distanceSrcSub">editing input field</div>
+					</div>
+				</div>
+
+				<div class="margin-bar">
+					<div class="bar-track"><div class="bar-fill" id="marginBar"></div></div>
+					<div class="bar-txt" id="marginTxt">Link margin gauge</div>
+				</div>
+
+				<div class="range-profile">
+					<h3>Estimated Practical Single-Hop Range</h3>
+					<div class="profile-grid">
+						<div class="profile-card">
+							<div class="profile-title">Conservative</div>
+							<div class="profile-value" id="rangeConservative">-</div>
+							<div class="profile-sub" id="rangeConservativeSub">Dense clutter, strict reliability</div>
+						</div>
+						<div class="profile-card">
+							<div class="profile-title">Likely</div>
+							<div class="profile-value" id="rangeLikely">-</div>
+							<div class="profile-sub" id="rangeLikelySub">Current settings profile</div>
+						</div>
+						<div class="profile-card">
+							<div class="profile-title">Best Case</div>
+							<div class="profile-value" id="rangeBest">-</div>
+							<div class="profile-sub" id="rangeBestSub">Clear LOS + improved siting</div>
+						</div>
+					</div>
+				</div>
+			</article>
+		</section>
+
+		<section class="map-panel">
+			<h2 style="margin:0 0 10px;font-family:'Space Grotesk',sans-serif;">Leaflet Map: pick TX and remote RX point</h2>
+			<div class="map-tools">
+				<button class="btn active" id="setTxBtn" type="button">Set TX Point</button>
+				<button class="btn" id="setRxBtn" type="button">Set Remote RX Point</button>
+				<button class="btn" id="clearMapBtn" type="button">Clear Markers</button>
+			</div>
+			<div id="map"></div>
+			<div class="status" id="mapStatus">Click map to place TX marker. Then place RX marker to auto-fill distance.</div>
+			<div class="small-note">
+				Tip: drag markers to fine tune route distance. When both markers exist, map distance overrides manual distance input.
+			</div>
+		</section>
+	</div>
+
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	<script>
+		(function () {
+			var SF = 7;
+			var CR = 1; // CR 4/5 -> 1 in LoRa formula
+			var NF_DB = 6;
+			var SNR_REQ_DB = -7.5;
+			var MAX_RANGE_SEARCH_KM = 120;
+
+			var map;
+			var setMode = "tx";
+			var txMarker = null;
+			var rxMarker = null;
+			var pathLine = null;
+			var usingMapDistance = false;
+
+			function byId(id) {
+				return document.getElementById(id);
+			}
+
+			function round(v, p) {
+				var f = Math.pow(10, p || 2);
+				return Math.round(v * f) / f;
+			}
+
+			function toNum(id, fallback) {
+				var v = Number(byId(id).value);
+				return Number.isFinite(v) ? v : fallback;
+			}
+
+			function haversineKm(aLat, aLon, bLat, bLon) {
+				var toRad = Math.PI / 180;
+				var dLat = (bLat - aLat) * toRad;
+				var dLon = (bLon - aLon) * toRad;
+				var lat1 = aLat * toRad;
+				var lat2 = bLat * toRad;
+				var sinDLat = Math.sin(dLat / 2);
+				var sinDLon = Math.sin(dLon / 2);
+				var h = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
+				return 6371 * (2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h)));
+			}
+
+			function fsplDb(freqMHz, distanceKm) {
+				var d = Math.max(0.001, distanceKm);
+				var f = Math.max(1, freqMHz);
+				return 32.44 + (20 * Math.log10(f)) + (20 * Math.log10(d));
+			}
+
+			function horizonKm(htx, hrx) {
+				return 3.57 * (Math.sqrt(Math.max(0.1, htx)) + Math.sqrt(Math.max(0.1, hrx)));
+			}
+
+			function loraAirtimeMs(payloadBytes, sf, bwHz, cr, preamble, crcOn, explicitHeader) {
+				var bw = Math.max(1, bwHz);
+				var pl = Math.max(1, payloadBytes);
+				var ih = explicitHeader ? 0 : 1;
+				var crc = crcOn ? 1 : 0;
+				var de = (sf >= 11 && bw <= 125000) ? 1 : 0;
+
+				var tsym = Math.pow(2, sf) / bw;
+				var tpreamble = (preamble + 4.25) * tsym;
+				var payloadTerm = (8 * pl - 4 * sf + 28 + 16 * crc - 20 * ih);
+				var denom = 4 * (sf - 2 * de);
+				var symbNb = 8 + Math.max(Math.ceil(payloadTerm / denom) * (cr + 4), 0);
+				var tpayload = symbNb * tsym;
+				return (tpreamble + tpayload) * 1000;
+			}
+
+			function gatherParams() {
+				return {
+					txPower: toNum("txPower", 30),
+					freqMHz: toNum("freqMHz", 868.1),
+					txGain: toNum("txGain", 2),
+					rxGain: toNum("rxGain", 2),
+					txCable: toNum("txCable", 1.2),
+					rxCable: toNum("rxCable", 1),
+					distanceKm: Math.max(0.05, toNum("distanceKm", 8)),
+					extraLoss: Math.max(0, toNum("extraLoss", 2)),
+					txHeight: Math.max(0.1, toNum("txHeight", 8)),
+					rxHeight: Math.max(0.1, toNum("rxHeight", 8)),
+					terrainPerKm: toNum("terrain", 1.6),
+					obstruction: toNum("obstruction", 8),
+					bandMismatch: Math.max(0, toNum("bandMismatch", 2)),
+					fadeMargin: Math.max(0, toNum("fadeMargin", 10)),
+					eirpLimit: toNum("eirpLimit", 16.15),
+					payload: Math.max(1, Math.floor(toNum("payloadBytes", 20))),
+					dutyPct: Math.max(0.1, toNum("dutyCycle", 1)),
+					preamble: Math.max(6, Math.floor(toNum("preamble", 8))),
+					bwHz: Math.max(7800, toNum("bwKHz", 62.5) * 1000)
+				};
+			}
+
+			function computeMetrics(params) {
+				var fspl = fsplDb(params.freqMHz, params.distanceKm);
+				var clutterLoss = params.terrainPerKm * params.distanceKm;
+				var horizon = horizonKm(params.txHeight, params.rxHeight);
+				var horizonPenalty = params.distanceKm > horizon ? Math.min(40, (params.distanceKm - horizon) * 2.5) : 0;
+
+				var totalPathLoss = fspl + clutterLoss + params.obstruction + horizonPenalty + params.extraLoss + params.bandMismatch;
+
+				var noiseFloor = -174 + 10 * Math.log10(params.bwHz) + NF_DB;
+				var sensitivity = noiseFloor + SNR_REQ_DB;
+
+				var rxPower = params.txPower + params.txGain + params.rxGain - params.txCable - params.rxCable - totalPathLoss;
+				var rawMargin = rxPower - sensitivity;
+				var effectiveMargin = rawMargin - params.fadeMargin;
+
+				var requiredTx = sensitivity + params.fadeMargin + totalPathLoss + params.txCable + params.rxCable - params.txGain - params.rxGain;
+				var eirp = params.txPower + params.txGain - params.txCable;
+
+				var airtimeMs = loraAirtimeMs(params.payload, SF, params.bwHz, CR, params.preamble, true, true);
+				var dutyFrac = params.dutyPct / 100;
+				var maxAirtimeHourMs = dutyFrac * 3600 * 1000;
+				var maxPktsHour = Math.floor(maxAirtimeHourMs / airtimeMs);
+				var maxPktsDay = Math.floor(maxPktsHour * 24);
+				var minGapSec = (airtimeMs / 1000) * ((1 - dutyFrac) / dutyFrac);
+
+				return {
+					fspl: fspl,
+					clutterLoss: clutterLoss,
+					horizon: horizon,
+					horizonPenalty: horizonPenalty,
+					totalPathLoss: totalPathLoss,
+					noiseFloor: noiseFloor,
+					sensitivity: sensitivity,
+					rxPower: rxPower,
+					rawMargin: rawMargin,
+					effectiveMargin: effectiveMargin,
+					requiredTx: requiredTx,
+					eirp: eirp,
+					airtimeMs: airtimeMs,
+					maxPktsHour: maxPktsHour,
+					maxPktsDay: maxPktsDay,
+					minGapSec: minGapSec
+				};
+			}
+
+			function estimateMaxDistance(baseParams, scenario) {
+				var target = scenario.targetMargin;
+
+				function marginAt(distKm) {
+					var p = Object.assign({}, baseParams, scenario.overrides, { distanceKm: distKm });
+					return computeMetrics(p).effectiveMargin;
+				}
+
+				var low = 0.05;
+				var high = MAX_RANGE_SEARCH_KM;
+				var lowMargin = marginAt(low);
+				if (lowMargin < target) {
+					return { km: 0, capped: false };
+				}
+
+				var highMargin = marginAt(high);
+				if (highMargin >= target) {
+					return { km: high, capped: true };
+				}
+
+				for (var i = 0; i < 34; i += 1) {
+					var mid = (low + high) / 2;
+					var m = marginAt(mid);
+					if (m >= target) {
+						low = mid;
+					} else {
+						high = mid;
+					}
+				}
+
+				return { km: low, capped: false };
+			}
+
+			function formatRange(result) {
+				if (result.km <= 0) {
+					return "< 0.1 km";
+				}
+				if (result.capped) {
+					return round(result.km, 0) + "+ km";
+				}
+				if (result.km < 1) {
+					return Math.round(result.km * 1000) + " m";
+				}
+				return round(result.km, 1) + " km";
+			}
+
+			function updateRangeProfiles(baseParams) {
+				var conservative = estimateMaxDistance(baseParams, {
+					targetMargin: 6,
+					overrides: {
+						terrainPerKm: 2.8,
+						obstruction: 18,
+						fadeMargin: Math.max(14, baseParams.fadeMargin),
+						txHeight: Math.max(2, baseParams.txHeight * 0.8),
+						rxHeight: Math.max(2, baseParams.rxHeight * 0.8)
+					}
+				});
+
+				var likely = estimateMaxDistance(baseParams, {
+					targetMargin: 2,
+					overrides: {}
+				});
+
+				var best = estimateMaxDistance(baseParams, {
+					targetMargin: 0,
+					overrides: {
+						terrainPerKm: 0.2,
+						obstruction: 0,
+						fadeMargin: Math.max(6, baseParams.fadeMargin - 4),
+						txHeight: Math.min(60, baseParams.txHeight + 10),
+						rxHeight: Math.min(60, baseParams.rxHeight + 10)
+					}
+				});
+
+				setText("rangeConservative", formatRange(conservative));
+				setText("rangeLikely", formatRange(likely));
+				setText("rangeBest", formatRange(best));
+
+				setText("rangeConservativeSub", "Dense clutter, NLOS, +6 dB target margin");
+				setText("rangeLikelySub", "Current terrain/building profile, +2 dB target margin");
+				setText("rangeBestSub", "Clear LOS + higher siting, 0 dB target margin");
+			}
+
+			function setActivePreset(activeId) {
+				["presetKit", "presetLegal", "presetLos"].forEach(function (id) {
+					byId(id).classList.toggle("active", id === activeId);
+				});
+			}
+
+			function applyPreset(type) {
+				var values;
+				if (type === "kit") {
+					values = {
+						txPower: 30,
+						freqMHz: 868.1,
+						txGain: 2.0,
+						rxGain: 2.0,
+						txCable: 1.2,
+						rxCable: 1.0,
+						txHeight: 8,
+						rxHeight: 8,
+						terrain: 1.6,
+						obstruction: 8,
+						bandMismatch: 2.0,
+						fadeMargin: 10,
+						eirpLimit: 16.15
+					};
+					setActivePreset("presetKit");
+				} else if (type === "legal") {
+					values = {
+						txPower: 14,
+						freqMHz: 868.1,
+						txGain: 2.0,
+						rxGain: 2.0,
+						txCable: 1.0,
+						rxCable: 1.0,
+						txHeight: 8,
+						rxHeight: 8,
+						terrain: 1.6,
+						obstruction: 8,
+						bandMismatch: 2.0,
+						fadeMargin: 10,
+						eirpLimit: 16.15
+					};
+					setActivePreset("presetLegal");
+				} else {
+					values = {
+						txPower: 20,
+						freqMHz: 868.1,
+						txGain: 6.0,
+						rxGain: 6.0,
+						txCable: 1.0,
+						rxCable: 1.0,
+						txHeight: 25,
+						rxHeight: 25,
+						terrain: 0.2,
+						obstruction: 0,
+						bandMismatch: 0.5,
+						fadeMargin: 8,
+						eirpLimit: 16.15
+					};
+					setActivePreset("presetLos");
+				}
+
+				Object.keys(values).forEach(function (key) {
+					var el = byId(key);
+					if (el) {
+						el.value = values[key];
+					}
+				});
+
+				usingMapDistance = false;
+				setText("distanceSrcOut", "manual");
+				setText("distanceSrcSub", "profile preset loaded");
+				calculate();
+			}
+
+			function setModeButtons() {
+				byId("setTxBtn").classList.toggle("active", setMode === "tx");
+				byId("setRxBtn").classList.toggle("active", setMode === "rx");
+			}
+
+			function updatePath() {
+				if (!txMarker || !rxMarker) {
+					if (pathLine) {
+						map.removeLayer(pathLine);
+						pathLine = null;
+					}
+					byId("mapStatus").textContent = "Place both TX and RX markers to get auto distance.";
+					usingMapDistance = false;
+					byId("distanceSrcOut").textContent = "manual";
+					byId("distanceSrcSub").textContent = "editing input field";
+					calculate();
+					return;
+				}
+
+				var a = txMarker.getLatLng();
+				var b = rxMarker.getLatLng();
+				var dist = haversineKm(a.lat, a.lng, b.lat, b.lng);
+				byId("distanceKm").value = round(dist, 3);
+				usingMapDistance = true;
+
+				if (pathLine) {
+					pathLine.setLatLngs([a, b]);
+				} else {
+					pathLine = L.polyline([a, b], { color: "#1d4ed8", weight: 3, opacity: 0.8 }).addTo(map);
+				}
+
+				byId("mapStatus").textContent = "Auto distance from map: " + round(dist, 3) + " km";
+				byId("distanceSrcOut").textContent = "map";
+				byId("distanceSrcSub").textContent = round(dist, 3) + " km from marker path";
+				calculate();
+			}
+
+			function makeMarker(latlng, label, color) {
+				var icon = L.divIcon({
+					className: "",
+					html: '<div style="width:16px;height:16px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25);"></div>',
+					iconSize: [16, 16],
+					iconAnchor: [8, 8]
+				});
+				return L.marker(latlng, { draggable: true, icon: icon, title: label });
+			}
+
+			function initMap() {
+				var hasLeaflet = typeof L !== "undefined";
+				if (!hasLeaflet) {
+					byId("mapStatus").textContent = "Leaflet failed to load. Calculator still works with manual distance input.";
+					return;
+				}
+
+				map = L.map("map", { zoomControl: true }).setView([52.93, 6.64], 8);
+				L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+					maxZoom: 19,
+					attribution: "&copy; OpenStreetMap contributors"
+				}).addTo(map);
+
+				map.on("click", function (ev) {
+					if (setMode === "tx") {
+						if (txMarker) map.removeLayer(txMarker);
+						txMarker = makeMarker(ev.latlng, "TX", "#16a34a").addTo(map);
+						txMarker.bindTooltip("TX", { permanent: true, direction: "top", offset: [0, -8] });
+						txMarker.on("drag", updatePath);
+						setMode = "rx";
+						setModeButtons();
+					} else {
+						if (rxMarker) map.removeLayer(rxMarker);
+						rxMarker = makeMarker(ev.latlng, "RX", "#dc2626").addTo(map);
+						rxMarker.bindTooltip("RX", { permanent: true, direction: "top", offset: [0, -8] });
+						rxMarker.on("drag", updatePath);
+						setMode = "tx";
+						setModeButtons();
+					}
+					updatePath();
+				});
+
+				byId("setTxBtn").addEventListener("click", function () {
+					setMode = "tx";
+					setModeButtons();
+					byId("mapStatus").textContent = "Click map to place TX marker.";
+				});
+
+				byId("setRxBtn").addEventListener("click", function () {
+					setMode = "rx";
+					setModeButtons();
+					byId("mapStatus").textContent = "Click map to place remote RX marker.";
+				});
+
+				byId("clearMapBtn").addEventListener("click", function () {
+					if (txMarker) map.removeLayer(txMarker);
+					if (rxMarker) map.removeLayer(rxMarker);
+					if (pathLine) map.removeLayer(pathLine);
+					txMarker = null;
+					rxMarker = null;
+					pathLine = null;
+					usingMapDistance = false;
+					byId("distanceSrcOut").textContent = "manual";
+					byId("distanceSrcSub").textContent = "editing input field";
+					byId("mapStatus").textContent = "Markers cleared. Click map to place TX then RX.";
+					calculate();
+				});
+
+				setModeButtons();
+			}
+
+			function setText(id, value) {
+				byId(id).textContent = value;
+			}
+
+			function setMarginColor(el, value) {
+				el.classList.remove("ok", "warn", "bad");
+				if (value >= 10) el.classList.add("ok");
+				else if (value >= 2) el.classList.add("warn");
+				else el.classList.add("bad");
+			}
+
+			function calculate() {
+				var params = gatherParams();
+				var metrics = computeMetrics(params);
+
+				setText("rxPowerOut", round(metrics.rxPower, 2) + " dBm");
+				setText("sensitivityOut", round(metrics.sensitivity, 2) + " dBm");
+				setText("marginOut", round(metrics.effectiveMargin, 2) + " dB");
+				setText("requiredTxOut", round(metrics.requiredTx, 2) + " dBm");
+				setText("pathLossOut", round(metrics.totalPathLoss, 2) + " dB");
+				setText("horizonOut", round(metrics.horizon, 2) + " km");
+				setText("eirpOut", round(metrics.eirp, 2) + " dBm");
+				setText("airtimeOut", round(metrics.airtimeMs, 2) + " ms");
+				setText("pktsHourOut", String(metrics.maxPktsHour));
+				setText("pktsDayOut", String(metrics.maxPktsDay));
+				setText("minGapOut", round(metrics.minGapSec, 2) + " s");
+
+				var marginStatus = byId("marginStatus");
+				if (metrics.effectiveMargin >= 10) marginStatus.textContent = "healthy margin (>= 10 dB)";
+				else if (metrics.effectiveMargin >= 2) marginStatus.textContent = "possible but fragile";
+				else marginStatus.textContent = "likely unstable / no reliable link";
+				setMarginColor(marginStatus, metrics.effectiveMargin);
+
+				var horizonStatus = byId("horizonStatus");
+				if (params.distanceKm <= metrics.horizon) {
+					horizonStatus.textContent = "within geometric horizon";
+					horizonStatus.className = "sub ok";
+				} else {
+					horizonStatus.textContent = "beyond horizon, penalty applied";
+					horizonStatus.className = "sub warn";
+				}
+
+				var eirpStatus = byId("eirpStatus");
+				if (metrics.eirp <= params.eirpLimit) {
+					eirpStatus.textContent = "within selected limit";
+					eirpStatus.className = "sub ok";
+				} else {
+					eirpStatus.textContent = "over limit by " + round(metrics.eirp - params.eirpLimit, 2) + " dB";
+					eirpStatus.className = "sub bad";
+				}
+
+				var normalized = Math.max(0, Math.min(1, (metrics.effectiveMargin + 20) / 40));
+				byId("marginBar").style.width = (normalized * 100) + "%";
+				byId("marginTxt").textContent =
+					"Effective margin: " + round(metrics.effectiveMargin, 2) + " dB (raw " + round(metrics.rawMargin, 2) + " dB, fade target " + round(params.fadeMargin, 2) + " dB)";
+
+				if (!usingMapDistance) {
+					byId("distanceSrcOut").textContent = "manual";
+					byId("distanceSrcSub").textContent = "input value: " + round(params.distanceKm, 3) + " km";
+				}
+
+				updateRangeProfiles(params);
+			}
+
+			function bindInputs() {
+				[
+					"txPower", "freqMHz", "txGain", "rxGain", "txCable", "rxCable", "distanceKm", "extraLoss",
+					"txHeight", "rxHeight", "terrain", "obstruction", "bandMismatch", "fadeMargin", "eirpLimit",
+					"payloadBytes", "dutyCycle", "preamble", "bwKHz"
+				].forEach(function (id) {
+					var el = byId(id);
+					el.addEventListener("input", function () {
+						if (id === "distanceKm") usingMapDistance = false;
+						calculate();
+					});
+					el.addEventListener("change", function () {
+						if (id === "distanceKm") usingMapDistance = false;
+						calculate();
+					});
+				});
+			}
+
+			function bindPresets() {
+				byId("presetKit").addEventListener("click", function () {
+					applyPreset("kit");
+				});
+
+				byId("presetLegal").addEventListener("click", function () {
+					applyPreset("legal");
+				});
+
+				byId("presetLos").addEventListener("click", function () {
+					applyPreset("los");
+				});
+			}
+
+			bindInputs();
+			bindPresets();
+			initMap();
+			applyPreset("kit");
+		})();
+	</script>
+</body>
+</html>

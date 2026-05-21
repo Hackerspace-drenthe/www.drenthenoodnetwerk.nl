@@ -18,6 +18,51 @@
 
 export const newsData = [
   {
+    id: 6,
+    date: '2026-05-21',
+    category: 'voortgang',
+    title: 'Statusupdate Drenthe Noodnetwerk: Ontwikkelingen na week 3',
+    summary: 'In drie weken is het Drenthe Noodnetwerk van concept naar operationele testfases gegaan. De focus verschuift nu naar netwerkoptimalisatie en strategische opschaling met de Veiligheidsregio Drenthe.',
+    content: `
+      <p>In een tijdsbestek van drie weken heeft het Drenthe Noodnetwerk de transitie gemaakt van conceptfase naar de eerste operationele testfases. Door een hoge participatiegraad van radioamateurs en technisch georienteerde beginners is de hardware-basis nu provinciaal uitgerold.</p>
+
+      <figure class="news-article__media">
+        <img src="assets/images/news/statusupdate-week3-2026-05-21.png" alt="Statusvisual van Drenthe Noodnetwerk na week 3" loading="lazy" decoding="async">
+        <figcaption>Statusvisual van het netwerk na de eerste drie werkweken.</figcaption>
+      </figure>
+
+      <p><strong>Evaluatie bijeenkomsten 1 t/m 3</strong></p>
+      <ul>
+        <li><strong>Avond 1 (Introductie & Protocol):</strong> Presentatie over Meshcore-technologie aan een doelgroep van 15+ technisch georienteerde deelnemers. Introductie van de decentrale netwerkarchitectuur, bijgewoond door RTV Drenthe.</li>
+        <li><strong>Avond 2 (Hardware-integratie):</strong> Praktische assemblagefase. Alle aanwezige deelnemers hebben een functionele node geconfigureerd. Ook zijn de specificaties vastgesteld voor vervolgexperimenten met externe antennes, behuizingsontwerpen, accucapaciteit en off-grid zonne-energiesystemen.</li>
+        <li><strong>Avond 3 (Infrastructuur & Werkgroepen):</strong> Gastpresentatie door Wilco (VRD) over de roadmap en actuele netwerkstatus van de veiligheidsregio. De groep is daarna opgesplitst in twee operationele eenheden:</li>
+      </ul>
+
+      <p><strong>Werkgroepen</strong></p>
+      <ul>
+        <li><strong>Werkgroep Analyse:</strong> Verantwoordelijk voor packet-tracking, link-budget berekeningen en QoS-monitoring ("komen mijn berichten aan?").</li>
+        <li><strong>Werkgroep 3D-Printen:</strong> Verantwoordelijk voor het ontwerpen en produceren van weerbestendige (IP-rated) outdoor-behuizingen.</li>
+      </ul>
+
+      <p><strong>Actuele netwerktopologie en dekking</strong></p>
+      <ul>
+        <li><strong>RF-link Emmer-Compascuum:</strong> Bevindt zich momenteel nog out-of-range. Dit segment heeft hoge prioriteit voor de komende uitrolfase.</li>
+        <li><strong>Regio Emmen & Coevorden:</strong> Vertonen een stabiele netwerkverbinding met betrouwbare data-throughput.</li>
+        <li><strong>Langeafstandslink:</strong> Succesvolle point-to-point verbinding gerealiseerd door Vincent vanaf Emlichheim rechtstreeks naar de NAM-locatie.</li>
+      </ul>
+
+      <p><strong>Nieuwe targets en schaalvergroting (week 3)</strong></p>
+      <ul>
+        <li><strong>Locatie-inventarisatie scholengemeenschap:</strong> Er is een verkennend overleg gestart om 8 strategische locaties te screenen op geschiktheid voor repeater-installaties. Dit biedt voordelen in geografische spreiding en antennehoogte.</li>
+        <li><strong>VRD-coordinatie:</strong> De Veiligheidsregio Drenthe start op korte termijn met de uitrol van 8 eigen repeaters op hoge locaties. Integratie van schoollocaties wordt direct afgestemd om overlap te voorkomen en blinde vlekken efficient op te vullen.</li>
+      </ul>
+
+      <p>Technische documentatie, updates en netwerkdata zijn beschikbaar via <a href="https://www.drenthenoodnetwerk.nl" rel="noopener noreferrer" target="_blank">drenthenoodnetwerk.nl</a>.</p>
+    `,
+    tags: ['statusupdate', 'week-3', 'vrd', 'netwerkdekking', 'werkgroepen'],
+    featured: true
+  },
+  {
     id: 5,
     date: '2026-05-07',
     category: 'voortgang',

@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeshCore Airtime Simulator</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --panel: #1a1d27;
+      --border: #2e3248;
+      --accent: #4f8ef7;
+      --accent2: #f7a24f;
+      --green: #4fd98e;
+      --red: #f74f4f;
+      --yellow: #f7e04f;
+      --text: #e4e6f0;
+      --muted: #7a7f99;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+
+    header {
+      padding: 16px 24px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    header h1 { font-size: 18px; font-weight: 700; }
+    header span { color: var(--muted); font-size: 13px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      grid-template-rows: 1fr;
+      gap: 1px;
+      height: calc(100vh - 57px);
+      background: var(--border);
+    }
+    .sidebar {
+      background: var(--panel);
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .main-content {
+      background: var(--bg);
+      overflow-y: auto;
+    }
+    .main-top {
+      background: var(--bg);
+      padding: 16px;
+    }
+    .main-bottom {
+      background: var(--bg);
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    h2 { font-size: 13px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; margin-top: 20px; }
+    h2:first-child { margin-top: 0; }
+
+    label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 4px; margin-top: 10px; }
+    select, input[type=range], input[type=number], input[type=text] {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius); padding: 6px 10px; font-size: 13px;
+      outline: none;
+    }
+    select:focus, input:focus { border-color: var(--accent); }
+    input[type=range] { padding: 0; accent-color: var(--accent); }
+
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;
+    }
+    .stat-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 10px 12px;
+    }
+    .stat-card .val { font-size: 20px; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .bar-wrap { margin-top: 10px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .bar-bg { height: 14px; background: var(--bg); border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
+    .bar-fill { height: 100%; border-radius: 7px; transition: width .4s; }
+    .bar-fill.green { background: var(--green); }
+    .bar-fill.yellow { background: var(--yellow); }
+    .bar-fill.red { background: var(--red); }
+    .bar-fill.accent { background: var(--accent); }
+
+    /* Topology canvas */
+    #topoCanvas {
+      width: 100%; height: 420px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); display: block; cursor: crosshair;
+    }
+    .topo-controls { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+    .btn {
+      padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); cursor: pointer; font-size: 12px;
+      transition: border-color .2s, background .2s;
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.danger { border-color: var(--red); }
+    .btn.danger:hover { background: var(--red); }
+
+    /* Flood animation log */
+    #floodLog {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 10px 12px; font-size: 12px; line-height: 1.8;
+      max-height: 200px; overflow-y: auto; font-family: monospace;
+      margin-top: 10px;
+    }
+    .log-entry { color: var(--muted); }
+    .log-entry.tx { color: var(--accent); }
+    .log-entry.repeat { color: var(--green); }
+    .log-entry.skip { color: var(--muted); opacity: .6; }
+    .log-entry.col { color: var(--red); }
+    .log-entry.seen { color: var(--yellow); }
+    .log-entry.header { color: var(--accent2); font-weight: 600; }
+
+    /* hasSeen table */
+    #hasSeenGrid {
+      display: grid; grid-template-columns: repeat(32, 1fr);
+      gap: 2px; margin-top: 8px;
+    }
+    .hs-cell {
+      width: 100%; aspect-ratio: 1;
+      border-radius: 2px; background: var(--bg); border: 1px solid var(--border);
+      transition: background .3s;
+    }
+    .hs-cell.used { background: var(--accent); border-color: var(--accent); }
+    .hs-cell.old  { background: var(--muted); border-color: var(--muted); }
+
+    /* SF comparison table */
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { text-align: left; padding: 6px 8px; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 500; }
+    td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    td.hi { color: var(--green); font-weight: 600; }
+    td.lo { color: var(--red); }
+
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+    .leg { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+    .leg-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    .range-val { color: var(--accent); font-weight: 700; }
+
+    .node-info {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 8px 12px; margin-top: 8px; font-size: 12px; line-height: 1.7;
+    }
+    .node-info b { color: var(--accent2); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🌐 MeshCore Airtime Simulator</h1>
+  </div>
+  <span>Based on: meshwiki.nl – MeshCore en de Airtime-uitdaging</span>
+</header>
+
+<div class="layout">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside class="sidebar">
+
+    <h2>LoRa Parameters</h2>
+
+    <label>Spreading Factor</label>
+    <select id="sfSel" onchange="recalc()">
+      <option value="6">SF6</option>
+      <option value="7">SF7</option>
+      <option value="8" selected>SF8</option>
+      <option value="11">SF11</option>
+    </select>
+
+    <label>Bandwidth (kHz)</label>
+    <select id="bwSel" onchange="recalc()">
+      <option value="62.5" selected>62.5 kHz (MeshCore default)</option>
+      <option value="125">125 kHz</option>
+      <option value="250">250 kHz</option>
+    </select>
+
+    <label>Coding Rate</label>
+    <select id="crSel" onchange="recalc()">
+      <option value="5">4/5</option>
+      <option value="6">4/6</option>
+      <option value="7">4/7</option>
+      <option value="8">4/8</option>
+    </select>
+
+    <label>Preamble symbols</label>
+    <input type="number" id="preamble" value="8" min="4" max="32" onchange="recalc()" />
+
+    <label>Message length (characters)</label>
+    <input type="range" id="msgLen" min="1" max="130" value="12" oninput="onMsgLen()" />
+    <div style="display:flex;justify-content:space-between;font-size:12px;">
+      <span id="msgLenLabel" style="color:var(--accent2);">12 chars</span>
+      <span style="color:var(--muted);">"Goedemorgen!" = 12, max = 130</span>
+    </div>
+
+    <label>Inter-Packet Gap / avg (ms)</label>
+    <input type="range" id="ipg" min="120" max="480" value="300" oninput="onIPG()" />
+    <div style="display:flex;justify-content:space-between;font-size:12px;">
+      <span id="ipgLabel" class="range-val">300 ms</span>
+      <span style="color:var(--muted);">120–480 ms range</span>
+    </div>
+
+    <label>Header CRC enabled</label>
+    <select id="explHdr" onchange="recalc()">
+      <option value="1" selected>Yes (explicit header)</option>
+      <option value="0">No (implicit header)</option>
+    </select>
+
+    <label>Low data rate optimize</label>
+    <select id="ldr" onchange="recalc()">
+      <option value="auto" selected>Auto (SF≥11 + BW≤62.5)</option>
+      <option value="1">Force ON</option>
+      <option value="0">Force OFF</option>
+    </select>
+
+    <h2>Network</h2>
+
+    <label>Number of repeaters in hearing range</label>
+    <input type="range" id="numRepeaters" min="0" max="19" value="2" oninput="onRepeaters()" />
+    <div style="display:flex;justify-content:space-between;font-size:12px;">
+      <span id="repeatersLabel" class="range-val">2 repeaters</span>
+      <span style="color:var(--muted);">0 = companion only</span>
+    </div>
+
+    <label>hasSeen table size</label>
+    <input type="number" id="hasSeenSize" value="128" min="16" max="256" onchange="recalc()" />
+
+    <label>loop.detect mode</label>
+    <select id="loopDetect" onchange="recalc()">
+      <option value="off">Off</option>
+      <option value="strict" selected>Strict (1 repeat max)</option>
+      <option value="loose">Loose (2 repeats max)</option>
+    </select>
+
+    <h2>Duty Cycle</h2>
+    <label>Max duty cycle (%)</label>
+    <input type="number" id="dutyCycle" value="10" min="1" max="100" onchange="recalc()" />
+
+  </aside>
+
+  <!-- ══════════════ MAIN CONTENT ══════════════ -->
+  <div class="main-content">
+    <div class="main-top">
+    <h2>📊 Airtime Calculator</h2>
+
+    <div class="stat-grid" id="statGrid">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="bar-wrap" style="margin-top:16px;">
+      <div class="bar-label"><span>Airtime per message</span><span id="airtimeBarLabel"></span></div>
+      <div class="bar-bg"><div class="bar-fill accent" id="airtimeBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Duty cycle used (per message cycle)</span><span id="dutyBarLabel"></span></div>
+      <div class="bar-bg"><div class="bar-fill" id="dutyBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="bar-wrap">
+      <div class="bar-label"><span>Airtime consumed by flood (all repeaters + source)</span><span id="floodBarLabel"></span></div>
+      <div class="bar-bg"><div class="bar-fill" id="floodBar" style="width:0%"></div></div>
+    </div>
+
+    <h2 style="margin-top:20px;">📋 SF Comparison Table</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>SF</th>
+          <th>Airtime (ms)</th>
+          <th>+IPG total (ms)</th>
+          <th>Msgs/hr (1 node)</th>
+          <th>Msgs/hr (flood, N repeaters)</th>
+          <th>Duty cycle/msg</th>
+        </tr>
+      </thead>
+      <tbody id="sfTable"></tbody>
+    </table>
+
+    <h2 style="margin-top:20px;">👥 Companion vs Repeater Comparison</h2>
+    <div id="comparisonBox" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+  </div>
+
+  <!-- ══════════════ MAIN BOTTOM: TOPOLOGY ══════════════ -->
+  <div class="main-bottom">
+    <h2>🗺 Network Topology Simulator</h2>
+
+    <div class="topo-controls">
+      <button class="btn active" id="toolAdd" onclick="setTool('add-repeater')">➕ Add Repeater</button>
+      <button class="btn" id="toolComp" onclick="setTool('add-companion')">📱 Add Companion</button>
+      <button class="btn" id="toolMove" onclick="setTool('move')">✋ Move</button>
+      <button class="btn" id="toolDel" onclick="setTool('delete')">🗑 Delete</button>
+      <button class="btn" onclick="loadPreset('hex7')">7-node hex</button>
+      <button class="btn" onclick="loadPreset('ring19')">19-node rings</button>
+      <button class="btn" onclick="loadPreset('clear')">Clear</button>
+      <button class="btn" onclick="runFlood()" style="border-color:var(--green);color:var(--green);">▶ Simulate Flood</button>
+      <button class="btn" onclick="resetFlood()">↺ Reset</button>
+    </div>
+
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:#4f8ef7"></div> Repeater</div>
+      <div class="leg"><div class="leg-dot" style="background:#f7a24f"></div> Companion</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div> Transmitted</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--red)"></div> Collision risk</div>
+    </div>
+
+    <canvas id="topoCanvas"></canvas>
+
+    <div class="node-info" id="nodeInfo">Click a node to see details. Click canvas to add node in selected mode.</div>
+
+    <h2>📡 Flood Simulation Log</h2>
+    <div id="floodLog"><span class="log-entry">Run a flood simulation to see step-by-step propagation.</span></div>
+
+    <h2>🧠 hasSeen() Buffer Status</h2>
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:6px;font-size:12px;">
+      <span style="color:var(--muted);">Table size: <span id="hsSize" style="color:var(--text);">128</span></span>
+      <span style="color:var(--muted);">Used: <span id="hsUsed" style="color:var(--accent);">0</span></span>
+      <span style="color:var(--muted);">Fill: <span id="hsFill" style="color:var(--accent);">0%</span></span>
+    </div>
+    <div id="hasSeenGrid"></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;">
+      <span style="color:var(--accent);">■</span> recent &nbsp;
+      <span style="color:var(--muted);">■</span> aged &nbsp;
+      <span style="color:var(--border);">■</span> empty
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  AIRTIME CALCULATION (LoRa formula)
+// ═══════════════════════════════════════════════════════
+
+function calcAirtime(sf, bwKHz, payload_bytes, cr, preamble, explicitHeader, lowDR) {
+  const bwHz = bwKHz * 1000;
+  const Tsym = (Math.pow(2, sf) / bwHz) * 1000; // ms
+
+  const preamble_duration = (preamble + 4.25) * Tsym;
+
+  // Low data rate optimization auto
+  let ldr = lowDR;
+  if (lowDR === 'auto') ldr = (sf >= 11 && bwKHz <= 62.5) ? 1 : 0;
+
+  const de = ldr ? 1 : 0;
+  const ih = explicitHeader ? 0 : 1;
+
+  // Payload symbol count
+  const payloadSymb = 8 + Math.max(
+    Math.ceil(
+      (8 * payload_bytes - 4 * sf + 28 + 16 - 20 * ih) /
+      (4 * (sf - 2 * de))
+    ) * (cr + 4),
+    0
+  );
+
+  const payload_duration = payloadSymb * Tsym;
+  return preamble_duration + payload_duration;
+}
+
+function charsToBytes(chars) {
+  // Approximate: MeshCore header ~13 bytes + content
+  return 13 + Math.ceil(chars * 1.1); // UTF-8 slight overhead
+}
+
+function getParams() {
+  const sf     = parseInt(document.getElementById('sfSel').value);
+  const bw     = parseFloat(document.getElementById('bwSel').value);
+  const cr     = parseInt(document.getElementById('crSel').value) - 4; // coding rate offset
+  const pre    = parseInt(document.getElementById('preamble').value);
+  const explH  = parseInt(document.getElementById('explHdr').value);
+  const ldrRaw = document.getElementById('ldr').value;
+  const ldr    = ldrRaw === 'auto' ? 'auto' : parseInt(ldrRaw);
+  const msgLen = parseInt(document.getElementById('msgLen').value);
+  const ipg    = parseInt(document.getElementById('ipg').value);
+  const nRep   = parseInt(document.getElementById('numRepeaters').value);
+  const dc     = parseFloat(document.getElementById('dutyCycle').value);
+  const hsSize = parseInt(document.getElementById('hasSeenSize').value);
+  return { sf, bw, cr, pre, explH, ldr, msgLen, ipg, nRep, dc, hsSize };
+}
+
+function recalc() {
+  const p = getParams();
+  const bytes = charsToBytes(p.msgLen);
+  const airtime_ms = calcAirtime(p.sf, p.bw, bytes, p.cr, p.pre, p.explH === 1, p.ldr);
+  const total_ms = airtime_ms + p.ipg;
+  const msgs_per_hour_single = 3600000 / total_ms;
+  
+  // Flood: 1 source + N repeaters all re-transmit
+  // Each repeater that heard it repeats once (flood)
+  // But some may collide; we model ideal here
+  const floodMultiplier = 1 + p.nRep;
+  const msgs_per_hour_flood = msgs_per_hour_single / floodMultiplier;
+
+  // Duty cycle: percentage of 1 hour used per message (sender only)
+  const duty_pct = (airtime_ms / 3600000) * 100;
+
+  // Max msgs limited by duty cycle
+  const maxDutyMsgs = (p.dc / 100) * 3600000 / airtime_ms;
+
+  updateStats({
+    airtime_ms, total_ms, msgs_per_hour_single, msgs_per_hour_flood,
+    floodMultiplier, duty_pct, maxDutyMsgs, bytes, p
+  });
+  updateSFTable(p);
+  updateComparison(p);
+  updateHasSeen(p.hsSize, 0); // reset on recalc
+}
+
+function updateStats(d) {
+  const p = d.p;
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat-card"><div class="val">${d.airtime_ms.toFixed(1)}<small style="font-size:13px"> ms</small></div><div class="lbl">Airtime per message</div></div>
+    <div class="stat-card"><div class="val">${d.total_ms.toFixed(0)}<small style="font-size:13px"> ms</small></div><div class="lbl">Total slot (airtime + IPG)</div></div>
+    <div class="stat-card"><div class="val">${Math.floor(d.msgs_per_hour_single).toLocaleString()}</div><div class="lbl">Msgs/hr (single node)</div></div>
+    <div class="stat-card"><div class="val">${Math.floor(d.msgs_per_hour_flood).toLocaleString()}</div><div class="lbl">Msgs/hr (flood, ×${d.floodMultiplier})</div></div>
+    <div class="stat-card"><div class="val">${d.duty_pct.toFixed(4)}<small style="font-size:11px">%</small></div><div class="lbl">Duty cycle per msg</div></div>
+    <div class="stat-card"><div class="val">${Math.floor(d.maxDutyMsgs).toLocaleString()}</div><div class="lbl">Max msgs/hr (${p.dc}% duty)</div></div>
+    <div class="stat-card"><div class="val">×${d.floodMultiplier}</div><div class="lbl">Airtime multiplier (flood)</div></div>
+    <div class="stat-card"><div class="val">${d.bytes}<small style="font-size:13px"> B</small></div><div class="lbl">Estimated packet size</div></div>
+  `;
+
+  // Bars
+  const maxAirtime = 2000; // ms
+  const atPct = Math.min((d.airtime_ms / maxAirtime) * 100, 100);
+  document.getElementById('airtimeBar').style.width = atPct + '%';
+  document.getElementById('airtimeBarLabel').textContent = d.airtime_ms.toFixed(1) + ' ms';
+
+  const dutyPct = Math.min((d.duty_pct / p.dc) * 100, 100);
+  document.getElementById('dutyBar').style.width = dutyPct + '%';
+  document.getElementById('dutyBar').className = 'bar-fill ' + (dutyPct > 80 ? 'red' : dutyPct > 50 ? 'yellow' : 'green');
+  document.getElementById('dutyBarLabel').textContent = d.duty_pct.toFixed(4) + '% of ' + p.dc + '% limit';
+
+  const floodMs = d.airtime_ms * d.floodMultiplier;
+  const floodPct = Math.min((floodMs / (p.dc / 100 * 3600000 / 1)) * 100, 100);
+  document.getElementById('floodBar').style.width = Math.min(floodMs / 200, 100) + '%';
+  document.getElementById('floodBar').className = 'bar-fill ' + (d.floodMultiplier > 10 ? 'red' : d.floodMultiplier > 5 ? 'yellow' : 'green');
+  document.getElementById('floodBarLabel').textContent = floodMs.toFixed(0) + ' ms total (×' + d.floodMultiplier + ')';
+}
+
+const SF_LIST = [6, 7, 8, 11];
+function updateSFTable(p) {
+  const tbody = document.getElementById('sfTable');
+  const msgBytes = charsToBytes(p.msgLen);
+  let rows = '';
+  let bestMsgs = 0;
+  let bestFlood = 0;
+  const vals = SF_LIST.map(sf => {
+    const at = calcAirtime(sf, p.bw, msgBytes, p.cr, p.pre, p.explH === 1, p.ldr);
+    const total = at + p.ipg;
+    const msgs = 3600000 / total;
+    const flood = msgs / (1 + p.nRep);
+    const duty = (at / 3600000) * 100;
+    if (msgs > bestMsgs) bestMsgs = msgs;
+    if (flood > bestFlood) bestFlood = flood;
+    return { sf, at, total, msgs, flood, duty };
+  });
+  vals.forEach(v => {
+    const isBestMsgs = Math.abs(v.msgs - bestMsgs) < 0.01;
+    const isBestFlood = Math.abs(v.flood - bestFlood) < 0.01;
+    const isSelected = v.sf === p.sf;
+    rows += `<tr style="${isSelected ? 'background:rgba(79,142,247,.1);' : ''}">
+      <td><b>${isSelected ? '▶ ' : ''}SF${v.sf}</b></td>
+      <td>${v.at.toFixed(2)}</td>
+      <td>${v.total.toFixed(0)}</td>
+      <td class="${isBestMsgs ? 'hi' : ''}">${Math.floor(v.msgs).toLocaleString()}</td>
+      <td class="${isBestFlood ? 'hi' : (v.flood < bestFlood * 0.3 ? 'lo' : '')}">${Math.floor(v.flood).toLocaleString()}</td>
+      <td>${v.duty.toFixed(5)}%</td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows;
+}
+
+function updateComparison(p) {
+  const msgBytes = charsToBytes(p.msgLen);
+  const at = calcAirtime(p.sf, p.bw, msgBytes, p.cr, p.pre, p.explH === 1, p.ldr);
+  const total = at + p.ipg;
+  const nRep = p.nRep;
+  const nComp = nRep; // same count but all companions
+  
+  // With repeaters: 1 msg = (1+N) airtime uses
+  const repAirtimePerMsg = at * (1 + nRep);
+  const repMsgsHr = 3600000 / (total * (1 + nRep));
+  
+  // With companions: 1 msg = 1 airtime use (no repeating)
+  const compAirtimePerMsg = at;
+  const compMsgsHr = 3600000 / total;
+
+  const saving = nRep > 0 ? ((1 - 1/(1+nRep)) * 100).toFixed(0) : 0;
+
+  document.getElementById('comparisonBox').innerHTML = `
+    <div class="stat-card">
+      <div style="color:var(--accent);font-weight:700;margin-bottom:6px;">Current: ${nRep} Repeaters</div>
+      <div class="lbl">Airtime per flood: <b style="color:var(--text)">${repAirtimePerMsg.toFixed(0)} ms</b></div>
+      <div class="lbl">Effective msgs/hr: <b style="color:var(--red)">${Math.floor(repMsgsHr).toLocaleString()}</b></div>
+      <div class="lbl">Airtime multiplier: <b style="color:var(--red)">×${1+nRep}</b></div>
+      <div class="lbl" style="margin-top:8px;font-size:11px;color:var(--muted)">Each message is re-transmitted ${nRep}× by repeaters, using ${1+nRep}× the airtime.</div>
+    </div>
+    <div class="stat-card">
+      <div style="color:var(--accent2);font-weight:700;margin-bottom:6px;">Alternative: ${nComp} Companions (no repeat)</div>
+      <div class="lbl">Airtime per send: <b style="color:var(--text)">${compAirtimePerMsg.toFixed(0)} ms</b></div>
+      <div class="lbl">Effective msgs/hr: <b style="color:var(--green)">${Math.floor(compMsgsHr).toLocaleString()}</b></div>
+      <div class="lbl">Airtime multiplier: <b style="color:var(--green)">×1</b></div>
+      <div class="lbl" style="margin-top:8px;font-size:11px;color:var(--muted)">Companions receive but don't repeat. Airtime saved: <b style="color:var(--green)">${saving}%</b></div>
+    </div>
+  `;
+}
+
+function updateHasSeen(size, used, aged) {
+  document.getElementById('hsSize').textContent = size;
+  document.getElementById('hsUsed').textContent = used || 0;
+  document.getElementById('hsFill').textContent = ((used || 0) / size * 100).toFixed(1) + '%';
+  const grid = document.getElementById('hasSeenGrid');
+  // 128 cells max displayed
+  const display = Math.min(size, 128);
+  let html = '';
+  for (let i = 0; i < display; i++) {
+    let cls = '';
+    if (aged && i < aged) cls = 'old';
+    else if (i < (used || 0)) cls = 'used';
+    html += `<div class="hs-cell ${cls}"></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOPOLOGY SIMULATOR
+// ═══════════════════════════════════════════════════════
+
+const canvas  = document.getElementById('topoCanvas');
+const ctx     = canvas.getContext('2d');
+let nodes     = [];    // {id, x, y, type:'repeater'|'companion', hasSeen:[], txCount}
+let edges     = [];    // derived from hearing range
+let tool      = 'add-repeater';
+let dragging  = null;
+let floodRunning = false;
+let floodAnimTimer = null;
+let selectedNode = null;
+const HEAR_RANGE = 150; // px – "hearing distance"
+const NODE_R = 14;
+
+function setTool(t) {
+  tool = t;
+  ['toolAdd','toolComp','toolMove','toolDel'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
+  const map = {'add-repeater':'toolAdd','add-companion':'toolComp','move':'toolMove','delete':'toolDel'};
+  document.getElementById(map[t])?.classList.add('active');
+}
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width - 32;
+  canvas.height = 420;
+  draw();
+}
+
+function getNeighbors(node) {
+  return nodes.filter(n => n !== node && dist(n, node) <= HEAR_RANGE);
+}
+
+function dist(a, b) {
+  return Math.sqrt((a.x-b.x)**2 + (a.y-b.y)**2);
+}
+
+function canvasPos(e) {
+  const r = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / r.width;
+  const scaleY = canvas.height / r.height;
+  return {
+    x: (e.clientX - r.left) * scaleX,
+    y: (e.clientY - r.top) * scaleY
+  };
+}
+
+function hitTest(pos) {
+  return nodes.find(n => dist(n, pos) <= NODE_R + 4);
+}
+
+canvas.addEventListener('mousedown', e => {
+  const pos = canvasPos(e);
+  const hit = hitTest(pos);
+
+  if (tool === 'move') {
+    if (hit) { dragging = hit; canvas.style.cursor = 'grabbing'; }
+    return;
+  }
+  if (tool === 'delete') {
+    if (hit) { nodes = nodes.filter(n => n !== hit); selectedNode = null; draw(); updateNodeInfo(); }
+    return;
+  }
+  if (tool === 'add-repeater' || tool === 'add-companion') {
+    if (!hit) {
+      nodes.push({ id: Date.now(), x: pos.x, y: pos.y, type: tool === 'add-repeater' ? 'repeater' : 'companion', hasSeen: [], txCount: 0, state: 'idle' });
+      draw();
+    } else {
+      selectedNode = hit;
+      updateNodeInfo();
+    }
+    return;
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (dragging) {
+    const pos = canvasPos(e);
+    dragging.x = pos.x;
+    dragging.y = pos.y;
+    draw();
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (dragging) { dragging = null; canvas.style.cursor = 'crosshair'; }
+});
+
+canvas.addEventListener('click', e => {
+  if (tool !== 'move' && tool !== 'delete') return;
+  const pos = canvasPos(e);
+  const hit = hitTest(pos);
+  if (hit) { selectedNode = hit; updateNodeInfo(); draw(); }
+});
+
+function updateNodeInfo(extra) {
+  const box = document.getElementById('nodeInfo');
+  if (!selectedNode) {
+    box.innerHTML = 'Click a node to see details. Click canvas to add node.';
+    return;
+  }
+  const n = selectedNode;
+  const neighbors = getNeighbors(n);
+  box.innerHTML = `
+    <b>${n.type === 'repeater' ? '📡 Repeater' : '📱 Companion'}</b> #${n.id % 10000}<br>
+    Neighbors in range: <b>${neighbors.length}</b>
+    (${neighbors.filter(x=>x.type==='repeater').length} repeaters, ${neighbors.filter(x=>x.type==='companion').length} companions)<br>
+    TX count (last flood): <b>${n.txCount}</b> &nbsp; hasSeen entries: <b>${n.hasSeen.length}</b>
+    ${extra ? '<br>' + extra : ''}
+  `;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw hearing range circles (light)
+  nodes.forEach(n => {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, HEAR_RANGE, 0, Math.PI * 2);
+    ctx.strokeStyle = n.type === 'repeater' ? 'rgba(79,142,247,.08)' : 'rgba(247,162,79,.08)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = n.type === 'repeater' ? 'rgba(79,142,247,.03)' : 'rgba(247,162,79,.03)';
+    ctx.fill();
+  });
+
+  // Draw edges
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      if (dist(nodes[i], nodes[j]) <= HEAR_RANGE) {
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.strokeStyle = 'rgba(79,142,247,.25)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw nodes
+  nodes.forEach(n => {
+    const isSelected = n === selectedNode;
+    let fill, stroke;
+    if (n.state === 'tx')         { fill = '#4fd98e'; stroke = '#4fd98e'; }
+    else if (n.state === 'seen')  { fill = '#f7e04f'; stroke = '#f7e04f'; }
+    else if (n.state === 'col')   { fill = '#f74f4f'; stroke = '#f74f4f'; }
+    else if (n.type === 'repeater') { fill = '#1a1d27'; stroke = '#4f8ef7'; }
+    else                          { fill = '#1a1d27'; stroke = '#f7a24f'; }
+
+    // Glow for tx
+    if (n.state === 'tx' || n.state === 'col') {
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, NODE_R + 8, 0, Math.PI * 2);
+      ctx.fillStyle = n.state === 'col' ? 'rgba(247,79,79,.2)' : 'rgba(79,217,142,.2)';
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, NODE_R, 0, Math.PI * 2);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = isSelected ? '#fff' : stroke;
+    ctx.lineWidth = isSelected ? 3 : 2;
+    ctx.stroke();
+
+    // Icon text
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = n.type === 'repeater' ? '#4f8ef7' : '#f7a24f';
+    if (n.state === 'tx') ctx.fillStyle = '#fff';
+    ctx.fillText(n.type === 'repeater' ? '📡' : '📱', n.x, n.y);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  FLOOD SIMULATION
+// ═══════════════════════════════════════════════════════
+
+let floodLog = [];
+let floodHasSeenEntries = 0;
+
+function log(msg, cls = '') {
+  floodLog.push(`<span class="log-entry ${cls}">${msg}</span>`);
+  const el = document.getElementById('floodLog');
+  el.innerHTML = floodLog.join('<br>');
+  el.scrollTop = el.scrollHeight;
+}
+
+function resetFlood() {
+  clearTimeout(floodAnimTimer);
+  floodRunning = false;
+  floodLog = [];
+  document.getElementById('floodLog').innerHTML = '<span class="log-entry">Flood reset.</span>';
+  nodes.forEach(n => { n.state = 'idle'; n.hasSeen = []; n.txCount = 0; });
+  floodHasSeenEntries = 0;
+  updateHasSeen(parseInt(document.getElementById('hasSeenSize').value), 0);
+  draw();
+}
+
+async function runFlood() {
+  resetFlood();
+  if (nodes.length === 0) {
+    log('⚠ Add nodes to the canvas first.', 'header');
+    return;
+  }
+  // Pick the first companion, or first node
+  const source = nodes.find(n => n.type === 'companion') || nodes[0];
+
+  const p = getParams();
+  const msgBytes = charsToBytes(p.msgLen);
+  const airtime_ms = calcAirtime(p.sf, p.bw, msgBytes, p.cr, p.pre, p.explH === 1, p.ldr);
+  const hsMax = parseInt(document.getElementById('hasSeenSize').value);
+  const loopMode = document.getElementById('loopDetect').value;
+
+  const MSG_ID = `MSG_${Date.now() % 10000}`;
+  log(`━━ Flood simulation start ━━`, 'header');
+  log(`Source: ${source.type} #${source.id % 10000} | SF${p.sf} | ${p.msgLen} chars | ${airtime_ms.toFixed(1)}ms airtime`, 'header');
+
+  // Queue: {node, from, hops, loopCount}
+  let queue = [];
+  let totalTx = 0;
+  let totalAirtime = 0;
+  let step = 0;
+
+  // Source transmits
+  source.state = 'tx';
+  source.txCount++;
+  source.hasSeen.push(MSG_ID);
+  totalTx++;
+  totalAirtime += airtime_ms;
+  floodHasSeenEntries++;
+  log(`📤 TX [${source.type} #${source.id%10000}] broadcasts ${MSG_ID}`, 'tx');
+  draw();
+
+  // Propagate to neighbors
+  const srcNeighbors = getNeighbors(source);
+  srcNeighbors.forEach(n => queue.push({ node: n, from: source, hops: 1, loopCount: 0 }));
+
+  await sleep(600);
+
+  while (queue.length > 0) {
+    const next = queue.shift();
+    const { node, from, hops, loopCount } = next;
+    step++;
+
+    // Check hasSeen
+    if (node.hasSeen.includes(MSG_ID)) {
+      // Already seen – check if hasSeen buffer overflowed (wrap-around)
+      if (node.hasSeen.length >= hsMax) {
+        // Buffer overflow: oldest entry dropped, might re-see
+        node.hasSeen.shift();
+        if (!node.hasSeen.includes(MSG_ID)) {
+          log(`⚡ hasSeen OVERFLOW on #${node.id%10000} — re-queued!`, 'seen');
+          node.hasSeen.push(MSG_ID + '_requeue');
+        }
+      } else {
+        node.state = 'seen';
+        log(`👁 SKIP #${node.id%10000} (hasSeen hit, hops=${hops})`, 'skip');
+        draw();
+        await sleep(150);
+        node.state = 'idle';
+        draw();
+        continue;
+      }
+    }
+
+    // Loop detect
+    if (loopMode === 'strict' && loopCount >= 1) {
+      log(`🔒 loop.detect STRICT blocked #${node.id%10000}`, 'skip');
+      continue;
+    }
+    if (loopMode === 'loose' && loopCount >= 2) {
+      log(`🔒 loop.detect LOOSE blocked #${node.id%10000}`, 'skip');
+      continue;
+    }
+
+    // Companion does not repeat
+    if (node.type === 'companion') {
+      node.hasSeen.push(MSG_ID);
+      floodHasSeenEntries++;
+      node.state = 'seen';
+      log(`📱 RX  [companion #${node.id%10000}] received (hops=${hops}) — no repeat`, 'skip');
+      draw();
+      await sleep(200);
+      node.state = 'idle';
+      draw();
+      continue;
+    }
+
+    // Repeater: repeat!
+    node.hasSeen.push(MSG_ID);
+    floodHasSeenEntries++;
+    node.state = 'tx';
+    node.txCount++;
+    totalTx++;
+    totalAirtime += airtime_ms;
+
+    // Check for collision: multiple nodes transmitting at overlapping time
+    const simultaneous = queue.filter(q => q.hops === hops && q.node.state === 'tx');
+    if (simultaneous.length > 0) {
+      // Check if they share a neighbor who can't distinguish them
+      node.state = 'col';
+    }
+
+    log(`🔁 RPT [repeater #${node.id%10000}] repeat (hops=${hops}, tx#${node.txCount})`, 'repeat');
+    draw();
+
+    // Add neighbors to queue (with IPG delay modeled)
+    const neighbors = getNeighbors(node);
+    neighbors.forEach(n => {
+      if (n !== from && !queue.find(q => q.node === n && q.hops === hops + 1)) {
+        queue.push({ node: n, from: node, hops: hops + 1, loopCount: loopCount + (n.hasSeen.includes(MSG_ID) ? 1 : 0) });
+      }
+    });
+
+    await sleep(400);
+    node.state = 'idle';
+    draw();
+
+    // Update hasSeen display
+    updateHasSeen(hsMax, Math.min(floodHasSeenEntries, hsMax));
+  }
+
+  // Summary
+  log(`━━ Flood complete ━━`, 'header');
+  log(`Total TX events: ${totalTx} | Total airtime: ${totalAirtime.toFixed(0)} ms | Multiplier: ×${totalTx}`, 'header');
+  const pct = (totalAirtime / 3600000 * 100).toFixed(4);
+  log(`Airtime from 1-hour pot consumed by this flood: ${pct}%`, 'header');
+
+  // Update hasSeen
+  updateHasSeen(hsMax, Math.min(floodHasSeenEntries, hsMax));
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// ═══════════════════════════════════════════════════════
+//  PRESETS
+// ═══════════════════════════════════════════════════════
+
+function loadPreset(name) {
+  resetFlood();
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  if (name === 'clear') { nodes = []; draw(); return; }
+
+  if (name === 'hex7') {
+    nodes = [];
+    // 1 companion in corner, 1 center repeater, 6 hex repeaters
+    nodes.push({ id: 1, x: cx, y: cy, type: 'repeater', hasSeen: [], txCount: 0, state: 'idle' });
+    for (let i = 0; i < 6; i++) {
+      const a = (i * 60 - 30) * Math.PI / 180;
+      nodes.push({ id: i+2, x: cx + HEAR_RANGE * 0.85 * Math.cos(a), y: cy + HEAR_RANGE * 0.85 * Math.sin(a), type: 'repeater', hasSeen: [], txCount: 0, state: 'idle' });
+    }
+    // Companion outside
+    nodes.push({ id: 10, x: cx - HEAR_RANGE * 0.4, y: cy + HEAR_RANGE * 1.3, type: 'companion', hasSeen: [], txCount: 0, state: 'idle' });
+  }
+
+  if (name === 'ring19') {
+    nodes = [];
+    nodes.push({ id: 1, x: cx, y: cy, type: 'repeater', hasSeen: [], txCount: 0, state: 'idle' });
+    for (let i = 0; i < 6; i++) {
+      const a = (i * 60) * Math.PI / 180;
+      nodes.push({ id: i+2, x: cx + HEAR_RANGE * 0.85 * Math.cos(a), y: cy + HEAR_RANGE * 0.85 * Math.sin(a), type: 'repeater', hasSeen: [], txCount: 0, state: 'idle' });
+    }
+    for (let i = 0; i < 12; i++) {
+      const a = (i * 30) * Math.PI / 180;
+      nodes.push({ id: i+8, x: cx + HEAR_RANGE * 1.7 * Math.cos(a), y: cy + HEAR_RANGE * 1.7 * Math.sin(a), type: 'repeater', hasSeen: [], txCount: 0, state: 'idle' });
+    }
+    nodes.push({ id: 99, x: cx + 40, y: cy + HEAR_RANGE * 2.3, type: 'companion', hasSeen: [], txCount: 0, state: 'idle' });
+  }
+
+  draw();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SLIDER FEEDBACK
+// ═══════════════════════════════════════════════════════
+
+function onMsgLen() {
+  const v = document.getElementById('msgLen').value;
+  document.getElementById('msgLenLabel').textContent = v + ' chars';
+  recalc();
+}
+function onIPG() {
+  const v = document.getElementById('ipg').value;
+  document.getElementById('ipgLabel').textContent = v + ' ms';
+  recalc();
+}
+function onRepeaters() {
+  const v = document.getElementById('numRepeaters').value;
+  document.getElementById('repeatersLabel').textContent = v + ' repeaters';
+  recalc();
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+recalc();
+loadPreset('hex7');
+</script>
+</body>
+</html>

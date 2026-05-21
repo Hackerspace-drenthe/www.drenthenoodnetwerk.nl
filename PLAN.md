@@ -144,9 +144,9 @@ faq.html                → Veelgestelde vragen
 
 - **Tijdlijn Mei 2026** (SVG visualisatie)
   - Woensdag 6 mei: **Kick-off** — techniek, visie en demo
-  - Rest van mei: hak-avonden elke woensdagavond
+  - Rest van mei: hack-avonden elke woensdagavond
 
-- **Activiteiten tijdens de hak-avonden:**
+- **Activiteiten tijdens de hack-avonden:**
   - Firmware flashen en configureren — eerste nodes tot leven brengen
   - 3D-printen behuizingen — prototypes testen en verbeteren
   - Solar setup solderen — eerste zelfvoorzienende nodes bouwen

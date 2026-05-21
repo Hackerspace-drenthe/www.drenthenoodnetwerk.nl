@@ -203,6 +203,24 @@
   font-family: var(--font-mono);
 }
 
+.news-article__media {
+  margin: var(--space-lg) 0;
+}
+
+.news-article__media img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+.news-article__media figcaption {
+  margin-top: var(--space-xs);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
 /* News Article Footer */
 .news-article__footer {
   display: flex;

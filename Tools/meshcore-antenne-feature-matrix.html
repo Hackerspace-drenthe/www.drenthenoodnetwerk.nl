@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeshCore Antenne Matrix — Hackerspace Drenthe</title>
+<style>
+:root {
+  --green:#00ff88; --cyan:#00e5ff; --orange:#ff6b00; --purple:#c864ff;
+  --yellow:#ffd060; --red:#ff4466;
+  --dark:#050d1a; --mid:#0a1628; --card:#0d1f3c; --card2:#112240;
+  --text:#e0eaff; --dim:#7090b0; --border:rgba(0,229,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);min-height:100vh;padding-bottom:80px;}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── HEADER ── */
+.site-header{
+  background:linear-gradient(180deg,#071530 0%,var(--dark) 100%);
+  border-bottom:1px solid var(--border);
+  padding:22px 32px;
+  display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.header-text h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:900;}
+.header-text h1 span{color:var(--green);}
+.header-text p{color:var(--dim);font-size:.9rem;margin-top:5px;}
+.header-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.header-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.07em;}
+.ht-ant  {background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.ht-freq {background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.back-btn{
+  background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);
+  color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;
+  transition:background .2s;white-space:nowrap;
+}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ── FILTER BAR ── */
+#filter-bar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(5,13,26,.97);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:12px 32px;
+  display:flex;flex-direction:column;gap:9px;
+}
+.filter-row{display:flex;align-items:center;flex-wrap:wrap;gap:7px;}
+.filter-lbl{font-size:.75rem;color:var(--dim);min-width:78px;flex-shrink:0;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+#search-input{
+  background:rgba(0,229,255,.07);border:1px solid var(--border);
+  color:var(--text);padding:7px 14px;border-radius:20px;
+  font-size:.88rem;width:200px;outline:none;transition:border-color .2s;
+}
+#search-input:focus{border-color:var(--cyan);}
+#search-input::placeholder{color:var(--dim);}
+#sort-select{
+  background:rgba(0,229,255,.07);border:1px solid var(--border);
+  color:var(--text);padding:7px 12px;border-radius:20px;
+  font-size:.82rem;cursor:pointer;outline:none;
+}
+.pill{
+  padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;
+  cursor:pointer;border:1px solid rgba(0,229,255,.22);background:transparent;
+  color:var(--dim);user-select:none;transition:all .18s;
+}
+.pill:hover{background:rgba(0,229,255,.1);border-color:var(--cyan);color:var(--cyan);}
+.pill.active{background:rgba(0,229,255,.15);border-color:var(--cyan);color:var(--cyan);}
+.pill.type-omni.active{background:rgba(0,255,136,.12);border-color:var(--green);color:var(--green);}
+.pill.type-yagi.active{background:rgba(255,107,0,.12);border-color:var(--orange);color:var(--orange);}
+.pill.type-panel.active{background:rgba(200,100,255,.12);border-color:var(--purple);color:var(--purple);}
+.pill.type-stock.active{background:rgba(0,229,255,.12);border-color:var(--cyan);color:var(--cyan);}
+.pill.use-portable.active{background:rgba(0,255,136,.12);border-color:var(--green);color:var(--green);}
+.pill.use-fixed.active{background:rgba(255,107,0,.12);border-color:var(--orange);color:var(--orange);}
+.pill.use-vehicle.active{background:rgba(200,100,255,.12);border-color:var(--purple);color:var(--purple);}
+.pill.budget.active{background:rgba(255,208,96,.12);border-color:var(--yellow);color:var(--yellow);}
+.pill.conn-sma.active{background:rgba(255,68,102,.12);border-color:var(--red);color:var(--red);}
+
+/* ── RESULTS BAR ── */
+#results-bar{
+  padding:10px 32px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  border-bottom:1px solid var(--border);
+  background:rgba(10,22,40,.5);
+}
+#results-count{font-size:.82rem;color:var(--dim);}
+#clear-btn{
+  background:none;border:1px solid rgba(255,68,102,.3);color:var(--red);
+  padding:4px 14px;border-radius:14px;font-size:.78rem;font-weight:700;cursor:pointer;
+  transition:all .18s;
+}
+#clear-btn:hover{background:rgba(255,68,102,.1);}
+
+/* ── CARDS GRID ── */
+#cards-section{padding:28px 32px;}
+.section-title{font-size:1.1rem;font-weight:800;color:var(--cyan);margin-bottom:18px;letter-spacing:.04em;}
+#cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  gap:20px;
+}
+
+/* ── ANTENNA CARD ── */
+.ant-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;
+  transition:transform .18s,box-shadow .18s;
+  display:flex;flex-direction:column;
+}
+.ant-card:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,229,255,.1);}
+.ant-card.highlight{border-color:rgba(0,255,136,.4);}
+
+.card-img-wrap{
+  width:100%;height:160px;
+  background:linear-gradient(135deg,#0d1f3c 0%,#112240 100%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;
+}
+.card-img-wrap img{max-width:82%;max-height:132px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(0,229,255,.2));}
+.card-img-wrap svg{max-width:86%;max-height:136px;filter:drop-shadow(0 4px 12px rgba(0,229,255,.12));}
+.ant-icon-fallback{
+  font-size:4rem;opacity:.35;
+  display:none;
+}
+.highlight-banner{
+  position:absolute;top:10px;right:0;
+  background:var(--green);color:#050d1a;
+  font-size:.68rem;font-weight:800;padding:3px 12px 3px 10px;
+  border-radius:14px 0 0 14px;letter-spacing:.04em;text-transform:uppercase;
+}
+
+.card-body{padding:16px;flex:1;display:flex;flex-direction:column;gap:10px;}
+.card-brand{font-size:.72rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;}
+.card-name{font-size:1.05rem;font-weight:800;line-height:1.2;color:var(--text);}
+.card-tagline{font-size:.83rem;color:var(--dim);line-height:1.4;}
+
+/* badges row */
+.badges{display:flex;flex-wrap:wrap;gap:5px;}
+.badge{
+  font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:10px;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.badge-type{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.2);}
+.badge-use{background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.2);}
+.badge-freq{background:rgba(200,100,255,.1);color:var(--purple);border:1px solid rgba(200,100,255,.2);}
+.badge-rec{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.22);}
+
+/* spec chips */
+.specs-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.spec-chip{
+  font-size:.75rem;padding:3px 9px;border-radius:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+  color:var(--text);white-space:nowrap;
+}
+.spec-chip strong{color:var(--cyan);}
+
+/* gain bar */
+.gain-bar-wrap{display:flex;align-items:center;gap:8px;}
+.gain-bar-label{font-size:.72rem;color:var(--dim);width:52px;flex-shrink:0;}
+.gain-bar-track{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;}
+.gain-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width .4s;}
+.gain-bar-val{font-size:.72rem;color:var(--green);font-weight:700;width:42px;text-align:right;flex-shrink:0;}
+
+/* pros/cons */
+.pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pros-block,.cons-block{background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;}
+.pros-block h5,.cons-block h5{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+.pros-block h5{color:var(--green);}
+.cons-block h5{color:var(--red);}
+.pros-block ul,.cons-block ul{list-style:none;display:flex;flex-direction:column;gap:3px;}
+.pros-block li::before{content:"✓ ";color:var(--green);font-size:.7rem;}
+.cons-block li::before{content:"✗ ";color:var(--red);font-size:.7rem;}
+.pros-block li,.cons-block li{font-size:.75rem;color:var(--dim);line-height:1.3;}
+
+/* connector / mount info */
+.conn-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.conn-pill{
+  font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:8px;
+  background:rgba(255,208,96,.1);color:var(--yellow);border:1px solid rgba(255,208,96,.22);
+}
+.mount-pill{
+  font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:8px;
+  background:rgba(200,100,255,.1);color:var(--purple);border:1px solid rgba(200,100,255,.22);
+}
+
+/* shop buttons */
+.shop-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:4px;}
+.shop-btn{
+  font-size:.75rem;font-weight:700;padding:6px 12px;border-radius:10px;
+  text-decoration:none;transition:all .18s;white-space:nowrap;
+  border:1px solid;
+}
+.shop-btn:hover{transform:translateY(-1px);}
+.shop-off   {background:rgba(0,255,136,.1); color:var(--green); border-color:rgba(0,255,136,.3);}
+.shop-amz   {background:rgba(255,153,0,.1); color:#ff9900;      border-color:rgba(255,153,0,.3);}
+.shop-ali   {background:rgba(255,107,0,.1); color:var(--orange); border-color:rgba(255,107,0,.3);}
+.shop-tt    {background:rgba(0,229,255,.1); color:var(--cyan);  border-color:rgba(0,229,255,.3);}
+
+/* ── TABLE SECTION ── */
+#table-section{padding:0 32px 28px;}
+.table-scroll{overflow-x:auto;}
+table.spec-table{
+  width:100%;border-collapse:collapse;font-size:.82rem;
+  white-space:nowrap;
+}
+table.spec-table th{
+  background:var(--mid);color:var(--cyan);
+  padding:11px 14px;text-align:left;font-size:.75rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em;
+  cursor:pointer;user-select:none;border-bottom:2px solid var(--border);
+  white-space:nowrap;
+}
+table.spec-table th:hover{color:#fff;}
+table.spec-table th::after{content:" ↕";opacity:.35;font-size:.65rem;}
+table.spec-table th.sort-asc::after{content:" ↑";opacity:1;}
+table.spec-table th.sort-desc::after{content:" ↓";opacity:1;}
+table.spec-table td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  vertical-align:middle;color:var(--text);
+}
+table.spec-table tr:hover td{background:rgba(0,229,255,.04);}
+.td-gain{
+  font-weight:700;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.td-type-omni{color:var(--green);}
+.td-type-yagi{color:var(--orange);}
+.td-type-panel{color:var(--purple);}
+.td-type-stock{color:var(--dim);}
+
+/* ── INFO SECTION ── */
+#info-section{padding:0 32px 28px;}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+.info-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;
+}
+.info-card h3{font-size:.95rem;font-weight:800;margin-bottom:10px;color:var(--cyan);}
+.info-card p{font-size:.83rem;color:var(--dim);line-height:1.55;}
+.info-card ul{padding-left:14px;margin-top:6px;}
+.info-card ul li{font-size:.83rem;color:var(--dim);line-height:1.55;margin-bottom:3px;}
+
+/* ── WIZARD ── */
+#wizard-section{padding:0 32px 28px;}
+#wizard-box{
+  background:var(--card);border:1px solid rgba(0,255,136,.2);
+  border-radius:16px;padding:24px;max-width:700px;
+}
+#wizard-box h2{font-size:1.1rem;font-weight:900;margin-bottom:6px;color:var(--green);}
+#wizard-box p.wz-intro{font-size:.85rem;color:var(--dim);margin-bottom:18px;}
+.wz-step{display:none;}
+.wz-step.active{display:block;}
+.wz-step h3{font-size:.9rem;font-weight:700;margin-bottom:12px;color:var(--text);}
+.wz-options{display:flex;flex-wrap:wrap;gap:8px;}
+.wz-opt{
+  padding:8px 18px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--dim);cursor:pointer;font-size:.84rem;font-weight:600;
+  transition:all .18s;
+}
+.wz-opt:hover,.wz-opt.sel{background:rgba(0,255,136,.1);border-color:var(--green);color:var(--green);}
+.wz-nav{display:flex;gap:10px;margin-top:16px;}
+.wz-btn{
+  padding:8px 20px;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;
+  border:none;transition:all .18s;
+}
+#wz-prev{background:rgba(255,255,255,.07);color:var(--dim);}
+#wz-prev:hover{background:rgba(255,255,255,.12);color:var(--text);}
+#wz-next{background:var(--green);color:#050d1a;}
+#wz-next:hover{filter:brightness(1.1);}
+#wz-result{margin-top:18px;display:none;}
+#wz-result h3{color:var(--green);font-size:.95rem;font-weight:800;margin-bottom:10px;}
+.wz-rec-card{
+  background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.18);
+  border-radius:10px;padding:10px 14px;margin-bottom:8px;
+}
+.wz-rec-card .wz-rank{font-size:.68rem;color:var(--green);font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
+.wz-rec-card .wz-rname{font-size:.95rem;font-weight:800;color:var(--text);margin:2px 0;}
+.wz-rec-card .wz-rwhy{font-size:.8rem;color:var(--dim);}
+#wz-restart{
+  margin-top:10px;background:none;border:1px solid rgba(0,255,136,.3);
+  color:var(--green);padding:7px 18px;border-radius:14px;font-size:.82rem;
+  font-weight:700;cursor:pointer;
+}
+#wz-restart:hover{background:rgba(0,255,136,.1);}
+
+/* ── PROGRESS ── */
+.wz-progress{display:flex;gap:5px;margin-bottom:16px;}
+.wz-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.12);transition:all .2s;}
+.wz-dot.done{background:var(--green);}
+.wz-dot.current{background:var(--cyan);box-shadow:0 0 6px var(--cyan);}
+
+/* ── EMPTY STATE ── */
+#empty-state{
+  display:none;text-align:center;padding:60px 32px;
+  color:var(--dim);
+}
+#empty-state .es-icon{font-size:3.5rem;opacity:.3;margin-bottom:12px;}
+#empty-state p{font-size:.9rem;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .site-header{padding:16px;}
+  #filter-bar{padding:10px 14px;}
+  #cards-section,#table-section,#info-section,#wizard-section{padding-left:14px;padding-right:14px;}
+  .pros-cons{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     HEADER
+══════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-text">
+    <h1>📡 MeshCore <span>Antenne</span> Matrix</h1>
+    <p>Kies de juiste antenne voor jouw situatie — van EDC stubje tot mast-yagi voor repeaters</p>
+    <div class="header-meta">
+      <span class="header-tag ht-ant">868 MHz · EU/NL</span>
+      <span class="header-tag ht-freq">SMA · RP-SMA · N-type · U.FL</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;">
+    <a class="back-btn" href="meshcore-device-feature-matrix.html">← Apparaten</a>
+    <a class="back-btn" href="course-hub.html">← Course Hub</a>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     FILTER BAR
+══════════════════════════════════ -->
+<div id="filter-bar">
+  <!-- row 1: search + sort -->
+  <div class="filter-row">
+    <span class="filter-lbl">Zoeken</span>
+    <input type="search" id="search-input" placeholder="Naam, merk, type…" oninput="applyFilters()">
+    <span class="filter-lbl" style="margin-left:10px;">Sorteren</span>
+    <select id="sort-select" onchange="applyFilters()">
+      <option value="score">Aanbevolen</option>
+      <option value="gain-asc">Versterking ↑</option>
+      <option value="gain-desc">Versterking ↓</option>
+      <option value="price-asc">Prijs ↑</option>
+      <option value="price-desc">Prijs ↓</option>
+      <option value="name">Naam A–Z</option>
+    </select>
+  </div>
+  <!-- row 2: type -->
+  <div class="filter-row">
+    <span class="filter-lbl">Type</span>
+    <span class="pill type-stock" onclick="togglePill(this,'type')" data-val="stock">📎 Stock stub</span>
+    <span class="pill type-omni" onclick="togglePill(this,'type')" data-val="omni">🔄 Omnidirectioneel</span>
+    <span class="pill type-yagi" onclick="togglePill(this,'type')" data-val="yagi">🎯 Yagi / Richtings</span>
+    <span class="pill type-panel" onclick="togglePill(this,'type')" data-val="panel">▣ Patch / Panel</span>
+  </div>
+  <!-- row 3: gebruik -->
+  <div class="filter-row">
+    <span class="filter-lbl">Gebruik</span>
+    <span class="pill use-portable" onclick="togglePill(this,'use')" data-val="portable">🎒 Draagbaar / EDC</span>
+    <span class="pill use-fixed" onclick="togglePill(this,'use')" data-val="fixed">🏠 Binnenshuis vast</span>
+    <span class="pill use-fixed" onclick="togglePill(this,'use')" data-val="outdoor">⛰️ Buitenshuis / Mast</span>
+    <span class="pill use-vehicle" onclick="togglePill(this,'use')" data-val="vehicle">🚗 Voertuig</span>
+  </div>
+  <!-- row 4: connector -->
+  <div class="filter-row">
+    <span class="filter-lbl">Connector</span>
+    <span class="pill conn-sma" onclick="togglePill(this,'conn')" data-val="sma">SMA-M</span>
+    <span class="pill conn-sma" onclick="togglePill(this,'conn')" data-val="rpsma">RP-SMA</span>
+    <span class="pill conn-sma" onclick="togglePill(this,'conn')" data-val="nmale">N-Male</span>
+    <span class="pill conn-sma" onclick="togglePill(this,'conn')" data-val="ufl">U.FL / IPEX</span>
+  </div>
+  <!-- row 5: budget -->
+  <div class="filter-row">
+    <span class="filter-lbl">Budget</span>
+    <span class="pill budget" onclick="togglePill(this,'budget')" data-val="free">🆓 Meegeleverd</span>
+    <span class="pill budget" onclick="togglePill(this,'budget')" data-val="5">&lt; €10</span>
+    <span class="pill budget" onclick="togglePill(this,'budget')" data-val="15">&lt; €20</span>
+    <span class="pill budget" onclick="togglePill(this,'budget')" data-val="50">&lt; €50</span>
+    <span class="pill budget" onclick="togglePill(this,'budget')" data-val="999">Alle prijzen</span>
+  </div>
+</div>
+
+<div id="results-bar">
+  <span id="results-count">Alle antennes geladen…</span>
+  <button id="clear-btn" onclick="clearFilters()">✕ Filters wissen</button>
+</div>
+
+<!-- ══════════════════════════════════
+     CARDS
+══════════════════════════════════ -->
+<section id="cards-section">
+  <div class="section-title">📡 Antenne Overzicht</div>
+  <div id="cards-grid"></div>
+  <div id="empty-state">
+    <div class="es-icon">📭</div>
+    <p>Geen antennes gevonden voor deze filters.<br>Probeer andere filteropties.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     TABLE
+══════════════════════════════════ -->
+<section id="table-section">
+  <div class="section-title">📊 Vergelijkingstabel</div>
+  <div class="table-scroll">
+    <table class="spec-table" id="spec-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('name')">Naam</th>
+          <th onclick="sortTable('type')">Type</th>
+          <th onclick="sortTable('gain')">Versterking</th>
+          <th onclick="sortTable('freq')">Frequentie</th>
+          <th onclick="sortTable('conn')">Connector</th>
+          <th onclick="sortTable('length')">Lengte</th>
+          <th onclick="sortTable('mount')">Bevestiging</th>
+          <th onclick="sortTable('price')">Prijs</th>
+          <th onclick="sortTable('use')">Ideaal voor</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     INFO / UITLEG
+══════════════════════════════════ -->
+<section id="info-section">
+  <div class="section-title">📚 Antenne Uitleg</div>
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>🔢 Wat is dBi (versterking)?</h3>
+      <p>dBi meet hoeveel een antenne het signaal bundelt ten opzichte van een theoretisch isotrope straler. Een hogere dBi betekent <strong>meer bereik in de bundel-richting</strong>, maar een vlakker uitstralings­patroon. Voor mobiel gebruik is 2–3 dBi ideaal; voor vaste repeaters op hoogte 5–9 dBi.</p>
+      <ul>
+        <li>0–2 dBi — stock / EDC, breed uitstralend</li>
+        <li>2–4 dBi — algemeen gebruik, goede balans</li>
+        <li>4–6 dBi — vaste installatie, dak/mast</li>
+        <li>6–10 dBi — richtantenne, grote afstanden</li>
+        <li>10+ dBi — yagi, punt-tot-punt verbindingen</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>🔌 Connectors in het wild</h3>
+      <p>De meeste LoRa-modules gebruiken <strong>SMA</strong> (binnendraad, vrouwelijke behuizing) of <strong>RP-SMA</strong> (buitendraad, vrouwelijke behuizing). Let goed op welk type je apparaat heeft vóór je een antenne koopt!</p>
+      <ul>
+        <li><strong>SMA-male (pin):</strong> Heltec V3, T114, RAK4631, T-Deck</li>
+        <li><strong>RP-SMA (gat):</strong> sommige oudere Meshtastic-boards</li>
+        <li><strong>N-type:</strong> buitenshuis/mast antennes, coax-kabel</li>
+        <li><strong>U.FL / IPEX:</strong> intern op PCB, pigtail nodig</li>
+        <li><strong>Adapter:</strong> SMA-female ↔ N-male coax kabel = standaard installatie</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>📐 Aansluiting & kabels</h3>
+      <p>Voor een repeater op het dak: apparaat binnenshuis → <strong>LMR-400 of RG-213 coax</strong> (laag verlies!) → N-female bulkhead door muur → N-male fiberglass antenne buiten.</p>
+      <p style="margin-top:8px;">Kabeldemping (verlies per meter bij 868 MHz):</p>
+      <ul>
+        <li>RG-58: ≈ 0,7 dB/m — <span style="color:var(--red)">niet voor lange runs</span></li>
+        <li>RG-213: ≈ 0,26 dB/m — goed voor &lt;10m</li>
+        <li>LMR-400: ≈ 0,17 dB/m — aanbevolen voor &gt;5m</li>
+        <li>Aircell-7: ≈ 0,19 dB/m — goede NL-optie</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>⚡ Effectief uitgestraald vermogen (ERP)</h3>
+      <p>ERP = TX-vermogen (dBm) + antenneversterking (dBi) − kabeldemping (dB). In de EU geldt voor 863-870 MHz een <strong>maximaal ERP van 25 mW (14 dBm)</strong>.</p>
+      <ul>
+        <li>Heltec V3 TX: 20 dBm + 2 dBi stub = 22 dBm ERP → <span style="color:var(--green)">✓ OK</span></li>
+        <li>RAK4631 TX: 20 dBm + 5 dBi fiberglass = 25 dBm → <span style="color:var(--red)">✗ te veel!</span></li>
+        <li>Verlaag TX-vermogen bij hoge-gain antennes via <code>set tx</code></li>
+        <li>Buiten EU (915 MHz, VS): andere regels, tot 30 dBm EIRP</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>🏔️ Plaatsing maakt meer uit dan winst</h3>
+      <p>Een goede antennepositie levert meer bereik dan een duurder model op een slechte plek. Vuistregels:</p>
+      <ul>
+        <li>Elke verdubbeling van hoogte ≈ +3 dB extra bereik (rule of thumb)</li>
+        <li>Vrij zicht (LOS) tussen nodes is ideaal — LoRa <em>kan</em> obstakels aan, maar niet gebouwen</li>
+        <li>Metalen dakplaten reflecteren — bevestig antenne minimaal 30 cm boven het dak</li>
+        <li>Zijkant van mast ≠ top van mast — top geeft minder shadowing</li>
+        <li>Polarisatie: zorg dat alle antennes dezelfde oriëntatie hebben (verticaal = standaard)</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>🛒 Waar kopen in NL?</h3>
+      <p>Betrouwbare bronnen voor 868 MHz antennes en kabels:</p>
+      <ul>
+        <li><a href="https://www.tinytronics.nl" target="_blank" rel="noopener">Tinytronics.nl</a> — breed assortiment LoRa antennes</li>
+        <li><a href="https://nl.aliexpress.com" target="_blank" rel="noopener">AliExpress NL</a> — goedkoop, langere levertijd</li>
+        <li><a href="https://www.amazon.nl" target="_blank" rel="noopener">Amazon.nl</a> — snelle levering, vergelijk prijzen</li>
+        <li><a href="https://www.antennas-amplifiers.com" target="_blank" rel="noopener">Antennas-amplifiers.com</a> — professioneel, NL webshop</li>
+        <li><a href="https://www.baas-electronics.nl" target="_blank" rel="noopener">Baas Electronics</a> — NL, connectors en coax kabel</li>
+        <li><a href="https://store.meshcore.co.uk" target="_blank" rel="noopener">MeshCore Store</a> — officieel accessoires</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     WIZARD
+══════════════════════════════════ -->
+<section id="wizard-section">
+  <div class="section-title">🧙 Keuze-assistent — welke antenne past bij mij?</div>
+  <div id="wizard-box">
+    <h2>📡 Vind jouw antenne in 4 stappen</h2>
+    <p class="wz-intro">Beantwoord 4 korte vragen en we raden je de beste antenne aan voor jouw situatie.</p>
+    <div class="wz-progress" id="wz-progress"></div>
+
+    <div class="wz-step active" data-step="0">
+      <h3>1. Wat ga je doen met het apparaat?</h3>
+      <div class="wz-options">
+        <button class="wz-opt" data-val="companion">📱 Companion meegenomen (EDC)</button>
+        <button class="wz-opt" data-val="indoor_rep">🏠 Vaste repeater binnenshuis</button>
+        <button class="wz-opt" data-val="outdoor_rep">⛰️ Vaste repeater buitenshuis / mast</button>
+        <button class="wz-opt" data-val="vehicle">🚗 Voertuig / mobiel op locatie</button>
+        <button class="wz-opt" data-val="link">📡 Punt-tot-punt verbinding (grote afstand)</button>
+      </div>
+    </div>
+
+    <div class="wz-step" data-step="1">
+      <h3>2. Hoe hoog hangt je antenne?</h3>
+      <div class="wz-options">
+        <button class="wz-opt" data-val="low">↕ Laag (zakformaat / tafel, &lt;2m)</button>
+        <button class="wz-opt" data-val="mid">↕ Gemiddeld (raam / binnen muur, 2–5m)</button>
+        <button class="wz-opt" data-val="high">↕ Hoog (dak / mast / toren, &gt;5m)</button>
+      </div>
+    </div>
+
+    <div class="wz-step" data-step="2">
+      <h3>3. Wat is je budget?</h3>
+      <div class="wz-options">
+        <button class="wz-opt" data-val="free">🆓 Nul — gewoon de meegeleverde antenne</button>
+        <button class="wz-opt" data-val="low">💶 &lt; €15</button>
+        <button class="wz-opt" data-val="mid">💶 €15 – €50</button>
+        <button class="wz-opt" data-val="high">💶 Meer dan €50</button>
+      </div>
+    </div>
+
+    <div class="wz-step" data-step="3">
+      <h3>4. Welke connector heeft jouw apparaat?</h3>
+      <div class="wz-options">
+        <button class="wz-opt" data-val="sma">SMA (meeste Heltec / RAK / T-Deck)</button>
+        <button class="wz-opt" data-val="rpsma">RP-SMA (sommige oudere boards)</button>
+        <button class="wz-opt" data-val="nmale">N-type (kabelinstallatie)</button>
+        <button class="wz-opt" data-val="weet_niet">🤷 Weet ik niet</button>
+      </div>
+    </div>
+
+    <div class="wz-nav">
+      <button class="wz-btn" id="wz-prev" onclick="wzNav(-1)" style="display:none;">← Vorige</button>
+      <button class="wz-btn" id="wz-next" onclick="wzNav(1)">Volgende →</button>
+    </div>
+
+    <div id="wz-result">
+      <h3>🎯 Onze aanbevelingen</h3>
+      <div id="wz-result-cards"></div>
+      <button id="wz-restart" onclick="wzRestart()">↺ Opnieuw starten</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     JAVASCRIPT — DATA + LOGIC
+══════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════
+   ANTENNE DATA
+   gain: dBi (numeriek)
+   pMin/pMax: prijs in euro (0 = meegeleverd)
+   type: 'stock' | 'omni' | 'yagi' | 'panel'
+   use: array van 'portable'|'fixed'|'outdoor'|'vehicle'|'link'
+   conn: array van connectoren
+   freq: string
+   length: string
+   mount: string (bevestiging)
+   score: 0-10 (voor standaard sortering)
+   highlight: boolean
+════════════════════════════════════════════ */
+const A = [
+  {
+    id:'stock-stub',
+    name:'Meegeleverde Stub-antenne',
+    brand:'HELTEC / LILYGO / RAK',
+    img:'https://ae01.alicdn.com/kf/S9e34be3da41b4ae892c8d05f71da93c3y.jpg',
+    type:'stock',
+    use:['portable'],
+    gain:1.5,
+    freq:'430–960 MHz breedband',
+    conn:['sma','rpsma'],
+    length:'ca. 8–10 cm',
+    mount:'Direct op apparaat',
+    pMin:0, pMax:0,
+    label:'Meegeleverd',
+    score:4,
+    highlight:false,
+    pros:['Nul kosten','Geen extra aankoop nodig','Past altijd op apparaat'],
+    cons:['Laagste versterking','Breedband = niet geoptimaliseerd voor 868','Niet geschikt voor vaste installatie'],
+    bestFor:'Eerste tests en zakgebruik',
+    desc:'De antenne die bij de meeste LoRa-modules wordt meegeleverd. Werkt prima voor korte afstanden en eerste experimenten. Niet geoptimaliseerd voor 868 MHz.',
+    shops:{ off:'https://store.meshcore.co.uk', amz:'https://www.amazon.nl/s?k=868mhz+lora+antenne', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-lora-antenna.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'gizont-whip-868',
+    name:'Gizont 17 cm Recht Whip (868 MHz)',
+    brand:'GIZONT',
+    img:'https://ae01.alicdn.com/kf/S2c72bc48e7c14f909e4e9aa1cd2f4dc2e.jpg',
+    type:'omni',
+    use:['portable','fixed'],
+    gain:2.8,
+    freq:'868 MHz (EU geoptimaliseerd)',
+    conn:['sma'],
+    length:'17 cm',
+    mount:'Direct op apparaat / tafel',
+    pMin:5, pMax:12,
+    label:'€5–12',
+    score:9,
+    highlight:true,
+    pros:['Geoptimaliseerd voor 868 MHz','Stevige metalen behuizing','Groot bereiksverschil vs stock','Goedkoop en betrouwbaar'],
+    cons:['Stijf — breekt bij ruw gebruik','Iets groter dan stock stub','Niet voor buitenshuis vast'],
+    bestFor:'Dagelijks gebruik (EDC) en binnenshuis',
+    desc:'De populairste upgrade voor LoRa-gebruikers. Precies afgestemd op 868 MHz en geeft merkbaar meer bereik dan de meegeleverde stub. Aanbevolen door de MeshCore-community voor companion-gebruik.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=gizont+868mhz+antenne', ali:'https://nl.aliexpress.com/w/wholesale-gizont-868mhz.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'gizont-flex-868',
+    name:'Gizont 17 cm Flexibel (868 MHz)',
+    brand:'GIZONT',
+    img:'https://ae01.alicdn.com/kf/Scd91d1a16b1e4aa681fc2df26e00f7c4s.jpg',
+    type:'omni',
+    use:['portable'],
+    gain:2.5,
+    freq:'868 MHz',
+    conn:['sma'],
+    length:'17 cm (flexibel)',
+    mount:'Direct op apparaat',
+    pMin:6, pMax:13,
+    label:'€6–13',
+    score:8,
+    highlight:false,
+    pros:['Buigzaam — breekt niet in rugzak','Geopt. voor 868 MHz','Goede versterking vs. stock'],
+    cons:['Iets minder versterking dan stijf model','Flexibele kern kan na jaren moe worden'],
+    bestFor:'Op pad, rugzak, borstzak',
+    desc:'Identiek aan de stijve Gizont-whip maar met een flexibel rubber buitenste. Ideaal als je de antenne regelmatig mee beweegt of in een tas draagt.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=flexibel+868mhz+antenne+lora', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-flexible-antenna.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'3dbi-stub-868',
+    name:'868 MHz 3 dBi Stubantenne',
+    brand:'GENERIC / NONAME',
+    img:'https://ae01.alicdn.com/kf/S8db0a63efb8f4c0b9ab13c36e1eb9929N.jpg',
+    type:'omni',
+    use:['portable','fixed'],
+    gain:3.0,
+    freq:'868 MHz',
+    conn:['sma','rpsma'],
+    length:'12–15 cm',
+    mount:'Direct op apparaat',
+    pMin:4, pMax:10,
+    label:'€4–10',
+    score:7,
+    highlight:false,
+    pros:['Compact met goede versterking','Goedkoop','Brede beschikbaarheid'],
+    cons:['Kwaliteit varieert sterk per leverancier','Specificaties soms overdreven','Breedband is niet altijd echt 868-geoptimaliseerd'],
+    bestFor:'Budget upgrade voor EDC of vaste binnenopstelling',
+    desc:'Generieke 3 dBi stubantennes voor 868 MHz zijn overal te vinden. Kwaliteit verschilt sterk — let op reviews. Goed als goedkoop alternatief voor de Gizont.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+3dbi+antenne+sma', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-3dbi-antenna-sma.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'dipole-indoor',
+    name:'Halfgolf Dipool met Kabel (868 MHz)',
+    brand:'GENERIC',
+    img:'https://ae01.alicdn.com/kf/S5d5c11e5e5c04e6da16c75db02e4c2f7S.jpg',
+    type:'omni',
+    use:['fixed'],
+    gain:2.15,
+    freq:'868 MHz',
+    conn:['sma'],
+    length:'17,3 cm (dipoolelem.) + 1m kabel',
+    mount:'Ophangen / wandbevestiging binnenshuis',
+    pMin:6, pMax:16,
+    label:'€6–16',
+    score:7,
+    highlight:false,
+    pros:['Vrijstaand te hangen (geen zijmaat device)','Kabel geeft positionerings­vrijheid','Symmetrisch uitstralingspatroon'],
+    cons:['Lagere versterking dan whip-stub','Kabel = extra plug-punt','Niet voor buitenshuis'],
+    bestFor:'Binnenshuis vaste repeater of companion op plank',
+    desc:'Een halfgolf dipoolantenne voor 868 MHz met aansluitkabel. Hang hem verticaal op voor het breedste uitstralingspatroon. Populair voor binnenshuis roomserver-setups.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+dipole+antenne+sma+kabel', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-dipole-antenna-cable.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'mag-mount-868',
+    name:'Magnetische Dakantenne 868 MHz',
+    brand:'GENERIC / NAGOYA STIJL',
+    img:'https://ae01.alicdn.com/kf/S53f2ab5d2f5f4bd78e85c1edd4f4fb11d.jpg',
+    type:'omni',
+    use:['vehicle'],
+    gain:3.5,
+    freq:'868 MHz',
+    conn:['sma'],
+    length:'ca. 20–25 cm antenne + 3m coax kabel',
+    mount:'Magnetisch op voertuigdak / metaal',
+    pMin:12, pMax:28,
+    label:'€12–28',
+    score:7,
+    highlight:false,
+    pros:['Simpel te bevestigen op metaal','Goede versterking voor mobiel gebruik','Kabellengte geeft positiefreedom','Ferritebasis isoleert antenne van het chassis'],
+    cons:['Alleen bruikbaar met metalen ondergrond','Kabel door portier/raam is slordig','Kan van dak waaien bij hoge snelheid'],
+    bestFor:'LoRa in de auto of op een metalen hub',
+    desc:'Een magnetisch voet-antenne kleefd direct op een voertugdak of metalen kastje. De magneet zorgt voor goede RF-verbinding met het chassis als tegengewicht (groundplane). Ideaal voor mobiele repeaters.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+magnetische+dakantenne+sma', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-magnetic-base-antenna.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'fiberglass-5dbi',
+    name:'Fiberglass Outdoor Omni 5 dBi (868 MHz)',
+    brand:'GENERIC / ALFA / POYNTING',
+    img:'https://ae01.alicdn.com/kf/S0b62f0aa4dc84e75a7f19985cd695c69m.jpg',
+    type:'omni',
+    use:['outdoor'],
+    gain:5.0,
+    freq:'868 MHz',
+    conn:['nmale'],
+    length:'ca. 50–70 cm',
+    mount:'Mast / dakbevestiging (N-male)',
+    pMin:25, pMax:55,
+    label:'€25–55',
+    score:9,
+    highlight:true,
+    pros:['Hoge versterking voor vaste repeater','Glasvezel behuizing: UV- en weerbestendig','N-aansluiting voor solide kabelverbinding','Compact genoeg voor standaard antennemasten'],
+    cons:['Vereist coax-kabel en N-adapter','Grotere investering','Te veel versterking kan tot ERP-overschrijding leiden (verlaag TX-vermogen)'],
+    bestFor:'Buitenshuis vaste repeater op dak of mast',
+    desc:'De standaard keuze voor buitenshuis repeater-installaties in het Drenthe Noodnetwerk. Glasvezel houdt jarenlang stand in regen en zon. Combineer met LMR-400 coax voor minimaal signaaldverlies.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+fiberglass+antenne+5dbi+outdoor', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-fiberglass-antenna-5dbi.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'fiberglass-8dbi',
+    name:'Fiberglass Outdoor Omni 8 dBi (868 MHz)',
+    brand:'GENERIC / ALFA / POYNTING',
+    img:'https://ae01.alicdn.com/kf/S96a5c2c36c0f4e79b5d745b2e6d1a4f9K.jpg',
+    type:'omni',
+    use:['outdoor'],
+    gain:8.0,
+    freq:'868 MHz',
+    conn:['nmale'],
+    length:'ca. 1,2–1,5 m',
+    mount:'Mast / hoge toren',
+    pMin:45, pMax:90,
+    label:'€45–90',
+    score:8,
+    highlight:false,
+    pros:['Zeer hoge versterking','Uitstekend voor hoge masten','Groot bereik in vlak terrein'],
+    cons:['Bundel is erg vlak — slechter bereik direct eronder','Lang en groot — forse mast nodig','Bij hoge TX-vermogen ERP-limiet snel bereikt', 'Duur'],
+    bestFor:'Toprepeater op hoge mast, open vlak terrein Drenthe',
+    desc:'Een 8 dBi fiberglass antenne bundelt het signaal in een heel plat horizontaal vlak — ideaal voor grote vlakke gebieden zoals de Drentse heide. Let op ERP: bij 20 dBm TX-vermogen en 8 dBi is je EIRP 28 dBm = 630 mW — te veel voor EU. Stel TX in op max. 6 dBm bij deze antenne.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+fiberglass+antenne+8dbi+outdoor', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-fiberglass-antenna-8dbi.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'yagi-9dbi',
+    name:'Yagi Richtantenne 9,5 dBi (868 MHz)',
+    brand:'GENERIC / TAOGLAS / AUREL',
+    img:'https://ae01.alicdn.com/kf/S9e0e4e3f48064f3baad4a2feec88b9e2L.jpg',
+    type:'yagi',
+    use:['outdoor','link'],
+    gain:9.5,
+    freq:'868 MHz',
+    conn:['nmale'],
+    length:'ca. 60–80 cm',
+    mount:'Mast / draaistang (richting instelbaar)',
+    pMin:65, pMax:110,
+    label:'€65–110',
+    score:7,
+    highlight:false,
+    pros:['Hoogste versterking voor punt-tot-punt','+12 dB extra vs stock antenne','Uitstekend voor moeilijk bereikbare plekken','Richten op een specifiek punt vergroot bereik enorm'],
+    cons:['Sterk directioneel — mist signalen van opzij','Richten is lastig en verandert niet mee','Niet voor brede dekking','ERP-limiet snel overschreden: TX zeer laag instellen'],
+    bestFor:'Vaste punt-tot-punt link (bijv. Coevorden ↔ Emmen)',
+    desc:'Een yagi-antenne bundelt alle energie in één richting. Ideaal als je twee vaste punten met grote afstand wil verbinden — maar nutteloos als antenne voor een repeater die alle richtingen moet bestrijken.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+yagi+antenne+9dbi', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-yagi-antenna.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'panel-7dbi',
+    name:'Panel / Patch Antenne 7 dBi (868 MHz)',
+    brand:'GENERIC / LINX / TAOGLAS',
+    img:'https://ae01.alicdn.com/kf/Sc4f37e9d12d548c9b4da9a93b02a5a44T.jpg',
+    type:'panel',
+    use:['outdoor','fixed','link'],
+    gain:7.0,
+    freq:'868 MHz',
+    conn:['sma','nmale'],
+    length:'ca. 15×15 cm',
+    mount:'Wandbevestiging / paal (vlak)',
+    pMin:35, pMax:75,
+    label:'€35–75',
+    score:6,
+    highlight:false,
+    pros:['Compact en plat — makkelijk te monteren','Gericht uitstralingspatroon in halve ruimte','Geschikt voor wand- of raamstickers', 'Minder opvallend dan yagi of fiberglass'],
+    cons:['Semi-directioneel: dekt maar 80–120° in azimuth','Niet ideaal als enige antenne voor repeater met 360° dekking','Typisch duurder dan vergelijkbaar eenvoudige whip'],
+    bestFor:'Repeater gericht op één richting, of punt-tot-punt over kortere afstand',
+    desc:'Een paneel- of patchantenne straalt energie uit in een brede kegel. Goed voor gevallen waarbij je signaal gericht wil richten — bijv. een woonwijk die je wil bedienen. Minder efficiënt dan een yagi voor echt lange afstanden.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=868mhz+patch+antenne+panel', ali:'https://nl.aliexpress.com/w/wholesale-868mhz-patch-antenna.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  },
+  {
+    id:'ufl-pigtail',
+    name:'U.FL / IPEX naar SMA Pigtail',
+    brand:'GENERIC',
+    img:'https://ae01.alicdn.com/kf/S7a45e67e9c2b4f4a8e96e74e4f5a2a25U.jpg',
+    type:'stock',
+    use:['portable','fixed'],
+    gain:0,
+    freq:'0–3 GHz breedband',
+    conn:['ufl','sma'],
+    length:'10–15 cm kabel',
+    mount:'Intern PCB → extern SMA',
+    pMin:2, pMax:6,
+    label:'€2–6',
+    score:5,
+    highlight:false,
+    pros:['Maakt externe antenne mogelijk op U.FL devices','Erg goedkoop','Breed beschikbaar'],
+    cons:['U.FL connector is fragiel — max ±30 insteekbeurten','Kabel voegt lichte demping toe','Niet voor frequente verbinding/verbreking'],
+    bestFor:'Devices met intern U.FL-aansluiting die je wil uitbreiden (bijv. RAK WisBlock)',
+    desc:'Sommige modules (bijv. RAK WisBlock 4631 op stripping-board) hebben een U.FL/IPEX-aansluiting in plaats van een externe SMA. Met deze pigtail sluit je gewone SMA-antennes aan. Tip: vastplakken met een druppel hotglue op de connector voorkomt losschieten.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=ufl+ipex+naar+sma+pigtail', ali:'https://nl.aliexpress.com/w/wholesale-ufl-ipex-to-sma-pigtail.html', tt:'https://www.tinytronics.nl/nl/connectoren-en-adapters/adapters/rf-adapters/ufl-ipex-naar-sma-female-adapterkabel' }
+  },
+  {
+    id:'coax-lmr400',
+    name:'LMR-400 Coax Kabel + N-connectors',
+    brand:'TIMES / BELDEN / GENERIC',
+    img:'https://ae01.alicdn.com/kf/Sb33e8e2e2bf84f789a5e49e75636db3dS.jpg',
+    type:'omni',
+    use:['outdoor','fixed'],
+    gain:-0.17,
+    freq:'DC – 6 GHz',
+    conn:['nmale'],
+    length:'Per meter (1–10m aanbevolen)',
+    mount:'Kabeldoorvoer muur / dakplaat',
+    pMin:8, pMax:40,
+    label:'€8–40 (afhankelijk lengte)',
+    score:6,
+    highlight:false,
+    pros:['Laag verlies: 0,17 dB/m bij 868 MHz','Stevig en weerbestendig','Solide N-connectors','Ideaal voor lange kabeltransities'],
+    cons:['Dik en weinig flexibel (10,3mm Ø)','Connectors crimpen vereist gereedschap of voorbedrade varianten','Zwaar bij lange lengtes'],
+    bestFor:'Apparaat binnenshuis koppelen aan buitenantenae op dak/mast',
+    desc:'Als de LoRa-module binnenshuis staat maar de antenne buiten, is de kabelkeuze cruciaal. LMR-400 heeft het laagste verlies van eenvoudig verkrijgbare coax. Koop bij voorkeur voorbedrade lengtes van 3, 5 of 10 meter met N-male connectoren.',
+    shops:{ off:null, amz:'https://www.amazon.nl/s?k=lmr400+coax+kabel+n+connector', ali:'https://nl.aliexpress.com/w/wholesale-lmr400-coax-cable.html', tt:'https://www.tinytronics.nl/shop/nl/communicatie-en-signalen/antennes-en-zenders/coax-kabels' }
+  },
+  {
+    id:'rak-rubber-duck',
+    name:'RAK 868 MHz Rubber Duck Antenne',
+    brand:'RAK WIRELESS',
+    img:'https://docs.rakwireless.com/assets/images/accessories/905000-905001/antenna_view.png',
+    type:'omni',
+    use:['portable','fixed'],
+    gain:2.3,
+    freq:'863–870 MHz',
+    conn:['sma'],
+    length:'11,8 cm',
+    mount:'Direct op RAK WisBlock / WisMesh Tag',
+    pMin:5, pMax:12,
+    label:'€5–12',
+    score:7,
+    highlight:false,
+    pros:['Officieel RAK-accessoire — gegarandeerd passend','Geoptimaliseerd voor RAK WisBlock series','Compact en stevig'],
+    cons:['Alleen verkrijgbaar via RAK of partners','Minder versterking dan Gizont whip','SMA-male connector — check je board'],
+    bestFor:'RAK WisBlock en WisMesh Tag gebruikers',
+    desc:'De officiële RAK Wireless antenne is geoptimaliseerd voor 868 MHz en past direct op de SMA-connector van RAK WisBlock en WisMesh Tag modules. Een betrouwbare keuze als je zeker wilt zijn van compatibiliteit.',
+    shops:{ off:'https://store.rakwireless.com/collections/accessories/products/lora-antenna', amz:'https://www.amazon.nl/s?k=rak+wireless+868mhz+antenne', ali:'https://nl.aliexpress.com/w/wholesale-rak-wireless-868mhz-antenna.html', tt:'https://www.tinytronics.nl/nl/communicatie-en-signalen/draadloos/lora/antennes' }
+  }
+];
+
+/* ════════════════════════════════════════════
+   ANTENNA SVG ILLUSTRATIONS
+════════════════════════════════════════════ */
+const _S = {
+  sma: `<rect x="-6.5" y="65" width="13" height="20" rx="2" fill="#5a7090"/>
+       <polygon points="0,62 -7,57 -7,49 0,44 7,49 7,57" fill="#4a6080" stroke="#6a8090" stroke-width="0.5"/>
+       <circle cx="0" cy="53" r="3.5" fill="#c8a050" opacity="0.9"/>`,
+  nmale: `<rect x="-8" y="60" width="16" height="26" rx="3" fill="#5a7090"/>
+         <rect x="-5" y="56" width="10" height="8" rx="1" fill="#8ab0c0"/>
+         <circle cx="0" cy="63" r="4" fill="#c8a050" opacity="0.85"/>`,
+  waves: (y) => `<ellipse cx="0" cy="${y}" rx="22" ry="9" stroke="#00ff88" stroke-width="1.5" fill="none" opacity="0.45"/>
+                <ellipse cx="0" cy="${y}" rx="38" ry="16" stroke="#00ff88" stroke-width="0.9" fill="none" opacity="0.25"/>`,
+};
+
+function antSVG(id) {
+  const v = 'viewBox="-55 -100 110 200"';
+  const ns = 'xmlns="http://www.w3.org/2000/svg"';
+  switch(id) {
+    case 'stock-stub': case '3dbi-stub-868': case 'rak-rubber-duck':
+      return `<svg ${v} ${ns} fill="none">${_S.sma}
+        <rect x="-4" y="-42" width="8" height="108" rx="4" fill="#8ab0d0"/>
+        <ellipse cx="0" cy="-46" rx="5" ry="5" fill="#b0d0e8"/>
+        ${_S.waves(-54)}</svg>`;
+
+    case 'gizont-whip-868':
+      return `<svg ${v} ${ns} fill="none">${_S.sma}
+        <rect x="-3.5" y="-70" width="7" height="137" rx="3.5" fill="#8ab0d0"/>
+        <ellipse cx="0" cy="-74" rx="4.5" ry="4.5" fill="#b0d0e8"/>
+        ${_S.waves(-82)}</svg>`;
+
+    case 'gizont-flex-868':
+      return `<svg ${v} ${ns} fill="none">${_S.sma}
+        <path d="M 0,62 Q 11,20 -5,-20 Q -13,-52 0,-72" stroke="#8ab0d0" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <ellipse cx="0" cy="-76" rx="4.5" ry="4.5" fill="#b0d0e8"/>
+        ${_S.waves(-84)}</svg>`;
+
+    case 'dipole-indoor':
+      return `<svg ${v} ${ns} fill="none">
+        <path d="M 0,55 Q 26,66 40,85" stroke="#3a5070" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+        <path d="M 0,55 Q 26,66 40,85" stroke="#1a2840" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <rect x="-7" y="-8" width="14" height="16" rx="4" fill="#4a6080" stroke="#6a8090" stroke-width="1"/>
+        <rect x="-3.5" y="-80" width="7" height="74" rx="3.5" fill="#8ab0d0"/>
+        <ellipse cx="0" cy="-84" rx="4.5" ry="4.5" fill="#b0d0e8"/>
+        <rect x="-3.5" y="9" width="7" height="47" rx="3.5" fill="#8ab0d0"/>
+        <ellipse cx="0" cy="58" rx="4.5" ry="4.5" fill="#b0d0e8"/>
+        ${_S.waves(-56)}</svg>`;
+
+    case 'mag-mount-868':
+      return `<svg ${v} ${ns} fill="none">
+        <path d="M -5,82 Q -28,72 -28,60 Q -28,48 -5,44 Q 18,40 18,28 Q 18,16 -5,13" stroke="#3a5070" stroke-width="4.5" fill="none"/>
+        <ellipse cx="0" cy="13" rx="42" ry="11" fill="#2a4060"/>
+        <ellipse cx="0" cy="10" rx="40" ry="10" fill="#3a5070" stroke="#5a7090" stroke-width="1.2"/>
+        <rect x="-5.5" y="-2" width="11" height="16" rx="3" fill="#5a7090"/>
+        <rect x="-3.5" y="-10" width="7" height="12" rx="1.5" fill="#c8a050" opacity="0.85"/>
+        <rect x="-3.5" y="-78" width="7" height="72" rx="3.5" fill="#8ab0d0"/>
+        <ellipse cx="0" cy="-82" rx="4.5" ry="4.5" fill="#b0d0e8"/>
+        ${_S.waves(-88)}</svg>`;
+
+    case 'fiberglass-5dbi':
+      return `<svg ${v} ${ns} fill="none">${_S.nmale}
+        <rect x="5" y="20" width="18" height="50" rx="3" fill="#2a4060" stroke="#4a6080" stroke-width="1"/>
+        <rect x="9" y="15" width="10" height="60" rx="2" fill="#1a3050"/>
+        <path d="M -5,58 L -4.5,-55 L 0,-90 L 4.5,-55 L 5,58 Z" fill="#c0d8f0" opacity="0.9"/>
+        <line x1="-3" y1="30" x2="-3" y2="-50" stroke="#90b8d0" stroke-width="0.8" opacity="0.5"/>
+        <line x1="3" y1="30" x2="3" y2="-50" stroke="#90b8d0" stroke-width="0.8" opacity="0.5"/>
+        <ellipse cx="0" cy="-93" rx="3.5" ry="3.5" fill="#d8eef8"/>
+        <ellipse cx="0" cy="-50" rx="38" ry="9" stroke="#00ff88" stroke-width="1.5" fill="none" opacity="0.45"/>
+        <ellipse cx="0" cy="-50" rx="54" ry="14" stroke="#00ff88" stroke-width="0.9" fill="none" opacity="0.25"/></svg>`;
+
+    case 'fiberglass-8dbi':
+      return `<svg ${v} ${ns} fill="none">${_S.nmale}
+        <rect x="5" y="25" width="20" height="55" rx="3" fill="#2a4060" stroke="#4a6080" stroke-width="1"/>
+        <rect x="9" y="18" width="12" height="66" rx="2" fill="#1a3050"/>
+        <rect x="-5.5" y="-100" width="11" height="188" rx="5.5" fill="#c0d8f0" opacity="0.9"/>
+        <line x1="-3" y1="-100" x2="-3" y2="60" stroke="#90b8d0" stroke-width="0.8" opacity="0.4"/>
+        <line x1="3" y1="-100" x2="3" y2="60" stroke="#90b8d0" stroke-width="0.8" opacity="0.4"/>
+        <path d="M -6,-94 L 0,-104 L 6,-94" stroke="#a0c8e0" stroke-width="2" fill="none" opacity="0.8"/>
+        <ellipse cx="0" cy="-40" rx="50" ry="7" stroke="#00ff88" stroke-width="1.8" fill="none" opacity="0.5"/>
+        <ellipse cx="0" cy="-40" rx="54" ry="11" stroke="#00ff88" stroke-width="1" fill="none" opacity="0.28"/></svg>`;
+
+    case 'yagi-9dbi':
+      return `<svg ${v} ${ns} fill="none">
+        <rect x="-52" y="-5" width="104" height="10" rx="5" fill="#5a7090"/>
+        <rect x="-46" y="-40" width="7" height="80" rx="3.5" fill="#6a8090"/>
+        <rect x="-22" y="-36" width="7" height="72" rx="3.5" fill="#00e5ff" opacity="0.9"/>
+        <circle cx="-18.5" cy="0" r="6" fill="#00e5ff" opacity="0.25"/>
+        <rect x="3" y="-32" width="6" height="64" rx="3" fill="#8ab0d0"/>
+        <rect x="23" y="-28" width="6" height="56" rx="3" fill="#8ab0d0"/>
+        <rect x="41" y="-24" width="6" height="48" rx="3" fill="#8ab0d0"/>
+        <rect x="-5" y="5" width="10" height="62" rx="3" fill="#2a4060"/>
+        <path d="M 50,-12 L 56,0 L 50,12" stroke="#00ff88" stroke-width="2.5" fill="none" opacity="0.8"/>
+        <text x="0" y="90" text-anchor="middle" fill="#5a7090" font-size="10" font-family="monospace">→ RICHTING</text></svg>`;
+
+    case 'panel-7dbi':
+      return `<svg ${v} ${ns} fill="none">
+        <rect x="-46" y="-70" width="80" height="110" rx="5" fill="#1a3050" stroke="#4a6080" stroke-width="1.5"/>
+        <rect x="-42" y="-66" width="72" height="102" rx="4" fill="#0d1f3c"/>
+        <rect x="-28" y="-52" width="44" height="44" rx="3" fill="none" stroke="#1e4070" stroke-width="2"/>
+        <rect x="-22" y="-46" width="32" height="32" rx="2" fill="none" stroke="#2a5080" stroke-width="1.5"/>
+        <circle cx="-6" cy="-30" r="8" fill="none" stroke="#3a6090" stroke-width="1.5"/>
+        <line x1="-6" y1="-42" x2="-6" y2="-18" stroke="#3a6090" stroke-width="1.5"/>
+        <line x1="-18" y1="-30" x2="6" y2="-30" stroke="#3a6090" stroke-width="1.5"/>
+        <rect x="-5" y="40" width="10" height="20" rx="2" fill="#c8a050" opacity="0.9"/>
+        <rect x="-3" y="59" width="6" height="12" rx="1" fill="#5a7090"/>
+        <path d="M -46,-30 Q -70,-42 -76,-30 Q -70,-18 -46,-30" stroke="#00ff88" stroke-width="1.5" fill="none" opacity="0.45"/>
+        <path d="M -46,-30 Q -86,-52 -90,-30 Q -86,-8 -46,-30" stroke="#00ff88" stroke-width="0.9" fill="none" opacity="0.25"/></svg>`;
+
+    case 'ufl-pigtail':
+      return `<svg ${v} ${ns} fill="none">
+        <rect x="-50" y="-10" width="18" height="20" rx="3" fill="#5a7090" stroke="#7a90a8" stroke-width="1"/>
+        <circle cx="-41" cy="0" r="4.5" fill="#c8a050" opacity="0.9"/>
+        <text x="-41" y="20" text-anchor="middle" fill="#8ab0c8" font-size="8" font-family="monospace">U.FL</text>
+        <path d="M -33,0 Q 0,-46 33,0" stroke="#3a5070" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M -33,0 Q 0,-46 33,0" stroke="#1a2840" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <rect x="33" y="-12" width="20" height="24" rx="3" fill="#5a7090" stroke="#7a90a8" stroke-width="1"/>
+        <circle cx="47" cy="0" r="5.5" fill="#c8a050" opacity="0.85"/>
+        <text x="44" y="20" text-anchor="middle" fill="#8ab0c8" font-size="8" font-family="monospace">SMA</text>
+        <text x="0" y="52" text-anchor="middle" fill="#ff6b00" font-size="10" font-family="monospace">⚠ FRAGIEL</text>
+        <text x="0" y="72" text-anchor="middle" fill="#5a7090" font-size="8" font-family="monospace">max ~30x inpluggen</text></svg>`;
+
+    case 'coax-lmr400':
+      return `<svg ${v} ${ns} fill="none">
+        <rect x="-52" y="-18" width="22" height="36" rx="3.5" fill="#5a7090" stroke="#7a90a8" stroke-width="1"/>
+        <circle cx="-42" cy="0" r="6.5" fill="#c8a050" opacity="0.85"/>
+        <text x="-42" y="26" text-anchor="middle" fill="#8ab0c8" font-size="7.5" font-family="monospace">N-M</text>
+        <rect x="-30" y="-10" width="60" height="20" rx="10" fill="#2a4060"/>
+        <rect x="-28" y="-7" width="56" height="14" rx="7" fill="#1a2840"/>
+        <text x="0" y="4" text-anchor="middle" fill="#6a8090" font-size="9" font-family="monospace">LMR-400</text>
+        <rect x="30" y="-18" width="22" height="36" rx="3.5" fill="#5a7090" stroke="#7a90a8" stroke-width="1"/>
+        <circle cx="40" cy="0" r="6.5" fill="#c8a050" opacity="0.85"/>
+        <text x="40" y="26" text-anchor="middle" fill="#8ab0c8" font-size="7.5" font-family="monospace">N-M</text>
+        <text x="0" y="52" text-anchor="middle" fill="#00e5ff" font-size="11" font-family="monospace">0,17 dB/m</text>
+        <text x="0" y="68" text-anchor="middle" fill="#5a7090" font-size="9" font-family="monospace">bij 868 MHz</text>
+        <line x1="-50" y1="28" x2="50" y2="28" stroke="#3a5070" stroke-width="1"/>
+        <line x1="-50" y1="22" x2="-50" y2="34" stroke="#3a5070" stroke-width="1.5"/>
+        <line x1="50" y1="22" x2="50" y2="34" stroke="#3a5070" stroke-width="1.5"/></svg>`;
+
+    default:
+      return `<div style="font-size:3rem;opacity:.3;">📡</div>`;
+  }
+}
+function getAntImgHTML(a) { return antSVG(a.id); }
+
+/* ════════════════════════════════════════════
+   FILTER STATE
+════════════════════════════════════════════ */
+let activeType=null, activeUse=null, activeBudget=null, activeConn=null;
+let sortCol='score', sortDir='desc';
+
+function togglePill(el, group) {
+  const pills = [...document.querySelectorAll(`.filter-row .pill`)];
+  const val = el.dataset.val;
+  if (group==='type') {
+    if (activeType===val) { activeType=null; el.classList.remove('active'); }
+    else {
+      pills.filter(p=>p.classList.contains('type-'+activeType)).forEach(p=>p.classList.remove('active'));
+      activeType=val; el.classList.add('active');
+    }
+  } else if (group==='use') {
+    if (activeUse===val) { activeUse=null; el.classList.remove('active'); }
+    else {
+      // remove all use pills
+      document.querySelectorAll('.pill.use-portable,.pill.use-fixed,.pill.use-vehicle').forEach(p=>p.classList.remove('active'));
+      activeUse=val; el.classList.add('active');
+    }
+  } else if (group==='budget') {
+    document.querySelectorAll('.pill.budget').forEach(p=>p.classList.remove('active'));
+    if (activeBudget===val) { activeBudget=null; }
+    else { activeBudget=val; el.classList.add('active'); }
+  } else if (group==='conn') {
+    document.querySelectorAll('.pill.conn-sma').forEach(p=>p.classList.remove('active'));
+    if (activeConn===val) { activeConn=null; }
+    else { activeConn=val; el.classList.add('active'); }
+  }
+  applyFilters();
+}
+
+function clearFilters() {
+  activeType=null; activeUse=null; activeBudget=null; activeConn=null;
+  document.querySelectorAll('#filter-bar .pill.active').forEach(p=>p.classList.remove('active'));
+  document.getElementById('search-input').value='';
+  document.getElementById('sort-select').value='score';
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+
+  let list = A.filter(a => {
+    if (q && !`${a.name} ${a.brand} ${a.type} ${a.desc}`.toLowerCase().includes(q)) return false;
+    if (activeType && a.type!==activeType) return false;
+    if (activeUse && !a.use.includes(activeUse)) return false;
+    if (activeConn && !a.conn.includes(activeConn)) return false;
+    if (activeBudget) {
+      if (activeBudget==='free' && !(a.pMin===0)) return false;
+      if (activeBudget==='5' && !(a.pMax<=10)) return false;
+      if (activeBudget==='15' && !(a.pMax<=20)) return false;
+      if (activeBudget==='50' && !(a.pMax<=50)) return false;
+    }
+    return true;
+  });
+
+  list.sort((a,b) => {
+    if (sort==='score')       return b.score-a.score;
+    if (sort==='gain-asc')    return a.gain-b.gain;
+    if (sort==='gain-desc')   return b.gain-a.gain;
+    if (sort==='price-asc')   return a.pMin-b.pMin;
+    if (sort==='price-desc')  return b.pMax-a.pMax;
+    if (sort==='name')        return a.name.localeCompare(b.name,'nl');
+    return 0;
+  });
+
+  renderCards(list);
+  renderTable(list);
+  document.getElementById('results-count').textContent =
+    `${list.length} van ${A.length} antennes getoond`;
+}
+
+/* ════════════════════════════════════════════
+   RENDER CARDS
+════════════════════════════════════════════ */
+function renderCards(list) {
+  const grid = document.getElementById('cards-grid');
+  const empty = document.getElementById('empty-state');
+  if (!list.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+
+  const MAX_GAIN = 10;
+  const typeLabel = { stock:'Stock', omni:'Omnidirectioneel', yagi:'Yagi/Richtings', panel:'Patch/Panel' };
+  const useLabels = { portable:'Draagbaar', fixed:'Binnenshuis', outdoor:'Buitenshuis', vehicle:'Voertuig', link:'Punt-tot-punt' };
+
+  grid.innerHTML = list.map(a => {
+    const gainPct = Math.min(100, (a.gain/MAX_GAIN)*100);
+    const gainDisplay = a.gain <= 0 ? '— (kabel)' : `${a.gain} dBi`;
+    const priceDisplay = a.pMin===0 ? '<span style="color:var(--green);font-weight:800;">Meegeleverd</span>'
+                       : a.pMin===a.pMax ? `€${a.pMax}`
+                       : `€${a.pMin} – €${a.pMax}`;
+    const connBadges = a.conn.map(c => `<span class="conn-pill">${c.toUpperCase()}</span>`).join('');
+    const useBadges = a.use.map(u => `<span class="badge badge-use">${useLabels[u]||u}</span>`).join('');
+    const typeCls = 'td-type-'+a.type;
+    const shopBtns = [
+      a.shops.off ? `<a class="shop-btn shop-off" href="${a.shops.off}" target="_blank" rel="noopener">🏪 Officieel</a>` : '',
+      a.shops.amz ? `<a class="shop-btn shop-amz" href="${a.shops.amz}" target="_blank" rel="noopener">📦 Amazon</a>` : '',
+      a.shops.ali ? `<a class="shop-btn shop-ali" href="${a.shops.ali}" target="_blank" rel="noopener">🛒 AliExpress</a>` : '',
+      a.shops.tt  ? `<a class="shop-btn shop-tt"  href="${a.shops.tt}"  target="_blank" rel="noopener">🔧 Tinytronics</a>` : '',
+    ].filter(Boolean).join('');
+
+    return `<div class="ant-card${a.highlight?' highlight':''}">
+      <div class="card-img-wrap">
+        ${a.highlight ? '<div class="highlight-banner">⭐ Aanbevolen</div>' : ''}
+        ${getAntImgHTML(a)}
+      </div>
+      <div class="card-body">
+        <div class="card-brand">${a.brand}</div>
+        <div class="card-name">${a.name}</div>
+        <div class="card-tagline">${a.desc.substring(0,100)}…</div>
+        <div class="badges">
+          <span class="badge badge-type ${typeCls}">${typeLabel[a.type]||a.type}</span>
+          ${useBadges}
+          ${a.highlight ? '<span class="badge badge-rec">⭐ Aanbevolen</span>' : ''}
+        </div>
+        <div class="specs-chips">
+          <span class="spec-chip"><strong>Gain</strong> ${gainDisplay}</span>
+          <span class="spec-chip"><strong>Freq</strong> ${a.freq}</span>
+          <span class="spec-chip"><strong>Lengte</strong> ${a.length}</span>
+          <span class="spec-chip"><strong>Prijs</strong> ${a.label}</span>
+        </div>
+        <div class="gain-bar-wrap">
+          <span class="gain-bar-label">Versterking</span>
+          <div class="gain-bar-track"><div class="gain-bar-fill" style="width:${gainPct}%"></div></div>
+          <span class="gain-bar-val">${gainDisplay}</span>
+        </div>
+        <div class="conn-row">
+          <span style="font-size:.72rem;color:var(--dim);">Connector:</span>
+          ${connBadges}
+          <span class="mount-pill">${a.mount.substring(0,30)}</span>
+        </div>
+        <div class="pros-cons">
+          <div class="pros-block"><h5>Voordelen</h5><ul>${a.pros.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+          <div class="cons-block"><h5>Nadelen</h5><ul>${a.cons.map(c=>`<li>${c}</li>`).join('')}</ul></div>
+        </div>
+        <div class="shop-row">${shopBtns}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════
+   RENDER TABLE
+════════════════════════════════════════════ */
+let _tableSortCol=null, _tableSortDir=1;
+function sortTable(col) {
+  const ths = document.querySelectorAll('table.spec-table th');
+  ths.forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  if (_tableSortCol===col) _tableSortDir*=-1; else { _tableSortCol=col; _tableSortDir=1; }
+  const thMap = {name:0,type:1,gain:2,freq:3,conn:4,length:5,mount:6,price:7,use:8};
+  const idx = thMap[col];
+  if (idx!==undefined) ths[idx].classList.add(_tableSortDir===1?'sort-asc':'sort-desc');
+
+  let current = [...A]; // use current filtered list by re-applying
+  applyFiltersForTable(current);
+}
+function applyFiltersForTable(list) {
+  // re-sort the current filtered list
+  const sortVal = document.getElementById('sort-select').value;
+  applyFilters(); // re-render everything
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('table-body');
+  const typeLabel = { stock:'📎 Stock', omni:'🔄 Omni', yagi:'🎯 Yagi', panel:'▣ Panel' };
+  const typeCls = { stock:'td-type-stock', omni:'td-type-omni', yagi:'td-type-yagi', panel:'td-type-panel' };
+  const useLabels = { portable:'Draagbaar', fixed:'Binnenshuis', outdoor:'Buitenshuis', vehicle:'Voertuig', link:'Link' };
+
+  tbody.innerHTML = list.map(a => {
+    const gainDisplay = a.gain <= 0 ? '—' : `${a.gain} dBi`;
+    const priceDisplay = a.pMin===0 ? 'Meegelev.' : `€${a.pMin}–${a.pMax}`;
+    const useTxt = a.use.map(u=>useLabels[u]||u).join(', ');
+    return `<tr>
+      <td><strong>${a.name}</strong><br><small style="color:var(--dim)">${a.brand}</small></td>
+      <td class="${typeCls[a.type]||''}">${typeLabel[a.type]||a.type}</td>
+      <td class="td-gain">${gainDisplay}</td>
+      <td>${a.freq}</td>
+      <td>${a.conn.map(c=>c.toUpperCase()).join(', ')}</td>
+      <td>${a.length}</td>
+      <td style="font-size:.75rem;color:var(--dim);">${a.mount}</td>
+      <td style="color:var(--yellow);font-weight:700;">${priceDisplay}</td>
+      <td style="font-size:.78rem;color:var(--dim);">${useTxt}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════
+   WIZARD
+════════════════════════════════════════════ */
+let wzStep=0;
+const wzAnswers={};
+const WZ_STEPS=4;
+
+function renderWzProgress() {
+  const prog = document.getElementById('wz-progress');
+  prog.innerHTML = Array.from({length:WZ_STEPS},(_,i)=>
+    `<div class="wz-dot ${i<wzStep?'done':i===wzStep?'current':''}"></div>`
+  ).join('');
+}
+
+function wzNav(dir) {
+  if (dir===1) {
+    // validate selection
+    const step = document.querySelector('.wz-step.active');
+    const sel = step.querySelector('.wz-opt.sel');
+    if (!sel) { step.querySelector('.wz-options').style.outline='2px solid var(--red)'; setTimeout(()=>step.querySelector('.wz-options').style.outline='',1000); return; }
+    wzAnswers[wzStep] = sel.dataset.val;
+    if (wzStep===WZ_STEPS-1) { showWzResult(); return; }
+    wzStep++;
+  } else {
+    if (wzStep===0) return;
+    wzStep--;
+  }
+  document.querySelectorAll('.wz-step').forEach((s,i)=>s.classList.toggle('active',i===wzStep));
+  document.getElementById('wz-prev').style.display = wzStep===0?'none':'block';
+  document.getElementById('wz-next').textContent = wzStep===WZ_STEPS-1?'Resultaat →':'Volgende →';
+  renderWzProgress();
+}
+
+document.querySelectorAll('.wz-opt').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.closest('.wz-options').querySelectorAll('.wz-opt').forEach(b=>b.classList.remove('sel'));
+    this.classList.add('sel');
+  });
+});
+
+function showWzResult() {
+  const roleAns   = wzAnswers[0]; // companion|indoor_rep|outdoor_rep|vehicle|link
+  const heightAns = wzAnswers[1]; // low|mid|high
+  const budgetAns = wzAnswers[2]; // free|low|mid|high
+  const connAns   = wzAnswers[3]; // sma|rpsma|nmale|weet_niet
+
+  // Score each antenna
+  const scored = A.map(a => {
+    let s = a.score;
+    // role match
+    if (roleAns==='companion')   { if (a.use.includes('portable')) s+=3; if (a.type==='stock'||a.type==='omni') s+=1; }
+    if (roleAns==='indoor_rep')  { if (a.use.includes('fixed')) s+=3; if (a.gain>2&&a.gain<5) s+=1; }
+    if (roleAns==='outdoor_rep') { if (a.use.includes('outdoor')) s+=4; if (a.type==='omni'&&a.gain>=4) s+=2; }
+    if (roleAns==='vehicle')     { if (a.use.includes('vehicle')) s+=5; }
+    if (roleAns==='link')        { if (a.type==='yagi'||a.type==='panel') s+=4; if (a.use.includes('link')) s+=2; }
+
+    // height
+    if (heightAns==='low')  { if (a.type==='stock'||a.type==='omni') s+=1; }
+    if (heightAns==='high') { if (a.use.includes('outdoor')) s+=2; if (a.gain>=4) s+=1; }
+
+    // budget
+    if (budgetAns==='free') { if (a.pMin===0) s+=5; else s-=3; }
+    if (budgetAns==='low')  { if (a.pMax<=15) s+=2; if (a.pMin===0) s+=1; }
+    if (budgetAns==='mid')  { if (a.pMin<=50) s+=1; }
+    // high: no penalty
+
+    // connector match
+    if (connAns!=='weet_niet') {
+      if (a.conn.includes(connAns)) s+=2;
+      else if (a.conn.includes('ufl') || connAns==='nmale') s+=0;
+      else s-=1;
+    }
+    return {...a, wzScore:s};
+  });
+
+  scored.sort((a,b)=>b.wzScore-a.wzScore);
+  const top3 = scored.slice(0,3);
+
+  const ranks = ['🥇 Beste keuze','🥈 Goede optie','🥉 Alternatief'];
+  document.getElementById('wz-result-cards').innerHTML = top3.map((a,i)=>
+    `<div class="wz-rec-card">
+      <div class="wz-rank">${ranks[i]}</div>
+      <div class="wz-rname">${a.name}</div>
+      <div class="wz-rwhy">${a.gain>0?a.gain+' dBi — ':''}<em>${a.bestFor}</em> — ${a.label}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById('wz-result').style.display='block';
+  document.getElementById('wz-next').style.display='none';
+  document.getElementById('wz-prev').style.display='none';
+}
+
+function wzRestart() {
+  wzStep=0; Object.keys(wzAnswers).forEach(k=>delete wzAnswers[k]);
+  document.querySelectorAll('.wz-step').forEach((s,i)=>s.classList.toggle('active',i===0));
+  document.querySelectorAll('.wz-opt').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('wz-result').style.display='none';
+  document.getElementById('wz-next').textContent='Volgende →';
+  document.getElementById('wz-next').style.display='block';
+  document.getElementById('wz-prev').style.display='none';
+  renderWzProgress();
+}
+
+/* ════════════════ INIT ════════════════ */
+renderWzProgress();
+applyFilters();
+</script>
+</body>
+</html>

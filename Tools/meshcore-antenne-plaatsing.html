@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MeshCore Antenne Plaatsing &amp; Best Practices — Hackerspace Drenthe</title>
+<style>
+:root {
+  --green:#00ff88; --cyan:#00e5ff; --orange:#ff6b00; --purple:#c864ff;
+  --yellow:#ffd060; --red:#ff4466; --blue:#4488ff;
+  --dark:#050d1a; --mid:#0a1628; --card:#0d1f3c; --card2:#112240;
+  --text:#e0eaff; --dim:#7090b0; --border:rgba(0,229,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);color:var(--text);min-height:100vh;padding-bottom:100px;}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── HEADER ── */
+.site-header{
+  background:linear-gradient(180deg,#071530 0%,var(--dark) 100%);
+  border-bottom:1px solid var(--border);
+  padding:22px 32px;
+  display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.header-text h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:900;}
+.header-text h1 span{color:var(--green);}
+.header-text p{color:var(--dim);font-size:.9rem;margin-top:5px;}
+.header-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;}
+.header-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.07em;}
+.ht-green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.ht-cyan {background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.ht-ora  {background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.back-btn{
+  background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);
+  color:var(--cyan);padding:9px 20px;border-radius:20px;font-size:.85rem;font-weight:600;
+  transition:background .2s;white-space:nowrap;align-self:flex-start;
+}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+/* ── NAV TABS ── */
+.section-nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(5,13,26,.97);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:0 32px;
+  display:flex;gap:0;overflow-x:auto;
+}
+.nav-tab{
+  padding:13px 22px;font-size:.85rem;font-weight:600;color:var(--dim);
+  border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;
+  transition:color .18s,border-color .18s;user-select:none;
+}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+
+/* ── CONTENT SECTIONS ── */
+.section{display:none;padding:36px 32px;}
+.section.active{display:block;}
+.section-title{font-size:1.6rem;font-weight:900;margin-bottom:8px;}
+.section-title span{color:var(--cyan);}
+.section-intro{color:var(--dim);font-size:.95rem;line-height:1.7;max-width:760px;margin-bottom:32px;}
+
+/* ── CARDS GRID ── */
+.cards-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;}
+.cards-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+
+.info-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;
+  transition:border-color .2s,transform .18s;
+}
+.info-card:hover{border-color:rgba(0,229,255,.3);transform:translateY(-2px);}
+.info-card.good {border-left:4px solid var(--green);}
+.info-card.warn {border-left:4px solid var(--yellow);}
+.info-card.bad  {border-left:4px solid var(--red);}
+.info-card.tip  {border-left:4px solid var(--cyan);}
+.info-card.rule {border-left:4px solid var(--purple);}
+.card-icon{font-size:2rem;margin-bottom:10px;}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:6px;}
+.card-body{font-size:.88rem;color:var(--dim);line-height:1.65;}
+.card-body strong{color:var(--text);}
+
+/* ── CALLOUT ── */
+.callout{
+  border-radius:12px;padding:18px 22px;margin-bottom:24px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.callout.green{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.22);}
+.callout.yellow{background:rgba(255,208,96,.07);border:1px solid rgba(255,208,96,.22);}
+.callout.red{background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.22);}
+.callout.cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.22);}
+.callout-icon{font-size:1.5rem;flex-shrink:0;margin-top:2px;}
+.callout-text{font-size:.9rem;line-height:1.65;}
+.callout-text strong{color:var(--text);}
+
+/* ── INTERACTIVE: LOS DEMO ── */
+#los-demo{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:0;overflow:hidden;margin-bottom:28px;
+}
+.demo-header{
+  padding:18px 24px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.demo-header h3{font-size:1rem;font-weight:700;}
+.demo-header .demo-hint{font-size:.8rem;color:var(--dim);}
+#los-canvas{display:block;width:100%;cursor:crosshair;}
+.demo-legend{
+  padding:12px 24px;border-top:1px solid var(--border);
+  display:flex;flex-wrap:wrap;gap:16px;font-size:.78rem;color:var(--dim);
+}
+.legend-item{display:flex;align-items:center;gap:6px;}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+
+/* ── INTERACTIVE: HEIGHT SIMULATOR ── */
+#height-demo{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;margin-bottom:28px;
+}
+#height-demo h3{font-size:1rem;font-weight:700;margin-bottom:18px;}
+.slider-group{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+.slider-group label{font-size:.85rem;color:var(--dim);min-width:160px;}
+.slider-group input[type=range]{flex:1;min-width:160px;accent-color:var(--cyan);}
+.slider-group .slider-val{font-size:.9rem;font-weight:700;color:var(--cyan);min-width:56px;text-align:right;}
+#height-result{
+  background:var(--mid);border-radius:10px;padding:16px 20px;
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:8px;
+}
+.result-metric{text-align:center;}
+.result-metric .rm-val{font-size:1.6rem;font-weight:900;}
+.result-metric .rm-lbl{font-size:.75rem;color:var(--dim);margin-top:2px;}
+.result-metric .rm-val.good{color:var(--green);}
+.result-metric .rm-val.ok  {color:var(--yellow);}
+.result-metric .rm-val.bad {color:var(--red);}
+
+/* ── INTERACTIVE: MAX DISTANCE PLANNER ── */
+#maxdist-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:20px;margin-bottom:28px;
+}
+.md-grid{display:grid;grid-template-columns:minmax(280px,340px) 1fr;gap:18px;}
+.md-controls{
+  background:var(--mid);border:1px solid rgba(0,229,255,.1);
+  border-radius:12px;padding:16px;
+}
+.md-controls h3{font-size:1rem;font-weight:700;margin-bottom:14px;}
+.md-controls .slider-group{margin-bottom:12px;}
+.md-controls .slider-group label{min-width:140px;}
+.md-controls select,
+.md-controls input[type=number]{
+  background:rgba(0,229,255,.07);border:1px solid var(--border);
+  color:var(--text);padding:7px 10px;border-radius:9px;
+  font-size:.85rem;outline:none;min-width:150px;
+}
+.md-controls select:focus,
+.md-controls input[type=number]:focus{border-color:var(--cyan);}
+.md-controls input[type=range]{accent-color:var(--green);}
+.md-output{min-width:0;}
+#maxdist-canvas{
+  display:block;width:100%;background:#081428;
+  border:1px solid var(--border);border-radius:12px;
+}
+.md-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px;}
+.md-note{font-size:.8rem;color:var(--dim);line-height:1.6;margin-top:10px;}
+@media(max-width:980px){.md-grid{grid-template-columns:1fr;}}
+
+/* ── INTERACTIVE: SCENARIO BUILDER ── */
+#scenario-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;margin-bottom:28px;
+}
+.scenario-tabs{
+  display:flex;border-bottom:1px solid var(--border);overflow-x:auto;
+}
+.sc-tab{
+  padding:13px 22px;font-size:.83rem;font-weight:600;color:var(--dim);
+  cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  transition:all .18s;user-select:none;
+}
+.sc-tab:hover{color:var(--text);}
+.sc-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.scenario-content{padding:24px;}
+.sc-panel{display:none;}
+.sc-panel.active{display:block;}
+.sc-vis{
+  width:100%;border-radius:10px;overflow:hidden;
+  margin-bottom:18px;position:relative;
+}
+.sc-vis canvas{display:block;width:100%;}
+.sc-detail{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:16px;}
+.sc-stat{background:var(--mid);border-radius:10px;padding:13px 16px;}
+.sc-stat .ss-lbl{font-size:.75rem;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;}
+.sc-stat .ss-val{font-size:1.1rem;font-weight:700;}
+.sc-stat .ss-val.good{color:var(--green);}
+.sc-stat .ss-val.ok  {color:var(--yellow);}
+.sc-stat .ss-val.bad {color:var(--red);}
+
+/* ── CHECKLIST ── */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:10px;max-width:680px;}
+.checklist li{
+  display:flex;gap:12px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;cursor:pointer;user-select:none;
+  transition:border-color .18s;
+}
+.checklist li:hover{border-color:rgba(0,229,255,.3);}
+.checklist li .check-box{
+  width:22px;height:22px;border-radius:6px;border:2px solid var(--dim);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:all .18s;margin-top:1px;
+}
+.checklist li.done .check-box{background:var(--green);border-color:var(--green);color:#050d1a;}
+.checklist li .check-text{font-size:.9rem;line-height:1.55;}
+.checklist li .check-text .check-sub{font-size:.8rem;color:var(--dim);margin-top:2px;}
+.checklist-score{
+  margin-top:16px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px 20px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;
+}
+.score-bar-wrap{flex:1;min-width:160px;}
+.score-bar-bg{background:rgba(0,229,255,.1);border-radius:20px;height:10px;overflow:hidden;}
+.score-bar{height:10px;border-radius:20px;transition:width .4s;background:var(--green);}
+.score-text{font-size:.9rem;color:var(--dim);}
+.score-text strong{color:var(--text);}
+
+/* ── FRESNEL ZONE EXPLAINER ── */
+#fresnel-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;margin-bottom:28px;
+}
+#fresnel-wrap h3{font-size:1rem;font-weight:700;margin-bottom:18px;}
+.fresnel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;}
+@media(max-width:600px){.fresnel-grid{grid-template-columns:1fr;}}
+#fresnel-canvas{display:block;width:100%;border-radius:10px;}
+
+/* ── POLARIZATION DEMO ── */
+#polar-demo{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;margin-bottom:28px;
+}
+#polar-demo h3{font-size:1rem;font-weight:700;margin-bottom:6px;}
+#polar-demo .demo-sub{font-size:.83rem;color:var(--dim);margin-bottom:18px;}
+.polar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:16px;}
+.polar-case{
+  background:var(--mid);border-radius:10px;padding:16px;text-align:center;
+  border:2px solid transparent;cursor:pointer;transition:border-color .18s;
+}
+.polar-case:hover{border-color:var(--border);}
+.polar-case.sel-a{border-color:var(--green);}
+.polar-case.sel-b{border-color:var(--orange);}
+.polar-case.sel-c{border-color:var(--red);}
+.polar-case canvas{display:block;margin:0 auto 10px;border-radius:6px;}
+.polar-case .pc-title{font-size:.85rem;font-weight:700;margin-bottom:4px;}
+.polar-case .pc-loss{font-size:.8rem;}
+#polar-result{background:var(--mid);border-radius:10px;padding:14px 18px;font-size:.9rem;line-height:1.6;}
+
+/* ── TABLE ── */
+.rules-table{width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:24px;}
+.rules-table th{text-align:left;padding:10px 14px;color:var(--dim);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);}
+.rules-table td{padding:11px 14px;border-bottom:1px solid rgba(0,229,255,.06);}
+.rules-table tr:hover td{background:rgba(0,229,255,.04);}
+.rules-table .good{color:var(--green);font-weight:700;}
+.rules-table .warn{color:var(--yellow);font-weight:700;}
+.rules-table .bad {color:var(--red);font-weight:700;}
+.pill-sm{padding:2px 9px;border-radius:10px;font-size:.75rem;font-weight:700;display:inline-block;}
+.pill-green{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.pill-red  {background:rgba(255,68,102,.12);color:var(--red);  border:1px solid rgba(255,68,102,.25);}
+.pill-ora  {background:rgba(255,107,0,.12); color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.pill-yel  {background:rgba(255,208,96,.12);color:var(--yellow);border:1px solid rgba(255,208,96,.25);}
+
+/* ── DB CALCULATOR ── */
+#db-calc{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px;margin-bottom:28px;max-width:640px;
+}
+#db-calc h3{font-size:1rem;font-weight:700;margin-bottom:18px;}
+.calc-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.calc-row label{font-size:.85rem;color:var(--dim);min-width:180px;}
+.calc-row input,.calc-row select{
+  background:rgba(0,229,255,.07);border:1px solid var(--border);
+  color:var(--text);padding:7px 13px;border-radius:10px;
+  font-size:.88rem;outline:none;width:120px;transition:border-color .2s;
+}
+.calc-row input:focus,.calc-row select:focus{border-color:var(--cyan);}
+.calc-result{
+  background:var(--mid);border-radius:10px;padding:14px 18px;
+  font-size:.9rem;line-height:1.65;margin-top:6px;
+}
+.calc-result .cr-good{color:var(--green);font-weight:700;}
+.calc-result .cr-warn{color:var(--yellow);font-weight:700;}
+.calc-result .cr-bad {color:var(--red);font-weight:700;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .site-header{padding:16px 18px;}
+  .section{padding:22px 16px;}
+  .section-nav{padding:0 8px;}
+  .nav-tab{padding:11px 13px;font-size:.8rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="site-header">
+  <div class="header-text">
+    <h1>📡 Antenne Plaatsing &amp; <span>Best Practices</span></h1>
+    <p>Interactieve gids voor MeshCore / LoRa @ 868 MHz — Hackerspace Drenthe</p>
+    <div class="header-meta">
+      <span class="header-tag ht-green">868 MHz</span>
+      <span class="header-tag ht-cyan">LoRa / MeshCore</span>
+      <span class="header-tag ht-ora">RF Best Practices</span>
+    </div>
+  </div>
+  <a href="course-hub.html" class="back-btn">← Terug naar Course Hub</a>
+</header>
+
+<!-- ══════════ NAV TABS ══════════ -->
+<nav class="section-nav" id="main-nav">
+  <div class="nav-tab active" data-sec="basics">📐 Basisregels</div>
+  <div class="nav-tab" data-sec="height">📏 Hoogte &amp; Bereik</div>
+  <div class="nav-tab" data-sec="maxdist">🛰️ Max Distance</div>
+  <div class="nav-tab" data-sec="los">👁️ Zichtlijn (LOS)</div>
+  <div class="nav-tab" data-sec="scenarios">🏠 Scenario's</div>
+  <div class="nav-tab" data-sec="polarization">↕️ Polarisatie</div>
+  <div class="nav-tab" data-sec="cable">🔌 Kabel &amp; Verlies</div>
+  <div class="nav-tab" data-sec="checklist">✅ Checklist</div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     SECTION: BASISREGELS
+══════════════════════════════════════ -->
+<section class="section active" id="sec-basics">
+  <h2 class="section-title">De <span>IJzeren Regels</span> van Antenneplacement</h2>
+  <p class="section-intro">
+    Bij LoRa / 868 MHz maakt plaatsing een groter verschil dan de antenne zelf.
+    Een slechte locatie verwoest zelfs de beste antenne. Hier zijn de principes die altijd gelden.
+  </p>
+
+  <div class="callout green">
+    <span class="callout-icon">⚡</span>
+    <div class="callout-text"><strong>Vuistregel #1 — Hoogte wint altijd.</strong>
+      Elke keer dat je de antennehoogte verdubbelt boven de horizon, verdubbel je (ruwweg) de zichtlijn.
+      Zet je node zo hoog als praktisch mogelijk.</div>
+  </div>
+
+  <div class="cards-2">
+    <div class="info-card good">
+      <div class="card-icon">✅</div>
+      <div class="card-title">Vrije zichtlijn (Line of Sight)</div>
+      <div class="card-body">Geen obstakels tussen zender en ontvanger. Bij 868 MHz is <strong>een vrije eerste Fresnel-zone</strong> essentieel — ook al "zie" je de andere node, een gebouw halverwege kan het signaal met 20+ dB verzwakken.</div>
+    </div>
+    <div class="info-card bad">
+      <div class="card-icon">🧱</div>
+      <div class="card-title">Gebouwen &amp; Muren vermijden</div>
+      <div class="card-body">Beton: <strong>−10 tot −20 dB</strong> per muur. Metalen kozijnen, folie-isolatie en liftschachten blokkeren vrijwel volledig. Probeer altijd buitenshuis te plaatsen of vlak bij een raam zonder metalen frame.</div>
+    </div>
+    <div class="info-card tip">
+      <div class="card-icon">🏔️</div>
+      <div class="card-title">Aarding &amp; dakplaatsing</div>
+      <div class="card-body">Een antenne op een nok of schoorsteenoplegging presteert beter dan dezelfde antenne zolderplaatsing. <strong>Dakpannen dempen ±3–6 dB</strong>, betonnen vloer/plafond 10–25 dB.</div>
+    </div>
+    <div class="info-card rule">
+      <div class="card-icon">📐</div>
+      <div class="card-title">Exacte verticale oriëntatie</div>
+      <div class="card-body">Omnidirectionele antennes zijn ontworpen voor <strong>verticale polarisatie</strong>. Schuin monteren kost signal. Gebruik een waterpa­sje of stelvierkant bij mast-installatie; ≥5° schuin = merkbare verzwakking.</div>
+    </div>
+    <div class="info-card warn">
+      <div class="card-icon">🌳</div>
+      <div class="card-title">Boom &amp; vegetatie-demping</div>
+      <div class="card-body">Natte bladeren absorberen 868 MHz sterk (<strong>−5 tot −15 dB</strong>). In zomer aanzienlijk slechter dan winter. Reken hiermee bij node plaatsing in bosgebied.</div>
+    </div>
+    <div class="info-card tip">
+      <div class="card-icon">🔩</div>
+      <div class="card-title">Metalen draagconstructie</div>
+      <div class="card-body">Een metalen mast of dakconstructie kan <strong>als grondvlak (ground plane) dienen</strong> — gunstig voor bepaalde antennes. Maar zet de antenne minimaal <strong>λ/4 (≈8,6 cm) boven het metaal</strong> om reflecie-interferentie te vermijden.</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:1.1rem;font-weight:800;margin:32px 0 16px;">Materiaaldemping bij 868 MHz</h3>
+  <table class="rules-table">
+    <thead>
+      <tr>
+        <th>Materiaal</th>
+        <th>Typisch verlies</th>
+        <th>Beoordeling</th>
+        <th>Tip</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Glas (enkel)</td><td>−1 tot −3 dB</td><td class="good">✔ Goed</td><td>Antenne vlak achter raam werkt redelijk</td></tr>
+      <tr><td>Glas (HR++ / HR-glas)</td><td>−8 tot −18 dB</td><td class="warn">⚠ Matig</td><td>Metallische coating blokkeert RF sterk</td></tr>
+      <tr><td>Hout (30 mm)</td><td>−2 tot −5 dB</td><td class="good">✔ Acceptabel</td><td>Houten schuur / caravan: nauwelijks last</td></tr>
+      <tr><td>Baksteen (onbepleisterd)</td><td>−5 tot −10 dB</td><td class="warn">⚠ Matig</td><td>Spouw-muur = dubbel verlies</td></tr>
+      <tr><td>Beton / gewapend beton</td><td>−10 tot −25 dB</td><td class="bad">✗ Slecht</td><td>Kelders / parkeergarages: vrijwel geen bereik</td></tr>
+      <tr><td>Metaal / staalconstructie</td><td>−25 tot −60 dB</td><td class="bad">✗ Zeer slecht</td><td>Faraday kooi effect; antenne buiten!</td></tr>
+      <tr><td>Folie-isolatie (dak)</td><td>−20 tot −40 dB</td><td class="bad">✗ Zeer slecht</td><td>Zolder met folie-isolatie: directe buitenplaats</td></tr>
+      <tr><td>Droog bladerdak (bos)</td><td>−5 tot −10 dB</td><td class="warn">⚠ Matig</td><td>Winter beter dan zomer</td></tr>
+      <tr><td>Nat bladerdak (na regen)</td><td>−15 tot −25 dB</td><td class="bad">✗ Slecht</td><td>Regen + dicht bos = aanzienlijk bereik-verlies</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout yellow">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-text"><strong>HR++ glas = onzichtbare blokkade.</strong>
+      Moderne energiezuinige raamkozijnen met metallische coating blokkeren 868 MHz vrijwel even goed als beton.
+      Zet altijd buiten of gebruik een doorvoer als je binnen moet plaatsen.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: HOOGTE & BEREIK
+══════════════════════════════════════ -->
+<section class="section" id="sec-height">
+  <h2 class="section-title"><span>Hoogte</span> &amp; Bereik Simulator</h2>
+  <p class="section-intro">
+    Bereken de (optische) radio-horizon en de theoretische maximale bereikafstand op basis van antennehoogte.
+    In de praktijk hangt het sterk af van terrein, obstakels en Fresnel-zone vrijheid.
+  </p>
+
+  <div id="height-demo">
+    <h3>📡 Hoogte-bereik calculator</h3>
+    <div class="slider-group">
+      <label>Hoogte node A (jouw antenne)</label>
+      <input type="range" id="h-a" min="0.5" max="50" step="0.5" value="5">
+      <span class="slider-val" id="h-a-val">5,0 m</span>
+    </div>
+    <div class="slider-group">
+      <label>Hoogte node B (remote node)</label>
+      <input type="range" id="h-b" min="0.5" max="50" step="0.5" value="5">
+      <span class="slider-val" id="h-b-val">5,0 m</span>
+    </div>
+    <div class="slider-group">
+      <label>Terrein correctie</label>
+      <select id="h-terrain">
+        <option value="1.0">Open vlakte / polder</option>
+        <option value="0.75">Licht bebouwd / woonwijk</option>
+        <option value="0.5">Dicht bebouwd / stad</option>
+        <option value="0.3">Bos / heuvelachtig</option>
+      </select>
+      <span class="slider-val" id="h-terrain-lbl" style="color:var(--dim);font-size:.8rem;min-width:80px;"></span>
+    </div>
+    <div id="height-result">
+      <div class="result-metric">
+        <div class="rm-val good" id="hr-horizon-a">—</div>
+        <div class="rm-lbl">Radio-horizon A</div>
+      </div>
+      <div style="color:var(--dim);font-size:1.4rem;font-weight:300;">+</div>
+      <div class="result-metric">
+        <div class="rm-val good" id="hr-horizon-b">—</div>
+        <div class="rm-lbl">Radio-horizon B</div>
+      </div>
+      <div style="color:var(--dim);font-size:1.4rem;font-weight:300;">=</div>
+      <div class="result-metric">
+        <div class="rm-val good" id="hr-total">—</div>
+        <div class="rm-lbl">Max. bereik (LOS)</div>
+      </div>
+      <div class="result-metric" style="margin-left:auto;">
+        <div class="rm-val" id="hr-practical" style="color:var(--yellow);">—</div>
+        <div class="rm-lbl">Praktisch (terrein)</div>
+      </div>
+    </div>
+    <p style="font-size:.8rem;color:var(--dim);margin-top:12px;">
+      Formule: <em>d = 3,57 × √h</em> km per antenne (4/3-aardstraal model). Praktische waarde vermenigvuldigd met terrainfactor.
+    </p>
+  </div>
+
+  <div id="fresnel-wrap">
+    <h3>🌀 Fresnel-zone visualisatie</h3>
+    <div class="callout cyan" style="margin-bottom:18px;">
+      <span class="callout-icon">💡</span>
+      <div class="callout-text">
+        <strong>Wat is de Fresnel-zone?</strong> Een ellipsoïde rondom de directe lijn tussen twee antennes.
+        Obstakels die <strong>meer dan 60% van de eerste Fresnel-zone blokkeren</strong> veroorzaken significante signaaldegradatie (diffractieverlies).
+        Vuistregel: zorg dat de eerste Fresnel-zone minstens <strong>0,6r vrij</strong> is van obstakels.
+      </div>
+    </div>
+    <div class="fresnel-grid">
+      <div>
+        <div class="slider-group">
+          <label>Afstand (km)</label>
+          <input type="range" id="fz-dist" min="0.5" max="30" step="0.5" value="5">
+          <span class="slider-val" id="fz-dist-val">5 km</span>
+        </div>
+        <div class="slider-group">
+          <label>Obstakel positie</label>
+          <input type="range" id="fz-pos" min="10" max="90" step="1" value="50">
+          <span class="slider-val" id="fz-pos-val">50%</span>
+        </div>
+        <div class="slider-group">
+          <label>Obstakel hoogte</label>
+          <input type="range" id="fz-obs" min="0" max="100" step="1" value="30">
+          <span class="slider-val" id="fz-obs-val">30%</span>
+        </div>
+        <div id="fz-result" style="margin-top:14px;font-size:.9rem;line-height:1.65;"></div>
+      </div>
+      <div>
+        <canvas id="fresnel-canvas" width="420" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-text">
+      <strong>Praktische tip — de 6-regel:</strong>
+      Bij een 5 km link op gelijk niveau moet de antenne minstens <strong>~13 meter boven het obstakel halverwege</strong> uitkomen om de eerste Fresnel-zone 60% vrij te houden.
+      Dit is waarom dak- of mastplaatsing bijna altijd nodig is voor betrouwbare links &gt;2 km.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: MAX DISTANCE
+══════════════════════════════════════ -->
+<section class="section" id="sec-maxdist">
+  <h2 class="section-title">Interactieve <span>Max Distance</span> Planner</h2>
+  <p class="section-intro">
+    Speel met antennes, hoogtes, LoRa-profiel, kabelverliezen en omgeving.
+    De visualisatie toont direct wat de bottleneck is: RF-linkbudget of radio-horizon.
+  </p>
+
+  <div id="maxdist-wrap">
+    <div class="md-grid">
+      <div class="md-controls">
+        <h3>🔧 Variabelen</h3>
+
+        <div class="slider-group">
+          <label>Preset</label>
+          <select id="md-preset">
+            <option value="home" selected>Thuis-node ↔ buurtnode</option>
+            <option value="hike">Handheld outdoor</option>
+            <option value="relay">Relay mast ↔ relay mast</option>
+            <option value="yagi">Yagi point-to-point</option>
+            <option value="indoor">Binnen-slechtste geval</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div class="slider-group">
+          <label>Antenne A</label>
+          <select id="md-ant-a">
+            <option value="stock">Stock stub (2 dBi)</option>
+            <option value="whip" selected>Whip omni (3 dBi)</option>
+            <option value="fiber5">Fiberglass (5 dBi)</option>
+            <option value="fiber8">Fiberglass (8 dBi)</option>
+            <option value="panel7">Panel (7 dBi)</option>
+            <option value="yagi9">Yagi (9 dBi)</option>
+          </select>
+        </div>
+        <div class="slider-group">
+          <label>Antenne B</label>
+          <select id="md-ant-b">
+            <option value="stock">Stock stub (2 dBi)</option>
+            <option value="whip" selected>Whip omni (3 dBi)</option>
+            <option value="fiber5">Fiberglass (5 dBi)</option>
+            <option value="fiber8">Fiberglass (8 dBi)</option>
+            <option value="panel7">Panel (7 dBi)</option>
+            <option value="yagi9">Yagi (9 dBi)</option>
+          </select>
+        </div>
+
+        <div class="slider-group">
+          <label>Hoogte A</label>
+          <input type="range" id="md-h-a" min="0.5" max="80" step="0.5" value="8">
+          <span class="slider-val" id="md-h-a-val">8,0 m</span>
+        </div>
+        <div class="slider-group">
+          <label>Hoogte B</label>
+          <input type="range" id="md-h-b" min="0.5" max="80" step="0.5" value="3">
+          <span class="slider-val" id="md-h-b-val">3,0 m</span>
+        </div>
+
+        <div class="slider-group">
+          <label>TX power</label>
+          <input type="range" id="md-tx" min="2" max="22" step="1" value="20">
+          <span class="slider-val" id="md-tx-val">20 dBm</span>
+        </div>
+
+        <div class="slider-group">
+          <label>Frequentie</label>
+          <select id="md-freq">
+            <option value="433">433 MHz</option>
+            <option value="868" selected>868 MHz (EU)</option>
+            <option value="915">915 MHz</option>
+          </select>
+        </div>
+        <div class="slider-group">
+          <label>Spreading Factor</label>
+          <select id="md-sf">
+            <option value="7">SF7</option>
+            <option value="8">SF8</option>
+            <option value="9">SF9</option>
+            <option value="10" selected>SF10</option>
+            <option value="11">SF11</option>
+            <option value="12">SF12</option>
+          </select>
+        </div>
+        <div class="slider-group">
+          <label>Bandbreedte</label>
+          <select id="md-bw">
+            <option value="125" selected>125 kHz</option>
+            <option value="250">250 kHz</option>
+            <option value="500">500 kHz</option>
+          </select>
+        </div>
+
+        <div class="slider-group">
+          <label>Kabelverlies A</label>
+          <input type="number" id="md-loss-a" min="0" max="20" step="0.1" value="1.2">
+        </div>
+        <div class="slider-group">
+          <label>Kabelverlies B</label>
+          <input type="number" id="md-loss-b" min="0" max="20" step="0.1" value="0.4">
+        </div>
+
+        <div class="slider-group">
+          <label>Fade margin</label>
+          <input type="range" id="md-margin" min="0" max="25" step="1" value="12">
+          <span class="slider-val" id="md-margin-val">12 dB</span>
+        </div>
+
+        <div class="slider-group">
+          <label>Omgeving</label>
+          <select id="md-env">
+            <option value="open" selected>Open veld / polder</option>
+            <option value="suburb">Woonwijk</option>
+            <option value="city">Dichte stad</option>
+            <option value="forest">Bosgebied</option>
+            <option value="indoor">Binnen door meerdere muren</option>
+          </select>
+        </div>
+
+        <div class="slider-group">
+          <label>Uitlijning link</label>
+          <select id="md-align">
+            <option value="0" selected>Goed uitgelijnd (0 dB)</option>
+            <option value="3">Redelijk (−3 dB)</option>
+            <option value="8">Slecht / mismatch (−8 dB)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="md-output">
+        <canvas id="maxdist-canvas" width="760" height="330"></canvas>
+
+        <div class="md-stats">
+          <div class="sc-stat"><div class="ss-lbl">RX gevoeligheid</div><div class="ss-val" id="md-sens">—</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Max padverlies</div><div class="ss-val" id="md-plmax">—</div></div>
+          <div class="sc-stat"><div class="ss-lbl">RF limiet afstand</div><div class="ss-val" id="md-d-budget">—</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Horizon limiet</div><div class="ss-val" id="md-d-horizon">—</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Geschatte max afstand</div><div class="ss-val" id="md-d-final">—</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Bottleneck</div><div class="ss-val" id="md-bottleneck">—</div></div>
+        </div>
+
+        <div id="md-explain" class="calc-result" style="margin-top:14px;"></div>
+        <div class="md-note">
+          Model: vrije-ruimte padverlies + omgevingsstraf + fade margin + radio-horizon.
+          Dit is een planningstool, geen garantie; echte dekking hangt af van terreinprofiel, Fresnel en interferentie.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cyan">
+    <span class="callout-icon">🧠</span>
+    <div class="callout-text">
+      <strong>Hoe lees je dit?</strong>
+      De kleinste van twee grenzen wint: <strong>RF-linkbudget</strong> (vermogen, gevoeligheid, antennes, verliezen)
+      of <strong>horizon/zichtlijn</strong> (hoogte en omgeving). De gele balk in de grafiek is je bruikbare maximum.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: LOS (zichtlijn) DEMO
+══════════════════════════════════════ -->
+<section class="section" id="sec-los">
+  <h2 class="section-title"><span>Zichtlijn</span> planner — sleep je nodes</h2>
+  <p class="section-intro">
+    Klik of sleep de twee nodes op het terrein-canvas. De tool berekent of er een zichtlijn is,
+    hoeveel obstakels er in de weg staan en wat het berekend signaalniveau is.
+  </p>
+
+  <div id="los-demo">
+    <div class="demo-header">
+      <h3>📍 Interactieve LOS planner — sleep de nodes</h3>
+      <span class="demo-hint">Klik in het veld om nodes te plaatsen · Dubbelklik om een obstakel toe te voegen</span>
+    </div>
+    <canvas id="los-canvas" width="900" height="420"></canvas>
+    <div class="demo-legend">
+      <span class="legend-item"><span class="legend-dot" style="background:var(--green);"></span>Node A</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--cyan);"></span>Node B</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--orange);border-radius:2px;"></span>Obstakel (dubbelklik)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--green);opacity:.5;"></span>Vrije LOS</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--red);opacity:.7;"></span>Geblokkeerde LOS</span>
+      <span id="los-status" style="margin-left:auto;font-weight:700;font-size:.85rem;"></span>
+    </div>
+  </div>
+
+  <div class="callout yellow">
+    <span class="callout-icon">🗺️</span>
+    <div class="callout-text">
+      <strong>Tip voor echte planningstools:</strong> gebruik
+      <a href="https://www.heywhatsthat.com/" target="_blank">HeyWhatsThat</a>,
+      <a href="https://www.scadacore.com/tools/rf-path/rf-line-of-sight/" target="_blank">SCADA Core RF LOS</a>
+      of <a href="https://airlink.ubnt.com/" target="_blank">Ubiquiti airLink</a>
+      voor realistische LOS-analyse op basis van echte topografische kaarten.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: SCENARIO'S
+══════════════════════════════════════ -->
+<section class="section" id="sec-scenarios">
+  <h2 class="section-title">Praktijk<span>scenario's</span></h2>
+  <p class="section-intro">
+    Klik op een scenario om de configuratie te zien, inclusief geadviseerde antenne, plaatsing en verwacht bereik.
+  </p>
+
+  <div id="scenario-wrap">
+    <div class="scenario-tabs">
+      <div class="sc-tab active" data-sc="home">🏠 Thuis / wijk</div>
+      <div class="sc-tab" data-sc="outdoor">⛺ Outdoor / camping</div>
+      <div class="sc-tab" data-sc="vehicle">🚗 Voertuig</div>
+      <div class="sc-tab" data-sc="relay">📡 Relay / repeater</div>
+      <div class="sc-tab" data-sc="emergency">🚨 Noodnet node</div>
+    </div>
+    <div class="scenario-content">
+
+      <!-- THUIS -->
+      <div class="sc-panel active" id="sc-home">
+        <canvas id="cv-home" width="800" height="280" style="width:100%;border-radius:10px;"></canvas>
+        <div class="sc-detail">
+          <div class="sc-stat"><div class="ss-lbl">Aanbevolen antenne</div><div class="ss-val good">3–5 dBi Omni</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Ideale mounting</div><div class="ss-val ok">Dakrand / schoorsteen</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Verwacht bereik</div><div class="ss-val good">1–4 km</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Polarisatie</div><div class="ss-val">Verticaal</div></div>
+        </div>
+        <p style="font-size:.88rem;color:var(--dim);margin-top:14px;line-height:1.65;">
+          Plaats de node zo hoog mogelijk — zolder werkt als er geen folie-isolatie is, anders buiten op de dakrand.
+          Gebruik een <strong>waterbestendige behuizing</strong> en een korte coax-pigtail naar buiten.
+          Een 3 dBi omni op 8 meter geeft in een woonwijk een bereik van 1–3 km.
+        </p>
+      </div>
+
+      <!-- OUTDOOR -->
+      <div class="sc-panel" id="sc-outdoor">
+        <canvas id="cv-outdoor" width="800" height="280" style="width:100%;border-radius:10px;"></canvas>
+        <div class="sc-detail">
+          <div class="sc-stat"><div class="ss-lbl">Aanbevolen antenne</div><div class="ss-val good">Stock stub / flexibel</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Ideale mounting</div><div class="ss-val good">Hoog op rugzak / stokje</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Verwacht bereik</div><div class="ss-val good">2–8 km (open terrein)</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Polarisatie</div><div class="ss-val">Verticaal</div></div>
+        </div>
+        <p style="font-size:.88rem;color:var(--dim);margin-top:14px;line-height:1.65;">
+          Draag de node hoog op een schouderbandpatch of op een wandelstok.
+          Je lichaam is een goede RF-absorber — zorg dat de antenne <strong>niet naar je rug wijst</strong>.
+          Op open terrein (zoals Drentse heide) is bereik van 5–8 km haalbaar met standaard stub aantennen.
+        </p>
+      </div>
+
+      <!-- VOERTUIG -->
+      <div class="sc-panel" id="sc-vehicle">
+        <canvas id="cv-vehicle" width="800" height="280" style="width:100%;border-radius:10px;"></canvas>
+        <div class="sc-detail">
+          <div class="sc-stat"><div class="ss-lbl">Aanbevolen antenne</div><div class="ss-val good">Magmount 5 dBi omni</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Ideale mounting</div><div class="ss-val good">Dakcentrum / achterruit</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Verwacht bereik</div><div class="ss-val good">3–10 km</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Grondvlak</div><div class="ss-val ok">Autodak = ground plane</div></div>
+        </div>
+        <p style="font-size:.88rem;color:var(--dim);margin-top:14px;line-height:1.65;">
+          De <strong>magmount werkt het beste op het dakcenter</strong> — het metalen dak dient als grondvlak.
+          Vermijd achterruit-plaatsing (HR++ glas blokkeert). Voer de coax via een deuropening of gebruik
+          een platte doorvoer. Zorg dat de antenne verticaal staat, ook bij helling.
+        </p>
+      </div>
+
+      <!-- RELAY -->
+      <div class="sc-panel" id="sc-relay">
+        <canvas id="cv-relay" width="800" height="280" style="width:100%;border-radius:10px;"></canvas>
+        <div class="sc-detail">
+          <div class="sc-stat"><div class="ss-lbl">Aanbevolen antenne</div><div class="ss-val good">5–8 dBi Fiberglass</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Ideale mounting</div><div class="ss-val good">Mast / dakopstand &gt; 3m</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Verwacht bereik</div><div class="ss-val good">10–30 km (open)</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Kabelkwaliteit</div><div class="ss-val ok">LMR-400 of Aircell 7</div></div>
+        </div>
+        <p style="font-size:.88rem;color:var(--dim);margin-top:14px;line-height:1.65;">
+          Een relay-node op een hoog punt verbindt gebieden die normaal niet direct kunnen communiceren.
+          <strong>Hoogte is hier het wichtigste:</strong> 10 meter extra hoogte geeft ruwweg 12 km extra zichtlijn.
+          Gebruik dikke coaxkabel (LMR-400) om kabelverlies laag te houden. Een solar-powered node met 18650-batterij is ideaal.
+        </p>
+      </div>
+
+      <!-- NOODNET -->
+      <div class="sc-panel" id="sc-emergency">
+        <canvas id="cv-emergency" width="800" height="280" style="width:100%;border-radius:10px;"></canvas>
+        <div class="sc-detail">
+          <div class="sc-stat"><div class="ss-lbl">Aanbevolen antenne</div><div class="ss-val good">8 dBi Fiberglass</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Ideale mounting</div><div class="ss-val good">Hoogste gebouw omgeving</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Verwacht bereik</div><div class="ss-val good">15–40 km</div></div>
+          <div class="sc-stat"><div class="ss-lbl">Redundantie</div><div class="ss-val ok">Meerdere nodes aanbevolen</div></div>
+        </div>
+        <p style="font-size:.88rem;color:var(--dim);margin-top:14px;line-height:1.65;">
+          Voor het <strong>Drenthe Noodnet</strong> plaatsen we nodes op strategisch hoge punten: watertorens, kerktorenspitsen, platte daken van ziekenhuizen.
+          Verbind nodes via het mesh — dan overleeft het netwerk individuele node-uitval.
+          Zorg voor noodstroom (accu + zonnepaneel) en gebruik zo min mogelijk kabellengte.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: POLARISATIE
+══════════════════════════════════════ -->
+<section class="section" id="sec-polarization">
+  <h2 class="section-title"><span>Polarisatie</span> — waarom het verschil maakt</h2>
+  <p class="section-intro">
+    Polarisatie beschrijft de richting van het elektrisch veld. Zender en ontvanger moeten dezelfde polarisatie delen,
+    anders kost het tot 20 dB verlies. Klik op een scenario om het verlies te zien.
+  </p>
+
+  <div id="polar-demo">
+    <h3>Polarisatie-match simulator</h3>
+    <p class="demo-sub">Klik op een combinatie om het verlies te berekenen.</p>
+    <div class="polar-grid">
+      <div class="polar-case sel-a" id="pc-vv" onclick="selectPolar('vv')">
+        <canvas id="pv-vv" width="140" height="100"></canvas>
+        <div class="pc-title">Verticaal ↔ Verticaal</div>
+        <div class="pc-loss" style="color:var(--green);">0 dB verlies ✔</div>
+      </div>
+      <div class="polar-case" id="pc-hh" onclick="selectPolar('hh')">
+        <canvas id="pv-hh" width="140" height="100"></canvas>
+        <div class="pc-title">Horizontaal ↔ Horizontaal</div>
+        <div class="pc-loss" style="color:var(--green);">0 dB verlies ✔</div>
+      </div>
+      <div class="polar-case" id="pc-vh" onclick="selectPolar('vh')">
+        <canvas id="pv-vh" width="140" height="100"></canvas>
+        <div class="pc-title">Verticaal ↔ Horizontaal</div>
+        <div class="pc-loss" style="color:var(--red);">−20 dB verlies ✗</div>
+      </div>
+      <div class="polar-case" id="pc-ti" onclick="selectPolar('ti')">
+        <canvas id="pv-ti" width="140" height="100"></canvas>
+        <div class="pc-title">Verticaal ↔ 45° gekanteld</div>
+        <div class="pc-loss" style="color:var(--yellow);">−3 dB verlies ⚠</div>
+      </div>
+    </div>
+    <div id="polar-result"></div>
+  </div>
+
+  <div class="cards-3">
+    <div class="info-card tip">
+      <div class="card-icon">📱</div>
+      <div class="card-title">Handheld node in de hand</div>
+      <div class="card-body">Een Meshtastic/MeshCore handset wordt vaak <strong>horizontaal of schuin gehouden</strong>. Dat geeft −3 tot −10 dB t.o.v. een verticale vaste node. Zet de antenne altijd zo <strong>rechtop mogelijk</strong> als je bereik nodig hebt.</div>
+    </div>
+    <div class="info-card good">
+      <div class="card-icon">🏠</div>
+      <div class="card-title">Vaste node — altijd verticaal</div>
+      <div class="card-body">Gemonteerde nodes op palen, dakanden of binnen moeten <strong>exact verticaal</strong> staan. Gebruik een waterpaslibel. 5° schuin: −0,3 dB. 45° schuin: −3 dB. 90° (horizontaal): −20 dB.</div>
+    </div>
+    <div class="info-card warn">
+      <div class="card-icon">🏕️</div>
+      <div class="card-title">Yagi voor richting­verkeer</div>
+      <div class="card-body">Een Yagi-antenne heeft <strong>ook een polarisatie</strong>. Zet hem verticaal voor nodes met verticale omni's, of horizontaal voor links met andere horizontale elementen. Mixen = −20 dB straf.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: KABEL & VERLIES
+══════════════════════════════════════ -->
+<section class="section" id="sec-cable">
+  <h2 class="section-title">Kabel &amp; connector<span>verlies</span></h2>
+  <p class="section-intro">
+    Elke meter coaxkabel en elke connector kost signaalsterkte. Bereken hoeveel verlies jouw kabelroute veroorzaakt
+    en vergelijk dit met de winst van een betere antennepositie.
+  </p>
+
+  <div id="db-calc">
+    <h3>🔌 Systeem-budget calculator</h3>
+    <div class="calc-row">
+      <label>Kabeltype</label>
+      <select id="cc-type" onchange="calcBudget()">
+        <option value="1.5">RG-316 / dunne SMA kabel (1,5 dB/m)</option>
+        <option value="0.65" selected>RG-58 / standaard thin coax (0,65 dB/m)</option>
+        <option value="0.32">RG-213 / dikke coax (0,32 dB/m)</option>
+        <option value="0.17">LMR-400 / Aircell 7 (0,17 dB/m)</option>
+        <option value="0.05">LDF4-50A Heliax (0,05 dB/m)</option>
+      </select>
+    </div>
+    <div class="calc-row">
+      <label>Kabellengte (m)</label>
+      <input type="number" id="cc-len" value="5" min="0.1" max="50" step="0.5" oninput="calcBudget()">
+    </div>
+    <div class="calc-row">
+      <label>Aantal connectors</label>
+      <input type="number" id="cc-conn" value="2" min="0" max="20" step="1" oninput="calcBudget()">
+    </div>
+    <div class="calc-row">
+      <label>Antenne gain (dBi)</label>
+      <input type="number" id="cc-gain" value="5" min="0" max="20" step="0.5" oninput="calcBudget()">
+    </div>
+    <div class="calc-result" id="cc-result"></div>
+  </div>
+
+  <h3 style="font-size:1.1rem;font-weight:800;margin:28px 0 16px;">Kabelverlies bij 868 MHz (per meter)</h3>
+  <table class="rules-table">
+    <thead>
+      <tr><th>Kabeltype</th><th>Verlies / meter</th><th>Verlies 5m</th><th>Verlies 10m</th><th>Advies</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>RG-316 (dun, flexibel)</td><td class="bad">1,5 dB/m</td><td class="bad">7,5 dB</td><td class="bad">15 dB</td><td>Alleen als pigtail (&lt;30 cm)</td></tr>
+      <tr><td>RG-174 (dun)</td><td class="bad">1,1 dB/m</td><td class="bad">5,5 dB</td><td class="bad">11 dB</td><td>Max 1 meter</td></tr>
+      <tr><td>RG-58 (standaard)</td><td class="warn">0,65 dB/m</td><td class="warn">3,3 dB</td><td class="bad">6,5 dB</td><td>Max 3–5 meter</td></tr>
+      <tr><td>RG-213 / RG-8</td><td class="warn">0,32 dB/m</td><td class="good">1,6 dB</td><td class="warn">3,2 dB</td><td>Tot 10 meter</td></tr>
+      <tr><td>LMR-400 / Aircell 7</td><td class="good">0,17 dB/m</td><td class="good">0,85 dB</td><td class="good">1,7 dB</td><td>Tot 20 meter, ideaal voor mast</td></tr>
+      <tr><td>LDF4-50A (Heliax)</td><td class="good">0,05 dB/m</td><td class="good">0,25 dB</td><td class="good">0,5 dB</td><td>Professioneel, duur maar verliesarm</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:1.1rem;font-weight:800;margin:28px 0 16px;">Connector verlies (typisch)</h3>
+  <table class="rules-table">
+    <thead>
+      <tr><th>Connector type</th><th>Typisch verlies</th><th>Gebruik</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>SMA (goed gekrimpt)</td><td class="good">0,1 – 0,2 dB</td><td>Standaard hobbygebruik</td></tr>
+      <tr><td>SMA (goedkoop / los)</td><td class="warn">0,3 – 1 dB</td><td>Vermijd losse Ali-Express SMA's</td></tr>
+      <tr><td>N-type (zilver)</td><td class="good">0,05 – 0,15 dB</td><td>Vaste installaties, masten</td></tr>
+      <tr><td>U.FL / IPEX (nieuw)</td><td class="good">0,2 – 0,3 dB</td><td>Max 30 inplugbewegingen!</td></tr>
+      <tr><td>U.FL (oud / beschadigd)</td><td class="bad">1 – 5+ dB</td><td>Vervang direct, onzichtbare fout</td></tr>
+      <tr><td>SMA → N adaptor</td><td class="warn">0,2 – 0,4 dB</td><td>Vermijd adaptors in de RF-keten</td></tr>
+      <tr><td>Oxidatie / corrosie</td><td class="bad">2 – 20 dB</td><td>Gebruik zelfklevende tape op buitenconnectoren</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout red">
+    <span class="callout-icon">🔴</span>
+    <div class="callout-text">
+      <strong>Vuistregel — kabel vs. hoogte:</strong>
+      Elke 3 dB kabelverlies = je halveert je effectief zendvermogen.
+      Een extra 5 meter LMR-400 kabel (0,85 dB verlies) is <strong>eerder de moeite waard dan een kortere kabel op een lagere posi­tie</strong>.
+      Reken altijd het systeem-budget door!
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION: CHECKLIST
+══════════════════════════════════════ -->
+<section class="section" id="sec-checklist">
+  <h2 class="section-title">Installatie<span>checklist</span></h2>
+  <p class="section-intro">
+    Doorloop deze lijst voordat je een node definitief plaatst. Klik items aan om ze te markeren.
+  </p>
+
+  <ul class="checklist" id="install-checklist">
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Antenne zo hoog mogelijk geplaatst
+        <div class="check-sub">Dakrand, schoorsteenoplegging, of mast — minimaal 3m boven omliggende obstakels</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Vrije zichtlijn gecheckt in de hoofdrichting
+        <div class="check-sub">Gebruik heywhatsthat.com of een topografische kaart; let op bomen, gebouwen en heuvels halverwege</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Antenne exact verticaal gemonteerd
+        <div class="check-sub">Gebruik waterpaslibel; maximaal 5° afwijking</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Coaxkabel van goede kwaliteit (LMR-400 of beter voor ≥5m)
+        <div class="check-sub">Vermijd RG-58 langer dan 3 meter; verlies stapelt snel op</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Connectoren gecontroleerd en waterdicht gemaakt
+        <div class="check-sub">Zelfvulkende silicone tape (Coax-seal) op buitenconnectoren; oxidatie = stille signaalmoorder</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Geen folie-isolatie of metaal tussen antenne en buitenwereld
+        <div class="check-sub">Controleer dakisolatie; folie-isolatie = Faraday-kooi. Antenne altijd buiten of vlak bij glas (enkel glas)</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Systeembudget berekend (antenne gain − kabelverlies)
+        <div class="check-sub">Netto gain &gt;0 dB t.o.v. stock antenne = winst. Gebruik de kabel-calculator in het Kabel-tabblad</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Node getest met RSSI / SNR metingen na installatie
+        <div class="check-sub">Vergelijk RSSI voor en na. Een goede plaatsing geeft typisch 10–20 dB verbetering</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Weersbestendigheid gecontroleerd (IP-rating behuizing)
+        <div class="check-sub">Node in IP65+ behuizing voor buitenplaatsing; druppeltest voor provisorische oplossingen</div>
+      </div>
+    </li>
+    <li onclick="toggleCheck(this)">
+      <div class="check-box"></div>
+      <div class="check-text">Voedingskabel / solar-accu geïnstalleerd voor vaste nodes
+        <div class="check-sub">18650 LiPo + 5V solar-panel = zelfonderhoudend knooppunt; check laadstroom bij bewolkt weer</div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="checklist-score" id="cl-score-wrap">
+    <div class="result-metric">
+      <div class="rm-val" id="cl-score-val" style="color:var(--cyan);">0 / 10</div>
+      <div class="rm-lbl">Items afgevinkt</div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-text" id="cl-score-text" style="margin-bottom:7px;"><strong>Beginnen maar!</strong></div>
+      <div class="score-bar-bg"><div class="score-bar" id="cl-score-bar" style="width:0%;"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+/* ════ NAV ════ */
+document.querySelectorAll('.nav-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('sec-' + t.dataset.sec).classList.add('active');
+    // lazy init canvases on first show
+    if (t.dataset.sec === 'height') { initFresnelCanvas(); updateHeight(); }
+    if (t.dataset.sec === 'maxdist') { initMaxDist(); }
+    if (t.dataset.sec === 'los')    { initLOS(); }
+    if (t.dataset.sec === 'scenarios') { initScenarios(); }
+    if (t.dataset.sec === 'polarization') { initPolar(); }
+    if (t.dataset.sec === 'cable') { calcBudget(); }
+    if (t.dataset.sec === 'checklist') { updateChecklist(); }
+  });
+});
+
+/* ════ SCENARIO TABS ════ */
+document.querySelectorAll('.sc-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.sc-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.sc-panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    const panel = document.getElementById('sc-' + t.dataset.sc);
+    if (panel) { panel.classList.add('active'); drawScenario(t.dataset.sc); }
+  });
+});
+
+/* ════════════════════════════════════════
+   HEIGHT SIMULATOR
+════════════════════════════════════════ */
+function updateHeight() {
+  const hA = parseFloat(document.getElementById('h-a').value);
+  const hB = parseFloat(document.getElementById('h-b').value);
+  document.getElementById('h-a-val').textContent = hA.toFixed(1).replace('.',',') + ' m';
+  document.getElementById('h-b-val').textContent = hB.toFixed(1).replace('.',',') + ' m';
+
+  const rA = 3.57 * Math.sqrt(hA);
+  const rB = 3.57 * Math.sqrt(hB);
+  const total = rA + rB;
+  const terrain = parseFloat(document.getElementById('h-terrain').value);
+  const practical = total * terrain;
+
+  const terrainLabels = {'1.0':'facteur 1,0','0.75':'facteur 0,75','0.5':'facteur 0,5','0.3':'facteur 0,3'};
+  document.getElementById('h-terrain-lbl').textContent = terrainLabels[document.getElementById('h-terrain').value] || '';
+
+  const fmt = v => v >= 10 ? v.toFixed(1) + ' km' : v.toFixed(2) + ' km';
+  document.getElementById('hr-horizon-a').textContent = fmt(rA);
+  document.getElementById('hr-horizon-b').textContent = fmt(rB);
+  document.getElementById('hr-total').textContent = fmt(total);
+  document.getElementById('hr-practical').textContent = fmt(practical);
+
+  const pEl = document.getElementById('hr-practical');
+  pEl.className = 'rm-val ' + (practical > 10 ? 'good' : practical > 4 ? 'ok' : 'bad');
+}
+['h-a','h-b'].forEach(id => document.getElementById(id).addEventListener('input', updateHeight));
+document.getElementById('h-terrain').addEventListener('change', updateHeight);
+updateHeight();
+
+/* ════════════════════════════════════════
+   FRESNEL CANVAS
+════════════════════════════════════════ */
+let fresnelInited = false;
+function initFresnelCanvas() {
+  if (fresnelInited) return;
+  fresnelInited = true;
+  ['fz-dist','fz-pos','fz-obs'].forEach(id => {
+    document.getElementById(id).addEventListener('input', drawFresnel);
+  });
+  drawFresnel();
+}
+function drawFresnel() {
+  const distKm = parseFloat(document.getElementById('fz-dist').value);
+  const posP   = parseFloat(document.getElementById('fz-pos').value) / 100;
+  const obsP   = parseFloat(document.getElementById('fz-obs').value) / 100;
+  document.getElementById('fz-dist-val').textContent = distKm + ' km';
+  document.getElementById('fz-pos-val').textContent  = Math.round(posP*100) + '%';
+  document.getElementById('fz-obs-val').textContent  = Math.round(obsP*100) + '%';
+
+  // Fresnel zone radius at position d1 along link of length d
+  const freq = 868e6;
+  const c = 3e8;
+  const d = distKm * 1000;
+  const d1 = posP * d;
+  const d2 = d - d1;
+  const r1 = Math.sqrt((c / freq) * d1 * d2 / d); // first Fresnel radius in meters
+
+  const canvas = document.getElementById('fresnel-canvas');
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0a1628';
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = 40;
+  const drawW = W - pad * 2;
+  const centerY = H / 2;
+  const maxR = Math.max(r1 * 2.2, 1);
+  const scaleY = Math.min((H / 2 - 20) / maxR, 80);
+
+  // LOS line
+  ctx.beginPath();
+  ctx.moveTo(pad, centerY);
+  ctx.lineTo(W - pad, centerY);
+  ctx.strokeStyle = 'rgba(0,229,255,.5)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Fresnel zone ellipse
+  const fzX = pad + posP * drawW;
+  const fzRx = drawW * 0.45;
+  ctx.beginPath();
+  ctx.ellipse(pad + drawW / 2, centerY, fzRx, r1 * scaleY, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(0,255,136,.35)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(0,255,136,.06)';
+  ctx.fill();
+
+  // Obstacle
+  const obsH = obsP;
+  const sixtyPctR = r1 * 0.6;
+  const obsPxH = obsH * r1 * scaleY;
+  const obsTop = centerY - obsPxH;
+  ctx.fillStyle = obsP * r1 > sixtyPctR * 0.9 ? 'rgba(255,68,102,.7)' : 'rgba(255,208,96,.6)';
+  ctx.fillRect(fzX - 10, obsTop, 20, obsPxH);
+
+  // 60% clearance line
+  ctx.beginPath();
+  ctx.moveTo(pad, centerY - sixtyPctR * scaleY);
+  ctx.lineTo(W - pad, centerY - sixtyPctR * scaleY);
+  ctx.strokeStyle = 'rgba(0,255,136,.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 6]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(0,255,136,.5)';
+  ctx.font = '10px monospace';
+  ctx.fillText('60% Fresnel', pad + 4, centerY - sixtyPctR * scaleY - 4);
+
+  // Node icons
+  ['A','B'].forEach((lbl, i) => {
+    const x = i === 0 ? pad : W - pad;
+    ctx.beginPath();
+    ctx.arc(x, centerY, 9, 0, Math.PI * 2);
+    ctx.fillStyle = i === 0 ? '#00ff88' : '#00e5ff';
+    ctx.fill();
+    ctx.fillStyle = '#050d1a';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(lbl, x, centerY);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  });
+
+  // Labels
+  ctx.fillStyle = 'rgba(112,144,176,.8)';
+  ctx.font = '10px monospace';
+  ctx.fillText(`r₁ = ${r1.toFixed(0)}m @ ${Math.round(posP*100)}%`, fzX + 13, centerY - r1 * scaleY * 0.5);
+
+  // Result
+  const clearRatio = obsP / 0.6;
+  const blocked = obsP * r1 > sixtyPctR;
+  const resultEl = document.getElementById('fz-result');
+  if (blocked) {
+    resultEl.innerHTML = `<span style="color:var(--red);font-weight:700;">⚠ Geblokkeerd!</span>
+      Het obstakel (${Math.round(obsP * r1)}m in de Fresnel-zone) overschrijdt de 60%-grens (${Math.round(sixtyPctR)}m).
+      Verwacht verlies: <strong style="color:var(--red);">+${(clearRatio * 6).toFixed(1)} dB extra</strong> diffractieverlies.`;
+  } else {
+    resultEl.innerHTML = `<span style="color:var(--green);font-weight:700;">✔ Voldoende vrij.</span>
+      Eerste Fresnel-zone straal op ${Math.round(posP * distKm * 10) / 10} km: <strong>${r1.toFixed(0)} m</strong>.
+      Obstakel occupeert ${Math.round(obsP / 0.6 * 100)}% van de 60%-grens — acceptabel.`;
+  }
+}
+
+/* ════════════════════════════════════════
+   MAX DISTANCE PLANNER
+════════════════════════════════════════ */
+let maxDistInited = false;
+const MD_ANT_GAIN = {
+  stock: 2,
+  whip: 3,
+  fiber5: 5,
+  fiber8: 8,
+  panel7: 7,
+  yagi9: 9,
+};
+const MD_ENV = {
+  open:   {horizonFactor:1.0, clutterLoss:0,  label:'open terrein'},
+  suburb: {horizonFactor:0.75, clutterLoss:6, label:'woonwijk'},
+  city:   {horizonFactor:0.55, clutterLoss:12,label:'dichte stad'},
+  forest: {horizonFactor:0.45, clutterLoss:10,label:'bosgebied'},
+  indoor: {horizonFactor:0.25, clutterLoss:18,label:'binnen met obstakels'},
+};
+const MD_SNR_REQ = {
+  7:-7.5,
+  8:-10,
+  9:-12.5,
+  10:-15,
+  11:-17.5,
+  12:-20,
+};
+const MD_PRESETS = {
+  home:   {antA:'fiber5',antB:'whip',hA:8,hB:3,tx:20,freq:868,sf:10,bw:125,lossA:1.2,lossB:0.4,margin:12,env:'suburb',align:0},
+  hike:   {antA:'stock',antB:'stock',hA:1.7,hB:1.7,tx:14,freq:868,sf:9,bw:125,lossA:0.2,lossB:0.2,margin:10,env:'open',align:3},
+  relay:  {antA:'fiber8',antB:'fiber8',hA:25,hB:25,tx:20,freq:868,sf:11,bw:125,lossA:1.5,lossB:1.5,margin:14,env:'open',align:0},
+  yagi:   {antA:'yagi9',antB:'yagi9',hA:12,hB:12,tx:20,freq:868,sf:9,bw:125,lossA:1.0,lossB:1.0,margin:12,env:'open',align:0},
+  indoor: {antA:'whip',antB:'whip',hA:1.6,hB:1.6,tx:14,freq:868,sf:12,bw:125,lossA:0.7,lossB:0.7,margin:16,env:'indoor',align:8},
+};
+
+function initMaxDist() {
+  if (maxDistInited) return;
+  if (!document.getElementById('maxdist-wrap')) return;
+  maxDistInited = true;
+
+  const presetEl = document.getElementById('md-preset');
+  presetEl.addEventListener('change', applyMaxDistPreset);
+
+  const controls = ['md-ant-a','md-ant-b','md-h-a','md-h-b','md-tx','md-freq','md-sf','md-bw','md-loss-a','md-loss-b','md-margin','md-env','md-align'];
+  controls.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const onEdit = () => {
+      if (presetEl.value !== 'custom') presetEl.value = 'custom';
+      updateMaxDist();
+    };
+    el.addEventListener('input', onEdit);
+    el.addEventListener('change', onEdit);
+  });
+
+  applyMaxDistPreset();
+}
+
+function applyMaxDistPreset() {
+  const key = document.getElementById('md-preset').value;
+  const cfg = MD_PRESETS[key];
+  if (!cfg) { updateMaxDist(); return; }
+
+  document.getElementById('md-ant-a').value = cfg.antA;
+  document.getElementById('md-ant-b').value = cfg.antB;
+  document.getElementById('md-h-a').value = cfg.hA;
+  document.getElementById('md-h-b').value = cfg.hB;
+  document.getElementById('md-tx').value = cfg.tx;
+  document.getElementById('md-freq').value = cfg.freq;
+  document.getElementById('md-sf').value = cfg.sf;
+  document.getElementById('md-bw').value = cfg.bw;
+  document.getElementById('md-loss-a').value = cfg.lossA;
+  document.getElementById('md-loss-b').value = cfg.lossB;
+  document.getElementById('md-margin').value = cfg.margin;
+  document.getElementById('md-env').value = cfg.env;
+  document.getElementById('md-align').value = cfg.align;
+
+  updateMaxDist();
+}
+
+function updateMaxDist() {
+  const antA = document.getElementById('md-ant-a').value;
+  const antB = document.getElementById('md-ant-b').value;
+  const hA = parseFloat(document.getElementById('md-h-a').value);
+  const hB = parseFloat(document.getElementById('md-h-b').value);
+  const tx = parseFloat(document.getElementById('md-tx').value);
+  const freqMHz = parseFloat(document.getElementById('md-freq').value);
+  const sf = parseInt(document.getElementById('md-sf').value);
+  const bwKhz = parseFloat(document.getElementById('md-bw').value);
+  const lossA = Math.max(0, parseFloat(document.getElementById('md-loss-a').value) || 0);
+  const lossB = Math.max(0, parseFloat(document.getElementById('md-loss-b').value) || 0);
+  const margin = parseFloat(document.getElementById('md-margin').value);
+  const envKey = document.getElementById('md-env').value;
+  const alignLoss = parseFloat(document.getElementById('md-align').value);
+
+  const gainA = MD_ANT_GAIN[antA] || 2;
+  const gainB = MD_ANT_GAIN[antB] || 2;
+  const env = MD_ENV[envKey] || MD_ENV.open;
+
+  const snrReq = MD_SNR_REQ[sf] ?? -15;
+  const noiseFigure = 6;
+  const sensitivity = -174 + 10 * Math.log10(bwKhz * 1000) + noiseFigure + snrReq;
+
+  const maxPathLoss = tx + gainA + gainB - lossA - lossB - alignLoss - env.clutterLoss - margin - sensitivity;
+  const budgetDistance = Math.pow(10, (maxPathLoss - 32.44 - 20 * Math.log10(freqMHz)) / 20);
+
+  const horizonA = 3.57 * Math.sqrt(hA);
+  const horizonB = 3.57 * Math.sqrt(hB);
+  const horizonDistance = (horizonA + horizonB) * env.horizonFactor;
+
+  const dBudget = Math.min(500, Math.max(0.02, budgetDistance));
+  const dHorizon = Math.min(500, Math.max(0.02, horizonDistance));
+  const dFinal = Math.min(dBudget, dHorizon);
+  const bottleneck = dBudget < dHorizon ? 'RF-linkbudget' : 'Horizon / LOS';
+
+  const fmtKm = v => (v >= 10 ? v.toFixed(1) : v.toFixed(2)).replace('.', ',') + ' km';
+  const fmtDb = v => (v >= 0 ? v.toFixed(1) : '-' + Math.abs(v).toFixed(1)).replace('.', ',') + ' dB';
+  const fmtDbm = v => (v >= 0 ? '+' : '') + v.toFixed(1).replace('.', ',') + ' dBm';
+
+  document.getElementById('md-h-a-val').textContent = hA.toFixed(1).replace('.', ',') + ' m';
+  document.getElementById('md-h-b-val').textContent = hB.toFixed(1).replace('.', ',') + ' m';
+  document.getElementById('md-tx-val').textContent = Math.round(tx) + ' dBm';
+  document.getElementById('md-margin-val').textContent = Math.round(margin) + ' dB';
+
+  document.getElementById('md-sens').textContent = fmtDbm(sensitivity);
+  document.getElementById('md-plmax').textContent = fmtDb(maxPathLoss);
+  document.getElementById('md-d-budget').textContent = fmtKm(dBudget);
+  document.getElementById('md-d-horizon').textContent = fmtKm(dHorizon);
+
+  const finalEl = document.getElementById('md-d-final');
+  finalEl.textContent = fmtKm(dFinal);
+  finalEl.classList.remove('good','ok','bad');
+  finalEl.classList.add(dFinal > 20 ? 'good' : dFinal > 5 ? 'ok' : 'bad');
+
+  const bottleneckEl = document.getElementById('md-bottleneck');
+  bottleneckEl.textContent = bottleneck;
+  bottleneckEl.classList.remove('good','ok','bad');
+  bottleneckEl.classList.add(bottleneck === 'RF-linkbudget' ? 'bad' : 'ok');
+
+  document.getElementById('md-explain').innerHTML = `
+    Linkbudget: <strong>${tx.toFixed(0)} + ${gainA} + ${gainB} − ${lossA.toFixed(1)} − ${lossB.toFixed(1)} − ${alignLoss.toFixed(1)} − ${env.clutterLoss.toFixed(1)} − ${margin.toFixed(1)} − (${sensitivity.toFixed(1)})</strong>
+    = <strong>${maxPathLoss.toFixed(1)} dB</strong> padverlies.<br>
+    Geschatte max afstand in <strong>${env.label}</strong> bij <strong>${freqMHz} MHz / SF${sf} / ${bwKhz} kHz</strong>:
+    <strong style="color:${dFinal > 20 ? 'var(--green)' : dFinal > 5 ? 'var(--yellow)' : 'var(--red)'};">${fmtKm(dFinal)}</strong>.
+    Bottleneck: <strong>${bottleneck}</strong>.
+  `;
+
+  drawMaxDistCanvas(dBudget, dHorizon, dFinal, bottleneck);
+}
+
+function drawMaxDistCanvas(dBudget, dHorizon, dFinal, bottleneck) {
+  const canvas = document.getElementById('maxdist-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#081428';
+  ctx.fillRect(0, 0, W, H);
+
+  const left = 150;
+  const right = 26;
+  const top = 42;
+  const gap = 86;
+  const barH = 24;
+  const usableW = W - left - right;
+
+  const maxRange = Math.max(5, dBudget, dHorizon, dFinal) * 1.15;
+  const toX = km => left + (km / maxRange) * usableW;
+
+  for (let i = 0; i <= 5; i++) {
+    const x = left + (i / 5) * usableW;
+    const km = (maxRange * i / 5);
+    ctx.strokeStyle = 'rgba(112,144,176,.14)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, top - 18);
+    ctx.lineTo(x, H - 42);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(112,144,176,.75)';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(km.toFixed(km > 20 ? 0 : 1) + ' km', x, H - 24);
+  }
+
+  const rows = [
+    {label:'RF-linkbudget limiet', val:dBudget, color:'#00e5ff', y:top},
+    {label:'Horizon / hoogte limiet', val:dHorizon, color:'#00ff88', y:top + gap},
+    {label:'Geschatte max afstand', val:dFinal, color:'#ffd060', y:top + gap * 2},
+  ];
+
+  rows.forEach(r => {
+    const x2 = toX(r.val);
+    ctx.fillStyle = 'rgba(112,144,176,.15)';
+    ctx.fillRect(left, r.y, usableW, barH);
+
+    ctx.fillStyle = r.color;
+    ctx.fillRect(left, r.y, Math.max(2, x2 - left), barH);
+
+    ctx.fillStyle = 'rgba(224,234,255,.9)';
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(r.label, 20, r.y + 16);
+
+    ctx.fillStyle = r.color;
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText((r.val >= 10 ? r.val.toFixed(1) : r.val.toFixed(2)) + ' km', W - 10, r.y + 16);
+  });
+
+  ctx.fillStyle = 'rgba(224,234,255,.85)';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Wat begrenst jouw link?', 20, H - 70);
+
+  ctx.fillStyle = bottleneck === 'RF-linkbudget' ? 'rgba(255,68,102,.95)' : 'rgba(0,255,136,.95)';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText(bottleneck === 'RF-linkbudget' ? 'RF-keten is limiterend' : 'Hoogte/zichtlijn is limiterend', 20, H - 50);
+}
+
+/* ════════════════════════════════════════
+   LOS CANVAS
+════════════════════════════════════════ */
+let losInited = false;
+const LOS = {
+  nodeA: {x: 160, y: 200},
+  nodeB: {x: 740, y: 200},
+  obstacles: [
+    {x:380, y:120, w:60, h:160, type:'building', label:'Gebouw'},
+    {x:560, y:160, w:80, h:100, type:'building', label:'Boom'},
+  ],
+  drag: null,
+  W: 900, H: 420,
+};
+
+function initLOS() {
+  if (losInited) return;
+  losInited = true;
+  const canvas = document.getElementById('los-canvas');
+  canvas.height = 420;
+
+  canvas.addEventListener('mousedown', (e) => {
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width / r.width;
+    const sy = canvas.height / r.height;
+    const mx = (e.clientX - r.left) * sx;
+    const my = (e.clientY - r.top) * sy;
+
+    if (dist(mx, my, LOS.nodeA.x, LOS.nodeA.y) < 18) { LOS.drag = 'A'; return; }
+    if (dist(mx, my, LOS.nodeB.x, LOS.nodeB.y) < 18) { LOS.drag = 'B'; return; }
+    for (let i = 0; i < LOS.obstacles.length; i++) {
+      const o = LOS.obstacles[i];
+      if (mx > o.x && mx < o.x + o.w && my > o.y && my < o.y + o.h) {
+        LOS.drag = 'obs_' + i;
+        LOS.obstacles[i]._dx = mx - o.x;
+        LOS.obstacles[i]._dy = my - o.y;
+        return;
+      }
+    }
+  });
+  canvas.addEventListener('dblclick', (e) => {
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width / r.width;
+    const sy = canvas.height / r.height;
+    const mx = (e.clientX - r.left) * sx;
+    const my = (e.clientY - r.top) * sy;
+    const types = ['building','tree','hill'];
+    const labels = ['Gebouw','Boom','Heuvel'];
+    const t = Math.floor(Math.random() * 3);
+    LOS.obstacles.push({x: mx - 30, y: my - 50, w: 60 + Math.random()*40, h: 60 + Math.random()*80, type: types[t], label: labels[t]});
+    drawLOS();
+  });
+  canvas.addEventListener('mousemove', (e) => {
+    if (!LOS.drag) return;
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width / r.width;
+    const sy = canvas.height / r.height;
+    const mx = (e.clientX - r.left) * sx;
+    const my = (e.clientY - r.top) * sy;
+    if (LOS.drag === 'A') { LOS.nodeA.x = mx; LOS.nodeA.y = my; }
+    else if (LOS.drag === 'B') { LOS.nodeB.x = mx; LOS.nodeB.y = my; }
+    else if (LOS.drag.startsWith('obs_')) {
+      const i = parseInt(LOS.drag.split('_')[1]);
+      LOS.obstacles[i].x = mx - LOS.obstacles[i]._dx;
+      LOS.obstacles[i].y = my - LOS.obstacles[i]._dy;
+    }
+    drawLOS();
+  });
+  canvas.addEventListener('mouseup', () => { LOS.drag = null; });
+  canvas.addEventListener('mouseleave', () => { LOS.drag = null; });
+
+  // Touch support
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); simulateMouse(e, 'mousedown', canvas); }, {passive:false});
+  canvas.addEventListener('touchmove',  (e) => { e.preventDefault(); simulateMouse(e, 'mousemove', canvas); }, {passive:false});
+  canvas.addEventListener('touchend',   (e) => { LOS.drag = null; }, {passive:false});
+
+  drawLOS();
+}
+
+function simulateMouse(e, type, canvas) {
+  const t = e.touches[0];
+  canvas.dispatchEvent(new MouseEvent(type, {clientX: t.clientX, clientY: t.clientY}));
+}
+
+function dist(x1,y1,x2,y2) { return Math.sqrt((x1-x2)**2 + (y1-y2)**2); }
+
+function segmentIntersectsRect(ax,ay,bx,by,rx,ry,rw,rh) {
+  // Cohen–Sutherland simplified: check if any of the 4 rect edges cross the segment
+  function cross(p1x,p1y,p2x,p2y,q1x,q1y,q2x,q2y) {
+    const d1x=p2x-p1x, d1y=p2y-p1y, d2x=q2x-q1x, d2y=q2y-q1y;
+    const denom = d1x*d2y - d1y*d2x;
+    if (Math.abs(denom) < 1e-10) return false;
+    const t = ((q1x-p1x)*d2y - (q1y-p1y)*d2x) / denom;
+    const u = ((q1x-p1x)*d1y - (q1y-p1y)*d1x) / denom;
+    return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+  }
+  return cross(ax,ay,bx,by, rx,ry, rx+rw,ry) ||
+         cross(ax,ay,bx,by, rx+rw,ry, rx+rw,ry+rh) ||
+         cross(ax,ay,bx,by, rx+rw,ry+rh, rx,ry+rh) ||
+         cross(ax,ay,bx,by, rx,ry+rh, rx,ry);
+}
+
+function drawLOS() {
+  const canvas = document.getElementById('los-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Background terrain
+  ctx.fillStyle = '#071020';
+  ctx.fillRect(0,0,W,H);
+  // Ground
+  const grd = ctx.createLinearGradient(0, H*0.72, 0, H);
+  grd.addColorStop(0, '#0d2010');
+  grd.addColorStop(1, '#071510');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, H*0.72, W, H*0.28);
+  // Grid
+  ctx.strokeStyle = 'rgba(0,229,255,.05)';
+  ctx.lineWidth = 1;
+  for (let x=0; x<W; x+=60) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y=0; y<H; y+=60) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Check LOS
+  const ax = LOS.nodeA.x, ay = LOS.nodeA.y;
+  const bx = LOS.nodeB.x, by = LOS.nodeB.y;
+  let blocked = false;
+  let blockedCount = 0;
+  LOS.obstacles.forEach(o => {
+    if (segmentIntersectsRect(ax,ay,bx,by,o.x,o.y,o.w,o.h)) {
+      blocked = true;
+      blockedCount++;
+    }
+  });
+
+  // LOS beam
+  const grad = ctx.createLinearGradient(ax,ay,bx,by);
+  if (!blocked) {
+    grad.addColorStop(0,'rgba(0,255,136,0.9)');
+    grad.addColorStop(1,'rgba(0,229,255,0.9)');
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = 10;
+  } else {
+    grad.addColorStop(0,'rgba(255,68,102,0.8)');
+    grad.addColorStop(1,'rgba(255,107,0,0.8)');
+    ctx.shadowColor = '#ff4466';
+    ctx.shadowBlur = 8;
+  }
+  ctx.beginPath();
+  ctx.moveTo(ax,ay); ctx.lineTo(bx,by);
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash(blocked ? [8,5] : []);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.shadowBlur = 0;
+
+  // Signal arcs from A
+  for (let r = 20; r <= 80; r += 30) {
+    const alpha = blocked ? 0.08 : 0.18 - r * 0.001;
+    ctx.beginPath();
+    ctx.arc(ax, ay, r, -Math.PI*0.6, Math.PI*0.6);
+    ctx.strokeStyle = blocked ? `rgba(255,68,102,${alpha})` : `rgba(0,255,136,${alpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Draw obstacles
+  LOS.obstacles.forEach(o => {
+    const isBlocking = segmentIntersectsRect(ax,ay,bx,by,o.x,o.y,o.w,o.h);
+    if (o.type === 'tree') {
+      ctx.fillStyle = isBlocking ? 'rgba(200,80,30,.8)' : 'rgba(30,100,40,.85)';
+      ctx.beginPath();
+      ctx.ellipse(o.x + o.w/2, o.y + o.h*0.4, o.w*0.45, o.h*0.5, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#3a2000';
+      ctx.fillRect(o.x + o.w*0.42, o.y + o.h*0.75, o.w*0.16, o.h*0.3);
+    } else {
+      ctx.fillStyle = isBlocking ? 'rgba(180,50,50,.85)' : 'rgba(30,60,100,.85)';
+      ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.strokeStyle = isBlocking ? 'rgba(255,68,102,.6)' : 'rgba(0,229,255,.2)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(o.x, o.y, o.w, o.h);
+      // Windows
+      ctx.fillStyle = isBlocking ? 'rgba(255,120,60,.4)' : 'rgba(0,229,255,.2)';
+      for (let wy = o.y+12; wy < o.y+o.h-18; wy += 22) {
+        for (let wx = o.x+10; wx < o.x+o.w-14; wx += 18) {
+          ctx.fillRect(wx, wy, 10, 10);
+        }
+      }
+    }
+    // Label
+    ctx.fillStyle = isBlocking ? 'rgba(255,150,100,.9)' : 'rgba(112,144,176,.8)';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(o.label, o.x + o.w/2, o.y - 4);
+    ctx.textAlign = 'left';
+  });
+
+  // Draw nodes
+  [[ax,ay,'A','#00ff88'],[bx,by,'B','#00e5ff']].forEach(([x,y,lbl,col]) => {
+    // Glow
+    const g = ctx.createRadialGradient(x,y,4,x,y,22);
+    g.addColorStop(0, col.replace('#','rgba(').replace(/(..)(..)(..)/, (_,r,g,b) => `${parseInt(r,16)},${parseInt(g,16)},${parseInt(b,16)}`) + ',.35)');
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x,y,22,0,Math.PI*2); ctx.fill();
+    // Circle
+    ctx.beginPath(); ctx.arc(x,y,14,0,Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.fillStyle = '#050d1a';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(lbl, x, y);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    // Label
+    ctx.fillStyle = col;
+    ctx.font = '11px monospace';
+    ctx.fillText(`Node ${lbl}`, x + 18, y - 3);
+    ctx.fillStyle = 'rgba(112,144,176,.7)';
+    ctx.font = '9px monospace';
+    ctx.fillText(`(sleep me)`, x + 18, y + 10);
+    ctx.textAlign = 'left';
+  });
+
+  // Distance label
+  const dx = bx - ax, dy = by - ay;
+  const d = Math.sqrt(dx*dx+dy*dy);
+  const mx = (ax+bx)/2, my2 = (ay+by)/2;
+  ctx.fillStyle = 'rgba(0,229,255,.85)';
+  ctx.font = 'bold 11px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${(d/50).toFixed(1)} km`, mx, my2 - 10);
+  ctx.textAlign = 'left';
+
+  // Status
+  const status = document.getElementById('los-status');
+  if (blocked) {
+    status.textContent = `⚠ ${blockedCount} obstakel${blockedCount>1?'s':''} blokker${blockedCount>1?'en':'t'} de LOS`;
+    status.style.color = 'var(--red)';
+  } else {
+    status.textContent = '✔ Vrije zichtlijn!';
+    status.style.color = 'var(--green)';
+  }
+}
+
+/* ════════════════════════════════════════
+   SCENARIO CANVASES
+════════════════════════════════════════ */
+let scenariosInited = false;
+function initScenarios() {
+  if (scenariosInited) return;
+  scenariosInited = true;
+  drawScenario('home');
+}
+
+function drawScenario(id) {
+  const canvas = document.getElementById('cv-' + id);
+  if (!canvas) return;
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0,0,0,H*0.65);
+  sky.addColorStop(0, '#071530'); sky.addColorStop(1, '#0d2040');
+  ctx.fillStyle = sky; ctx.fillRect(0,0,W,H*0.65);
+  // Ground
+  ctx.fillStyle = '#0d2010'; ctx.fillRect(0,H*0.65,W,H*0.35);
+  // Stars
+  ctx.fillStyle = 'rgba(200,220,255,.7)';
+  [[50,30],[120,15],[240,45],[350,20],[500,35],[640,18],[760,40],[840,25]].forEach(([x,y]) => {
+    ctx.beginPath(); ctx.arc(x,y,1.2,0,Math.PI*2); ctx.fill();
+  });
+
+  const scenes = {
+    home: () => {
+      // House
+      ctx.fillStyle = '#1a3050'; ctx.fillRect(100,120,160,120);
+      ctx.fillStyle = '#152840'; ctx.fillRect(120,140,40,40); ctx.fillRect(180,140,40,40); // windows
+      ctx.fillStyle = 'rgba(0,229,255,.25)'; ctx.fillRect(123,143,34,34); ctx.fillRect(183,143,34,34);
+      // Roof
+      ctx.beginPath(); ctx.moveTo(90,120); ctx.lineTo(180,50); ctx.lineTo(270,120); ctx.closePath();
+      ctx.fillStyle = '#0d2540'; ctx.fill();
+      // Antenna mast on roof
+      ctx.strokeStyle = '#7090a0'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(200,50); ctx.lineTo(200,-10); ctx.stroke();
+      // Antenna
+      _drawAntenna(ctx, 200, -10, 'right', '#00ff88', 5, true);
+      // Signal rings
+      [40,75,115].forEach((r,i) => {
+        ctx.beginPath(); ctx.arc(200,-10,r,-Math.PI*0.7,Math.PI*0.7);
+        ctx.strokeStyle = `rgba(0,255,136,${0.4 - i*0.1})`; ctx.lineWidth=1.5; ctx.stroke();
+      });
+      // Neighbour node
+      ctx.fillStyle = '#192840'; ctx.fillRect(520,130,120,100);
+      ctx.fillStyle = '#0d2040'; ctx.fillRect(550,148,30,30);
+      ctx.fillStyle = 'rgba(0,229,255,.2)'; ctx.fillRect(553,151,24,24);
+      ctx.fillStyle = '#162030'; ctx.beginPath(); ctx.moveTo(510,130); ctx.lineTo(580,70); ctx.lineTo(650,130); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#506070'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(545,70); ctx.lineTo(545,30); ctx.stroke();
+      _drawAntenna(ctx, 545, 30, 'left', '#00e5ff', 3, false);
+      // Link line
+      ctx.strokeStyle = 'rgba(0,255,136,.6)'; ctx.lineWidth=2; ctx.setLineDash([8,5]);
+      ctx.beginPath(); ctx.moveTo(200,-10); ctx.lineTo(545,30); ctx.stroke();
+      ctx.setLineDash([]);
+      // Label
+      _label(ctx, 200, H-30, '✅ Dak-montage', '#00ff88');
+      _label(ctx, 530, H-30, '±2 km bereik', '#00e5ff');
+    },
+
+    outdoor: () => {
+      // Hills
+      ctx.fillStyle = '#0d2510';
+      ctx.beginPath(); ctx.moveTo(0,H*0.65); ctx.quadraticCurveTo(200,H*0.3,400,H*0.65);
+      ctx.quadraticCurveTo(600,H*0.5,800,H*0.65); ctx.closePath(); ctx.fill();
+      // Trees
+      [[60,H*0.6],[130,H*0.55],[700,H*0.58],[770,H*0.62]].forEach(([x,y]) => {
+        ctx.fillStyle = '#1a4020';
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-22,y+40); ctx.lineTo(x+22,y+40); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x,y-15); ctx.lineTo(x-16,y+10); ctx.lineTo(x+16,y+10); ctx.closePath(); ctx.fill();
+      });
+      // Hiker A
+      const hy = H * 0.5;
+      ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(240, hy-40, 10, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#00ff88'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(240,hy-30); ctx.lineTo(240,hy+10); ctx.stroke();
+      // Antenna on backpack high
+      ctx.strokeStyle = '#a0c0d0'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(245, hy-38); ctx.lineTo(245, hy-75); ctx.stroke();
+      _drawAntenna(ctx, 245, hy-75, 'right', '#00ff88', 3, false);
+      // Signal
+      [30,55,80].forEach((r,i) => {
+        ctx.beginPath(); ctx.arc(245,hy-75,r,-Math.PI*0.8,Math.PI*0.8);
+        ctx.strokeStyle=`rgba(0,255,136,${0.4-i*0.1})`; ctx.lineWidth=1.5; ctx.stroke();
+      });
+      // Hiker B
+      ctx.fillStyle = '#00e5ff'; ctx.beginPath(); ctx.arc(600, hy-20, 10, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#00e5ff'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(600,hy-10); ctx.lineTo(600,hy+30); ctx.stroke();
+      ctx.strokeStyle = '#a0c0d0'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(605,hy-18); ctx.lineTo(605,hy-55); ctx.stroke();
+      _drawAntenna(ctx, 605, hy-55, 'left', '#00e5ff', 3, false);
+      // Link
+      ctx.strokeStyle='rgba(0,255,136,.5)'; ctx.lineWidth=2; ctx.setLineDash([8,5]);
+      ctx.beginPath(); ctx.moveTo(245,hy-75); ctx.lineTo(605,hy-55); ctx.stroke();
+      ctx.setLineDash([]);
+      _label(ctx, 200, H-30, '✅ Antenne hoog op rug', '#00ff88');
+      _label(ctx, 510, H-30, '5–8 km open terrein', '#00e5ff');
+    },
+
+    vehicle: () => {
+      // Road
+      ctx.fillStyle = '#1a1a2a'; ctx.fillRect(0,H*0.6,W,H*0.4);
+      ctx.strokeStyle = '#ffd060'; ctx.lineWidth=3; ctx.setLineDash([30,20]);
+      ctx.beginPath(); ctx.moveTo(0,H*0.72); ctx.lineTo(W,H*0.72); ctx.stroke();
+      ctx.setLineDash([]);
+      // Car body
+      const cx = 300, cy = H*0.52;
+      ctx.fillStyle = '#1e3a5a'; ctx.fillRect(cx-80,cy,160,50);
+      ctx.fillStyle = '#162840'; ctx.beginPath(); ctx.roundRect(cx-70,cy-30,140,35,8); ctx.fill();
+      // Windows
+      ctx.fillStyle = 'rgba(0,229,255,.2)'; ctx.fillRect(cx-55,cy-25,40,25); ctx.fillRect(cx+10,cy-25,45,25);
+      // Wheels
+      [cx-50,cx+50].forEach(wx => {
+        ctx.fillStyle = '#0d1a28'; ctx.beginPath(); ctx.arc(wx,cy+50,18,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#3a5070'; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.arc(wx,cy+50,14,0,Math.PI*2); ctx.stroke();
+      });
+      // Magmount on roof center
+      ctx.fillStyle = '#c8a050'; ctx.beginPath(); ctx.ellipse(cx,cy,22,5,0,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#a0c0d0'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy-55); ctx.stroke();
+      _drawAntenna(ctx, cx, cy-55, 'right', '#00ff88', 5, true);
+      [35,65,100].forEach((r,i) => {
+        ctx.beginPath(); ctx.arc(cx,cy-55,r,-Math.PI*0.75,Math.PI*0.75);
+        ctx.strokeStyle=`rgba(0,255,136,${0.4-i*0.1})`; ctx.lineWidth=1.5; ctx.stroke();
+      });
+      // Arrow indicating center
+      ctx.strokeStyle='rgba(255,208,96,.6)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(cx,cy+4); ctx.lineTo(cx+60,cy+4); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,208,96,.8)'; ctx.font='10px sans-serif'; ctx.fillText('dakcentrum',cx+63,cy+7);
+      _label(ctx, 250, H-30, '✅ Magmount op dak', '#00ff88');
+      _label(ctx, 500, H-30, 'dak = ground plane', '#ffd060');
+    },
+
+    relay: () => {
+      // Hill outline
+      ctx.strokeStyle = 'rgba(0,229,255,.15)'; ctx.lineWidth=1;
+      ctx.fillStyle = '#0d2015';
+      ctx.beginPath(); ctx.moveTo(0,H*0.65); ctx.quadraticCurveTo(340,H*0.15,680,H*0.65); ctx.lineTo(0,H*0.65); ctx.closePath(); ctx.fill();
+      // Mast on hilltop
+      const tx = 340, ty = H*0.18;
+      ctx.strokeStyle = '#708090'; ctx.lineWidth=4;
+      ctx.beginPath(); ctx.moveTo(tx,ty+10); ctx.lineTo(tx,ty-90); ctx.stroke();
+      // Guy wires
+      ctx.strokeStyle='rgba(112,144,176,.3)'; ctx.lineWidth=1.5;
+      [[tx-60,ty+10],[tx+60,ty+10]].forEach(([gx,gy]) => {
+        ctx.beginPath(); ctx.moveTo(tx,ty-50); ctx.lineTo(gx,gy); ctx.stroke();
+      });
+      _drawAntenna(ctx, tx, ty-90, 'right', '#00ff88', 8, true);
+      // Rings for relay range
+      [80,130,190,260].forEach((r,i) => {
+        ctx.beginPath(); ctx.arc(tx,ty-90,r,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(0,255,136,${0.25-i*0.04})`; ctx.lineWidth=1.5; ctx.stroke();
+      });
+      // Left node
+      ctx.fillStyle='#00e5ff'; ctx.beginPath(); ctx.arc(80,H*0.58,10,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(0,229,255,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(80,H*0.58); ctx.lineTo(tx,ty-90); ctx.stroke();
+      ctx.setLineDash([]);
+      // Right node
+      ctx.fillStyle='#c864ff'; ctx.beginPath(); ctx.arc(620,H*0.55,10,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(200,100,255,.5)'; ctx.lineWidth=1.5; ctx.setLineDash([6,4]);
+      ctx.beginPath(); ctx.moveTo(620,H*0.55); ctx.lineTo(tx,ty-90); ctx.stroke();
+      ctx.setLineDash([]);
+      // Direct line (blocked)
+      ctx.strokeStyle='rgba(255,68,102,.4)'; ctx.lineWidth=1.5; ctx.setLineDash([4,8]);
+      ctx.beginPath(); ctx.moveTo(80,H*0.58); ctx.lineTo(620,H*0.55); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,68,102,.6)'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+      ctx.fillText('✗ Direct geblokkeerd', 350, H*0.52);
+      ctx.textAlign='left';
+      _label(ctx, 300, H-30, '✅ Relay op hoog punt', '#00ff88');
+      _label(ctx, 500, H-30, '10–30 km bereik', '#00e5ff');
+    },
+
+    emergency: () => {
+      // City skyline (simplified)
+      [[50,180],[110,140],[170,160],[230,120],[290,150],[650,130],[710,155],[760,140],[810,170]].forEach(([bx,bh]) => {
+        ctx.fillStyle = '#0d1f3c';
+        ctx.fillRect(bx-20, H*0.65-bh, 40, bh);
+        ctx.strokeStyle='rgba(0,229,255,.15)'; ctx.lineWidth=1;
+        ctx.strokeRect(bx-20, H*0.65-bh, 40, bh);
+        // Windows
+        ctx.fillStyle='rgba(0,229,255,.15)';
+        for(let wy=H*0.65-bh+8; wy<H*0.65-10; wy+=16) {
+          for(let wx=bx-14; wx<bx+14; wx+=12) { ctx.fillRect(wx,wy,8,8); }
+        }
+      });
+      // Water tower (high node)
+      const wx2=450, wy2=H*0.1;
+      ctx.fillStyle='#1a3050'; ctx.beginPath(); ctx.ellipse(wx2,wy2+20,35,20,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#1a3050'; ctx.fillRect(wx2-12,wy2+20,24,H*0.65-wy2-20-10);
+      ctx.strokeStyle='rgba(0,229,255,.3)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.ellipse(wx2,wy2+20,35,20,0,0,Math.PI*2); ctx.stroke();
+      // Antenna on tower
+      ctx.strokeStyle='#708090'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(wx2,wy2+20); ctx.lineTo(wx2,wy2-60); ctx.stroke();
+      _drawAntenna(ctx, wx2, wy2-60, 'right', '#00ff88', 8, true);
+      [60,110,170,240].forEach((r,i) => {
+        ctx.beginPath(); ctx.arc(wx2,wy2-60,r,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(0,255,136,${0.3-i*0.05})`; ctx.lineWidth=1.5; ctx.stroke();
+      });
+      // Multiple nodes connecting to watertower
+      [[130,H*0.5],[280,H*0.45],[680,H*0.48],[760,H*0.43]].forEach(([nx,ny],i) => {
+        const col = ['#00e5ff','#c864ff','#ffd060','#ff6b00'][i];
+        ctx.fillStyle=col; ctx.beginPath(); ctx.arc(nx,ny,8,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle=col.replace(')',', 0.5)').replace('rgb','rgba'); ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+        ctx.beginPath(); ctx.moveTo(nx,ny); ctx.lineTo(wx2,wy2-60); ctx.stroke();
+        ctx.setLineDash([]);
+      });
+      // Solar panel hint
+      ctx.fillStyle='rgba(255,208,96,.4)'; ctx.fillRect(wx2+40,wy2-10,30,18);
+      ctx.strokeStyle='rgba(255,208,96,.6)'; ctx.lineWidth=1; ctx.strokeRect(wx2+40,wy2-10,30,18);
+      ctx.fillStyle='rgba(255,208,96,.6)'; ctx.font='8px sans-serif'; ctx.fillText('☀ Solar',wx2+43,wy2+4);
+      _label(ctx, 380, H-30, '✅ Watertoren / kerktoren', '#00ff88');
+      _label(ctx, 600, H-30, '15–40 km noodnet', '#ffd060');
+    },
+  };
+
+  if (scenes[id]) scenes[id]();
+}
+
+function _drawAntenna(ctx, x, y, side, col, dBi, withBase) {
+  const h = 18 + dBi * 5;
+  if (withBase) {
+    ctx.fillStyle = '#5a7090'; ctx.fillRect(x-5,y,10,12);
+    y -= 2;
+  }
+  ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - h); ctx.stroke();
+  // tip
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y-h, 3, 0, Math.PI*2); ctx.fill();
+}
+
+function _label(ctx, x, y, text, col) {
+  ctx.fillStyle = 'rgba(5,13,26,.75)';
+  ctx.fillRect(x-6, y-14, ctx.measureText(text).width+12, 18);
+  ctx.fillStyle = col; ctx.font = 'bold 11px sans-serif';
+  ctx.fillText(text, x, y);
+}
+
+/* ════════════════════════════════════════
+   POLARIZATION
+════════════════════════════════════════ */
+let polarInited = false;
+function initPolar() {
+  if (polarInited) return;
+  polarInited = true;
+  drawPolarCanvases();
+  selectPolar('vv');
+}
+
+function drawPolarCanvases() {
+  const cases = {
+    vv: {a:90, b:90},
+    hh: {a:0, b:0},
+    vh: {a:90, b:0},
+    ti: {a:90, b:45},
+  };
+  Object.entries(cases).forEach(([id, {a, b}]) => {
+    const canvas = document.getElementById('pv-'+id);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#0a1628'; ctx.fillRect(0,0,W,H);
+    const drawAnt = (cx, angle, col) => {
+      const rad = (angle - 90) * Math.PI / 180;
+      const L = 32;
+      ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - Math.cos(rad)*L, H/2 - Math.sin(rad)*L);
+      ctx.lineTo(cx + Math.cos(rad)*L, H/2 + Math.sin(rad)*L);
+      ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(cx, H/2, 5, 0, Math.PI*2); ctx.fill();
+    };
+    drawAnt(W*0.28, a, '#00ff88');
+    drawAnt(W*0.72, b, '#00e5ff');
+    ctx.strokeStyle = 'rgba(112,144,176,.3)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(W*0.28,H/2); ctx.lineTo(W*0.72,H/2); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+
+function selectPolar(id) {
+  document.querySelectorAll('.polar-case').forEach(el => {
+    el.classList.remove('sel-a','sel-b','sel-c');
+  });
+  const info = {
+    vv: {cls:'sel-a', loss:0, color:'var(--green)', desc:'<strong style="color:var(--green);">0 dB verlies.</strong> Perfecte polarisatie-match. Beide antennes staan verticaal — ideaal voor alle MeshCore/Meshtastic vaste nodes. Dit is de standaard bij 868 MHz omni-to-omni links.'},
+    hh: {cls:'sel-a', loss:0, color:'var(--green)', desc:'<strong style="color:var(--green);">0 dB verlies.</strong> Beide antennes horizontaal. Minder gebruikelijk bij MeshCore, maar wel gebruikt bij Yagi-to-Yagi point-to-point links (bv. 2 basistations recht tegenover elkaar).'},
+    vh: {cls:'sel-c', loss:-20, color:'var(--red)', desc:'<strong style="color:var(--red);">−20 dB verlies!</strong> Verticaal ↔ horizontaal is de worst case. Je verliest 99% van je signaalvermogen — dit halveert je bereik meerdere malen. Komt voor als je een handset op zijn zijde houdt terwijl de vaste node verticaal staat.'},
+    ti: {cls:'sel-b', loss:-3, color:'var(--yellow)', desc:'<strong style="color:var(--yellow);">−3 dB verlies.</strong> 45° kanteling (bv. antenne in borstzak of Meshtastic handset in een houder met hoek). Dit kost de helft van je zendvermogen. Merkbaar in de RSSI, maar niet dramatisch. Probeer altijd zo rechtop mogelijk te houden.'},
+  };
+  const el = document.getElementById('pc-'+id);
+  if (el) el.classList.add(info[id].cls);
+  document.getElementById('polar-result').innerHTML = info[id].desc;
+}
+
+/* ════════════════════════════════════════
+   CABLE BUDGET
+════════════════════════════════════════ */
+function calcBudget() {
+  const lossPerM = parseFloat(document.getElementById('cc-type').value);
+  const len = parseFloat(document.getElementById('cc-len').value) || 0;
+  const conn = parseInt(document.getElementById('cc-conn').value) || 0;
+  const gain = parseFloat(document.getElementById('cc-gain').value) || 0;
+  const cableLoss = lossPerM * len;
+  const connLoss = conn * 0.2;
+  const totalLoss = cableLoss + connLoss;
+  const netGain = gain - totalLoss;
+  const verdict = netGain > 1 ? 'cr-good' : netGain > -1 ? 'cr-warn' : 'cr-bad';
+  const verdictText = netGain > 1
+    ? `✔ Netto winst van <span class="cr-good">${netGain.toFixed(1)} dBi</span> t.o.v. stock antenne.`
+    : netGain > -1
+    ? `⚠ Vrijwel gelijk aan stock antenne (<span class="cr-warn">${netGain.toFixed(1)} dBi</span>). Overweeg kortere kabel of dikker type.`
+    : `✗ Nettoverlies van <span class="cr-bad">${Math.abs(netGain).toFixed(1)} dB</span> t.o.v. stock. Gebruik kortere / dikkere kabel!`;
+  document.getElementById('cc-result').innerHTML = `
+    Kabelverlies: <strong>${cableLoss.toFixed(2)} dB</strong> &nbsp;|&nbsp;
+    Connectoren (${conn}×): <strong>${connLoss.toFixed(2)} dB</strong> &nbsp;|&nbsp;
+    Totaal verlies: <strong>${totalLoss.toFixed(2)} dB</strong><br>
+    Antenne gain: <strong>${gain} dBi</strong> &nbsp;⟶&nbsp; ${verdictText}
+  `;
+}
+calcBudget();
+
+/* ════════════════════════════════════════
+   CHECKLIST
+════════════════════════════════════════ */
+function toggleCheck(li) {
+  li.classList.toggle('done');
+  if (li.classList.contains('done')) li.querySelector('.check-box').textContent = '✓';
+  else li.querySelector('.check-box').textContent = '';
+  updateChecklist();
+}
+function updateChecklist() {
+  const items = document.querySelectorAll('#install-checklist li');
+  const done = document.querySelectorAll('#install-checklist li.done').length;
+  const total = items.length;
+  const pct = Math.round(done / total * 100);
+  document.getElementById('cl-score-val').textContent = `${done} / ${total}`;
+  document.getElementById('cl-score-bar').style.width = pct + '%';
+  const bar = document.getElementById('cl-score-bar');
+  bar.style.background = pct === 100 ? 'var(--green)' : pct >= 60 ? 'var(--yellow)' : 'var(--cyan)';
+  const msgs = ['Beginnen maar!','Goed bezig!','Bijna klaar!','Installatie gereed! 🎉'];
+  const msgEl = document.getElementById('cl-score-text');
+  const idx = pct === 100 ? 3 : pct >= 70 ? 2 : pct >= 30 ? 1 : 0;
+  msgEl.innerHTML = `<strong>${msgs[idx]}</strong> — ${pct}% compleet`;
+}
+
+/* init visible sections */
+updateHeight();
+initMaxDist();
+calcBudget();
+</script>
+</body>
+</html>

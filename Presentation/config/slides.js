@@ -77,7 +77,7 @@ export const slidesData = [
     Meer interesse in software? Help met firmware-configuratie en testing. 
     Heb je een hoge locatie beschikbaar? Overweeg een repeater-node te plaatsen. 
     Wil je graag documenteren of lesgeven? Help anderen op weg. 
-    Geen ervaring? Geen probleem. Tijdens de hak-avonden begeleiden we je stap voor stap. 
+    Geen ervaring? Geen probleem. Tijdens de hack-avonden begeleiden we je stap voor stap. 
     Je eigen hardware kost tussen de 20 en 50 euro.`,
     keywords: ["meedoen", "vrijwilligers", "community", "hardware", "hulp"],
     category: "participation"

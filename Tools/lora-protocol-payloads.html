@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LoRa Hardware, Protocols en Payload Types</title>
+<style>
+:root {
+  --green:#00ff88;
+  --cyan:#00e5ff;
+  --orange:#ff6b00;
+  --purple:#c864ff;
+  --yellow:#ffd060;
+  --red:#ff4466;
+  --dark:#050d1a;
+  --mid:#0a1628;
+  --card:#0d1f3c;
+  --card2:#112240;
+  --text:#e0eaff;
+  --dim:#7090b0;
+  --border:rgba(0,229,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Segoe UI',system-ui,sans-serif;
+  background:var(--dark);
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:80px;
+}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+.site-header{
+  background:linear-gradient(180deg,#071530 0%,var(--dark) 100%);
+  border-bottom:1px solid var(--border);
+  padding:22px 32px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:14px;
+}
+.header-text h1{font-size:clamp(1.3rem,3vw,2rem);font-weight:900;}
+.header-text h1 span{color:var(--green);}
+.header-text p{color:var(--dim);font-size:.92rem;margin-top:6px;line-height:1.65;max-width:820px;}
+.header-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+.header-tag{font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.07em;}
+.ht-green{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);}
+.ht-cyan{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.25);}
+.ht-ora{background:rgba(255,107,0,.1);color:var(--orange);border:1px solid rgba(255,107,0,.25);}
+.back-btn{
+  background:rgba(0,229,255,.1);
+  border:1px solid rgba(0,229,255,.25);
+  color:var(--cyan);
+  padding:9px 20px;
+  border-radius:20px;
+  font-size:.85rem;
+  font-weight:600;
+  transition:background .2s;
+  white-space:nowrap;
+  align-self:flex-start;
+}
+.back-btn:hover{background:rgba(0,229,255,.2);text-decoration:none;}
+
+.section-nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(5,13,26,.97);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:0 32px;
+  display:flex;
+  gap:0;
+  overflow-x:auto;
+}
+.nav-tab{
+  padding:13px 20px;
+  font-size:.84rem;
+  font-weight:700;
+  color:var(--dim);
+  border-bottom:3px solid transparent;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .18s;
+}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+
+.page{padding:34px 32px;}
+.section{display:none;}
+.section.active{display:block;}
+.section-title{font-size:1.55rem;font-weight:900;margin-bottom:8px;}
+.section-title span{color:var(--cyan);}
+.section-intro{font-size:.93rem;line-height:1.7;color:var(--dim);max-width:920px;margin-bottom:24px;}
+
+.callout{
+  background:rgba(255,208,96,.08);
+  border:1px solid rgba(255,208,96,.25);
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:.85rem;
+  color:#f6d88f;
+  margin-bottom:18px;
+  line-height:1.6;
+}
+.callout strong{color:#ffe6ac;}
+
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px 16px;
+}
+.card h3{font-size:1rem;margin-bottom:7px;}
+.card p{font-size:.86rem;line-height:1.6;color:var(--dim);}
+.card strong{color:var(--text);}
+
+.stack-box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.stack-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.stack-row:last-child{margin-bottom:0;}
+.stack-label{min-width:130px;font-size:.78rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+.stack-layer{
+  flex:1;
+  border-radius:8px;
+  padding:7px 10px;
+  font-size:.82rem;
+  font-weight:700;
+}
+.stack-layer.phys{background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.25);color:var(--green);}
+.stack-layer.link{background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.25);color:var(--cyan);}
+.stack-layer.net{background:rgba(200,100,255,.12);border:1px solid rgba(200,100,255,.25);color:var(--purple);}
+.stack-layer.app{background:rgba(255,107,0,.12);border:1px solid rgba(255,107,0,.25);color:var(--orange);}
+
+.compare-table{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:8px;}
+.compare-table th{text-align:left;padding:10px 12px;color:var(--dim);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);}
+.compare-table td{padding:10px 12px;border-bottom:1px solid rgba(0,229,255,.08);vertical-align:top;line-height:1.55;}
+.compare-table tr:hover td{background:rgba(0,229,255,.04);}
+
+.advisor{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px;
+}
+.controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:12px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:.78rem;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.field select,
+.field input,
+.field textarea{
+  background:rgba(0,229,255,.07);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:.86rem;
+  outline:none;
+}
+.field select:focus,
+.field input:focus,
+.field textarea:focus{border-color:var(--cyan);}
+
+.reco-box{
+  background:var(--mid);
+  border:1px solid rgba(0,229,255,.1);
+  border-radius:10px;
+  padding:12px;
+}
+.reco-box h4{font-size:.9rem;margin-bottom:6px;}
+.reco-box p{font-size:.83rem;color:var(--dim);line-height:1.6;}
+.reco-box ul{margin:8px 0 0 18px;color:var(--dim);font-size:.82rem;line-height:1.55;}
+
+.payload-lab{
+  display:grid;
+  grid-template-columns:minmax(300px,380px) 1fr;
+  gap:14px;
+}
+.lab-panel,
+.output-panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+}
+.lab-panel h3,
+.output-panel h3{font-size:.95rem;margin-bottom:8px;}
+.mono{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+  font-size:.79rem;
+  line-height:1.55;
+  color:#b8d4f2;
+}
+pre{
+  background:var(--mid);
+  border:1px solid rgba(0,229,255,.1);
+  border-radius:10px;
+  padding:10px;
+  overflow:auto;
+  max-height:260px;
+}
+
+.seg-list{display:flex;flex-direction:column;gap:7px;margin-top:8px;}
+.seg-row{display:flex;align-items:center;gap:8px;}
+.seg-name{width:110px;font-size:.76rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+.seg-bar{flex:1;height:12px;background:rgba(0,229,255,.08);border-radius:99px;overflow:hidden;}
+.seg-fill{height:12px;border-radius:99px;min-width:2px;}
+.seg-size{width:60px;text-align:right;font-size:.75rem;color:var(--dim);}
+
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.btn{
+  background:rgba(0,229,255,.1);
+  border:1px solid rgba(0,229,255,.3);
+  color:var(--cyan);
+  border-radius:10px;
+  padding:8px 11px;
+  font-size:.8rem;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn:hover{background:rgba(0,229,255,.2);}
+.btn.primary{background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.3);color:var(--green);}
+.btn.primary:hover{background:rgba(0,255,136,.22);}
+
+.meshcore-grid{
+  display:grid;
+  grid-template-columns:minmax(280px,340px) 1fr;
+  gap:14px;
+  margin-top:6px;
+}
+.mc-box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+}
+.mc-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.mc-table th{padding:8px 9px;color:var(--dim);font-size:.72rem;text-transform:uppercase;border-bottom:1px solid var(--border);text-align:left;}
+.mc-table td{padding:8px 9px;border-bottom:1px solid rgba(0,229,255,.08);line-height:1.5;}
+
+.triple-wrap{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+}
+.triple-controls{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+  gap:10px;
+  margin-bottom:10px;
+}
+.triple-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:12px;
+}
+.proto-card{
+  background:var(--mid);
+  border:1px solid rgba(0,229,255,.12);
+  border-radius:11px;
+  padding:11px;
+}
+.proto-card h3{font-size:.9rem;margin-bottom:6px;}
+.proto-card p{font-size:.8rem;color:var(--dim);line-height:1.55;}
+.mini-layout{display:flex;flex-direction:column;gap:6px;margin:8px 0;}
+.mini-row{display:flex;align-items:center;gap:7px;}
+.mini-row .mini-name{width:84px;font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+.mini-row .mini-bar{flex:1;height:9px;background:rgba(0,229,255,.08);border-radius:999px;overflow:hidden;}
+.mini-row .mini-fill{height:9px;border-radius:999px;min-width:2px;}
+.mini-row .mini-size{width:42px;text-align:right;font-size:.7rem;color:var(--dim);}
+
+@media(max-width:980px){
+  .payload-lab{grid-template-columns:1fr;}
+  .meshcore-grid{grid-template-columns:1fr;}
+}
+@media(max-width:700px){
+  .site-header{padding:16px 18px;}
+  .section-nav{padding:0 10px;}
+  .page{padding:20px 14px;}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-text">
+    <h1>LoRa Hardware, Protocols en <span>Payload Types</span></h1>
+    <p>
+      Praktische uitleg voor Hackerspace Drenthe: wat is de relatie tussen LoRa hardware,
+      LoRaWAN, Meshtastic en MeshCore, en hoe zien payloads er uit per protocol.
+      Inclusief interactieve packet visualizer.
+    </p>
+    <div class="header-meta">
+      <span class="header-tag ht-green">LORA PHY</span>
+      <span class="header-tag ht-cyan">LORAWAN / MESHTASTIC / MESHCORE</span>
+      <span class="header-tag ht-ora">PAYLOAD LAB</span>
+    </div>
+  </div>
+  <a href="course-hub.html" class="back-btn">← Terug naar Course Hub</a>
+</header>
+
+<nav class="section-nav" id="main-nav">
+  <div class="nav-tab active" data-sec="overview">Overzicht</div>
+  <div class="nav-tab" data-sec="hardware">Hardware Advisor</div>
+  <div class="nav-tab" data-sec="lab">Payload Lab</div>
+  <div class="nav-tab" data-sec="triple">3x Vergelijking</div>
+  <div class="nav-tab" data-sec="meshcore">MeshCore Protocol</div>
+  <div class="nav-tab" data-sec="cheatsheet">Cheatsheet</div>
+</nav>
+
+<main class="page">
+  <section class="section active" id="sec-overview">
+    <h2 class="section-title">Protocol <span>overzicht</span></h2>
+    <p class="section-intro">
+      LoRa is de radio-modulatie op de fysieke laag. LoRaWAN, Meshtastic en MeshCore zijn
+      drie verschillende protocollen/systemen die daar bovenop draaien. Ze gebruiken dezelfde radiofamilie,
+      maar totaal verschillende netwerklogica en payload-opbouw.
+    </p>
+
+    <div class="callout">
+      <strong>Belangrijk:</strong> de interactieve frames op deze pagina zijn educatieve wire-models.
+      Echte on-air bytes kunnen afwijken door encryptie, protocolversie, firmware en extra metadata.
+    </div>
+
+    <div class="grid-3" style="margin-bottom:14px;">
+      <article class="card">
+        <h3>LoRaWAN</h3>
+        <p>
+          Ster-topologie met gateways en netwerkserver. Payload gaat meestal als applicatiedata
+          op <strong>FPort 1..223</strong>, of als MAC command op <strong>FPort 0</strong>.
+        </p>
+      </article>
+      <article class="card">
+        <h3>Meshtastic</h3>
+        <p>
+          Meshprotocol voor berichten. Payloads zitten in protobuf-achtige containers met een
+          <strong>PortNum</strong> die aangeeft of het tekst, positie, telemetry, node info, etc. is.
+        </p>
+      </article>
+      <article class="card">
+        <h3>MeshCore</h3>
+        <p>
+          Messaging-first mesh met eigen packettypen. Payload type wordt expliciet meegegeven
+          (zoals <strong>TXT_MSG</strong>, <strong>ACK</strong>, <strong>ADVERT</strong>, <strong>PATH</strong>).
+        </p>
+      </article>
+    </div>
+
+    <div class="stack-box">
+      <div class="stack-row">
+        <div class="stack-label">Fysiek</div>
+        <div class="stack-layer phys">LoRa radio modem (SX127x / SX126x / vergelijkbaar)</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-label">Link</div>
+        <div class="stack-layer link">LoRa PHY packet + CRC + modem instellingen (BW/SF/CR)</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-label">Netwerk</div>
+        <div class="stack-layer net">LoRaWAN OF Meshtastic mesh OF MeshCore routing</div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-label">Applicatie</div>
+        <div class="stack-layer app">Text, telemetry, locatie, sensor data, commando's</div>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Eigenschap</th>
+          <th>LoRaWAN</th>
+          <th>Meshtastic</th>
+          <th>MeshCore</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Topologie</td>
+          <td>Star of stars (gateway + network server)</td>
+          <td>Mesh, nodes kunnen rebroadcasten</td>
+          <td>Mesh met focus op messaging en repeater-rollen</td>
+        </tr>
+        <tr>
+          <td>Payload selectie</td>
+          <td>FPort + app codec</td>
+          <td>PortNum / protobuf payload type</td>
+          <td>Payload type byte (REQ, TXT_MSG, ACK, etc.)</td>
+        </tr>
+        <tr>
+          <td>Encryptie</td>
+          <td>Network + application session keys</td>
+          <td>Kanaal-gebaseerde encryptie</td>
+          <td>Protocol-specifiek met key-identiteiten per contact/kanaal</td>
+        </tr>
+        <tr>
+          <td>Beste use-case</td>
+          <td>IoT sensornetwerken met cloud backend</td>
+          <td>Community mesh chat en positie delen</td>
+          <td>Off-grid secure messaging met repeaters/rooms</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="sec-hardware">
+    <h2 class="section-title">LoRa <span>Hardware Advisor</span></h2>
+    <p class="section-intro">
+      Kies protocol en use-case. De advisor geeft een praktisch hardwareprofiel,
+      plus basis instellingen voor payload-betrouwbaarheid en airtime.
+    </p>
+
+    <div class="advisor">
+      <div class="controls-grid">
+        <div class="field">
+          <label for="hw-protocol">Protocol</label>
+          <select id="hw-protocol">
+            <option value="lorawan">LoRaWAN</option>
+            <option value="meshtastic">Meshtastic</option>
+            <option value="meshcore" selected>MeshCore</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="hw-use">Use-case</label>
+          <select id="hw-use">
+            <option value="sensor">Sensor / telemetry</option>
+            <option value="portable">Portable chat</option>
+            <option value="fixed" selected>Vaste node</option>
+            <option value="relay">Relay / backbone</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="hw-power">Power model</label>
+          <select id="hw-power">
+            <option value="battery">Batterij</option>
+            <option value="solar" selected>Zonne + batterij</option>
+            <option value="mains">Netvoeding</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="reco-box" id="hw-output"></div>
+    </div>
+
+    <div class="grid-2" style="margin-top:14px;">
+      <article class="card">
+        <h3>Veelgebruikte radio chips</h3>
+        <p><strong>SX1276/78:</strong> oudere generatie, veel beschikbaar, werkt prima voor basisnodes.</p>
+        <p><strong>SX1262:</strong> lager verbruik, betere gevoeligheid in veel setups, zeer populair in nieuwe nodes.</p>
+        <p><strong>LR1110/LR1121:</strong> geavanceerder, vaak duurder, niche afhankelijk van board support.</p>
+      </article>
+      <article class="card">
+        <h3>Board families in de praktijk</h3>
+        <p><strong>Heltec V3:</strong> goedkoop instapboard, vaak gebruikt voor experimenten en vaste nodes.</p>
+        <p><strong>RAK4631/WisBlock:</strong> modulair, sterk voor low-power en buitenopstellingen.</p>
+        <p><strong>T-Deck/T-Echo/T-Beam:</strong> handig voor mobiele clients en direct UI/BLE use-cases.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="sec-lab">
+    <h2 class="section-title">Interactieve <span>Payload Lab</span></h2>
+    <p class="section-intro">
+      Bouw een voorbeeldpacket en bekijk direct de payload layout, pseudo-hex en decoded JSON.
+      Dit helpt bij het debuggen van field mappings, gateways en packet analyzers.
+    </p>
+
+    <div class="payload-lab">
+      <div class="lab-panel">
+        <h3>Packet instellingen</h3>
+
+        <div class="field">
+          <label for="lab-protocol">Protocol</label>
+          <select id="lab-protocol">
+            <option value="lorawan">LoRaWAN</option>
+            <option value="meshtastic">Meshtastic</option>
+            <option value="meshcore" selected>MeshCore</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="lab-type">Payload type</label>
+          <select id="lab-type"></select>
+        </div>
+
+        <div class="field">
+          <label for="lab-message">App payload / bericht</label>
+          <textarea id="lab-message" rows="4">Hallo Hackerspace Drenthe</textarea>
+        </div>
+
+        <div class="controls-grid">
+          <div class="field">
+            <label for="lab-fport">FPort</label>
+            <input id="lab-fport" type="number" min="0" max="223" value="1">
+          </div>
+          <div class="field">
+            <label for="lab-hop">Hop limit</label>
+            <input id="lab-hop" type="number" min="1" max="64" value="5">
+          </div>
+          <div class="field">
+            <label for="lab-src">Source ID</label>
+            <input id="lab-src" type="text" value="A1B2C3D4">
+          </div>
+          <div class="field">
+            <label for="lab-dst">Destination ID</label>
+            <input id="lab-dst" type="text" value="D4C3B2A1">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn primary" id="btn-build">Bouw packet</button>
+          <button class="btn" id="btn-sample-text">Sample text</button>
+          <button class="btn" id="btn-sample-telemetry">Sample telemetry</button>
+          <button class="btn" id="btn-copy-hex">Kopieer hex</button>
+        </div>
+      </div>
+
+      <div class="output-panel">
+        <h3>Packet output</h3>
+        <div class="card" style="margin-bottom:10px;padding:10px;">
+          <p id="lab-summary" style="font-size:.84rem;color:var(--dim);line-height:1.6;">Nog geen packet gebouwd.</p>
+        </div>
+
+        <div class="seg-list" id="lab-layout"></div>
+
+        <div style="margin-top:12px;">
+          <h3 style="font-size:.86rem;margin-bottom:5px;">Pseudo hex</h3>
+          <pre class="mono" id="lab-hex">-</pre>
+        </div>
+
+        <div style="margin-top:10px;">
+          <h3 style="font-size:.86rem;margin-bottom:5px;">Decoded JSON</h3>
+          <pre class="mono" id="lab-json">-</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="sec-triple">
+    <h2 class="section-title">Zelfde bericht, <span>3 protocollen</span></h2>
+    <p class="section-intro">
+      Vergelijk exact hetzelfde bericht side-by-side als LoRaWAN data frame, Meshtastic text packet,
+      en MeshCore TXT_MSG. Zo zie je direct verschil in header-overhead en veldopbouw.
+    </p>
+
+    <div class="triple-wrap">
+      <div class="triple-controls">
+        <div class="field">
+          <label for="tri-message">Bericht</label>
+          <textarea id="tri-message" rows="2">HSD testbericht 01</textarea>
+        </div>
+        <div class="field">
+          <label for="tri-fport">LoRaWAN FPort</label>
+          <input id="tri-fport" type="number" min="1" max="223" value="1">
+        </div>
+        <div class="field">
+          <label for="tri-hop">Hop limit (mesh)</label>
+          <input id="tri-hop" type="number" min="1" max="64" value="5">
+        </div>
+        <div class="field">
+          <label for="tri-src">Source ID</label>
+          <input id="tri-src" type="text" value="A1B2C3D4">
+        </div>
+        <div class="field">
+          <label for="tri-dst">Destination ID</label>
+          <input id="tri-dst" type="text" value="D4C3B2A1">
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:10px;">
+        <button class="btn primary" id="btn-tri-build">Vergelijk nu</button>
+        <button class="btn" id="btn-tri-short">Korte payload</button>
+        <button class="btn" id="btn-tri-json">JSON payload</button>
+        <button class="btn" id="btn-tri-copy">Kopieer alle hex</button>
+      </div>
+
+      <div class="triple-grid">
+        <article class="proto-card">
+          <h3>LoRaWAN</h3>
+          <p id="tri-lorawan-summary">-</p>
+          <div class="mini-layout" id="tri-lorawan-layout"></div>
+          <pre class="mono" id="tri-lorawan-hex">-</pre>
+        </article>
+        <article class="proto-card">
+          <h3>Meshtastic</h3>
+          <p id="tri-meshtastic-summary">-</p>
+          <div class="mini-layout" id="tri-meshtastic-layout"></div>
+          <pre class="mono" id="tri-meshtastic-hex">-</pre>
+        </article>
+        <article class="proto-card">
+          <h3>MeshCore</h3>
+          <p id="tri-meshcore-summary">-</p>
+          <div class="mini-layout" id="tri-meshcore-layout"></div>
+          <pre class="mono" id="tri-meshcore-hex">-</pre>
+        </article>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:12px;">
+      <strong>Interpretatie tip:</strong> als payload kort is, bepaalt header-overhead een groot deel van airtime.
+      Bij langere payloads wordt app-data dominant en loont compacte serialisatie nog steeds.
+    </div>
+  </section>
+
+  <section class="section" id="sec-meshcore">
+    <h2 class="section-title">MeshCore <span>protocol focus</span></h2>
+    <p class="section-intro">
+      Volgens de publieke FAQ/diagnostics verwijst MeshCore naar meerdere payload type codes.
+      Onderstaande tabel is handig bij packet logging en debugging van analyzer output.
+    </p>
+
+    <div class="meshcore-grid">
+      <div class="mc-box">
+        <h3 style="font-size:.95rem;margin-bottom:8px;">Type inspector</h3>
+        <div class="field" style="margin-bottom:8px;">
+          <label for="mc-type-select">MeshCore payload type</label>
+          <select id="mc-type-select">
+            <option value="0">0x00 PAYLOAD_TYPE_REQ</option>
+            <option value="1">0x01 PAYLOAD_TYPE_RESPONSE</option>
+            <option value="2" selected>0x02 PAYLOAD_TYPE_TXT_MSG</option>
+            <option value="3">0x03 PAYLOAD_TYPE_ACK</option>
+            <option value="4">0x04 PAYLOAD_TYPE_ADVERT</option>
+            <option value="5">0x05 PAYLOAD_TYPE_GRP_TXT</option>
+            <option value="6">0x06 PAYLOAD_TYPE_GRP_DATA</option>
+            <option value="7">0x07 PAYLOAD_TYPE_ANON_REQ</option>
+            <option value="8">0x08 PAYLOAD_TYPE_PATH</option>
+          </select>
+        </div>
+        <pre class="mono" id="mc-type-output">-</pre>
+      </div>
+
+      <div class="mc-box">
+        <h3 style="font-size:.95rem;margin-bottom:8px;">Payload type referentie</h3>
+        <table class="mc-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Naam</th>
+              <th>Doel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>0x00</td><td>REQ</td><td>Request packet naar bestemming</td></tr>
+            <tr><td>0x01</td><td>RESPONSE</td><td>Antwoord op request</td></tr>
+            <tr><td>0x02</td><td>TXT_MSG</td><td>Direct textbericht</td></tr>
+            <tr><td>0x03</td><td>ACK</td><td>Bevestiging ontvangst</td></tr>
+            <tr><td>0x04</td><td>ADVERT</td><td>Node advert (naam/positie/public key metadata)</td></tr>
+            <tr><td>0x05</td><td>GRP_TXT</td><td>Group text via kanaalhash</td></tr>
+            <tr><td>0x06</td><td>GRP_DATA</td><td>Group datagram / blob</td></tr>
+            <tr><td>0x07</td><td>ANON_REQ</td><td>Request met anonieme flow</td></tr>
+            <tr><td>0x08</td><td>PATH</td><td>Padinformatie voor routing</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:12px;">
+      <strong>Opmerking:</strong> firmwareversies kunnen velden uitbreiden of intern anders serialiseren.
+      Gebruik voor productie-debug altijd de analyzer/tooling die bij jouw firmwareversie hoort.
+    </div>
+  </section>
+
+  <section class="section" id="sec-cheatsheet">
+    <h2 class="section-title">Snelle <span>cheatsheet</span></h2>
+    <p class="section-intro">Als je snel wil kiezen welk protocol en welk payloadmodel je nodig hebt, gebruik dit schema.</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Situatie</th>
+          <th>Kies</th>
+          <th>Waarom</th>
+          <th>Payload focus</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sensordata naar cloud dashboard</td>
+          <td>LoRaWAN</td>
+          <td>Gateway + server architectuur, schaalbaar voor IoT</td>
+          <td>FPort + app codec (CBOR/bytes/JSON mapping)</td>
+        </tr>
+        <tr>
+          <td>Off-grid community berichten</td>
+          <td>Meshtastic</td>
+          <td>Gebruiksvriendelijke mesh chat met veel clients</td>
+          <td>PortNum payloads: text, position, telemetry</td>
+        </tr>
+        <tr>
+          <td>MeshCore repeaters/rooms omgeving</td>
+          <td>MeshCore</td>
+          <td>Messaging-first routing met specifieke packet types</td>
+          <td>Typecode (REQ/TXT_MSG/ACK/ADVERT/PATH)</td>
+        </tr>
+        <tr>
+          <td>Lange berichten met lage airtime druk</td>
+          <td>Alle protocollen: optimize</td>
+          <td>Kort payload, lager SF indien link toelaat, BW afstemmen</td>
+          <td>Payload compacter maken en retries beperken</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2" style="margin-top:14px;">
+      <article class="card">
+        <h3>Payload ontwerp tips</h3>
+        <p><strong>1.</strong> Houd berichten kort; airtime groeit snel bij hoge SF.</p>
+        <p><strong>2.</strong> Voeg een klein versienummer toe in app payloads.</p>
+        <p><strong>3.</strong> Gebruik ACK alleen waar nodig, niet voor elke update.</p>
+      </article>
+      <article class="card">
+        <h3>Debug workflow</h3>
+        <p><strong>1.</strong> Controleer RF settings (freq, SF, BW, CR) eerst.</p>
+        <p><strong>2.</strong> Check daarna protocol fields (port/type/hop).</p>
+        <p><strong>3.</strong> Vergelijk decoded payload met expected schema.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<script>
+const navTabs = document.querySelectorAll('.nav-tab');
+const sections = document.querySelectorAll('.section');
+navTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    navTabs.forEach(t => t.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    const target = document.getElementById('sec-' + tab.dataset.sec);
+    if (target) target.classList.add('active');
+  });
+});
+
+const hardwareProfiles = {
+  lorawan: {
+    sensor: {
+      battery: {
+        chip: 'SX1262 + low-power MCU',
+        boards: ['RAK4631 WisBlock', 'Seeed low-power nRF52 + LoRa'],
+        settings: 'SF10/SF11, BW125, uplink compact payload',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['RAK WisBlock + solar', 'Heltec T114 class boards'],
+        settings: 'SF9-SF11 afhankelijk linkbudget',
+      },
+      mains: {
+        chip: 'SX1276 of SX1262',
+        boards: ['Heltec V3', 'T-Beam vaste opstelling'],
+        settings: 'ADR aan, periodieke uplink',
+      },
+    },
+    portable: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['T-Echo achtige portable board'],
+        settings: 'Korte payloads, duty-cycle bewaken',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['T-Beam + externe power'],
+        settings: 'Midden-SF voor balans airtime/range',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Laptop gateway companion'],
+        settings: 'Testmodus, geen zware uplink rates',
+      },
+    },
+    fixed: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['RAK solar node'],
+        settings: 'SF10, BW125, slaapintervallen',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['WisBlock outdoor set'],
+        settings: 'Lang interval, low overhead payload',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Heltec V3'],
+        settings: 'Gateway-backhauled sensor node',
+      },
+    },
+    relay: {
+      battery: {
+        chip: 'Niet aanbevolen',
+        boards: ['Relay op batterij beperkt bruikbaar'],
+        settings: 'Energiebudget meestal te krap',
+      },
+      solar: {
+        chip: 'SX130x concentrator kant of krachtige node',
+        boards: ['Solar repeater setup'],
+        settings: 'Afhankelijk van infrastructuur',
+      },
+      mains: {
+        chip: 'Gateway-class hardware',
+        boards: ['LoRaWAN concentrator'],
+        settings: 'Backhaul + vaste antenne-installatie',
+      },
+    },
+  },
+  meshtastic: {
+    sensor: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['RAK4631', 'T1000-E class trackers'],
+        settings: 'Telemetry port payload compact houden',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['WisBlock solar nodes'],
+        settings: 'Router role alleen waar nodig',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Heltec V3 vaste mesh node'],
+        settings: 'Router mogelijk, maar airtime monitoren',
+      },
+    },
+    portable: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['T-Echo', 'T-Beam'],
+        settings: 'TEXT_MESSAGE_APP en POSITION_APP slim gebruiken',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['Portable + powerbank/solar'],
+        settings: 'Beperk beacon frequentie',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Desktop test node'],
+        settings: 'Gebruik voor lab en protocoltesten',
+      },
+    },
+    fixed: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['Low-power outdoor router'],
+        settings: 'Lage update rates, betrouwbare antenne',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['Solar relay nodes'],
+        settings: 'Airtime en role tuning is cruciaal',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Heltec/T-Beam fixed'],
+        settings: 'Goed voor lokale backbone',
+      },
+    },
+    relay: {
+      battery: {
+        chip: 'Beperkt zinvol',
+        boards: ['Alleen tijdelijk'],
+        settings: 'Relay kost energie en airtime',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['Outdoor relay build'],
+        settings: 'Balance between reliability and chatter',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Station G2 of vergelijkbaar'],
+        settings: 'Continue router rol mogelijk',
+      },
+    },
+  },
+  meshcore: {
+    sensor: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['RAK4631 companion builds'],
+        settings: 'Gebruik compacte payloads voor GRP_DATA waar nodig',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['RAK/Heltec outdoor'],
+        settings: 'Advert interval en repeat policy slim instellen',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Heltec V3'],
+        settings: 'Geschikt voor vaste service node',
+      },
+    },
+    portable: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['T-Deck / T-Pager / companion BLE'],
+        settings: 'TXT_MSG en ADVERT gebruik afgestemd op netwerkdruk',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['Portable with external power'],
+        settings: 'Lagere advert frequentie bij beperkt vermogen',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Desk client + companion'],
+        settings: 'Lab/debug met analyzer mogelijk',
+      },
+    },
+    fixed: {
+      battery: {
+        chip: 'SX1262',
+        boards: ['RAK low-power companion'],
+        settings: 'Route discovery met beheerst verkeer',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['Solar fixed node'],
+        settings: 'Goed voor continue aanwezigheid in mesh',
+      },
+      mains: {
+        chip: 'SX1276/SX1262',
+        boards: ['Heltec V3 / WisBlock vaste node'],
+        settings: 'Stabiele node voor lokale dekking',
+      },
+    },
+    relay: {
+      battery: {
+        chip: 'Niet ideaal',
+        boards: ['Alleen korte tijdelijke opstelling'],
+        settings: 'Repeater gedrag kost relatief veel energie',
+      },
+      solar: {
+        chip: 'SX1262',
+        boards: ['RAK4631 repeater firmware'],
+        settings: 'Hoog plaatsen en flood beleid tune-en',
+      },
+      mains: {
+        chip: 'SX1262/SX1276',
+        boards: ['Heltec V3 of RAK repeater'],
+        settings: 'Beste voor stabiele MeshCore backbone',
+      },
+    },
+  },
+};
+
+const hwProtocol = document.getElementById('hw-protocol');
+const hwUse = document.getElementById('hw-use');
+const hwPower = document.getElementById('hw-power');
+const hwOutput = document.getElementById('hw-output');
+
+function updateHardwareAdvisor() {
+  const protocol = hwProtocol.value;
+  const use = hwUse.value;
+  const power = hwPower.value;
+  const profile = (((hardwareProfiles[protocol] || {})[use] || {})[power]) || null;
+  if (!profile) {
+    hwOutput.innerHTML = '<h4>Geen profiel gevonden</h4><p>Probeer een andere combinatie.</p>';
+    return;
+  }
+
+  hwOutput.innerHTML = `
+    <h4>Aanbevolen hardwareprofiel: ${protocol.toUpperCase()} / ${use} / ${power}</h4>
+    <p><strong>Radiochip:</strong> ${profile.chip}</p>
+    <p><strong>Startinstellingen:</strong> ${profile.settings}</p>
+    <ul>${profile.boards.map(b => `<li>${b}</li>`).join('')}</ul>
+  `;
+}
+
+[hwProtocol, hwUse, hwPower].forEach(el => {
+  el.addEventListener('change', updateHardwareAdvisor);
+});
+
+const payloadTypes = {
+  lorawan: [
+    { id:'join_request', label:'Join Request', note:'OTAA join packet' },
+    { id:'join_accept', label:'Join Accept', note:'Network join response' },
+    { id:'unconfirmed_up', label:'Unconfirmed Data Up', note:'Uplink zonder confirmatie' },
+    { id:'confirmed_up', label:'Confirmed Data Up', note:'Uplink met ACK flow' },
+    { id:'mac_cmd', label:'MAC Command (FPort 0)', note:'Link management command' },
+  ],
+  meshtastic: [
+    { id:'text', label:'Text Message', note:'Chatbericht payload' },
+    { id:'position', label:'Position', note:'Locatie update payload' },
+    { id:'telemetry', label:'Telemetry', note:'Sensor en batterijdata' },
+    { id:'nodeinfo', label:'Node Info', note:'Device metadata' },
+  ],
+  meshcore: [
+    { id:'req', label:'0x00 REQ', note:'Request packet' },
+    { id:'response', label:'0x01 RESPONSE', note:'Response packet' },
+    { id:'txt_msg', label:'0x02 TXT_MSG', note:'Text payload' },
+    { id:'ack', label:'0x03 ACK', note:'Delivery acknowledgment' },
+    { id:'advert', label:'0x04 ADVERT', note:'Node advert payload' },
+    { id:'grp_txt', label:'0x05 GRP_TXT', note:'Kanaal text payload' },
+    { id:'grp_data', label:'0x06 GRP_DATA', note:'Kanaal datagram payload' },
+    { id:'anon_req', label:'0x07 ANON_REQ', note:'Anonymous request' },
+    { id:'path', label:'0x08 PATH', note:'Routing path info' },
+  ],
+};
+
+const labProtocol = document.getElementById('lab-protocol');
+const labType = document.getElementById('lab-type');
+const labMessage = document.getElementById('lab-message');
+const labFport = document.getElementById('lab-fport');
+const labHop = document.getElementById('lab-hop');
+const labSrc = document.getElementById('lab-src');
+const labDst = document.getElementById('lab-dst');
+const labSummary = document.getElementById('lab-summary');
+const labLayout = document.getElementById('lab-layout');
+const labHex = document.getElementById('lab-hex');
+const labJson = document.getElementById('lab-json');
+
+const triMessage = document.getElementById('tri-message');
+const triFport = document.getElementById('tri-fport');
+const triHop = document.getElementById('tri-hop');
+const triSrc = document.getElementById('tri-src');
+const triDst = document.getElementById('tri-dst');
+const triLorawanSummary = document.getElementById('tri-lorawan-summary');
+const triMeshtasticSummary = document.getElementById('tri-meshtastic-summary');
+const triMeshcoreSummary = document.getElementById('tri-meshcore-summary');
+const triLorawanLayout = document.getElementById('tri-lorawan-layout');
+const triMeshtasticLayout = document.getElementById('tri-meshtastic-layout');
+const triMeshcoreLayout = document.getElementById('tri-meshcore-layout');
+const triLorawanHex = document.getElementById('tri-lorawan-hex');
+const triMeshtasticHex = document.getElementById('tri-meshtastic-hex');
+const triMeshcoreHex = document.getElementById('tri-meshcore-hex');
+
+let latestHex = '';
+let latestTripleHex = '';
+
+function cleanHex(input, fallback) {
+  const c = (input || '').replace(/[^0-9a-f]/gi, '').toUpperCase();
+  if (!c) return fallback;
+  return c.padEnd(8, '0').slice(0, 8);
+}
+
+function textToHex(text) {
+  const bytes = new TextEncoder().encode(text || '');
+  const list = Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase());
+  return list.join(' ');
+}
+
+function pseudoMacFromHex(hexStr) {
+  const compact = hexStr.replace(/\s+/g, '');
+  let sum = 0;
+  for (let i = 0; i < compact.length; i++) sum = (sum + compact.charCodeAt(i) * (i + 3)) & 0xffffffff;
+  const s = sum.toString(16).toUpperCase().padStart(8, '0');
+  return `${s.slice(0,2)} ${s.slice(2,4)} ${s.slice(4,6)} ${s.slice(6,8)}`;
+}
+
+function renderLayout(segments) {
+  const total = Math.max(1, segments.reduce((a, s) => a + s.size, 0));
+  const palette = ['#00e5ff','#00ff88','#ffd060','#ff6b00','#c864ff','#8ab4ff','#7ee0a0'];
+  labLayout.innerHTML = segments.map((s, idx) => {
+    const w = Math.max(2, Math.round((s.size / total) * 100));
+    return `
+      <div class="seg-row">
+        <div class="seg-name">${s.name}</div>
+        <div class="seg-bar"><div class="seg-fill" style="width:${w}%;background:${palette[idx % palette.length]};"></div></div>
+        <div class="seg-size">${s.size} B</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderMiniLayout(targetEl, segments) {
+  if (!targetEl) return;
+  const total = Math.max(1, segments.reduce((a, s) => a + s.size, 0));
+  const palette = ['#00e5ff','#00ff88','#ffd060','#ff6b00','#c864ff','#8ab4ff','#7ee0a0'];
+  targetEl.innerHTML = segments.map((s, idx) => {
+    const w = Math.max(2, Math.round((s.size / total) * 100));
+    return `
+      <div class="mini-row">
+        <div class="mini-name">${s.name}</div>
+        <div class="mini-bar"><div class="mini-fill" style="width:${w}%;background:${palette[idx % palette.length]};"></div></div>
+        <div class="mini-size">${s.size}B</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildLorawanPacket(typeId, dataHex, msg, fport) {
+  const payloadBytes = msg.length ? Math.min(51, new TextEncoder().encode(msg).length) : 0;
+  const devAddr = dataHex;
+  const baseSegments = [
+    { name:'MHDR', size:1 },
+    { name:'DevAddr', size:4 },
+    { name:'FCtrl', size:1 },
+    { name:'FCnt', size:2 },
+  ];
+
+  if (typeId === 'join_request') {
+    const segments = [
+      { name:'MHDR', size:1 },
+      { name:'JoinEUI', size:8 },
+      { name:'DevEUI', size:8 },
+      { name:'DevNonce', size:2 },
+      { name:'MIC', size:4 },
+    ];
+    const hex = '00 | 10 20 30 40 50 60 70 80 | A1 B2 C3 D4 E5 F6 01 02 | 12 34 | 9A BC DE F0';
+    const decoded = {
+      protocol: 'LoRaWAN',
+      messageType: 'Join Request',
+      joinEUI: '1020304050607080',
+      devEUI: 'A1B2C3D4E5F60102',
+      devNonce: 0x1234,
+      mic: '9ABCDEF0',
+      note: 'Join frames hebben eigen structuur; geen FPort in dit frame.',
+    };
+    return { segments, hex, decoded, summary: 'LoRaWAN OTAA Join Request frame.' };
+  }
+
+  if (typeId === 'join_accept') {
+    const segments = [
+      { name:'MHDR', size:1 },
+      { name:'AppNonce', size:3 },
+      { name:'NetID', size:3 },
+      { name:'DevAddr', size:4 },
+      { name:'DLSettings', size:1 },
+      { name:'RxDelay', size:1 },
+      { name:'MIC', size:4 },
+    ];
+    const hex = '20 | 01 02 03 | 00 00 13 | 26 01 1B DA | 05 | 01 | AB CD EF 12';
+    const decoded = {
+      protocol: 'LoRaWAN',
+      messageType: 'Join Accept',
+      devAddr: '26011BDA',
+      rxDelay: 1,
+      note: 'Join Accept is network-originated en normaal ge-encrypt op netwerklaag.',
+    };
+    return { segments, hex, decoded, summary: 'LoRaWAN Join Accept structuur.' };
+  }
+
+  const effectiveFport = typeId === 'mac_cmd' ? 0 : Math.max(1, Math.min(223, fport));
+  const payloadSegmentName = effectiveFport === 0 ? 'MACPayload' : 'FRMPayload';
+  const segments = [
+    ...baseSegments,
+    { name:'FPort', size:1 },
+    { name:payloadSegmentName, size:payloadBytes || 1 },
+    { name:'MIC', size:4 },
+  ];
+
+  const payloadHex = dataHex.slice(0, 8).match(/../g).join(' ') + (msg ? ' ' + textToHex(msg).slice(0, 80) : '');
+  const mic = pseudoMacFromHex(payloadHex + String(effectiveFport));
+  const mhdr = typeId === 'confirmed_up' ? '80' : '40';
+  const hex = `${mhdr} | ${devAddr.match(/../g).join(' ')} | 00 | 01 00 | ${effectiveFport.toString(16).padStart(2, '0').toUpperCase()} | ${payloadHex.trim()} | ${mic}`;
+  const decoded = {
+    protocol: 'LoRaWAN',
+    messageType: typeId,
+    devAddr,
+    fPort: effectiveFport,
+    payloadBytes,
+    payloadMeaning: effectiveFport === 0 ? 'MAC commands' : 'Application payload',
+    note: 'Applicatiepayload wordt normaal met AppSKey versleuteld.',
+  };
+  const summary = `LoRaWAN data frame (${typeId}) met FPort ${effectiveFport}.`;
+  return { segments, hex, decoded, summary };
+}
+
+function buildMeshtasticPacket(typeId, dataHex, msg, hop, src, dst) {
+  const payloadHex = msg ? textToHex(msg).slice(0, 120) : '00';
+  const payloadBytes = Math.max(1, Math.ceil(payloadHex.replace(/\s+/g, '').length / 2));
+  const portMap = {
+    text: 'TEXT_MESSAGE_APP',
+    position: 'POSITION_APP',
+    telemetry: 'TELEMETRY_APP',
+    nodeinfo: 'NODEINFO_APP',
+  };
+  const segments = [
+    { name:'PacketHeader', size:7 },
+    { name:'RoutingMeta', size:4 },
+    { name:'PortNum', size:1 },
+    { name:'Payload', size:payloadBytes },
+    { name:'Auth/MAC', size:4 },
+  ];
+  const typeCode = { text:'01', position:'03', telemetry:'04', nodeinfo:'05' }[typeId] || '01';
+  const headerHex = `${src.match(/../g).join(' ')} ${dst.match(/../g).join(' ')} ${Math.min(63, hop).toString(16).padStart(2, '0').toUpperCase()}`;
+  const mac = pseudoMacFromHex(headerHex + payloadHex + typeCode);
+  const hex = `${headerHex} | 00 10 00 00 | ${typeCode} | ${payloadHex} | ${mac}`;
+
+  const decoded = {
+    protocol: 'Meshtastic',
+    from: src,
+    to: dst,
+    hopLimit: Math.min(63, hop),
+    portNum: portMap[typeId] || 'TEXT_MESSAGE_APP',
+    payloadType: typeId,
+    payloadPreview: msg,
+    note: 'Meshtastic gebruikt protobuf payloads; bytes hier zijn een vereenvoudigde representatie.',
+  };
+
+  return {
+    segments,
+    hex,
+    decoded,
+    summary: `Meshtastic packet met ${portMap[typeId] || 'TEXT_MESSAGE_APP'} en hop-limit ${Math.min(63, hop)}.`,
+  };
+}
+
+function buildMeshcorePacket(typeId, dataHex, msg, hop, src, dst) {
+  const typeCodes = {
+    req: 0x00,
+    response: 0x01,
+    txt_msg: 0x02,
+    ack: 0x03,
+    advert: 0x04,
+    grp_txt: 0x05,
+    grp_data: 0x06,
+    anon_req: 0x07,
+    path: 0x08,
+  };
+  const typeCode = typeCodes[typeId] ?? 0x02;
+  const payloadHex = msg ? textToHex(msg).slice(0, 140) : '00';
+  const payloadBytes = Math.max(1, Math.ceil(payloadHex.replace(/\s+/g, '').length / 2));
+  const headerByte = (0x80 | (typeCode & 0x0f)).toString(16).toUpperCase().padStart(2, '0');
+
+  const segments = [
+    { name:'Header', size:1 },
+    { name:'SrcHash', size:4 },
+    { name:'DstHash', size:4 },
+    { name:'Hops', size:1 },
+    { name:'Len', size:1 },
+    { name:'EncPayload', size:payloadBytes },
+    { name:'MAC', size:4 },
+  ];
+
+  const srcHex = src.match(/../g).join(' ');
+  const dstHex = dst.match(/../g).join(' ');
+  const hopsHex = Math.min(64, hop).toString(16).toUpperCase().padStart(2, '0');
+  const lenHex = payloadBytes.toString(16).toUpperCase().padStart(2, '0');
+  const mac = pseudoMacFromHex(headerByte + src + dst + payloadHex + hopsHex);
+  const hex = `${headerByte} | ${srcHex} | ${dstHex} | ${hopsHex} | ${lenHex} | ${payloadHex} | ${mac}`;
+
+  const decoded = {
+    protocol: 'MeshCore',
+    payloadTypeCode: '0x' + typeCode.toString(16).toUpperCase().padStart(2, '0'),
+    payloadTypeName: typeId,
+    srcHash: src,
+    dstHash: dst,
+    hopLimit: Math.min(64, hop),
+    payloadBytes,
+    payloadPreview: msg,
+    note: 'MeshCore packet modellering gebaseerd op publiek gedeelde payload type referenties en diagnostics.',
+  };
+
+  return {
+    segments,
+    hex,
+    decoded,
+    summary: `MeshCore packet type 0x${typeCode.toString(16).toUpperCase().padStart(2, '0')} met hop-limit ${Math.min(64, hop)}.`,
+  };
+}
+
+function refillPayloadTypes() {
+  const protocol = labProtocol.value;
+  const arr = payloadTypes[protocol] || [];
+  labType.innerHTML = arr.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
+}
+
+function buildPacket() {
+  const protocol = labProtocol.value;
+  const typeId = labType.value;
+  const msg = labMessage.value.trim();
+  const fport = Number(labFport.value) || 1;
+  const hop = Number(labHop.value) || 5;
+  const src = cleanHex(labSrc.value, 'A1B2C3D4');
+  const dst = cleanHex(labDst.value, 'D4C3B2A1');
+
+  let result;
+  if (protocol === 'lorawan') {
+    result = buildLorawanPacket(typeId, src, msg, fport);
+  } else if (protocol === 'meshtastic') {
+    result = buildMeshtasticPacket(typeId, src, msg, hop, src, dst);
+  } else {
+    result = buildMeshcorePacket(typeId, src, msg, hop, src, dst);
+  }
+
+  labSummary.textContent = result.summary;
+  renderLayout(result.segments);
+  labHex.textContent = result.hex;
+  labJson.textContent = JSON.stringify(result.decoded, null, 2);
+  latestHex = result.hex;
+}
+
+function buildTripleComparison() {
+  if (!triMessage) return;
+
+  const msg = triMessage.value.trim();
+  const fport = Math.max(1, Math.min(223, Number(triFport.value) || 1));
+  const hop = Math.max(1, Math.min(64, Number(triHop.value) || 5));
+  const src = cleanHex(triSrc.value, 'A1B2C3D4');
+  const dst = cleanHex(triDst.value, 'D4C3B2A1');
+
+  const lw = buildLorawanPacket('unconfirmed_up', src, msg, fport);
+  const mt = buildMeshtasticPacket('text', src, msg, hop, src, dst);
+  const mc = buildMeshcorePacket('txt_msg', src, msg, hop, src, dst);
+
+  triLorawanSummary.textContent = lw.summary;
+  triMeshtasticSummary.textContent = mt.summary;
+  triMeshcoreSummary.textContent = mc.summary;
+
+  renderMiniLayout(triLorawanLayout, lw.segments);
+  renderMiniLayout(triMeshtasticLayout, mt.segments);
+  renderMiniLayout(triMeshcoreLayout, mc.segments);
+
+  triLorawanHex.textContent = lw.hex;
+  triMeshtasticHex.textContent = mt.hex;
+  triMeshcoreHex.textContent = mc.hex;
+
+  latestTripleHex = [
+    'LoRaWAN:    ' + lw.hex,
+    'Meshtastic: ' + mt.hex,
+    'MeshCore:   ' + mc.hex,
+  ].join('\n');
+}
+
+const mcDetails = {
+  0: {
+    name: 'PAYLOAD_TYPE_REQ',
+    use: 'Request frame naar een specifieke bestemming.',
+    sample: {
+      trigger: 'Client start data request of control request',
+      payload: 'timestamp + encrypted blob',
+      behavior: 'verwacht RESPONSE (0x01) of retry/route fallback',
+    },
+  },
+  1: {
+    name: 'PAYLOAD_TYPE_RESPONSE',
+    use: 'Response op REQ of ANON_REQ.',
+    sample: {
+      trigger: 'Antwoord op eerder request',
+      payload: 'timestamp + response data',
+      behavior: 'kan ACK flow impliceren afhankelijk van app logic',
+    },
+  },
+  2: {
+    name: 'PAYLOAD_TYPE_TXT_MSG',
+    use: 'Direct text message.',
+    sample: {
+      trigger: 'User chatbericht',
+      payload: 'timestamp + text',
+      behavior: 'vaak gevolgd door ACK (0x03)',
+    },
+  },
+  3: {
+    name: 'PAYLOAD_TYPE_ACK',
+    use: 'Lichte delivery bevestiging.',
+    sample: {
+      trigger: 'Ontvanger bevestigt packet',
+      payload: 'ack id / kort control veld',
+      behavior: 'kan retries stoppen',
+    },
+  },
+  4: {
+    name: 'PAYLOAD_TYPE_ADVERT',
+    use: 'Node advert met identity/metadata.',
+    sample: {
+      trigger: 'Advert action of periodieke advert',
+      payload: 'naam, positie, public key metadata',
+      behavior: 'nodes ontdekken elkaar',
+    },
+  },
+  5: {
+    name: 'PAYLOAD_TYPE_GRP_TXT',
+    use: 'Group text op kanaal.',
+    sample: {
+      trigger: 'Bericht in publieke/private groep',
+      payload: 'timestamp + "name: msg" patroon',
+      behavior: 'flood-style distributie mogelijk',
+    },
+  },
+  6: {
+    name: 'PAYLOAD_TYPE_GRP_DATA',
+    use: 'Group datagram / blob.',
+    sample: {
+      trigger: 'Niet-tekst groepdata',
+      payload: 'timestamp + binary blob',
+      behavior: 'handig voor compacte sensor payloads',
+    },
+  },
+  7: {
+    name: 'PAYLOAD_TYPE_ANON_REQ',
+    use: 'Anonieme request flow.',
+    sample: {
+      trigger: 'Request zonder volledige identity leak',
+      payload: 'dest hash + ephemeral key context + data',
+      behavior: 'verwacht RESPONSE of failover',
+    },
+  },
+  8: {
+    name: 'PAYLOAD_TYPE_PATH',
+    use: 'Routing path informatie.',
+    sample: {
+      trigger: 'Padleren of route update',
+      payload: 'path + extra metadata',
+      behavior: 'verbetert vervolgroutes voor doelnode',
+    },
+  },
+};
+
+const mcTypeSelect = document.getElementById('mc-type-select');
+const mcTypeOutput = document.getElementById('mc-type-output');
+
+function updateMcTypeInspector() {
+  const code = Number(mcTypeSelect.value);
+  const d = mcDetails[code];
+  if (!d) {
+    mcTypeOutput.textContent = '-';
+    return;
+  }
+  mcTypeOutput.textContent = JSON.stringify({
+    code: '0x' + code.toString(16).toUpperCase().padStart(2, '0'),
+    name: d.name,
+    usage: d.use,
+    sample: d.sample,
+  }, null, 2);
+}
+
+function copyHexToClipboard() {
+  if (!latestHex) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(latestHex);
+  }
+}
+
+document.getElementById('btn-build').addEventListener('click', buildPacket);
+document.getElementById('btn-sample-text').addEventListener('click', () => {
+  labMessage.value = 'Noodtest HSD checkpoint 3';
+  buildPacket();
+});
+document.getElementById('btn-sample-telemetry').addEventListener('click', () => {
+  labMessage.value = '{"temp":18.7,"hum":64,"bat":3.92}';
+  buildPacket();
+});
+document.getElementById('btn-copy-hex').addEventListener('click', copyHexToClipboard);
+
+if (document.getElementById('btn-tri-build')) {
+  document.getElementById('btn-tri-build').addEventListener('click', buildTripleComparison);
+  document.getElementById('btn-tri-short').addEventListener('click', () => {
+    triMessage.value = 'Ping';
+    buildTripleComparison();
+  });
+  document.getElementById('btn-tri-json').addEventListener('click', () => {
+    triMessage.value = '{"node":"hsd-3","temp":17.9,"bat":3.87}';
+    buildTripleComparison();
+  });
+  document.getElementById('btn-tri-copy').addEventListener('click', () => {
+    if (!latestTripleHex) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(latestTripleHex);
+    }
+  });
+  [triMessage, triFport, triHop, triSrc, triDst].forEach(el => {
+    el.addEventListener('input', buildTripleComparison);
+    el.addEventListener('change', buildTripleComparison);
+  });
+}
+
+labProtocol.addEventListener('change', () => {
+  refillPayloadTypes();
+  buildPacket();
+});
+labType.addEventListener('change', buildPacket);
+[labMessage, labFport, labHop, labSrc, labDst].forEach(el => {
+  el.addEventListener('input', buildPacket);
+  el.addEventListener('change', buildPacket);
+});
+mcTypeSelect.addEventListener('change', updateMcTypeInspector);
+
+updateHardwareAdvisor();
+refillPayloadTypes();
+buildPacket();
+buildTripleComparison();
+updateMcTypeInspector();
+</script>
+</body>
+</html>

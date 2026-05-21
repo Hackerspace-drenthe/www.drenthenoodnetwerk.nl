@@ -1,12 +1,12 @@
 /**
- * Page Shell — Injects shared navigation and footer into every page.
- * Single point of maintenance for site-wide layout elements.
+ * Page Shell - injects shared navigation, breadcrumb and footer.
+ * Single point of maintenance for site-wide shell elements.
  */
 
 const NAV_ITEMS = [
   { href: 'index.html', label: 'Home' },
-  { 
-    label: 'Info', 
+  {
+    label: 'Info',
     dropdown: [
       { href: 'wat-is-meshcore.html', label: 'Wat is Meshcore?' },
       { href: 'hoe-werkt-het.html', label: 'Hoe werkt het?' },
@@ -14,14 +14,14 @@ const NAV_ITEMS = [
       { href: 'faq.html', label: 'FAQ' },
     ]
   },
-  { 
+  {
     label: 'Netwerk',
     dropdown: [
       { href: 'netwerk-drenthe.html', label: 'Netwerk Kaart' },
       { href: 'planning.html', label: 'Planning' },
     ]
   },
-  { 
+  {
     label: 'Leren',
     dropdown: [
       { href: 'MeshAcademy/course-hub.html', label: 'MeshAcademy' },
@@ -39,14 +39,248 @@ const SECONDARY_ITEMS = [
   { href: 'sponsor-drenthe-noodnetwerk.html', label: 'Sponsor' },
 ];
 
+const SECTION_PREFIX_MAP = {
+  Info: ['Presentation/'],
+  Netwerk: ['Map/'],
+  Leren: ['MeshAcademy/', 'Tools/'],
+};
+
+const REQUIRED_SHELL_STYLES = [
+  'css/components/nav.css',
+  'css/components/footer.css',
+  'css/components/theme-toggle.css',
+];
+
 /**
- * Determines the current page from the URL.
+ * Determines the current path from URL.
+ * @returns {string} e.g. 'index.html' or 'MeshAcademy/c01-wat-is-mesh.html'
+ */
+function getCurrentPath() {
+  const path = window.location.pathname || '';
+  const trimmed = path.replace(/^\/+/, '');
+
+  if (!trimmed || trimmed.endsWith('/')) {
+    return 'index.html';
+  }
+
+  return trimmed;
+}
+
+/**
+ * Determines the current page from URL.
  * @returns {string} filename like 'index.html'
  */
 function getCurrentPage() {
-  const path = window.location.pathname;
-  const filename = path.substring(path.lastIndexOf('/') + 1);
+  const currentPath = getCurrentPath();
+  const filename = currentPath.substring(currentPath.lastIndexOf('/') + 1);
   return filename || 'index.html';
+}
+
+/**
+ * Builds relative prefix back to root for nested pages.
+ * @returns {string}
+ */
+function getPathPrefix() {
+  const depth = getCurrentPath().split('/').length - 1;
+  return depth > 0 ? '../'.repeat(depth) : '';
+}
+
+/**
+ * Returns true for external links that should not be prefixed.
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isExternalUrl(value) {
+  if (!value) return true;
+
+  return (
+    /^([a-z]+:)?\/\//i.test(value) ||
+    value.startsWith('mailto:') ||
+    value.startsWith('tel:') ||
+    value.startsWith('#') ||
+    value.startsWith('/')
+  );
+}
+
+/**
+ * Prefixes a relative URL with pathPrefix.
+ * @param {string} url
+ * @param {string} pathPrefix
+ * @returns {string}
+ */
+function withPrefix(url, pathPrefix) {
+  if (isExternalUrl(url)) {
+    return url;
+  }
+
+  return `${pathPrefix}${url}`;
+}
+
+/**
+ * Returns true when a target href matches current path/page.
+ * @param {string} href
+ * @param {string} currentPath
+ * @param {string} currentPage
+ * @returns {boolean}
+ */
+function hrefMatchesCurrent(href, currentPath, currentPage) {
+  return href === currentPath || href === currentPage;
+}
+
+/**
+ * Gets a readable label for current page from h1/title.
+ * @param {string} currentPage
+ * @returns {string}
+ */
+function getCurrentPageLabel(currentPage) {
+  const pageHeading = document.querySelector('#main-content h1, main h1, h1');
+
+  if (pageHeading && pageHeading.textContent.trim()) {
+    return pageHeading.textContent.trim();
+  }
+
+  if (document.title) {
+    return document.title.split(' - ')[0].split('—')[0].split('|')[0].trim();
+  }
+
+  return currentPage.replace(/\.html$/i, '').replace(/[-_]/g, ' ');
+}
+
+/**
+ * Computes breadcrumb items for current page.
+ * @param {string} currentPage
+ * @param {string} currentPath
+ * @returns {Array<{label: string, href?: string}>}
+ */
+function getBreadcrumbItems(currentPage, currentPath) {
+  const items = [{ label: 'Home', href: 'index.html' }];
+
+  if (currentPath === 'index.html') {
+    return items;
+  }
+
+  for (const navItem of NAV_ITEMS) {
+    if (navItem.href && hrefMatchesCurrent(navItem.href, currentPath, currentPage)) {
+      if (navItem.href !== 'index.html') {
+        items.push({ label: navItem.label, href: navItem.href });
+      }
+      return items;
+    }
+
+    if (navItem.dropdown) {
+      const activeChild = navItem.dropdown.find(child => hrefMatchesCurrent(child.href, currentPath, currentPage));
+      if (activeChild) {
+        items.push({ label: navItem.label });
+        items.push({ label: activeChild.label, href: activeChild.href });
+        return items;
+      }
+    }
+  }
+
+  if (currentPath.startsWith('MeshAcademy/')) {
+    items.push({ label: 'Leren' });
+    items.push({ label: 'MeshAcademy', href: 'MeshAcademy/course-hub.html' });
+    items.push({ label: getCurrentPageLabel(currentPage) });
+    return items;
+  }
+
+  if (currentPath.startsWith('Tools/')) {
+    items.push({ label: 'Leren' });
+    items.push({ label: 'Tools en simulatoren', href: 'tools.html' });
+    items.push({ label: getCurrentPageLabel(currentPage) });
+    return items;
+  }
+
+  if (currentPath.startsWith('Map/')) {
+    items.push({ label: 'Netwerk' });
+    items.push({ label: 'Planningkaart', href: 'Map/index.html' });
+    return items;
+  }
+
+  if (currentPath.startsWith('Presentation/')) {
+    items.push({ label: 'Info' });
+    items.push({ label: 'Presentatie', href: 'Presentation/index.html' });
+    return items;
+  }
+
+  if (currentPage === 'sponsor-drenthe-noodnetwerk.html') {
+    items.push({ label: 'Meedoen' });
+    items.push({ label: 'Sponsor', href: 'sponsor-drenthe-noodnetwerk.html' });
+    return items;
+  }
+
+  items.push({ label: getCurrentPageLabel(currentPage) });
+  return items;
+}
+
+/**
+ * Creates a single breadcrumb list item.
+ * @param {{label: string, href?: string}} item
+ * @param {boolean} isCurrent
+ * @param {string} pathPrefix
+ * @returns {HTMLElement}
+ */
+function createBreadcrumbNode(item, isCurrent, pathPrefix) {
+  const li = document.createElement('li');
+  li.className = 'site-breadcrumb__item';
+
+  if (!isCurrent && item.href) {
+    const link = document.createElement('a');
+    link.href = withPrefix(item.href, pathPrefix);
+    link.textContent = item.label;
+    li.appendChild(link);
+    return li;
+  }
+
+  const text = document.createElement('span');
+  text.className = 'site-breadcrumb__current';
+  text.textContent = item.label;
+
+  if (isCurrent) {
+    text.setAttribute('aria-current', 'page');
+  }
+
+  li.appendChild(text);
+  return li;
+}
+
+/**
+ * Ensures required shell styles are available.
+ * @param {string} pathPrefix
+ */
+function ensureShellStyles(pathPrefix) {
+  const hasStylesheet = (targetPath) => {
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    return Array.from(links).some(link => {
+      const href = link.getAttribute('href') || '';
+      return href === targetPath || href.endsWith(targetPath);
+    });
+  };
+
+  REQUIRED_SHELL_STYLES.forEach(stylePath => {
+    if (hasStylesheet(stylePath)) {
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = withPrefix(stylePath, pathPrefix);
+    link.setAttribute('data-page-shell-style', stylePath);
+    document.head.appendChild(link);
+  });
+}
+
+/**
+ * Adds top spacing for pages without layout shell spacing.
+ */
+function ensureMainOffset() {
+  const main = document.querySelector('#main-content, main');
+  if (!main) return;
+
+  const paddingTop = parseFloat(window.getComputedStyle(main).paddingTop || '0');
+  if (paddingTop < 40) {
+    main.style.paddingTop = 'calc(var(--nav-height, 64px) + 1rem)';
+  }
 }
 
 /**
@@ -54,15 +288,17 @@ function getCurrentPage() {
  * @param {Object} item - { href, label }
  * @param {string} currentPage - current filename
  * @param {string} className - CSS class prefix
+ * @param {string} currentPath - current relative path
+ * @param {string} pathPrefix - path back to root
  * @returns {HTMLAnchorElement}
  */
-function createNavLink(item, currentPage, className) {
+function createNavLink(item, currentPage, className, currentPath = currentPage, pathPrefix = '') {
   const a = document.createElement('a');
-  a.href = item.href;
+  a.href = withPrefix(item.href, pathPrefix);
   a.textContent = item.label;
   a.className = className;
 
-  if (item.href === currentPage) {
+  if (hrefMatchesCurrent(item.href, currentPath, currentPage)) {
     a.classList.add(`${className}--active`);
     a.setAttribute('aria-current', 'page');
   }
@@ -74,9 +310,11 @@ function createNavLink(item, currentPage, className) {
  * Creates a dropdown menu item for desktop navigation.
  * @param {Object} item - { label, dropdown: [] }
  * @param {string} currentPage
+ * @param {string} currentPath
+ * @param {string} pathPrefix
  * @returns {HTMLElement}
  */
-function createDropdown(item, currentPage) {
+function createDropdown(item, currentPage, currentPath, pathPrefix) {
   const container = document.createElement('div');
   container.className = 'site-nav__dropdown';
 
@@ -90,19 +328,24 @@ function createDropdown(item, currentPage) {
   dropdownContent.className = 'site-nav__dropdown-content';
   dropdownContent.setAttribute('role', 'menu');
 
-  // Check if any child is active
   let hasActiveChild = false;
   item.dropdown.forEach(child => {
-    const link = createNavLink(child, currentPage, 'site-nav__dropdown-link');
+    const link = createNavLink(child, currentPage, 'site-nav__dropdown-link', currentPath, pathPrefix);
     link.setAttribute('role', 'menuitem');
     dropdownContent.appendChild(link);
-    
-    if (child.href === currentPage) {
+
+    if (hrefMatchesCurrent(child.href, currentPath, currentPage)) {
       hasActiveChild = true;
     }
   });
 
-  // Mark parent as active if child is active
+  if (!hasActiveChild) {
+    const sectionPrefixes = SECTION_PREFIX_MAP[item.label] || [];
+    if (sectionPrefixes.some(prefix => currentPath.startsWith(prefix))) {
+      hasActiveChild = true;
+    }
+  }
+
   if (hasActiveChild) {
     button.classList.add('site-nav__link--active');
   }
@@ -116,9 +359,11 @@ function createDropdown(item, currentPage) {
  * Creates a mobile accordion item.
  * @param {Object} item - { label, dropdown: [] }
  * @param {string} currentPage
+ * @param {string} currentPath
+ * @param {string} pathPrefix
  * @returns {HTMLElement}
  */
-function createMobileAccordion(item, currentPage) {
+function createMobileAccordion(item, currentPage, currentPath, pathPrefix) {
   const container = document.createElement('div');
   container.className = 'site-nav__mobile-accordion';
 
@@ -132,7 +377,7 @@ function createMobileAccordion(item, currentPage) {
   content.setAttribute('aria-hidden', 'true');
 
   item.dropdown.forEach(child => {
-    content.appendChild(createNavLink(child, currentPage, 'site-nav__mobile-link'));
+    content.appendChild(createNavLink(child, currentPage, 'site-nav__mobile-link', currentPath, pathPrefix));
   });
 
   container.appendChild(button);
@@ -143,8 +388,14 @@ function createMobileAccordion(item, currentPage) {
 /**
  * Builds and injects the site navigation.
  * @param {string} currentPage
+ * @param {string} currentPath
+ * @param {string} pathPrefix
  */
-function injectNav(currentPage) {
+function injectNav(currentPage, currentPath, pathPrefix) {
+  if (document.querySelector('.site-nav')) {
+    return;
+  }
+
   const nav = document.createElement('nav');
   nav.className = 'site-nav';
   nav.setAttribute('aria-label', 'Hoofdnavigatie');
@@ -152,11 +403,10 @@ function injectNav(currentPage) {
   const inner = document.createElement('div');
   inner.className = 'site-nav__inner';
 
-  // Logo
   const logo = document.createElement('a');
-  logo.href = 'index.html';
+  logo.href = withPrefix('index.html', pathPrefix);
   logo.className = 'site-nav__logo';
-  logo.setAttribute('aria-label', 'Meshcore Drenthe — Home');
+  logo.setAttribute('aria-label', 'Meshcore Drenthe - Home');
   logo.innerHTML = `
     <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
       <circle cx="8" cy="8" r="3" fill="currentColor" opacity="0.7"/>
@@ -174,25 +424,22 @@ function injectNav(currentPage) {
     </svg>
     <span>Meshcore Drenthe</span>`;
 
-  // Desktop menu
   const menu = document.createElement('div');
   menu.className = 'site-nav__menu';
   menu.setAttribute('role', 'menubar');
 
   NAV_ITEMS.forEach(item => {
     if (item.dropdown) {
-      menu.appendChild(createDropdown(item, currentPage));
+      menu.appendChild(createDropdown(item, currentPage, currentPath, pathPrefix));
     } else {
-      menu.appendChild(createNavLink(item, currentPage, 'site-nav__link'));
+      menu.appendChild(createNavLink(item, currentPage, 'site-nav__link', currentPath, pathPrefix));
     }
   });
 
-  // Theme toggle placeholder (wordt door theme-toggle.js gevuld)
   const themeSlot = document.createElement('div');
   themeSlot.id = 'theme-toggle-slot';
   menu.appendChild(themeSlot);
 
-  // Hamburger
   const toggle = document.createElement('button');
   toggle.className = 'site-nav__toggle';
   toggle.setAttribute('aria-label', 'Menu openen');
@@ -200,7 +447,6 @@ function injectNav(currentPage) {
   toggle.setAttribute('aria-controls', 'mobile-menu');
   toggle.innerHTML = '<span class="site-nav__toggle-icon" aria-hidden="true"></span>';
 
-  // Mobile menu
   const mobile = document.createElement('div');
   mobile.className = 'site-nav__mobile';
   mobile.id = 'mobile-menu';
@@ -209,15 +455,14 @@ function injectNav(currentPage) {
 
   NAV_ITEMS.forEach(item => {
     if (item.dropdown) {
-      mobile.appendChild(createMobileAccordion(item, currentPage));
+      mobile.appendChild(createMobileAccordion(item, currentPage, currentPath, pathPrefix));
     } else {
-      mobile.appendChild(createNavLink(item, currentPage, 'site-nav__mobile-link'));
+      mobile.appendChild(createNavLink(item, currentPage, 'site-nav__mobile-link', currentPath, pathPrefix));
     }
   });
 
-  // Add secondary items at the bottom
   SECONDARY_ITEMS.forEach(item => {
-    mobile.appendChild(createNavLink(item, currentPage, 'site-nav__mobile-link'));
+    mobile.appendChild(createNavLink(item, currentPage, 'site-nav__mobile-link', currentPath, pathPrefix));
   });
 
   inner.appendChild(logo);
@@ -230,9 +475,82 @@ function injectNav(currentPage) {
 }
 
 /**
- * Builds and injects the site footer.
+ * Builds and injects breadcrumb navigation.
+ * @param {string} currentPage
+ * @param {string} currentPath
+ * @param {string} pathPrefix
  */
-function injectFooter() {
+function injectBreadcrumb(currentPage, currentPath, pathPrefix) {
+  const main = document.querySelector('#main-content, main');
+  const existing = document.querySelector('.site-breadcrumb');
+
+  if (existing) {
+    return;
+  }
+
+  const items = getBreadcrumbItems(currentPage, currentPath);
+  if (!items.length) {
+    return;
+  }
+
+  const nav = document.createElement('nav');
+  nav.className = 'site-breadcrumb';
+  nav.setAttribute('aria-label', 'Breadcrumb');
+
+  const list = document.createElement('ol');
+  list.className = 'site-breadcrumb__list';
+
+  items.forEach((item, index) => {
+    const isCurrent = index === items.length - 1;
+    list.appendChild(createBreadcrumbNode(item, isCurrent, pathPrefix));
+  });
+
+  nav.appendChild(list);
+
+  if (main) {
+    main.prepend(nav);
+    return;
+  }
+
+  nav.classList.add('site-breadcrumb--floating');
+  const siteNav = document.querySelector('.site-nav');
+  if (siteNav) {
+    siteNav.insertAdjacentElement('afterend', nav);
+  }
+}
+
+/**
+ * Prefixes relative links and image paths in footer.
+ * @param {HTMLElement} footer
+ * @param {string} pathPrefix
+ */
+function prefixFooterUrls(footer, pathPrefix) {
+  const anchors = footer.querySelectorAll('a[href]');
+  anchors.forEach(anchor => {
+    const href = anchor.getAttribute('href');
+    if (href && !isExternalUrl(href)) {
+      anchor.setAttribute('href', withPrefix(href, pathPrefix));
+    }
+  });
+
+  const images = footer.querySelectorAll('img[src]');
+  images.forEach(image => {
+    const src = image.getAttribute('src');
+    if (src && !isExternalUrl(src)) {
+      image.setAttribute('src', withPrefix(src, pathPrefix));
+    }
+  });
+}
+
+/**
+ * Builds and injects the site footer.
+ * @param {string} pathPrefix
+ */
+function injectFooter(pathPrefix) {
+  if (document.querySelector('.site-footer')) {
+    return;
+  }
+
   const footer = document.createElement('footer');
   footer.className = 'site-footer';
 
@@ -243,7 +561,7 @@ function injectFooter() {
           <img src="assets/images/logo-hackerspace.png" alt="Hackerspace Drenthe logo" width="56" height="40">
         </a>
         <p class="site-footer__description">
-          Een project van <strong>Hackerspace Drenthe</strong> — voor hackers en makers in Coevorden, Emmen en de rest van Drenthe.
+          Een project van <strong>Hackerspace Drenthe</strong> - voor hackers en makers in Coevorden, Emmen en de rest van Drenthe.
         </p>
       </div>
       <div class="site-footer__links">
@@ -273,25 +591,44 @@ function injectFooter() {
             <li><a href="https://www.hackerspace-drenthe.nl/" rel="noopener noreferrer">Website</a></li>
             <li><a href="mailto:bestuur@hackerspace-drenthe.nl">bestuur@hackerspace-drenthe.nl</a></li>
             <li><a href="https://t.me/+GTTYOvZTRVNhNThk" rel="noopener noreferrer">Telegram</a></li>
-            <li>Elke woensdag 19:00–21:00</li>
-            <li>Coevorden — De Nieuwe Veste</li>
+            <li>Elke woensdag 19:00-21:00</li>
+            <li>Coevorden - De Nieuwe Veste</li>
           </ul>
         </div>
       </div>
       <div class="site-footer__bottom">
-        <span>Meshcore Drenthe — Een open-source noodnetwerk voor de provincie</span>
-        <span>Hackerspace Drenthe — KVK: 82345023</span>
+        <span>Meshcore Drenthe - Een open-source noodnetwerk voor de provincie</span>
+        <span>Hackerspace Drenthe - KVK: 82345023</span>
       </div>
     </div>`;
 
+  prefixFooterUrls(footer, pathPrefix);
   document.body.appendChild(footer);
 }
 
 /**
- * Initializes the page shell (nav + footer).
+ * Initializes the page shell.
  */
 function initPageShell() {
+  if (window.__pageShellInitialized) {
+    return;
+  }
+
+  window.__pageShellInitialized = true;
+
+  const currentPath = getCurrentPath();
   const currentPage = getCurrentPage();
-  injectNav(currentPage);
-  injectFooter();
+  const pathPrefix = getPathPrefix();
+
+  ensureShellStyles(pathPrefix);
+  injectNav(currentPage, currentPath, pathPrefix);
+  injectBreadcrumb(currentPage, currentPath, pathPrefix);
+  injectFooter(pathPrefix);
+  ensureMainOffset();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPageShell);
+} else {
+  initPageShell();
 }

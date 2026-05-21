@@ -128,6 +128,109 @@ const COURSE_META = {
 };
 
 
+/* ─── PAGE ISSUE BUTTON ─── */
+const ISSUE_REPO = 'Hackerspace-drenthe/www.drenthenoodnetwerk.nl';
+
+function buildPageIssueUrl() {
+  const rawPath = window.location.pathname || '';
+  const pagePath = rawPath.replace(/^\/+/, '') || 'MeshAcademy/';
+  const pageTitle = document.title || 'MeshCore Academy pagina';
+  const issueTitle = `[Academy] Probleem op ${pagePath}`;
+
+  const issueBody = [
+    '## Pagina',
+    `- Titel: ${pageTitle}`,
+    `- URL: ${window.location.href}`,
+    `- Pad: ${pagePath}`,
+    '',
+    '## Wat gaat er mis?',
+    '',
+    '## Stappen om te reproduceren',
+    '1. ',
+    '2. ',
+    '3. ',
+    '',
+    '## Verwacht gedrag',
+    '',
+    '## Extra context (optioneel)',
+    ''
+  ].join('\n');
+
+  const params = new URLSearchParams({
+    title: issueTitle,
+    body: issueBody
+  });
+
+  return `https://github.com/${ISSUE_REPO}/issues/new?${params.toString()}`;
+}
+
+function injectPageIssueButton() {
+  if (!document.body || document.getElementById('academy-issue-button')) return;
+
+  if (!document.getElementById('academy-issue-button-style')) {
+    const style = document.createElement('style');
+    style.id = 'academy-issue-button-style';
+    style.textContent = `
+      .academy-issue-button {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 9999;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.62rem 0.95rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 229, 255, 0.35);
+        background: rgba(10, 22, 40, 0.92);
+        color: #00e5ff;
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 700;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(4px);
+        transition: transform 120ms ease, background-color 120ms ease;
+      }
+      .academy-issue-button:hover {
+        transform: translateY(-1px);
+        background: rgba(10, 22, 40, 1);
+        text-decoration: none;
+      }
+      @media (max-width: 700px) {
+        .academy-issue-button {
+          right: 10px;
+          bottom: 10px;
+          padding: 0.55rem 0.8rem;
+          font-size: 0.78rem;
+        }
+      }
+      @media print {
+        .academy-issue-button { display: none !important; }
+      }
+    `;
+
+    const target = document.head || document.body;
+    if (target) target.appendChild(style);
+  }
+
+  const link = document.createElement('a');
+  link.id = 'academy-issue-button';
+  link.className = 'academy-issue-button';
+  link.href = buildPageIssueUrl();
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', 'Meld een fout op deze pagina via GitHub issue');
+  link.innerHTML = '<span aria-hidden="true">🐞</span><span>Meld fout / bug</span>';
+  document.body.appendChild(link);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', injectPageIssueButton);
+} else {
+  injectPageIssueButton();
+}
+
+
 /* ─── QUIZ ENGINE ─── */
 class QuizEngine {
   constructor(containerId, questions, courseId) {

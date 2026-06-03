@@ -9,6 +9,7 @@
   Functionaliteit:
     - Interactieve kaart met topografische, luchtfoto- en hoogtelagen (PDOK)
     - Plaatsen en beheren van Meshcore nodes (naam, antennehoogte)
+    - Selectieve import van nodes uit MC-Radar (data/mc-radar/repeaters.json)
     - Lijn-van-zicht (LOS) analyse tussen twee nodes
     - Fresnel-zone berekening (instelbare drempel: 40/60/100 %)
     - Hoogteprofiel met DTM (terrein) en DSM (bebouwing + bos)
@@ -518,6 +519,138 @@
         }
         .wiz-actions-right { display: flex; gap: 6px; }
 
+        /* ── MC-Radar import ────────────────────────────────────── */
+        #mc-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(3, 7, 12, 0.78);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 12120;
+        }
+        #mc-backdrop.show { display: flex; }
+        #mc-modal {
+            width: min(980px, 96vw);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--sb-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 22px 60px rgba(0,0,0,.52);
+            padding: 13px 14px 14px;
+        }
+        .mc-head { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+        .mc-title { font-size:15px; font-weight:700; color:var(--accent); }
+        .mc-sub { font-size:11px; color:var(--dim); margin-top:2px; }
+        .mc-toolbar {
+            display:flex; align-items:center; gap:8px;
+            margin-bottom:8px;
+        }
+        #mc-search {
+            flex:1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            padding: 7px 9px;
+            font-size: 12px;
+        }
+        .mc-height {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            font-size:11px;
+            color:var(--dim);
+            white-space:nowrap;
+        }
+        .mc-height input {
+            width:68px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 5px;
+            padding: 4px 6px;
+            font-size: 12px;
+        }
+        .mc-status {
+            font-size:11px;
+            color:var(--dim);
+            margin:2px 0 7px;
+        }
+        .mc-list {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255,255,255,.02);
+            min-height: 170px;
+            max-height: 52vh;
+            overflow: auto;
+            padding: 6px;
+        }
+        .mc-item {
+            display:flex;
+            align-items:flex-start;
+            gap:8px;
+            padding:7px 8px;
+            border-radius:6px;
+            border: 1px solid transparent;
+            cursor:pointer;
+        }
+        .mc-item:hover {
+            background: rgba(255,255,255,.04);
+            border-color: rgba(255,255,255,.06);
+        }
+        .mc-item input {
+            margin-top:2px;
+            accent-color: var(--accent);
+        }
+        .mc-item-main { min-width:0; }
+        .mc-item-name {
+            font-size:12px;
+            color:var(--text);
+            display:flex;
+            align-items:center;
+            gap:6px;
+            flex-wrap:wrap;
+        }
+        .mc-badge {
+            font-size:10px;
+            padding:2px 5px;
+            border:1px solid var(--border);
+            border-radius:999px;
+            color:var(--dim);
+            line-height:1;
+        }
+        .mc-item-meta {
+            font-size:10px;
+            color:var(--dim);
+            margin-top:2px;
+            word-break:break-word;
+        }
+        .mc-empty {
+            text-align:center;
+            color:var(--dim);
+            font-size:11px;
+            padding:18px 8px;
+            line-height:1.5;
+        }
+        .mc-actions {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:8px;
+            margin-top:10px;
+            padding-top:10px;
+            border-top:1px solid var(--border);
+            flex-wrap:wrap;
+        }
+
+        @media (max-width: 720px) {
+            .mc-toolbar { flex-direction:column; align-items:stretch; }
+            .mc-height { justify-content:flex-end; }
+            .mc-actions { flex-direction:column; align-items:stretch; }
+        }
+
         /* ── Heatmap node selector ───────────────────────────────── */
         .hm-row { display:flex; align-items:center; gap:6px; margin-top:6px; }
     </style>
@@ -619,11 +752,12 @@
                         + Node plaatsen
                     </button>
                     <button class="btn btn-secondary" onclick="importNodes()" title="Importeer JSON">↑</button>
+                    <button class="btn btn-secondary" onclick="openMcRadarImport()" title="Importeer selectie uit MC-Radar">MC</button>
                     <button class="btn btn-secondary" onclick="exportNodes()" title="Exporteer JSON">↓</button>
                     <button class="btn btn-ghost" onclick="clearNodes()" title="Alles wissen">🗑</button>
                 </div>
                 <div id="node-list">
-                    <div class="no-nodes">Klik "Node plaatsen" en klik op de kaart</div>
+                    <div class="no-nodes">Klik "Node plaatsen" of importeer via "MC"</div>
                 </div>
                 <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
                     <div class="layer-row">
@@ -1049,6 +1183,43 @@
     </div>
 </div>
 
+<div id="mc-backdrop" aria-hidden="true">
+    <div id="mc-modal" role="dialog" aria-modal="true" aria-labelledby="mc-title">
+        <div class="mc-head">
+            <div>
+                <div class="mc-title" id="mc-title">Importeer nodes uit MC-Radar</div>
+                <div class="mc-sub">Bron: data/mc-radar/repeaters.json - kies zelf welke nodes je toevoegt</div>
+            </div>
+            <button class="btn btn-ghost" onclick="closeMcRadarImport()" title="Sluiten">✕</button>
+        </div>
+
+        <div class="mc-toolbar">
+            <input id="mc-search" type="search" placeholder="Zoek op naam, short id of public key" oninput="filterMcRadarList()">
+            <label class="mc-height">
+                Hoogte
+                <input id="mc-import-h" type="number" value="2" min="0" max="300" step="0.5">
+                <span>m</span>
+            </label>
+        </div>
+
+        <div id="mc-status" class="mc-status">Nog niet geladen</div>
+        <div id="mc-list" class="mc-list">
+            <div class="mc-empty">Open deze import om MC-Radar nodes te laden.</div>
+        </div>
+
+        <div class="mc-actions">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="selectVisibleMcRadar(true)">Selecteer zichtbaar</button>
+                <button class="btn btn-secondary" onclick="selectVisibleMcRadar(false)">Deselecteer zichtbaar</button>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-secondary" onclick="closeMcRadarImport()">Annuleren</button>
+                <button class="btn btn-primary" id="btn-mc-import" onclick="importSelectedMcRadarNodes()" disabled>Importeer selectie</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="share-toast"></div>
 
 <!-- ════════════════════════════ SCRIPT ══════════════════════════════ -->
@@ -1114,6 +1285,14 @@ const _profileCache = new Map();  // profile key → {points, dtm, dsm, dist}
 const _bagCache     = new Map();  // bbox key    → {features, has3D}
 
 const INTRO_SEEN_KEY = 'mc-intro-seen-v1';
+const MC_RADAR_CANDIDATE_PATHS = [
+    '../data/mc-radar/repeaters.json',
+    'data/mc-radar/repeaters.json',
+];
+
+let mcRadarCatalog = [];
+let mcRadarVisible = [];
+const mcRadarSelected = new Set();
 
 function _elevKey(c)    { return `${Math.round(c[0]/8)*8},${Math.round(c[1]/8)*8}`; }
 function _profileKey(c1,c2,n) { return `${c1[0].toFixed(1)},${c1[1].toFixed(1)}|${c2[0].toFixed(1)},${c2[1].toFixed(1)}|${n}`; }
@@ -1374,7 +1553,7 @@ function renderNodes() {
 function updateNodeList() {
     const el = document.getElementById('node-list');
     if (!state.nodes.length) {
-        el.innerHTML = '<div class="no-nodes">Klik "Node plaatsen" en klik op de kaart</div>';
+        el.innerHTML = '<div class="no-nodes">Klik "Node plaatsen" of importeer via "MC"</div>';
         updateHeatmapNodeSel();
         return;
     }
@@ -1416,17 +1595,58 @@ function escHtml(s) {
 // NODE MANAGEMENT
 // ══════════════════════════════════════════════════════════════════════
 
-function addNode(coord, opts = {}) {
-    const id   = Date.now() + Math.floor(Math.random() * 1000);
-    const name = (opts.name && String(opts.name).trim()) || `Node ${state.nodes.length + 1}`;
-    const h    = Number.isFinite(Number(opts.h)) ? Number(opts.h) : 0;
-    state.nodes.push({ id, coord, name, h });
+function createNodeId() {
+    let id;
+    do {
+        id = Date.now() + Math.floor(Math.random() * 1000000);
+    } while (state.nodes.some(n => n.id === id));
+    return id;
+}
+
+function addNodesBulk(items, opts = {}) {
+    if (!Array.isArray(items) || !items.length) return [];
+    const ids = [];
+
+    for (const item of items) {
+        const coord = Array.isArray(item.coord) ? item.coord.slice(0, 2) : null;
+        if (!coord || !Number.isFinite(coord[0]) || !Number.isFinite(coord[1])) continue;
+
+        const id   = createNodeId();
+        const name = (item.name && String(item.name).trim()) || `Node ${state.nodes.length + 1}`;
+        const h    = Number.isFinite(Number(item.h)) ? Number(item.h) : 0;
+        const node = { id, coord, name, h };
+
+        if (item.source) node.source = String(item.source);
+        if (item.publicKey) node.publicKey = String(item.publicKey);
+        if (item.shortId) node.shortId = String(item.shortId);
+        if (item.lastSeen) node.lastSeen = String(item.lastSeen);
+        if (Number.isFinite(Number(item.nodeWeight))) node.nodeWeight = Number(item.nodeWeight);
+
+        state.nodes.push(node);
+        ids.push(id);
+    }
+
+    if (!ids.length) return ids;
+
     renderNodes();
     updateNodeList();
     updateAnalysisUI();
     saveNodes();
-    if (!opts.silent) showInfo(`${name} geplaatst — klik opnieuw voor volgende node`);
-    fetchAutoElevation(id);  // async: vult maaiveld in zodra WMS reageert
+
+    if (!opts.skipElevation) {
+        ids.forEach(id => fetchAutoElevation(id));
+    }
+
+    return ids;
+}
+
+function addNode(coord, opts = {}) {
+    const [id] = addNodesBulk([{ coord, ...opts }], { skipElevation: opts.skipElevation });
+    if (!id) return null;
+    if (!opts.silent) {
+        const n = state.nodes.find(x => x.id === id);
+        showInfo(`${n?.name || 'Node'} geplaatst — klik opnieuw voor volgende node`);
+    }
     return id;
 }
 
@@ -3682,15 +3902,307 @@ function importNodes() {
         reader.onload = ev => {
             try {
                 const data = JSON.parse(ev.target.result);
-                const imported = (data.nodes || data).filter(n => n.id && n.coord && n.name);
-                if (!imported.length) { alert('Geen geldige nodes gevonden.'); return; }
-                state.nodes.push(...imported);
-                renderNodes(); updateNodeList(); saveNodes();
+                const src = Array.isArray(data?.nodes) ? data.nodes : (Array.isArray(data) ? data : []);
+                const imported = src.map(n => {
+                    if (Array.isArray(n?.coord) && n.coord.length >= 2) {
+                        return {
+                            coord: [Number(n.coord[0]), Number(n.coord[1])],
+                            name: n.name,
+                            h: n.h,
+                            source: n.source,
+                            publicKey: n.publicKey,
+                            shortId: n.shortId,
+                            lastSeen: n.lastSeen,
+                            nodeWeight: n.nodeWeight,
+                        };
+                    }
+                    if (Array.isArray(n?.ll) && n.ll.length >= 2) {
+                        const lon = Number(n.ll[0]);
+                        const lat = Number(n.ll[1]);
+                        if (Number.isFinite(lon) && Number.isFinite(lat)) {
+                            return {
+                                coord: ol.proj.fromLonLat([lon, lat]),
+                                name: n.name,
+                                h: n.h,
+                                source: n.source,
+                                publicKey: n.publicKey,
+                                shortId: n.shortId,
+                                lastSeen: n.lastSeen,
+                                nodeWeight: n.nodeWeight,
+                            };
+                        }
+                    }
+                    return null;
+                }).filter(Boolean);
+
+                const valid = imported.filter(n =>
+                    Array.isArray(n.coord)
+                    && Number.isFinite(n.coord[0])
+                    && Number.isFinite(n.coord[1])
+                );
+
+                if (!valid.length) { alert('Geen geldige nodes gevonden.'); return; }
+                const ids = addNodesBulk(valid);
+                showToast(`✓ ${ids.length} node(s) geimporteerd`);
             } catch { alert('Ongeldig bestand.'); }
         };
         reader.readAsText(file);
     };
     inp.click();
+}
+
+function formatMcRadarSeen(ts) {
+    if (!ts) return 'onbekend';
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return 'onbekend';
+    return d.toLocaleString('nl-NL', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit',
+    });
+}
+
+function normalizeMcRadarRepeaters(raw) {
+    if (!Array.isArray(raw)) return [];
+    const out = [];
+
+    raw.forEach((item, idx) => {
+        const lat = Number(item?.location?.latitude);
+        const lon = Number(item?.location?.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return;
+
+        const name = (item?.name && String(item.name).trim()) || `MC-Radar node ${idx + 1}`;
+        const shortId = item?.short_id ? String(item.short_id).trim() : '';
+        const publicKey = item?.public_key ? String(item.public_key).trim() : '';
+        const nodeWeight = Number(item?.node_weight);
+
+        out.push({
+            rid: idx,
+            name,
+            shortId,
+            publicKey,
+            lat,
+            lon,
+            lastSeen: item?.last_seen ? String(item.last_seen) : '',
+            seenLabel: formatMcRadarSeen(item?.last_seen),
+            nodeWeight: Number.isFinite(nodeWeight) ? nodeWeight : null,
+        });
+    });
+
+    return out.sort((a, b) => {
+        const wa = a.nodeWeight ?? -Infinity;
+        const wb = b.nodeWeight ?? -Infinity;
+        if (wb !== wa) return wb - wa;
+        return a.name.localeCompare(b.name, 'nl', { sensitivity: 'base' });
+    });
+}
+
+async function fetchMcRadarRepeaters() {
+    const errors = [];
+    for (const path of MC_RADAR_CANDIDATE_PATHS) {
+        try {
+            const r = await fetch(path, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+            if (!r.ok) throw new Error(`${path} (${r.status})`);
+            return await r.json();
+        } catch (e) {
+            errors.push(e?.message || String(e));
+        }
+    }
+    throw new Error(errors.join(' | '));
+}
+
+function updateMcRadarStatus() {
+    const statusEl = document.getElementById('mc-status');
+    const importBtn = document.getElementById('btn-mc-import');
+    if (!statusEl) return;
+
+    const selectedVisible = mcRadarVisible.reduce((acc, n) => acc + (mcRadarSelected.has(n.rid) ? 1 : 0), 0);
+    statusEl.textContent = `${mcRadarSelected.size} geselecteerd | ${selectedVisible} in beeld | ${mcRadarVisible.length}/${mcRadarCatalog.length} zichtbaar`;
+    if (importBtn) importBtn.disabled = mcRadarSelected.size === 0;
+}
+
+function renderMcRadarList() {
+    const listEl = document.getElementById('mc-list');
+    if (!listEl) return;
+
+    if (!mcRadarVisible.length) {
+        listEl.innerHTML = '<div class="mc-empty">Geen nodes gevonden voor deze zoekterm.</div>';
+        updateMcRadarStatus();
+        return;
+    }
+
+    listEl.innerHTML = mcRadarVisible.map(n => {
+        const weightTxt = n.nodeWeight === null ? '' : ` | weight ${n.nodeWeight.toFixed(1)}`;
+        const seenTxt = n.seenLabel ? ` | gezien ${escHtml(n.seenLabel)}` : '';
+        return `
+        <label class="mc-item">
+            <input type="checkbox" ${mcRadarSelected.has(n.rid) ? 'checked' : ''}
+                   onchange="toggleMcRadarSelect(${n.rid}, this.checked)">
+            <div class="mc-item-main">
+                <div class="mc-item-name">
+                    ${escHtml(n.name)}
+                    ${n.shortId ? `<span class="mc-badge">${escHtml(n.shortId)}</span>` : ''}
+                </div>
+                <div class="mc-item-meta">
+                    ${n.lat.toFixed(5)}°N ${n.lon.toFixed(5)}°E${weightTxt}${seenTxt}
+                </div>
+            </div>
+        </label>`;
+    }).join('');
+
+    updateMcRadarStatus();
+}
+
+function filterMcRadarList() {
+    const q = (document.getElementById('mc-search')?.value || '').trim().toLowerCase();
+    if (!q) {
+        mcRadarVisible = mcRadarCatalog.slice();
+    } else {
+        mcRadarVisible = mcRadarCatalog.filter(n =>
+            n.name.toLowerCase().includes(q)
+            || n.shortId.toLowerCase().includes(q)
+            || n.publicKey.toLowerCase().includes(q)
+        );
+    }
+    renderMcRadarList();
+}
+
+function toggleMcRadarSelect(rid, checked) {
+    if (checked) mcRadarSelected.add(rid);
+    else mcRadarSelected.delete(rid);
+    updateMcRadarStatus();
+}
+
+function selectVisibleMcRadar(selectAll) {
+    if (!mcRadarCatalog.length) return;
+    mcRadarVisible.forEach(n => {
+        if (selectAll) mcRadarSelected.add(n.rid);
+        else mcRadarSelected.delete(n.rid);
+    });
+    renderMcRadarList();
+}
+
+async function openMcRadarImport() {
+    const backdrop = document.getElementById('mc-backdrop');
+    const listEl = document.getElementById('mc-list');
+    const statusEl = document.getElementById('mc-status');
+    if (!backdrop || !listEl || !statusEl) return;
+
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden', 'false');
+
+    if (!mcRadarCatalog.length) {
+        statusEl.textContent = 'MC-Radar nodes laden...';
+        listEl.innerHTML = '<div class="mc-empty">Even geduld, data wordt geladen...</div>';
+        try {
+            const raw = await fetchMcRadarRepeaters();
+            mcRadarCatalog = normalizeMcRadarRepeaters(raw);
+            mcRadarVisible = mcRadarCatalog.slice();
+            if (!mcRadarCatalog.length) {
+                listEl.innerHTML = '<div class="mc-empty">Geen importeerbare nodes gevonden in repeaters.json.</div>';
+                statusEl.textContent = '0 geselecteerd | 0 in beeld | 0/0 zichtbaar';
+                return;
+            }
+        } catch (e) {
+            listEl.innerHTML = `<div class="mc-empty">Kon MC-Radar data niet laden.<br>${escHtml(e?.message || '')}</div>`;
+            statusEl.textContent = 'Laden mislukt';
+            showToast('⚠ MC-Radar data kon niet worden geladen');
+            return;
+        }
+    }
+
+    filterMcRadarList();
+    document.getElementById('mc-search')?.focus();
+}
+
+function closeMcRadarImport() {
+    const backdrop = document.getElementById('mc-backdrop');
+    if (!backdrop) return;
+    backdrop.classList.remove('show');
+    backdrop.setAttribute('aria-hidden', 'true');
+}
+
+function importSelectedMcRadarNodes() {
+    const selected = mcRadarCatalog.filter(n => mcRadarSelected.has(n.rid));
+    if (!selected.length) {
+        showToast('⚠ Selecteer eerst minimaal 1 node');
+        return;
+    }
+
+    const hVal = parseFloat(document.getElementById('mc-import-h')?.value || '0');
+    const importH = Number.isFinite(hVal) ? hVal : 0;
+
+    const existingCoord = new Set(
+        state.nodes
+            .filter(n => Array.isArray(n.coord))
+            .map(n => {
+                const ll = ol.proj.toLonLat(n.coord);
+                return `${ll[0].toFixed(6)},${ll[1].toFixed(6)}`;
+            })
+    );
+    const existingPK = new Set(
+        state.nodes
+            .map(n => String(n.publicKey || '').trim().toUpperCase())
+            .filter(Boolean)
+    );
+
+    const toAdd = [];
+    let skipped = 0;
+
+    selected.forEach(n => {
+        const coordKey = `${n.lon.toFixed(6)},${n.lat.toFixed(6)}`;
+        const pk = n.publicKey.toUpperCase();
+        if ((pk && existingPK.has(pk)) || existingCoord.has(coordKey)) {
+            skipped += 1;
+            return;
+        }
+
+        existingCoord.add(coordKey);
+        if (pk) existingPK.add(pk);
+
+        toAdd.push({
+            coord: ol.proj.fromLonLat([n.lon, n.lat]),
+            name: n.name,
+            h: importH,
+            source: 'mc-radar',
+            publicKey: n.publicKey,
+            shortId: n.shortId,
+            lastSeen: n.lastSeen,
+            nodeWeight: n.nodeWeight,
+        });
+    });
+
+    const ids = addNodesBulk(toAdd, { skipElevation: true });
+    if (!ids.length) {
+        showToast('⚠ Geen nieuwe nodes geimporteerd');
+        return;
+    }
+
+    const importedNodes = ids.map(id => state.nodes.find(n => n.id === id)).filter(Boolean);
+    if (importedNodes.length === 1) {
+        map.getView().animate({ center: importedNodes[0].coord, zoom: 14, duration: 500 });
+    } else if (importedNodes.length > 1) {
+        const ext = ol.extent.boundingExtent(importedNodes.map(n => n.coord));
+        map.getView().fit(ext, { padding: [85, 85, 85, 85], maxZoom: 13, duration: 650 });
+    }
+
+    mcRadarSelected.clear();
+    showInfo(`${ids.length} node(s) uit MC-Radar toegevoegd`);
+    showToast(`✓ ${ids.length} node(s) geimporteerd${skipped ? `, ${skipped} overgeslagen` : ''}`);
+    closeMcRadarImport();
+}
+
+function initMcRadarImport() {
+    const backdrop = document.getElementById('mc-backdrop');
+    if (!backdrop) return;
+
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeMcRadarImport();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop.classList.contains('show')) closeMcRadarImport();
+    });
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -4102,6 +4614,7 @@ async function loadAHNCaps() {
     map.updateSize();
     initIntroPopup();
     initNodeWizard();
+    initMcRadarImport();
 })();
 
 // ══════════════════════════════════════════════════════════════════════

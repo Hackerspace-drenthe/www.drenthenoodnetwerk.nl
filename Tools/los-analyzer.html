@@ -4086,15 +4086,17 @@ function formatMcRadarSeen(ts) {
 }
 
 function parseMcRadarImportHeight(item) {
+    // Use explicit antenna-height fields only; generic `height` can refer to
+    // mast/elevation data in some feeds and may inflate AGL values.
     const candidates = [
         item?.antenna_height_agl,
-        item?.antenna_height,
         item?.antenna_height_m,
+        item?.antenna_height,
+        item?.antennaHeightAgl,
         item?.antennaHeight,
-        item?.h,
-        item?.height,
         item?.antenna?.height_agl,
-        item?.antenna?.height,
+        item?.antenna?.height_m,
+        item?.antenna?.antenna_height_agl,
     ];
 
     for (const c of candidates) {
@@ -4315,8 +4317,17 @@ function importSelectedMcRadarNodes() {
 
         const existingNode = (pk && existingPkMap.get(pk)) || existingCoordMap.get(coordKey);
         if (existingNode) {
-            if (existingNode.source === 'mc-radar' && !updatedIds.has(existingNode.id)) {
+            const existingPk = String(existingNode.publicKey || '').trim().toUpperCase();
+            const matchedByPk = Boolean(pk) && existingPk === pk;
+            const isMcRadarNode = existingNode.source === 'mc-radar' || matchedByPk;
+
+            if (isMcRadarNode && !updatedIds.has(existingNode.id)) {
                 existingNode.h = nodeH;
+                existingNode.source = 'mc-radar';
+                if (n.publicKey) existingNode.publicKey = n.publicKey;
+                if (n.shortId) existingNode.shortId = n.shortId;
+                if (n.lastSeen) existingNode.lastSeen = n.lastSeen;
+                if (Number.isFinite(n.nodeWeight)) existingNode.nodeWeight = n.nodeWeight;
                 updatedIds.add(existingNode.id);
                 updated += 1;
                 if (Number.isFinite(n.importH)) fromFile += 1;

@@ -807,12 +807,14 @@
                 <div class="setting">
                     <span class="setting-lbl">Profiel punten</span>
                     <select id="npts-sel">
-                        <option value="0" selected>Auto (1 pt/m, max 2000)</option>
+                        <option value="0" selected>Auto (1 pt/m, max 5000)</option>
                         <option value="100">100</option>
                         <option value="200">200</option>
                         <option value="500">500</option>
                         <option value="1000">1000</option>
-                        <option value="2000">2000 (max)</option>
+                        <option value="2000">2000</option>
+                        <option value="3000">3000</option>
+                        <option value="5000">5000 (max)</option>
                     </select>
                 </div>
 
@@ -1203,12 +1205,12 @@
             <input id="mc-search" type="search" placeholder="Zoek op naam, short id of public key" oninput="filterMcRadarList()">
             <label class="mc-height">
                 AGL hoogte
-                <input id="mc-import-h" type="number" value="2" min="0" max="300" step="0.5"
+                  <input id="mc-import-h" type="number" value="15" min="0" max="300" step="0.5"
                        title="Antennehoogte in meter boven lokale grond (AGL)">
                 <span>m</span>
             </label>
         </div>
-        <div class="mc-help">Ingevoerde antennehoogte wordt toegepast als meter boven lokale grond (AGL), niet boven NAP.</div>
+        <div class="mc-help">Bestandshoogte (AGL) wordt gebruikt als die aanwezig is; deze invoer is fallback in meter boven lokale grond (AGL), niet boven NAP.</div>
 
         <div id="mc-status" class="mc-status">Nog niet geladen</div>
         <div id="mc-list" class="mc-list">
@@ -1281,6 +1283,13 @@ const COLORS = [
     '#3b82f6','#22c55e','#f97316','#ec4899','#a855f7',
     '#14b8a6','#eab308','#ef4444','#06b6d4','#84cc16'
 ];
+
+const PROFILE_POINTS_MIN = 50;
+const PROFILE_POINTS_MAX = 5000;
+const MULTIHOP_POINTS_MIN = 30;
+const MULTIHOP_POINTS_DEFAULT = 120;
+const MULTIHOP_POINTS_MAX = 200;
+const BAG_WFS_MAX_FEATURES = 5000;
 
 // ── Simple in-memory cache ─────────────────────────────────────────
 // Avoids re-fetching the same WMS/WFS data during a session.
@@ -2297,9 +2306,11 @@ async function runAnalysis() {
     const n2 = state.nodes.find(x => x.id === id2);
     if (!n1 || !n2) return;
 
-    const nPtsRaw   = parseInt(document.getElementById('npts-sel').value, 10);
+    const nPtsRaw    = parseInt(document.getElementById('npts-sel').value, 10);
     const distForPts = haversineDist(n1.coord, n2.coord);
-    const nPts      = nPtsRaw === 0 ? Math.max(50, Math.min(Math.round(distForPts), 2000)) : nPtsRaw;
+    const nPts       = nPtsRaw === 0
+        ? Math.max(PROFILE_POINTS_MIN, Math.min(Math.round(distForPts), PROFILE_POINTS_MAX))
+        : Math.min(Math.max(nPtsRaw || PROFILE_POINTS_MIN, PROFILE_POINTS_MIN), PROFILE_POINTS_MAX);
     const threshold = parseFloat(document.getElementById('fres-thr').value);
     const kFactor   = parseFloat(document.getElementById('kfactor-sel').value) || 4/3;
     const rainRate  = parseInt(document.getElementById('rain-sel')?.value || '0', 10);
@@ -2415,7 +2426,7 @@ async function fetchBAGBuildings(points) {
     try {
         const url = `${BAG_WFS_URL}?service=WFS&version=2.0.0&request=GetFeature`
             + `&typeName=bag:pand&outputFormat=application/json`
-            + `&srsName=EPSG:4326&count=2000`
+            + `&srsName=EPSG:4326&count=${BAG_WFS_MAX_FEATURES}`
             + `&bbox=${bbox},EPSG:4326`;
         const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
         if (r.ok) {
@@ -2988,7 +2999,10 @@ body{
 async function runMultiHopAnalysis() {
     if (state.nodes.length < 3) return;
 
-    const nPts      = Math.min(parseInt(document.getElementById('npts-sel').value, 10), 30);
+    const nPtsRaw   = parseInt(document.getElementById('npts-sel').value, 10);
+    const nPts      = nPtsRaw === 0
+        ? MULTIHOP_POINTS_DEFAULT
+        : Math.min(Math.max(nPtsRaw || MULTIHOP_POINTS_MIN, MULTIHOP_POINTS_MIN), MULTIHOP_POINTS_MAX);
     const threshold = parseFloat(document.getElementById('fres-thr').value);
     const kFactor   = parseFloat(document.getElementById('kfactor-sel').value) || 4/3;
     const rainRate  = parseInt(document.getElementById('rain-sel')?.value || '0', 10);
@@ -3969,6 +3983,25 @@ function formatMcRadarSeen(ts) {
     });
 }
 
+function parseMcRadarImportHeight(item) {
+    const candidates = [
+        item?.antenna_height_agl,
+        item?.antenna_height,
+        item?.antenna_height_m,
+        item?.antennaHeight,
+        item?.h,
+        item?.height,
+        item?.antenna?.height_agl,
+        item?.antenna?.height,
+    ];
+
+    for (const c of candidates) {
+        const v = parseHeightInput(c, null);
+        if (Number.isFinite(v)) return v;
+    }
+    return null;
+}
+
 function normalizeMcRadarRepeaters(raw) {
     if (!Array.isArray(raw)) return [];
     const out = [];
@@ -3983,6 +4016,7 @@ function normalizeMcRadarRepeaters(raw) {
         const shortId = item?.short_id ? String(item.short_id).trim() : '';
         const publicKey = item?.public_key ? String(item.public_key).trim() : '';
         const nodeWeight = Number(item?.node_weight);
+        const importH = parseMcRadarImportHeight(item);
 
         out.push({
             rid: idx,
@@ -3991,6 +4025,7 @@ function normalizeMcRadarRepeaters(raw) {
             publicKey,
             lat,
             lon,
+            importH,
             lastSeen: item?.last_seen ? String(item.last_seen) : '',
             seenLabel: formatMcRadarSeen(item?.last_seen),
             nodeWeight: Number.isFinite(nodeWeight) ? nodeWeight : null,
@@ -4040,6 +4075,7 @@ function renderMcRadarList() {
     }
 
     listEl.innerHTML = mcRadarVisible.map(n => {
+        const hTxt = Number.isFinite(n.importH) ? ` | AGL ${n.importH} m` : '';
         const weightTxt = n.nodeWeight === null ? '' : ` | weight ${n.nodeWeight.toFixed(1)}`;
         const seenTxt = n.seenLabel ? ` | gezien ${escHtml(n.seenLabel)}` : '';
         return `
@@ -4052,7 +4088,7 @@ function renderMcRadarList() {
                     ${n.shortId ? `<span class="mc-badge">${escHtml(n.shortId)}</span>` : ''}
                 </div>
                 <div class="mc-item-meta">
-                    ${n.lat.toFixed(5)}°N ${n.lon.toFixed(5)}°E${weightTxt}${seenTxt}
+                    ${n.lat.toFixed(5)}°N ${n.lon.toFixed(5)}°E${hTxt}${weightTxt}${seenTxt}
                 </div>
             </div>
         </label>`;
@@ -4130,7 +4166,7 @@ function closeMcRadarImport() {
     backdrop.setAttribute('aria-hidden', 'true');
 }
 
-function parseHeightInput(v, fallback = 2) {
+function parseHeightInput(v, fallback = 15) {
     const normalized = String(v ?? '').trim().replace(',', '.');
     const num = Number.parseFloat(normalized);
     if (!Number.isFinite(num)) return fallback;
@@ -4145,7 +4181,7 @@ function importSelectedMcRadarNodes() {
     }
 
     const hInput = document.getElementById('mc-import-h');
-    const importH = parseHeightInput(hInput?.value, 2);
+    const importH = parseHeightInput(hInput?.value, 15);
     if (hInput) hInput.value = String(importH);
 
     const existingCoordMap = new Map(
@@ -4168,17 +4204,20 @@ function importSelectedMcRadarNodes() {
     const updatedIds = new Set();
     let updated = 0;
     let skipped = 0;
+    let fromFile = 0;
 
     selected.forEach(n => {
         const coordKey = `${n.lon.toFixed(6)},${n.lat.toFixed(6)}`;
         const pk = n.publicKey.toUpperCase();
+        const nodeH = Number.isFinite(n.importH) ? n.importH : importH;
 
         const existingNode = (pk && existingPkMap.get(pk)) || existingCoordMap.get(coordKey);
         if (existingNode) {
             if (existingNode.source === 'mc-radar' && !updatedIds.has(existingNode.id)) {
-                existingNode.h = importH;
+                existingNode.h = nodeH;
                 updatedIds.add(existingNode.id);
                 updated += 1;
+                if (Number.isFinite(n.importH)) fromFile += 1;
             } else {
                 skipped += 1;
             }
@@ -4196,13 +4235,14 @@ function importSelectedMcRadarNodes() {
         toAdd.push({
             coord: ol.proj.fromLonLat([n.lon, n.lat]),
             name: n.name,
-            h: importH,
+            h: nodeH,
             source: 'mc-radar',
             publicKey: n.publicKey,
             shortId: n.shortId,
             lastSeen: n.lastSeen,
             nodeWeight: n.nodeWeight,
         });
+        if (Number.isFinite(n.importH)) fromFile += 1;
     });
 
     const ids = toAdd.length ? addNodesBulk(toAdd, { skipElevation: true }) : [];
@@ -4234,6 +4274,7 @@ function importSelectedMcRadarNodes() {
     if (ids.length) parts.push(`${ids.length} toegevoegd`);
     if (updated) parts.push(`${updated} hoogte bijgewerkt`);
     if (skipped) parts.push(`${skipped} overgeslagen`);
+    if (fromFile) parts.push(`${fromFile} hoogte uit bestand`);
     const msg = `${parts.join(', ')} | hoogte ${importH} m AGL`;
     showInfo(`MC-Radar import: ${msg}`);
     showToast(`✓ ${msg}`);

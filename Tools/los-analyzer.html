@@ -1290,10 +1290,12 @@ const MULTIHOP_POINTS_MIN = 30;
 const MULTIHOP_POINTS_DEFAULT = 120;
 const MULTIHOP_POINTS_MAX = 200;
 const BAG_WFS_MAX_FEATURES = 5000;
-const ELEVATION_TIMEOUT_MS = 8000;
+const ELEVATION_TIMEOUT_MS = 7000;
+const ELEVATION_FIRST_PASS_TIMEOUT_MS = 5000;
 const ELEVATION_RETRY_ATTEMPTS = 2;
-const ELEVATION_BATCH_SIZE = 8;
-const PROFILE_RETRY_BATCH_SIZE = 4;
+const ELEVATION_FIRST_PASS_RETRIES = 1;
+const ELEVATION_MAX_CONCURRENCY = 40;
+const ELEVATION_RETRY_MAX_CONCURRENCY = 16;
 const PROFILE_CACHE_MIN_VALID_RATIO = 0.9;
 
 // ── Simple in-memory cache ─────────────────────────────────────────
@@ -1886,7 +1888,11 @@ function setBrtStyle(style) {
  * Returns { dtm: number|null, dsm: number|null }
  */
 async function queryElevation(coord3857, opts = {}) {
-    const { bypassCache = false } = opts;
+    const {
+        bypassCache = false,
+        retryAttempts = ELEVATION_RETRY_ATTEMPTS,
+        timeoutMs = ELEVATION_TIMEOUT_MS,
+    } = opts;
     const key = _elevKey(coord3857);
 
     // Return cached result immediately
@@ -1909,9 +1915,10 @@ async function queryElevation(coord3857, opts = {}) {
         + `&INFO_FORMAT=text/plain`;
 
     const fetchWithRetry = async () => {
-        for (let attempt = 1; attempt <= ELEVATION_RETRY_ATTEMPTS; attempt++) {
+        const maxAttempts = Math.max(1, retryAttempts);
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
-                const r   = await fetch(url, { signal: AbortSignal.timeout(ELEVATION_TIMEOUT_MS) });
+                const r   = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
                 const txt = await r.text();
                 const result = parseGFI(txt);
 
@@ -2016,6 +2023,42 @@ function haversineDist(c1, c2) {
 }
 
 /**
+ * Adaptive concurrency for profile elevation loading.
+ * First pass is aggressive; retry pass is capped lower.
+ */
+function getElevationConcurrency(totalPoints, retryPass = false) {
+    const n = Number.isFinite(totalPoints) ? Math.max(0, Math.floor(totalPoints)) : 0;
+    if (n === 0) return retryPass ? 4 : 8;
+
+    const hw = (typeof navigator !== 'undefined' && Number.isFinite(navigator.hardwareConcurrency))
+        ? navigator.hardwareConcurrency
+        : 8;
+
+    const base = retryPass ? Math.max(4, hw * 2) : Math.max(8, hw * 3);
+    const sizeBoost = n >= 4000 ? 12 : n >= 2000 ? 8 : n >= 1000 ? 4 : 0;
+    const cap = retryPass ? ELEVATION_RETRY_MAX_CONCURRENCY : ELEVATION_MAX_CONCURRENCY;
+    return Math.min(cap, Math.max(retryPass ? 4 : 8, base + sizeBoost));
+}
+
+/** Run async mapper with bounded concurrency. */
+async function mapConcurrent(items, concurrency, mapper) {
+    if (!Array.isArray(items) || !items.length) return [];
+
+    const out = new Array(items.length);
+    let nextIndex = 0;
+    const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+        while (true) {
+            const i = nextIndex++;
+            if (i >= items.length) break;
+            out[i] = await mapper(items[i], i);
+        }
+    });
+
+    await Promise.all(workers);
+    return out;
+}
+
+/**
  * Fill missing (null) values in a numeric series using linear interpolation.
  * Leading/trailing nulls are extended from the nearest valid value.
  */
@@ -2056,16 +2099,21 @@ async function getProfile(c1, c2, nPts) {
     if (_profileCache.has(key)) return _profileCache.get(key);
 
     const points = Array.from({ length: nPts }, (_, i) => lerp3857(c1, c2, i / (nPts - 1)));
-    const BATCH  = ELEVATION_BATCH_SIZE;
     const dtm    = new Array(nPts).fill(null);
     const dsm    = new Array(nPts).fill(null);
     const dist   = points.map(p => haversineDist(c1, p));
 
-    for (let i = 0; i < nPts; i += BATCH) {
-        const batch = points.slice(i, i + BATCH);
-        const res = await Promise.all(batch.map(p => queryElevation(p)));
-        res.forEach((r, j) => { dtm[i+j] = r.dtm; dsm[i+j] = r.dsm; });
-    }
+    const firstPassConcurrency = getElevationConcurrency(nPts, false);
+    const firstPass = await mapConcurrent(points, firstPassConcurrency, p =>
+        queryElevation(p, {
+            retryAttempts: ELEVATION_FIRST_PASS_RETRIES,
+            timeoutMs: ELEVATION_FIRST_PASS_TIMEOUT_MS,
+        })
+    );
+    firstPass.forEach((r, i) => {
+        dtm[i] = r.dtm;
+        dsm[i] = r.dsm;
+    });
 
     // Retry unresolved points once, bypassing cache so transient null responses
     // do not lock the profile into a partial chart.
@@ -2073,13 +2121,17 @@ async function getProfile(c1, c2, nPts) {
     for (let i = 0; i < nPts; i++) {
         if (dtm[i] === null && dsm[i] === null) missingIdx.push(i);
     }
-    for (let i = 0; i < missingIdx.length; i += PROFILE_RETRY_BATCH_SIZE) {
-        const idxBatch = missingIdx.slice(i, i + PROFILE_RETRY_BATCH_SIZE);
-        const res = await Promise.all(
-            idxBatch.map(idx => queryElevation(points[idx], { bypassCache: true }))
+    if (missingIdx.length) {
+        const retryConcurrency = getElevationConcurrency(missingIdx.length, true);
+        const retryRes = await mapConcurrent(missingIdx, retryConcurrency, idx =>
+            queryElevation(points[idx], {
+                bypassCache: true,
+                retryAttempts: ELEVATION_RETRY_ATTEMPTS,
+                timeoutMs: ELEVATION_TIMEOUT_MS,
+            })
         );
-        res.forEach((r, j) => {
-            const idx = idxBatch[j];
+        retryRes.forEach((r, j) => {
+            const idx = missingIdx[j];
             dtm[idx] = r.dtm;
             dsm[idx] = r.dsm;
         });
@@ -2088,14 +2140,18 @@ async function getProfile(c1, c2, nPts) {
     const fetchedValidCount = dtm.reduce((acc, v, i) => acc + ((v !== null || dsm[i] !== null) ? 1 : 0), 0);
     const fetchedValidRatio = nPts ? fetchedValidCount / nPts : 0;
 
-    // Force completeness: use available counterpart layer and interpolate the rest.
-    for (let i = 0; i < nPts; i++) {
-        if (dtm[i] === null && dsm[i] !== null) dtm[i] = dsm[i];
-        if (dsm[i] === null && dtm[i] !== null) dsm[i] = dtm[i];
-    }
-    const dtmComplete = fillMissingSeries(dtm, 0);
+    // Force completeness:
+    // - DTM (terrain) must be reconstructed from DTM samples only.
+    //   Using DSM as DTM fallback can inflate endpoint/base heights.
+    // - DSM may fallback to DTM where missing.
+    const firstDtm = dtm.find(v => v !== null);
+    const firstDsm = dsm.find(v => v !== null);
+    const dtmFallback = firstDtm ?? firstDsm ?? 0;
+    const dsmFallback = firstDsm ?? firstDtm ?? 0;
+
+    const dtmComplete = fillMissingSeries(dtm, dtmFallback);
     const dsmSeed = dsm.map((v, i) => (v === null ? dtmComplete[i] : v));
-    const dsmComplete = fillMissingSeries(dsmSeed, dtmComplete[0] ?? 0)
+    const dsmComplete = fillMissingSeries(dsmSeed, dsmFallback)
         .map((v, i) => Math.max(v, dtmComplete[i]));
 
     const result = {
@@ -2455,8 +2511,10 @@ async function runAnalysis() {
         // Apply k-factor earth-curvature correction to terrain heights
         const dtmCorrected = applyKFactor(dtm, dist, kFactor);
 
-        const e1 = dtmCorrected[0] ?? 0;
-        const e2 = dtmCorrected[nPts - 1] ?? 0;
+        // Anchor LOS endpoints to node ground (maaiveld) when available,
+        // so antenna heights remain true AGL at both ends.
+        const e1 = Number.isFinite(Number(n1.maaiveld)) ? Number(n1.maaiveld) : (dtmCorrected[0] ?? 0);
+        const e2 = Number.isFinite(Number(n2.maaiveld)) ? Number(n2.maaiveld) : (dtmCorrected[nPts - 1] ?? 0);
         const los = buildLOS(e1, n1.h, e2, n2.h, nPts);
 
         // Fresnel radii
@@ -3139,7 +3197,8 @@ async function runMultiHopAnalysis() {
             const { dtm, dsm, dist } = await getProfile(nA.coord, nB.coord, nPts);
             const totalDist  = haversineDist(nA.coord, nB.coord);
             const dtmCorr    = applyKFactor(dtm, dist, kFactor);
-            const e1 = dtmCorr[0] ?? 0, e2 = dtmCorr[dtmCorr.length - 1] ?? 0;
+            const e1 = Number.isFinite(Number(nA.maaiveld)) ? Number(nA.maaiveld) : (dtmCorr[0] ?? 0);
+            const e2 = Number.isFinite(Number(nB.maaiveld)) ? Number(nB.maaiveld) : (dtmCorr[dtmCorr.length - 1] ?? 0);
             const los        = buildLOS(e1, nA.h, e2, nB.h, nPts);
             const fR         = dist.map(d => { const d2 = totalDist - d; return (d > 0 && d2 > 0) ? fresnelR(d, d2, state.freq) : 0; });
             const fThDn      = los.map((v, j) => v - threshold * fR[j]);
@@ -3416,7 +3475,6 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
             const xScale = chart.scales.x;
             const yScale = chart.scales.y;
             const ds     = chart.data.datasets;
-            const lbls   = chart.data.labels;
             const a      = state.lastAnalysis;
             if (!a) return;
 
@@ -3426,8 +3484,8 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
             if (!losData || !dtmData) return;
 
             const endpoints = [
-                { idx: 0,                  name: a.n1?.name || 'A', isLeft: true  },
-                { idx: losData.length - 1, name: a.n2?.name || 'B', isLeft: false },
+                { idx: 0,                  name: a.n1?.name || 'A', isLeft: true,  h: Number(a.n1?.h) || 0 },
+                { idx: losData.length - 1, name: a.n2?.name || 'B', isLeft: false, h: Number(a.n2?.h) || 0 },
             ];
 
             for (const ep of endpoints) {
@@ -3435,10 +3493,11 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
                 const dtmH = dtmData[ep.idx];
                 if (losH == null || dtmH == null) continue;
 
-                const xPx    = xScale.getPixelForValue(lbls[ep.idx]);
+                const xPx    = xScale.getPixelForValue(ep.idx);
                 const antYpx = yScale.getPixelForValue(losH);
-                const dtmYpx = yScale.getPixelForValue(dtmH);
-                const antH   = Math.max(0, losH - dtmH);
+                const antH   = Number.isFinite(ep.h) && ep.h > 0 ? ep.h : Math.max(0, losH - dtmH);
+                const baseH  = losH - antH;
+                const dtmYpx = yScale.getPixelForValue(baseH);
 
                 ctx.save();
 

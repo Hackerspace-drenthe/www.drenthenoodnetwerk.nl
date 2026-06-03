@@ -4122,6 +4122,13 @@ function closeMcRadarImport() {
     backdrop.setAttribute('aria-hidden', 'true');
 }
 
+function parseHeightInput(v, fallback = 2) {
+    const normalized = String(v ?? '').trim().replace(',', '.');
+    const num = Number.parseFloat(normalized);
+    if (!Number.isFinite(num)) return fallback;
+    return Math.min(300, Math.max(0, num));
+}
+
 function importSelectedMcRadarNodes() {
     const selected = mcRadarCatalog.filter(n => mcRadarSelected.has(n.rid));
     if (!selected.length) {
@@ -4129,36 +4136,54 @@ function importSelectedMcRadarNodes() {
         return;
     }
 
-    const hVal = parseFloat(document.getElementById('mc-import-h')?.value || '0');
-    const importH = Number.isFinite(hVal) ? hVal : 0;
+    const hInput = document.getElementById('mc-import-h');
+    const importH = parseHeightInput(hInput?.value, 2);
+    if (hInput) hInput.value = String(importH);
 
-    const existingCoord = new Set(
+    const existingCoordMap = new Map(
         state.nodes
             .filter(n => Array.isArray(n.coord))
             .map(n => {
                 const ll = ol.proj.toLonLat(n.coord);
-                return `${ll[0].toFixed(6)},${ll[1].toFixed(6)}`;
+                return [`${ll[0].toFixed(6)},${ll[1].toFixed(6)}`, n];
             })
     );
-    const existingPK = new Set(
+    const existingPkMap = new Map(
         state.nodes
-            .map(n => String(n.publicKey || '').trim().toUpperCase())
-            .filter(Boolean)
+            .map(n => [String(n.publicKey || '').trim().toUpperCase(), n])
+            .filter(([pk]) => Boolean(pk))
     );
+    const seenCoord = new Set(existingCoordMap.keys());
+    const seenPk = new Set(existingPkMap.keys());
 
     const toAdd = [];
+    const updatedIds = new Set();
+    let updated = 0;
     let skipped = 0;
 
     selected.forEach(n => {
         const coordKey = `${n.lon.toFixed(6)},${n.lat.toFixed(6)}`;
         const pk = n.publicKey.toUpperCase();
-        if ((pk && existingPK.has(pk)) || existingCoord.has(coordKey)) {
+
+        const existingNode = (pk && existingPkMap.get(pk)) || existingCoordMap.get(coordKey);
+        if (existingNode) {
+            if (existingNode.source === 'mc-radar' && !updatedIds.has(existingNode.id)) {
+                existingNode.h = importH;
+                updatedIds.add(existingNode.id);
+                updated += 1;
+            } else {
+                skipped += 1;
+            }
+            return;
+        }
+
+        if ((pk && seenPk.has(pk)) || seenCoord.has(coordKey)) {
             skipped += 1;
             return;
         }
 
-        existingCoord.add(coordKey);
-        if (pk) existingPK.add(pk);
+        seenCoord.add(coordKey);
+        if (pk) seenPk.add(pk);
 
         toAdd.push({
             coord: ol.proj.fromLonLat([n.lon, n.lat]),
@@ -4172,23 +4197,38 @@ function importSelectedMcRadarNodes() {
         });
     });
 
-    const ids = addNodesBulk(toAdd, { skipElevation: true });
-    if (!ids.length) {
+    const ids = toAdd.length ? addNodesBulk(toAdd, { skipElevation: true }) : [];
+
+    if (!ids.length && updated > 0) {
+        renderNodes();
+        updateNodeList();
+        updateAnalysisUI();
+        saveNodes();
+    }
+
+    if (!ids.length && !updated) {
         showToast('⚠ Geen nieuwe nodes geimporteerd');
         return;
     }
 
-    const importedNodes = ids.map(id => state.nodes.find(n => n.id === id)).filter(Boolean);
-    if (importedNodes.length === 1) {
-        map.getView().animate({ center: importedNodes[0].coord, zoom: 14, duration: 500 });
-    } else if (importedNodes.length > 1) {
-        const ext = ol.extent.boundingExtent(importedNodes.map(n => n.coord));
-        map.getView().fit(ext, { padding: [85, 85, 85, 85], maxZoom: 13, duration: 650 });
+    if (ids.length) {
+        const importedNodes = ids.map(id => state.nodes.find(n => n.id === id)).filter(Boolean);
+        if (importedNodes.length === 1) {
+            map.getView().animate({ center: importedNodes[0].coord, zoom: 14, duration: 500 });
+        } else if (importedNodes.length > 1) {
+            const ext = ol.extent.boundingExtent(importedNodes.map(n => n.coord));
+            map.getView().fit(ext, { padding: [85, 85, 85, 85], maxZoom: 13, duration: 650 });
+        }
     }
 
     mcRadarSelected.clear();
-    showInfo(`${ids.length} node(s) uit MC-Radar toegevoegd`);
-    showToast(`✓ ${ids.length} node(s) geimporteerd${skipped ? `, ${skipped} overgeslagen` : ''}`);
+    const parts = [];
+    if (ids.length) parts.push(`${ids.length} toegevoegd`);
+    if (updated) parts.push(`${updated} hoogte bijgewerkt`);
+    if (skipped) parts.push(`${skipped} overgeslagen`);
+    const msg = parts.join(', ');
+    showInfo(`MC-Radar import: ${msg}`);
+    showToast(`✓ ${msg}`);
     closeMcRadarImport();
 }
 

@@ -1290,6 +1290,11 @@ const MULTIHOP_POINTS_MIN = 30;
 const MULTIHOP_POINTS_DEFAULT = 120;
 const MULTIHOP_POINTS_MAX = 200;
 const BAG_WFS_MAX_FEATURES = 5000;
+const ELEVATION_TIMEOUT_MS = 8000;
+const ELEVATION_RETRY_ATTEMPTS = 2;
+const ELEVATION_BATCH_SIZE = 8;
+const PROFILE_RETRY_BATCH_SIZE = 4;
+const PROFILE_CACHE_MIN_VALID_RATIO = 0.9;
 
 // ── Simple in-memory cache ─────────────────────────────────────────
 // Avoids re-fetching the same WMS/WFS data during a session.
@@ -1880,14 +1885,15 @@ function setBrtStyle(style) {
  * Uses a single WMS request with both layers in QUERY_LAYERS.
  * Returns { dtm: number|null, dsm: number|null }
  */
-async function queryElevation(coord3857) {
+async function queryElevation(coord3857, opts = {}) {
+    const { bypassCache = false } = opts;
     const key = _elevKey(coord3857);
 
     // Return cached result immediately
-    if (_elevCache.has(key)) return _elevCache.get(key);
+    if (!bypassCache && _elevCache.has(key)) return _elevCache.get(key);
 
     // Deduplicate concurrent requests for the same point
-    if (_inflightElev.has(key)) return _inflightElev.get(key);
+    if (!bypassCache && _inflightElev.has(key)) return _inflightElev.get(key);
 
     const [x, y] = coord3857;
     const buf    = 40;  // 40 m half-size bounding box
@@ -1902,15 +1908,30 @@ async function queryElevation(coord3857) {
         + `&WIDTH=${size}&HEIGHT=${size}&I=${ci}&J=${ci}`
         + `&INFO_FORMAT=text/plain`;
 
+    const fetchWithRetry = async () => {
+        for (let attempt = 1; attempt <= ELEVATION_RETRY_ATTEMPTS; attempt++) {
+            try {
+                const r   = await fetch(url, { signal: AbortSignal.timeout(ELEVATION_TIMEOUT_MS) });
+                const txt = await r.text();
+                const result = parseGFI(txt);
+
+                // Cache only meaningful values; do not persist fully empty responses.
+                if (result.dtm !== null || result.dsm !== null) {
+                    _elevCache.set(key, result);
+                    return result;
+                }
+            } catch {
+                // Retry on timeout/network issues.
+            }
+        }
+        return { dtm: null, dsm: null };
+    };
+
+    if (bypassCache) return await fetchWithRetry();
+
     const promise = (async () => {
         try {
-            const r   = await fetch(url, { signal: AbortSignal.timeout(8000) });
-            const txt = await r.text();
-            const result = parseGFI(txt);
-            _elevCache.set(key, result);
-            return result;
-        } catch {
-            return { dtm: null, dsm: null };
+            return await fetchWithRetry();
         } finally {
             _inflightElev.delete(key);
         }
@@ -1994,12 +2015,48 @@ function haversineDist(c1, c2) {
     return 2 * 6371000 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+/**
+ * Fill missing (null) values in a numeric series using linear interpolation.
+ * Leading/trailing nulls are extended from the nearest valid value.
+ */
+function fillMissingSeries(series, fallbackValue = 0) {
+    const out = series.map(v => Number.isFinite(v) ? Number(v) : null);
+    let first = out.findIndex(v => v !== null);
+
+    if (first === -1) {
+        return out.map(() => fallbackValue);
+    }
+
+    // Extend initial gap from first valid sample.
+    for (let i = 0; i < first; i++) out[i] = out[first];
+
+    // Interpolate internal gaps.
+    let prev = first;
+    for (let i = first + 1; i < out.length; i++) {
+        if (out[i] === null) continue;
+        const gap = i - prev;
+        if (gap > 1) {
+            const a = out[prev];
+            const b = out[i];
+            for (let k = 1; k < gap; k++) {
+                out[prev + k] = a + (b - a) * (k / gap);
+            }
+        }
+        prev = i;
+    }
+
+    // Extend trailing gap from last valid sample.
+    for (let i = prev + 1; i < out.length; i++) out[i] = out[prev];
+
+    return out;
+}
+
 async function getProfile(c1, c2, nPts) {
     const key = _profileKey(c1, c2, nPts);
     if (_profileCache.has(key)) return _profileCache.get(key);
 
     const points = Array.from({ length: nPts }, (_, i) => lerp3857(c1, c2, i / (nPts - 1)));
-    const BATCH  = 8;   // parallel requests per batch
+    const BATCH  = ELEVATION_BATCH_SIZE;
     const dtm    = new Array(nPts).fill(null);
     const dsm    = new Array(nPts).fill(null);
     const dist   = points.map(p => haversineDist(c1, p));
@@ -2010,10 +2067,54 @@ async function getProfile(c1, c2, nPts) {
         res.forEach((r, j) => { dtm[i+j] = r.dtm; dsm[i+j] = r.dsm; });
     }
 
-    const result = { points, dtm, dsm, dist };
-    // Keep at most 30 profiles; evict oldest when full
-    if (_profileCache.size >= 30) _profileCache.delete(_profileCache.keys().next().value);
-    _profileCache.set(key, result);
+    // Retry unresolved points once, bypassing cache so transient null responses
+    // do not lock the profile into a partial chart.
+    const missingIdx = [];
+    for (let i = 0; i < nPts; i++) {
+        if (dtm[i] === null && dsm[i] === null) missingIdx.push(i);
+    }
+    for (let i = 0; i < missingIdx.length; i += PROFILE_RETRY_BATCH_SIZE) {
+        const idxBatch = missingIdx.slice(i, i + PROFILE_RETRY_BATCH_SIZE);
+        const res = await Promise.all(
+            idxBatch.map(idx => queryElevation(points[idx], { bypassCache: true }))
+        );
+        res.forEach((r, j) => {
+            const idx = idxBatch[j];
+            dtm[idx] = r.dtm;
+            dsm[idx] = r.dsm;
+        });
+    }
+
+    const fetchedValidCount = dtm.reduce((acc, v, i) => acc + ((v !== null || dsm[i] !== null) ? 1 : 0), 0);
+    const fetchedValidRatio = nPts ? fetchedValidCount / nPts : 0;
+
+    // Force completeness: use available counterpart layer and interpolate the rest.
+    for (let i = 0; i < nPts; i++) {
+        if (dtm[i] === null && dsm[i] !== null) dtm[i] = dsm[i];
+        if (dsm[i] === null && dtm[i] !== null) dsm[i] = dtm[i];
+    }
+    const dtmComplete = fillMissingSeries(dtm, 0);
+    const dsmSeed = dsm.map((v, i) => (v === null ? dtmComplete[i] : v));
+    const dsmComplete = fillMissingSeries(dsmSeed, dtmComplete[0] ?? 0)
+        .map((v, i) => Math.max(v, dtmComplete[i]));
+
+    const result = {
+        points,
+        dtm: dtmComplete,
+        dsm: dsmComplete,
+        dist,
+        fetchedValidCount,
+        fetchedValidRatio,
+        validCount: nPts,
+        validRatio: 1,
+    };
+
+    // Cache only profiles with sufficient coverage to avoid persisting partial graphs.
+    if (fetchedValidRatio >= PROFILE_CACHE_MIN_VALID_RATIO) {
+        if (_profileCache.size >= 30) _profileCache.delete(_profileCache.keys().next().value);
+        _profileCache.set(key, result);
+    }
+
     return result;
 }
 
@@ -2337,6 +2438,7 @@ async function runAnalysis() {
                      n1.coord[1] + i/(nPts-1)*(n2.coord[1]-n1.coord[1])])
             ),
         ]);
+
         state.profilePoints = points;
         crosshairSource.clear();
 

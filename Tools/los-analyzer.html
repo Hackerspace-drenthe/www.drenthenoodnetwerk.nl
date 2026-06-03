@@ -1,0 +1,4147 @@
+<!--
+================================================================================
+  Meshcore Signaal Analyse Kaart
+================================================================================
+  Auteur      : Rein Velt
+  Doel        : Visualisatie en analyse van Meshcore (LoRa mesh) verbindingen
+                op basis van Nederlandse geodata (PDOK).
+
+  Functionaliteit:
+    - Interactieve kaart met topografische, luchtfoto- en hoogtelagen (PDOK)
+    - Plaatsen en beheren van Meshcore nodes (naam, antennehoogte)
+    - Lijn-van-zicht (LOS) analyse tussen twee nodes
+    - Fresnel-zone berekening (instelbare drempel: 40/60/100 %)
+    - Hoogteprofiel met DTM (terrein) en DSM (bebouwing + bos)
+    - Obstakelclassificatie: maaiveld / vegetatie-bos (2–15 m) / gebouwen (≥15 m)
+    - Signaaldemping schatting op basis van ITU-R P.833 (foliage) en gebouwen
+    - Klik op grafiek → punt oplichten op kaart
+    - Export/import van nodes als JSON
+
+  Geodata (PDOK — overheid open data):
+    - AHN  : Actueel Hoogtebestand Nederland WMS  (DTM 0,5 m / DSM 0,5 m)
+             https://service.pdok.nl/rws/actueel-hoogtebestand-nederland/wms/v1_0
+    - BRT-A: Topografische achtergrondkaart WMTS
+             https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0
+    - Luchtfoto RGB WMTS (2023 ortho 25 cm)
+             https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0
+    - BAG  : Basisregistratie Adressen en Gebouwen — panden WMS
+             https://service.pdok.nl/lv/bag/wms/v2_0
+    - BGT  : Basisregistratie Grootschalige Topografie — begroeid terreindeel WMS
+             https://service.pdok.nl/lv/bgt/wms/v1_0
+
+  Bibliotheken:
+    - OpenLayers 9.2.4  https://openlayers.org/  (BSD-2-Clause)
+    - Chart.js  4.4.2   https://www.chartjs.org/ (MIT)
+
+  Signaalkunde:
+    - Fresnel-straal  : r₁ = √(λ · d₁ · d₂ / (d₁+d₂))
+    - Foliage demping : ITU-R P.833 ~0,2–0,4 dB/m
+
+  Licentie : MIT
+  Versie   : 1.0  (2026)
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line of Sight Analyzer — PDOK Analyse</title>
+
+    <!-- OpenLayers 9 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@9.2.4/ol.css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@9.2.4/dist/ol.js"></script>
+    <!-- Chart.js 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root {
+            --sidebar-w: 310px;
+            --toolbar-h: 48px;
+            --bg:        #12151a;
+            --sb-bg:     #1a1d23;
+            --panel-bg:  #21262f;
+            --accent:    #3b82f6;
+            --green:     #22c55e;
+            --orange:    #f97316;
+            --red:       #ef4444;
+            --text:      #e2e8f0;
+            --dim:       #64748b;
+            --border:    #2d3748;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ── Sidebar ──────────────────────────────────────────────── */
+        #sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            background: var(--sb-bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+            z-index: 20;
+        }
+        #sb-head {
+            padding: 14px 16px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        #sb-head h1 { font-size: 15px; font-weight: 700; color: var(--accent); }
+        #sb-head p  { font-size: 11px; color: var(--dim); margin-top: 3px; }
+
+        #sb-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        #sb-body::-webkit-scrollbar { width: 4px; }
+        #sb-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        /* ── Panel card ───────────────────────────────────────────── */
+        .card { background: var(--panel-bg); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+        .card-head {
+            padding: 9px 12px;
+            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .7px;
+            color: var(--dim); cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            user-select: none;
+        }
+        .card-head:hover { color: var(--text); }
+        .card-body { padding: 8px 12px 12px; }
+
+        /* ── Layer row ────────────────────────────────────────────── */
+        .layer-row {
+            display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px;
+        }
+        .layer-row label { display: flex; align-items: center; gap: 7px; cursor: pointer; flex: 1; }
+        .layer-row input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--accent); }
+        .layer-row input[type=range] { width: 62px; height: 4px; accent-color: var(--accent); }
+
+        .ahn-note {
+            margin-top: 8px; padding: 6px 8px;
+            background: rgba(255,255,255,.03); border-radius: 4px;
+            font-size: 10px; color: var(--dim); line-height: 1.5;
+        }
+
+        /* ── Buttons ──────────────────────────────────────────────── */
+        .btn {
+            padding: 6px 11px; border-radius: 6px; border: none;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: background .15s, transform .1s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn:active { transform: scale(.97); }
+        .btn-primary  { background: var(--accent); color: #fff; }
+        .btn-primary:hover  { background: #2563eb; }
+        .btn-secondary { background: var(--border); color: var(--text); }
+        .btn-secondary:hover { background: #3d4a5c; }
+        .btn-ghost { background: transparent; color: var(--dim); padding: 3px 6px; }
+        .btn-ghost:hover { color: var(--red); background: rgba(239,68,68,.1); }
+        .btn-active { background: var(--green) !important; color: #111 !important; }
+
+        /* ── Node list ────────────────────────────────────────────── */
+        .node-item {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 8px; border-radius: 6px; margin-bottom: 3px;
+            background: rgba(255,255,255,.03);
+            font-size: 11px; cursor: pointer;
+            border: 1px solid transparent;
+            transition: background .15s;
+        }
+        .node-item:hover { background: rgba(255,255,255,.06); }
+        .node-item.selected { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.35); }
+        .node-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .node-info { flex: 1; min-width: 0; }
+        .node-name { font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .node-coord { font-size: 10px; color: var(--dim); margin-top: 1px; }
+        .node-h {
+            width: 46px; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); border-radius: 4px; padding: 2px 4px;
+            font-size: 11px; text-align: center;
+        }
+        .node-h-unit { font-size: 9px; color: var(--dim); }
+
+        .no-nodes { text-align: center; padding: 18px 0; color: var(--dim); font-size: 11px; }
+
+        /* ── Analysis ────────────────────────────────────────────── */
+        .setting { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+        .setting-lbl { color: var(--dim); }
+        select, input[type=number] {
+            background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); border-radius: 4px; padding: 3px 6px; font-size: 11px;
+        }
+        #sel-display {
+            font-size: 11px; margin: 6px 0;
+            border: 1px solid var(--border); border-radius: 6px;
+            padding: 8px 10px; background: rgba(255,255,255,.03);
+            transition: border-color .2s, background .2s;
+        }
+        #sel-display.s-empty   { border-color: rgba(239,68,68,.45); }
+        #sel-display.s-partial { border-color: rgba(245,158,11,.65); background: rgba(245,158,11,.04); }
+        #sel-display.s-ready   { border-color: rgba(34,197,94,.55);  background: rgba(34,197,94,.04); }
+        @keyframes pulse-border {
+            0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+            50%     { box-shadow: 0 0 0 3px rgba(59,130,246,.25); }
+        }
+        #btn-analyze:not([disabled]) { animation: pulse-border 2s ease-in-out 1; }
+
+        /* ── Results ─────────────────────────────────────────────── */
+        .status-card {
+            padding: 8px 10px; border-radius: 6px; font-size: 11px; margin-top: 8px;
+            display: flex; align-items: flex-start; gap: 7px;
+        }
+        .sc-good   { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.3);  }
+        .sc-warn   { background: rgba(249,115,22,.1); border: 1px solid rgba(249,115,22,.3); }
+        .sc-bad    { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3);  }
+        .metric    { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; }
+        .ml        { color: var(--dim); }
+        .mv        { font-weight: 600; }
+        .c-good    { color: var(--green); }
+        .c-warn    { color: var(--orange); }
+        .c-bad     { color: var(--red); }
+
+        /* ── Main area ───────────────────────────────────────────── */
+        #main {
+            flex: 1; min-height: 0; overflow-y: auto;
+        }
+
+        #toolbar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 7px 10px; background: var(--sb-bg); border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+        }
+        #mode-lbl {
+            margin-left: auto; font-size: 11px; color: var(--dim);
+            padding: 3px 8px; background: var(--panel-bg); border-radius: 4px;
+        }
+
+        #map-wrap {
+            height: calc(100vh - var(--toolbar-h)); position: relative; overflow: hidden;
+        }
+        #map { width: 100%; height: 100%; }
+
+        /* OL overrides */
+        .ol-zoom { top: 48px !important; }
+        .ol-control button {
+            background: var(--panel-bg) !important; color: var(--text) !important;
+            border: 1px solid var(--border) !important; border-radius: 4px !important;
+        }
+        .ol-attribution { background: rgba(18,21,26,.7) !important; color: var(--dim) !important; }
+        .ol-attribution a { color: var(--accent) !important; }
+
+        /* ── Floating tooltip ────────────────────────────────────── */
+        #map-tip {
+            background: rgba(18,21,26,.92); border: 1px solid var(--border);
+            border-radius: 6px; padding: 5px 9px; font-size: 11px;
+            pointer-events: none; white-space: nowrap; display: none;
+        }
+
+        #obs-popup {
+            min-width: 240px; max-width: 320px;
+            background: rgba(18,21,26,.97); border: 1px solid var(--border);
+            border-radius: 8px; padding: 8px 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+            display: none;
+        }
+        #obs-popup .obs-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+        #obs-popup .obs-title { font-size: 12px; font-weight: 700; color: var(--text); }
+        #obs-popup .obs-close { background: transparent; border: 0; color: var(--dim); cursor: pointer; font-size: 14px; line-height: 1; }
+        #obs-popup .obs-close:hover { color: var(--text); }
+        #obs-popup .obs-meta { font-size: 11px; color: var(--dim); line-height: 1.45; margin-bottom: 7px; }
+        #obs-popup .obs-links { display: flex; gap: 6px; }
+        #obs-popup .obs-link {
+            border: 1px solid var(--border); background: var(--panel-bg); color: var(--text);
+            border-radius: 5px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+        }
+        #obs-popup .obs-link:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Floating info bar ───────────────────────────────────── */
+        #infobar {
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(18,21,26,.88); border: 1px solid var(--border);
+            border-radius: 20px; padding: 6px 16px;
+            font-size: 11px; color: var(--dim); pointer-events: none; z-index: 50;
+            display: none;
+        }
+
+        /* ── AHN layer status badge ──────────────────────────────── */
+        #ahn-status {
+            position: absolute; top: 8px; left: 8px; z-index: 50;
+            background: rgba(18,21,26,.85); border: 1px solid var(--border);
+            border-radius: 4px; padding: 3px 8px; font-size: 10px; color: var(--dim);
+        }
+
+        /* ── Resize handle between map and profile ───────────────── */
+        #resize-handle { display: none !important; }
+
+        /* ── Profile panel ───────────────────────────────────────── */
+        #profile {
+            height: calc(100vh - var(--toolbar-h)); background: var(--sb-bg);
+            border-top: 3px solid var(--border);
+            display: flex; flex-direction: column;
+        }
+        #profile-head {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        #profile-head h3 { font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .7px; }
+        #profile-meta { font-size: 11px; color: var(--dim); margin-left: 6px; }
+        #profile-chart-wrap { flex: 1; padding: 6px 14px 10px; position: relative; }
+
+        #details-panel {
+            background: var(--bg); border-top: 3px solid var(--border);
+            padding: 18px 22px 40px; min-height: 120px;
+        }
+        #conclusion-panel {
+            background: var(--bg); border-top: 3px solid var(--border);
+            padding: 18px 22px 44px; min-height: 140px;
+        }
+        .dp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+        .dp-header h2 { font-size: 14px; font-weight: 700; }
+        .dp-status { font-size: 12px; font-weight: 600; }
+        .dp-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 18px; }
+        .dp-stat { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; display: flex; flex-direction: column; gap: 3px; }
+        .dp-stat span { font-size: 10px; color: var(--dim); }
+        .dp-stat strong { font-size: 13px; }
+        .dp-seg-label { font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+        .dp-seg-card { background: var(--panel-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; transition: box-shadow .25s; }
+        .dp-seg-card.dp-seg-highlight { box-shadow: 0 0 0 3px var(--accent); }
+        .dp-seg-head { padding: 8px 14px; background: rgba(255,255,255,.03); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; }
+        .dp-seg-body { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px 14px; align-items: flex-start; }
+        .dp-table { flex: 1; border-collapse: collapse; font-size: 11px; }
+        .dp-table tr { border-bottom: 1px solid var(--border); }
+        .dp-table tr:last-child { border-bottom: none; }
+        .dp-table th { color: var(--dim); font-weight: 500; padding: 4px 8px 4px 0; width: 48%; vertical-align: top; }
+        .dp-table td { padding: 4px 8px 4px 0; }
+        .dp-maps { display: flex; gap: 10px; flex-shrink: 0; }
+        .dp-mini { text-align: center; }
+        .dp-mini img { width: 220px; height: 165px; border-radius: 5px; border: 1px solid var(--border); display: block; }
+        .dp-mini-cap { font-size: 9px; color: var(--dim); margin-top: 3px; }
+        .dp-cluster-card { border-left: 3px solid var(--orange); }
+        .dp-cluster-details { flex-basis: 100%; margin-top: 0; }
+        .dp-cluster-details summary { cursor: pointer; font-size: 11px; color: var(--accent); font-weight: 600; padding: 4px 0; user-select: none; }
+        .dp-cluster-details summary:hover { opacity: .8; }
+        .dp-items-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 11px; }
+        .dp-items-table th { background: var(--surface); color: var(--text-muted); font-weight: 600; padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .dp-items-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .dp-items-table tr:last-child td { border-bottom: none; }
+        .dp-items-table tr:hover td { background: var(--surface); }
+        .dp-table-sm th, .dp-table-sm td { font-size: 10px; padding: 2px 6px 2px 0; }
+        .dp-placeholder { display: flex; align-items: center; justify-content: center; min-height: 80px; color: var(--dim); font-size: 12px; }
+        .cp-placeholder { display: flex; align-items: center; justify-content: center; min-height: 80px; color: var(--dim); font-size: 12px; }
+
+        .cp-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .cp-head h2 { font-size: 14px; font-weight: 700; }
+        .cp-badge {
+            font-size: 11px; font-weight: 700; border-radius: 999px;
+            border: 1px solid var(--border); padding: 4px 9px;
+        }
+        .cp-summary {
+            background: var(--panel-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.55;
+            margin-bottom: 10px;
+        }
+        .cp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 10px;
+        }
+        .cp-card {
+            background: var(--panel-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 12px;
+        }
+        .cp-card h4 { font-size: 12px; margin-bottom: 6px; }
+        .cp-impact { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+        .cp-card p { font-size: 11px; color: var(--text); line-height: 1.5; }
+        .cp-card p + p { margin-top: 6px; color: var(--dim); }
+
+        /* Loading spinner */
+        #prof-loading {
+            position: absolute; inset: 0; background: rgba(18,21,26,.8);
+            display: none; align-items: center; justify-content: center; gap: 10px;
+            font-size: 12px; color: var(--dim);
+        }
+        .spin {
+            width: 18px; height: 18px; border: 2px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #profile-error {
+            position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+            font-size: 12px; color: var(--red); flex-direction: column; gap: 6px;
+        }
+
+        /* ── Info panel ──────────────────────────────────────────── */
+        .info-ul { font-size: 11px; color: var(--dim); line-height: 1.65; }
+        .info-ul strong { color: var(--text); }
+
+        /* ── Link Budget ─────────────────────────────────────────── */
+        .lb-row { display:flex; align-items:center; padding:3px 0; font-size:11px; gap:4px; }
+        .lb-lbl { color:var(--dim); flex:1; }
+        .lb-inp { width:60px; background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:4px; padding:2px 5px; font-size:11px; text-align:right; }
+        .lb-unit { width:28px; font-size:10px; color:var(--dim); }
+        .lb-result { display:flex; justify-content:space-between; padding:3px 0; font-size:11px; border-top:1px solid var(--border); margin-top:4px; padding-top:6px; }
+
+        /* ── Multi-hop ───────────────────────────────────────────── */
+        .hop-item { padding:5px 8px; border-radius:5px; background:rgba(255,255,255,.03); margin-bottom:4px; font-size:11px; border:1px solid var(--border); }
+        .hop-head { display:flex; justify-content:space-between; font-weight:600; margin-bottom:3px; font-size:11px; }
+
+        /* ── Node maaiveld ───────────────────────────────────────── */
+        .node-maaiveld { font-size:9px; color:var(--dim); margin-top:1px; min-height:12px; }
+
+        /* ── Share toast ─────────────────────────────────────────── */
+        #share-toast {
+            position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+            background:var(--panel-bg); border:1px solid var(--green); border-radius:8px;
+            padding:8px 18px; font-size:12px; color:var(--green);
+            opacity:0; transition:opacity .3s, transform .3s;
+            pointer-events:none; z-index:9999;
+        }
+        #share-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        /* ── Intro popup ─────────────────────────────────────────── */
+        #intro-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(4, 8, 14, 0.74);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 12000;
+        }
+        #intro-backdrop.show { display: flex; }
+        #intro-modal {
+            width: min(880px, 96vw);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--sb-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.5);
+            padding: 14px 16px 14px;
+        }
+        .im-head {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .im-title { font-size: 16px; font-weight: 700; color: var(--accent); }
+        .im-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+        .im-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+            margin: 10px 0 8px;
+        }
+        .im-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 10px;
+        }
+        .im-card h4 { font-size: 12px; margin-bottom: 5px; }
+        .im-card p { font-size: 11px; color: var(--text); line-height: 1.5; }
+        .im-list { font-size: 11px; color: var(--text); line-height: 1.55; }
+        .im-list a { color: var(--accent); }
+        .im-actions {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-top: 12px; padding-top: 9px; border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .im-remember {
+            display: inline-flex; align-items: center; gap: 7px;
+            font-size: 11px; color: var(--dim);
+        }
+        .im-remember input { accent-color: var(--accent); }
+
+        /* ── Node wizard ─────────────────────────────────────────── */
+        #wiz-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(3, 7, 12, 0.78);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 12100;
+        }
+        #wiz-backdrop.show { display: flex; }
+        #wiz-modal {
+            width: min(760px, 96vw);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--sb-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 22px 60px rgba(0,0,0,.52);
+            padding: 13px 14px 14px;
+        }
+        .wiz-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .wiz-title { font-size: 15px; font-weight: 700; color: var(--accent); }
+        .wiz-step-ind { font-size: 11px; color: var(--dim); }
+        .wiz-step { display: none; }
+        .wiz-step.active { display: block; }
+        .wiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .wiz-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .wiz-card h4 { font-size: 12px; margin-bottom: 6px; }
+        .wiz-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 7px; }
+        .wiz-row label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .5px; }
+        .wiz-row input, .wiz-row select {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            color: var(--text); border-radius: 5px; padding: 5px 7px; font-size: 12px;
+        }
+        .wiz-inline-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+        .wiz-note { font-size: 11px; color: var(--dim); line-height: 1.5; margin-top: 2px; }
+        .wiz-actions {
+            display: flex; justify-content: space-between; align-items: center; gap: 8px;
+            margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+        }
+        .wiz-actions-right { display: flex; gap: 6px; }
+
+        /* ── Heatmap node selector ───────────────────────────────── */
+        .hm-row { display:flex; align-items:center; gap:6px; margin-top:6px; }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════════════ SIDEBAR ════════════════════════════ -->
+<div id="sidebar">
+    <div id="sb-head">
+        <h1>📡 Line of Sight Analyzer</h1>
+        <p>Hoogte- &amp; obstakelanalyse via PDOK geodata</p>
+    </div>
+
+    <div id="sb-body">
+
+        <!-- LAYERS -->
+        <div class="card">
+            <div class="card-head" onclick="toggleCard('layers')">
+                Kaartlagen <span id="chev-layers">▼</span>
+            </div>
+            <div class="card-body" id="bd-layers">
+
+                <div class="layer-row">
+                    <label>
+                        <input type="checkbox" id="ck-brt" checked onchange="toggleLayer('brt',this.checked)">
+                        BRT Achtergrondkaart
+                    </label>
+                    <select id="brt-style" onchange="setBrtStyle(this.value)" style="font-size:10px;padding:2px 4px;">
+                        <option value="standaard">Standaard</option>
+                        <option value="grijs">Grijs</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="water">Water</option>
+                    </select>
+                </div>
+
+                <div class="layer-row">
+                    <label>
+                        <input type="checkbox" id="ck-lucht" onchange="toggleLayer('lucht',this.checked)">
+                        Luchtfoto RGB (PDOK)
+                    </label>
+                </div>
+
+                <div class="layer-row">
+                    <label>
+                        <input type="checkbox" id="ck-dtm" checked onchange="toggleLayer('dtm',this.checked)">
+                        AHN Hoogte — DTM
+                    </label>
+                    <input type="range" id="op-dtm" min="0" max="100" value="55"
+                           oninput="setOpacity('dtm',this.value)">
+                </div>
+
+                <div class="layer-row">
+                    <label>
+                        <input type="checkbox" id="ck-dsm" onchange="toggleLayer('dsm',this.checked)">
+                        AHN Oppervlak — DSM
+                    </label>
+                    <input type="range" id="op-dsm" min="0" max="100" value="55"
+                           oninput="setOpacity('dsm',this.value)">
+                </div>
+
+                <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+                    <div style="font-size:10px;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Obstakels op kaart</div>
+                    <div class="layer-row">
+                        <label>
+                            <input type="checkbox" id="ck-bag" onchange="toggleLayer('bag',this.checked)">
+                            <span style="display:inline-block;width:10px;height:10px;background:rgba(239,68,68,.8);border-radius:2px;"></span>
+                            BAG Gebouwen
+                        </label>
+                        <input type="range" id="op-bag" min="0" max="100" value="70" oninput="setOpacity('bag',this.value)">
+                    </div>
+                    <div class="layer-row">
+                        <label>
+                            <input type="checkbox" id="ck-bgt" onchange="toggleLayer('bgt',this.checked)">
+                            <span style="display:inline-block;width:10px;height:10px;background:rgba(20,184,166,.8);border-radius:2px;"></span>
+                            BGT Vegetatie / Bossen
+                        </label>
+                        <input type="range" id="op-bgt" min="0" max="100" value="65" oninput="setOpacity('bgt',this.value)">
+                    </div>
+                </div>
+                <div class="ahn-note">
+                    💡 <strong>DTM</strong> = terreinmodel (zonder gebouwen/bomen)<br>
+                    &nbsp;&nbsp;&nbsp;<strong>DSM</strong> = oppervlaktemodel (met alles erop)<br>
+                    &nbsp;&nbsp;&nbsp;Verschil DSM−DTM = obstakel hoogte<br>
+                    &nbsp;&nbsp;&nbsp;<span style="color:rgba(20,184,166,.9)">■</span> 2–15 m: bos/vegetatie &nbsp;<span style="color:rgba(239,68,68,.9)">■</span> ≥15 m: gebouwen
+                </div>
+
+                <div id="ahn-layer-info" style="margin-top:6px;font-size:10px;color:var(--dim);"></div>
+            </div>
+        </div>
+
+        <!-- NODES -->
+        <div class="card">
+            <div class="card-head" onclick="toggleCard('nodes')">
+                Meshcore Nodes <span id="chev-nodes">▼</span>
+            </div>
+            <div class="card-body" id="bd-nodes">
+                <div style="display:flex;gap:6px;margin-bottom:8px;">
+                    <button class="btn btn-primary" id="btn-add" onclick="setMode('add')" style="flex:1">
+                        + Node plaatsen
+                    </button>
+                    <button class="btn btn-secondary" onclick="importNodes()" title="Importeer JSON">↑</button>
+                    <button class="btn btn-secondary" onclick="exportNodes()" title="Exporteer JSON">↓</button>
+                    <button class="btn btn-ghost" onclick="clearNodes()" title="Alles wissen">🗑</button>
+                </div>
+                <div id="node-list">
+                    <div class="no-nodes">Klik "Node plaatsen" en klik op de kaart</div>
+                </div>
+                <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
+                    <div class="layer-row">
+                        <label>
+                            <input type="checkbox" id="ck-coverage" onchange="toggleCoverageCircles(this.checked)">
+                            Dekkingscirkels (auto op antennehoogte)
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYSIS -->
+        <div class="card">
+            <div class="card-head" onclick="toggleCard('analysis')">
+                Verbindingsanalyse <span id="chev-analysis">▼</span>
+            </div>
+            <div class="card-body" id="bd-analysis">
+
+                <div class="setting">
+                    <span class="setting-lbl">Frequentie</span>
+                    <select id="freq-sel" onchange="onFreqChange()">
+                        <option value="169000000">169 MHz (LoRa)</option>
+                        <option value="433000000">433 MHz (LoRa)</option>
+                        <option value="868000000" selected>868 MHz (EU LoRa)</option>
+                        <option value="915000000">915 MHz (US LoRa)</option>
+                        <option value="2400000000">2.4 GHz</option>
+                        <option value="5800000000">5.8 GHz</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                    <span class="setting-lbl">Fresnel drempel</span>
+                    <select id="fres-thr">
+                        <option value="0.6" selected>60 % (aanbevolen)</option>
+                        <option value="1.0">100 % (optimaal)</option>
+                        <option value="0.4">40 % (minimaal)</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                    <span class="setting-lbl">Profiel punten</span>
+                    <select id="npts-sel">
+                        <option value="0" selected>Auto (1 pt/m, max 2000)</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="2000">2000 (max)</option>
+                    </select>
+                </div>
+
+                <div class="setting">
+                    <span class="setting-lbl">k-factor refractie</span>
+                    <select id="kfactor-sel" title="Atmosferische refractie: k=4/3 is standaard (effectieve aardstraal 4/3 × Re)">
+                        <option value="1.333" selected>4/3 standaard</option>
+                        <option value="1.0">1.0 geometrisch</option>
+                        <option value="0.667">2/3 sub-refractie</option>
+                    </select>
+                </div>
+
+                <div class="setting" style="display:none;">
+                    <span class="setting-lbl" title="Welke dakhoogte uit 3D BAG te gebruiken">3D BAG dakhoogte</span>
+                    <select id="bag-height-sel">
+                        <option value="h_dak_50p" selected>50e percentiel (mediaan)</option>
+                        <option value="h_dak_70p">70e percentiel</option>
+                        <option value="h_dak_max">Maximum</option>
+                    </select>
+                </div>
+
+                <div class="setting" id="rain-setting" style="display:none;">
+                    <span class="setting-lbl">Neerslag</span>
+                    <select id="rain-sel">
+                        <option value="0" selected>Droog</option>
+                        <option value="5">5 mm/h licht</option>
+                        <option value="25">25 mm/h matig</option>
+                        <option value="50">50 mm/h zwaar</option>
+                    </select>
+                </div>
+
+                <div id="sel-display" class="s-empty">Geen nodes geselecteerd</div>
+
+                <button class="btn btn-primary" id="btn-analyze" onclick="runAnalysis()"
+                        style="width:100%;margin-top:6px;" disabled>
+                    📊 Analyseer verbinding
+                </button>
+                <button class="btn btn-secondary" onclick="setMode('select')"
+                        style="width:100%;margin-top:5px;font-size:11px;">
+                    Selecteer nodes op kaart
+                </button>
+                <button class="btn btn-secondary" onclick="runMultiHopAnalysis()"
+                        id="btn-multihop" style="width:100%;margin-top:5px;font-size:11px;" disabled
+                        title="Analyseer keten van 3+ nodes in volgorde van de lijst">
+                    🔗 Multi-hop analyse (3+ nodes)
+                </button>
+
+                <div id="results" style="display:none;margin-top:2px;"></div>
+                <div id="multihop-results" style="display:none;margin-top:6px;"></div>
+            </div>
+        </div>
+
+        <!-- LINK BUDGET -->
+        <div class="card">
+            <div class="card-head" onclick="toggleCard('linkbudget')">
+                Link Budget &amp; Dekking <span id="chev-linkbudget">▶</span>
+            </div>
+            <div class="card-body" id="bd-linkbudget" style="display:none;">
+                <div style="font-size:10px;color:var(--dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;">Zender / ontvanger</div>
+                <select onchange="applyLBPreset(this.value)"
+                        style="width:100%;margin-bottom:8px;font-size:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 5px;">
+                    <option value="">— Snel preset —</option>
+                    <option value="meshtastic">Meshtastic SX1262 (22 dBm, SF12)</option>
+                    <option value="meshcore_sf7" selected>Meshcore SF7 / CR4/5 / BW 62.5 kHz</option>
+                    <option value="helium">Helium Hotspot (27 dBm, SF12)</option>
+                    <option value="generic_lora">Generieke LoRa (14 dBm, SF7)</option>
+                    <option value="wifi">WiFi AP (20 dBm, 2.4 GHz)</option>
+                </select>
+                <div class="lb-row">
+                    <span class="lb-lbl">TX vermogen</span>
+                    <input class="lb-inp" type="number" id="lb-tx" value="22" min="-10" max="33" step="0.5">
+                    <span class="lb-unit">dBm</span>
+                </div>
+                <div class="lb-row">
+                    <span class="lb-lbl">TX antenneversterking</span>
+                    <input class="lb-inp" type="number" id="lb-gtx" value="2.15" min="0" max="25" step="0.25">
+                    <span class="lb-unit">dBi</span>
+                </div>
+                <div class="lb-row">
+                    <span class="lb-lbl">RX antenneversterking</span>
+                    <input class="lb-inp" type="number" id="lb-grx" value="2.15" min="0" max="25" step="0.25">
+                    <span class="lb-unit">dBi</span>
+                </div>
+                <div class="lb-row">
+                    <span class="lb-lbl">RX gevoeligheid</span>
+                    <input class="lb-inp" type="number" id="lb-sens" value="-126" min="-150" max="-50" step="0.5">
+                    <span class="lb-unit">dBm</span>
+                </div>
+                <div class="lb-row">
+                    <span class="lb-lbl">Kabel/connector verlies</span>
+                    <input class="lb-inp" type="number" id="lb-cable" value="0" min="0" max="20" step="0.5">
+                    <span class="lb-unit">dB</span>
+                </div>
+
+                <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+                    <div style="font-size:10px;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Dekkingszones (FSPL)</div>
+                    <div style="font-size:10px;color:var(--dim);margin-bottom:5px;line-height:1.5;">
+                        Concentrische zones op kaart vanuit geselecteerde node (geen terreineffecten)
+                    </div>
+                    <div class="hm-row">
+                        <select id="hm-node-sel"
+                                style="flex:1;font-size:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 5px;">
+                            <option value="">— Selecteer node —</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="generateHeatmap()" style="font-size:11px;padding:4px 8px;">
+                            Toon
+                        </button>
+                        <button class="btn btn-ghost" onclick="clearHeatmap()" title="Verwijder zones" style="padding:4px 7px;">✕</button>
+                    </div>
+                    <div style="font-size:10px;color:var(--dim);margin-top:5px;line-height:1.5;">
+                        <span style="color:rgba(34,197,94,.8)">■</span> +30 dB &nbsp;
+                        <span style="color:rgba(234,179,8,.8)">■</span> +20 dB &nbsp;
+                        <span style="color:rgba(249,115,22,.8)">■</span> +10 dB &nbsp;
+                        <span style="color:rgba(239,68,68,.8)">■</span> 0 dB marge
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INFO -->
+        <div class="card">
+            <div class="card-head" onclick="toggleCard('info')">
+                Over dit gereedschap <span id="chev-info">▲</span>
+            </div>
+            <div class="card-body" id="bd-info" style="display:none;">
+                <div class="info-ul">
+                    <strong>Meshcore-problemen zichtbaar maken:</strong><br>
+                    • Heuvels / hoogteverschillen (AHN DTM)<br>
+                    • Bossen &amp; bomen (DSM − DTM)<br>
+                    • Gebouwen en constructies<br>
+                    • Fresnel zone obstructie<br>
+                    <br>
+                    <strong>PDOK databronnen:</strong><br>
+                    • <a href="https://www.pdok.nl/introductie/-/article/actueel-hoogtebestand-nederland-ahn"
+                       target="_blank" style="color:var(--accent)">AHN</a> — 0.5 m hoogte-raster<br>
+                    • <a href="https://www.pdok.nl/introductie/-/article/basisregistratie-topografie-achtergrondkaarten-brt-a-"
+                       target="_blank" style="color:var(--accent)">BRT-A</a> — topografische achtergrondkaart<br>
+                    • <a href="https://www.pdok.nl/introductie/-/article/pdok-luchtfoto-rgb-open-"
+                       target="_blank" style="color:var(--accent)">Luchtfoto RGB</a> — actuele luchtfoto's<br>
+                    <br>
+                    <strong>Hoe te gebruiken:</strong><br>
+                    1. Plaats Meshcore nodes op de kaart<br>
+                    2. Stel antennehoogte in (m boven grond)<br>
+                    3. Selecteer 2 nodes → Analyseer<br>
+                    4. Bekijk hoogteprofiel + Fresnel zone
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /sb-body -->
+</div><!-- /sidebar -->
+
+<!-- ════════════════════════════ MAIN ════════════════════════════════ -->
+<div id="main">
+
+    <!-- Toolbar -->
+    <div id="toolbar">
+        <div id="view-tabs">
+            <button class="tab-btn" id="tab-map"     onclick="scrollToSection('map')">🗺 Kaart</button>
+            <button class="tab-btn" id="tab-profile" onclick="scrollToSection('profile')">📈 Profiel</button>
+            <button class="tab-btn" id="tab-details" onclick="scrollToSection('details-panel')">📋 Details</button>
+            <button class="tab-btn" id="tab-conclusion" onclick="scrollToSection('conclusion-panel')">💡 Conclusie</button>
+        </div>
+        <div class="tb-sep"></div>
+        <button class="btn btn-secondary" onclick="setMode('view')" title="Navigeren">👁</button>
+        <button class="btn btn-secondary" onclick="fitNL()" title="Nederland overzicht">🇳🇱</button>
+        <button class="btn btn-secondary" onclick="locateUser()" title="Mijn locatie">📍</button>
+        <button class="btn btn-secondary" onclick="exportScreenshot()" title="Export kaart als PNG">📷</button>
+        <button class="btn btn-secondary" onclick="shareURL()" title="Kopieer deel-link">🔗</button>
+        <button class="btn btn-secondary" onclick="openNodeWizard()" title="Wizard voor eerste 2 nodes">🧭</button>
+        <button class="btn btn-secondary" onclick="openIntroPopup(true)" title="Uitleg en privacy">❔</button>
+        <div id="mode-lbl">Modus: Bekijken</div>
+    </div>
+
+    <!-- Map -->
+    <div id="map-wrap">
+        <div id="map"></div>
+
+        <!-- AHN badge -->
+        <div id="ahn-status">AHN: laden…</div>
+
+        <!-- Floating info bar -->
+        <div id="infobar"></div>
+
+        <!-- Tooltip overlay anchor -->
+        <div id="map-tip"></div>
+        <div id="obs-popup"></div>
+    </div>
+
+    <!-- Drag handle (removed – layout is now scrollable) -->
+
+    <!-- Elevation profile -->
+    <div id="profile">
+        <div id="profile-head">
+            <h3>Hoogteprofiel &amp; LOS</h3>
+            <span id="profile-meta"></span>
+
+        </div>
+        <div id="profile-chart-wrap">
+            <canvas id="profile-canvas"></canvas>
+            <div id="prof-loading"><div class="spin"></div> Hoogteprofiel laden…</div>
+            <div id="profile-error">
+                <span>⚠ Kon geen hoogteprofiel ophalen</span>
+                <span style="font-size:10px;color:var(--dim);">Controleer verbinding of zoom in en probeer opnieuw</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis details panel -->
+    <div id="details-panel">
+        <div id="dp-placeholder" class="dp-placeholder">Voer een analyse uit om obstakels en details te zien.</div>
+        <div id="dp-content" style="display:none;"></div>
+    </div>
+
+    <!-- Conclusion & advice panel -->
+    <div id="conclusion-panel">
+        <div id="cp-placeholder" class="cp-placeholder">Voer een analyse uit voor een conclusie met verbeteradvies.</div>
+        <div id="cp-content" style="display:none;"></div>
+    </div>
+
+</div><!-- /main -->
+
+<div id="intro-backdrop" aria-hidden="true">
+    <div id="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+        <div class="im-head">
+            <div>
+                <div class="im-title" id="intro-title">Welkom bij Line of Sight Analyzer</div>
+                <div class="im-sub">Snelle uitleg voor nieuwe gebruikers</div>
+                <div class="im-sub">Auteur: Rein Velt / <a href="mailto:Rein@hackerspace-drenthe.nl" style="color:var(--accent)">Rein@hackerspace-drenthe.nl</a></div>
+            </div>
+            <button class="btn btn-ghost" onclick="closeIntroPopup(false)" title="Sluiten">✕</button>
+        </div>
+
+        <div class="im-grid">
+            <div class="im-card">
+                <h4>Hoe het werkt</h4>
+                <p>
+                    1) Plaats twee of meer nodes op de kaart.<br>
+                    2) Stel antennehoogtes in.<br>
+                    3) Start analyse om LOS, Fresnel en obstakels te beoordelen.<br>
+                    4) Bekijk Kaart, Profiel, Details en Conclusie voor advies.
+                </p>
+            </div>
+            <div class="im-card">
+                <h4>Data &amp; herkomst</h4>
+                <div class="im-list">
+                    • AHN (PDOK/RWS): DTM/DSM hoogtegegevens<br>
+                    • BRT-A (PDOK/Kadaster): topografische kaart<br>
+                    • Luchtfoto RGB (PDOK): recente orthofoto<br>
+                    • BAG/BGT (PDOK): gebouwen en vegetatiecontext
+                </div>
+            </div>
+            <div class="im-card">
+                <h4>Nauwkeurigheid</h4>
+                <p>
+                    Resultaten zijn indicatief. Resolutie en actualiteit van brondata,
+                    vegetatie in het seizoen, antenneplaatsing en lokale omstandigheden
+                    kunnen verschillen veroorzaken. Gebruik veldmeting voor definitieve
+                    netwerkbeslissingen.
+                </p>
+            </div>
+            <div class="im-card">
+                <h4>Privacy</h4>
+                <p>
+                    Deze pagina draait client-side in je browser. Node-data wordt lokaal
+                    opgeslagen (localStorage) tenzij je zelf deelt/exporteert.
+                    Er is geen account of automatische upload naar een eigen server.
+                    Externe kaart-/hoogtediensten (PDOK e.d.) ontvangen wel kaartaanvragen.
+                </p>
+            </div>
+        </div>
+
+        <div class="im-actions">
+            <label class="im-remember">
+                <input type="checkbox" id="intro-hide-next" checked>
+                Niet meer automatisch tonen op dit apparaat
+            </label>
+            <div style="display:flex;gap:6px;">
+                <button class="btn btn-secondary" onclick="closeIntroPopup(true);openNodeWizard();">Start Node Wizard</button>
+                <button class="btn btn-primary" onclick="closeIntroPopup(true)">Start met analyseren</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="wiz-backdrop" aria-hidden="true">
+    <div id="wiz-modal" role="dialog" aria-modal="true" aria-labelledby="wiz-title">
+        <div class="wiz-head">
+            <div>
+                <div class="wiz-title" id="wiz-title">Node Wizard - Eerste 2 nodes</div>
+                <div class="wiz-step-ind" id="wiz-step-ind">Stap 1 van 2</div>
+            </div>
+            <button class="btn btn-ghost" onclick="closeNodeWizard()" title="Sluiten">✕</button>
+        </div>
+
+        <div class="wiz-step active" id="wiz-step-1">
+            <div class="wiz-card">
+                <h4>Node 1 instellingen</h4>
+                <div class="wiz-grid">
+                    <div>
+                        <div class="wiz-row">
+                            <label for="wiz-n1-name">Naam</label>
+                            <input id="wiz-n1-name" value="Node 1" maxlength="40">
+                        </div>
+                        <div class="wiz-row">
+                            <label for="wiz-n1-h">Antennehoogte (m)</label>
+                            <input id="wiz-n1-h" type="number" value="2" min="0" max="300" step="0.5">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="wiz-row">
+                            <label for="wiz-n1-method">Locatie bron</label>
+                            <select id="wiz-n1-method" onchange="toggleWizardCoordFields('n1')">
+                                <option value="geoloc">Gebruik mijn locatie</option>
+                                <option value="mapclick">Selecteer met klik op kaart</option>
+                                <option value="coords">Handmatige coordinaten</option>
+                                <option value="center">Gebruik huidig kaartcentrum</option>
+                            </select>
+                        </div>
+                        <div id="wiz-n1-coords" class="wiz-inline-2" style="display:none;">
+                            <div class="wiz-row"><label>Lon (E)</label><input id="wiz-n1-lon" type="number" step="0.000001" placeholder="5.123456"></div>
+                            <div class="wiz-row"><label>Lat (N)</label><input id="wiz-n1-lat" type="number" step="0.000001" placeholder="52.123456"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="wiz-actions">
+                <span class="wiz-note">Tip: je kunt later altijd nodes verplaatsen of aanpassen.</span>
+                <div class="wiz-actions-right">
+                    <button class="btn btn-primary" onclick="wizardNextStep()">Volgende</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="wiz-step" id="wiz-step-2">
+            <div class="wiz-card">
+                <h4>Node 2 instellingen</h4>
+                <div class="wiz-grid">
+                    <div>
+                        <div class="wiz-row">
+                            <label for="wiz-n2-name">Naam</label>
+                            <input id="wiz-n2-name" value="Node 2" maxlength="40">
+                        </div>
+                        <div class="wiz-row">
+                            <label for="wiz-n2-h">Antennehoogte (m)</label>
+                            <input id="wiz-n2-h" type="number" value="2" min="0" max="300" step="0.5">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="wiz-row">
+                            <label for="wiz-n2-method">Locatie bron</label>
+                            <select id="wiz-n2-method" onchange="toggleWizardCoordFields('n2')">
+                                <option value="mapclick">Selecteer met klik op kaart</option>
+                                <option value="geoloc">Gebruik mijn locatie</option>
+                                <option value="coords">Handmatige coordinaten</option>
+                                <option value="center">Gebruik huidig kaartcentrum</option>
+                            </select>
+                        </div>
+                        <div id="wiz-n2-coords" class="wiz-inline-2" style="display:none;">
+                            <div class="wiz-row"><label>Lon (E)</label><input id="wiz-n2-lon" type="number" step="0.000001" placeholder="5.223456"></div>
+                            <div class="wiz-row"><label>Lat (N)</label><input id="wiz-n2-lat" type="number" step="0.000001" placeholder="52.223456"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="wiz-actions">
+                <span class="wiz-note">Node 1 en 2 worden na afronden automatisch geselecteerd voor analyse.</span>
+                <div class="wiz-actions-right">
+                    <button class="btn btn-secondary" onclick="wizardPrevStep()">Vorige</button>
+                    <button class="btn btn-primary" onclick="finishNodeWizard()">Nodes aanmaken</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="share-toast"></div>
+
+<!-- ════════════════════════════ SCRIPT ══════════════════════════════ -->
+<script>
+'use strict';
+
+/**
+ * ============================================================
+ * Meshcore Signaal Analyse Kaart
+ * ============================================================
+ * @author      Rein Velt
+ * @version     1.0 (2026)
+ * @license     MIT
+ *
+ * @description
+ *   Single-file webapplicatie voor het analyseren van
+ *   Meshcore (LoRa mesh radio) signaalverbindingen boven
+ *   het Nederlandse maaiveld, gebouwen en bosgebieden.
+ *
+ *   Geodata via PDOK (overheid open data):
+ *     AHN  — DTM/DSM 0,5 m raster (hoogteprofiel + obstakeldetectie)
+ *     BRT-A — topografische achtergrondkaart
+ *     Luchtfoto RGB 2023 (25 cm ortho)
+ *     BAG  — gebouwvoetafdrukken (Pand)
+ *     BGT  — begroeid terreindeel (bos, vegetatie)
+ *
+ *   Signaalanalyse:
+ *     - Lijn-van-zicht (LOS) berekening over het AHN DTM/DSM
+ *     - Fresnel-zone radius: r₁ = √(λ · d₁ · d₂ / (d₁+d₂))
+ *     - Obstakelclassificatie op basis van DSM − DTM:
+ *         < 2 m   → maaiveld (verwaarloosbaar)
+ *         2–15 m  → vegetatie / bos
+ *         ≥ 15 m  → gebouwen / constructies
+ *     - Signaaldemping schatting (ITU-R P.833 foliage: 0,2–0,4 dB/m)
+ * ============================================================
+ */
+
+// ══════════════════════════════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════════════════════════════
+
+const AHN_WMS   = 'https://service.pdok.nl/rws/actueel-hoogtebestand-nederland/wms/v1_0';
+const BRT_BASE  = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0';
+const LUCHT_BASE = 'https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0';
+
+// Fallback layer names; will be updated from GetCapabilities
+let AHN_DTM = 'dtm_05m';
+let AHN_DSM = 'dsm_05m';
+
+const COLORS = [
+    '#3b82f6','#22c55e','#f97316','#ec4899','#a855f7',
+    '#14b8a6','#eab308','#ef4444','#06b6d4','#84cc16'
+];
+
+// ── Simple in-memory cache ─────────────────────────────────────────
+// Avoids re-fetching the same WMS/WFS data during a session.
+// queryElevation: keyed on coords rounded to 8 m (half the WMS pixel size)
+// getProfile:     keyed on endpoints + nPts (invalidated on node move)
+// fetchBAGBuildings: keyed on rounded bbox string
+const _elevCache    = new Map();  // coord key → {dtm, dsm}
+const _inflightElev = new Map();  // coord key → Promise (request dedup)
+const _profileCache = new Map();  // profile key → {points, dtm, dsm, dist}
+const _bagCache     = new Map();  // bbox key    → {features, has3D}
+
+const INTRO_SEEN_KEY = 'mc-intro-seen-v1';
+
+function _elevKey(c)    { return `${Math.round(c[0]/8)*8},${Math.round(c[1]/8)*8}`; }
+function _profileKey(c1,c2,n) { return `${c1[0].toFixed(1)},${c1[1].toFixed(1)}|${c2[0].toFixed(1)},${c2[1].toFixed(1)}|${n}`; }
+function _bagKey(minLon,minLat,maxLon,maxLat) { return `${minLon.toFixed(4)},${minLat.toFixed(4)},${maxLon.toFixed(4)},${maxLat.toFixed(4)}`; }
+
+/** Clear all cached elevation/profile data (e.g. after nodes move). */
+function clearElevCache() { _elevCache.clear(); _profileCache.clear(); _bagCache.clear(); }
+
+// ══════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════
+
+const state = {
+    mode: 'view',
+    nodes: [],
+    selAnalysis: [],   // [id, id] for analysis
+    freq: 868e6,
+    chart: null,
+    profilePoints: null,  // EPSG:3857 coords along the current profile
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// MAP LAYERS
+// ══════════════════════════════════════════════════════════════════════
+
+const brtSource = new ol.source.XYZ({
+    url: `${BRT_BASE}/standaard/EPSG:3857/{z}/{x}/{y}.png`,
+    attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> / Kadaster BRT-A',
+    maxZoom: 19,
+});
+const brtLayer = new ol.layer.Tile({ source: brtSource, name: 'brt', visible: true });
+
+const luchtLayer = new ol.layer.Tile({
+    source: new ol.source.XYZ({
+        url: `${LUCHT_BASE}/2023_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg`,
+        attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> Luchtfoto',
+        maxZoom: 19,
+    }),
+    name: 'lucht', visible: false,
+});
+
+const dtmSrc = new ol.source.ImageWMS({
+    url: AHN_WMS,
+    params: { LAYERS: AHN_DTM, FORMAT: 'image/png', TRANSPARENT: true },
+    ratio: 1, serverType: 'geoserver',
+    attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> AHN',
+});
+const dtmLayer = new ol.layer.Image({ source: dtmSrc, name: 'dtm', visible: true, opacity: 0.55 });
+
+const dsmSrc = new ol.source.ImageWMS({
+    url: AHN_WMS,
+    params: { LAYERS: AHN_DSM, FORMAT: 'image/png', TRANSPARENT: true },
+    ratio: 1, serverType: 'geoserver',
+});
+const dsmLayer = new ol.layer.Image({ source: dsmSrc, name: 'dsm', visible: false, opacity: 0.55 });
+
+// BAG Gebouwen WMS
+const bagSrc = new ol.source.ImageWMS({
+    url: 'https://service.pdok.nl/lv/bag/wms/v2_0',
+    params: { LAYERS: 'pand', FORMAT: 'image/png', TRANSPARENT: true },
+    ratio: 1, serverType: 'geoserver',
+    attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> BAG',
+});
+const bagLayer = new ol.layer.Image({ source: bagSrc, name: 'bag', visible: false, opacity: 0.7, zIndex: 6 });
+
+// BGT Begroeid terreindeel WMS (bossen, parken, grasland)
+const bgtSrc = new ol.source.ImageWMS({
+    url: 'https://service.pdok.nl/lv/bgt/wms/v1_0',
+    params: { LAYERS: 'begroeidterreindeel', FORMAT: 'image/png', TRANSPARENT: true },
+    ratio: 1, serverType: 'geoserver',
+    attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> BGT',
+});
+const bgtLayer = new ol.layer.Image({ source: bgtSrc, name: 'bgt', visible: false, opacity: 0.65, zIndex: 5 });
+
+// Vector: analysis line
+const obstructionSource = new ol.source.Vector();
+const obstructionLayer  = new ol.layer.Vector({ source: obstructionSource, zIndex: 95 });
+
+// Vector: analysis line + Fresnel
+const analysisSource = new ol.source.Vector();
+const analysisLayer = new ol.layer.Vector({ source: analysisSource, zIndex: 90 });
+
+// Vector: chart crosshair marker
+const crosshairSource = new ol.source.Vector();
+const crosshairLayer = new ol.layer.Vector({ source: crosshairSource, zIndex: 110 });
+
+// Vector: coverage circles (dekkingscirkels per node)
+const coverageSource = new ol.source.Vector();
+const coverageLayer = new ol.layer.Vector({ source: coverageSource, zIndex: 75 });
+
+// Vector: heatmap (FSPL dekkingszones vanuit 1 node)
+const heatmapSource = new ol.source.Vector();
+const heatmapLayer = new ol.layer.Vector({ source: heatmapSource, zIndex: 72 });
+
+// Vector: nodes
+const nodeSource = new ol.source.Vector();
+const nodeLayer = new ol.layer.Vector({ source: nodeSource, zIndex: 100 });
+
+// ══════════════════════════════════════════════════════════════════════
+// MAP
+// ══════════════════════════════════════════════════════════════════════
+
+const map = new ol.Map({
+    target: 'map',
+    layers: [brtLayer, luchtLayer, bgtLayer, bagLayer, dtmLayer, dsmLayer, analysisLayer, heatmapLayer, coverageLayer, obstructionLayer, nodeLayer, crosshairLayer],
+    view: new ol.View({
+        projection: 'EPSG:3857',
+        center: ol.proj.fromLonLat([5.29, 52.13]),
+        zoom: 7,
+    }),
+    controls: ol.control.defaults.defaults({ attribution: true, zoom: true, rotate: false }),
+});
+
+// Tooltip overlay
+const tipEl = document.getElementById('map-tip');
+const tipOverlay = new ol.Overlay({
+    element: tipEl, positioning: 'bottom-center', offset: [0, -12], stopEvent: false,
+});
+map.addOverlay(tipOverlay);
+
+const obsPopupEl = document.getElementById('obs-popup');
+const obsPopupOverlay = new ol.Overlay({
+    element: obsPopupEl, positioning: 'bottom-center', offset: [0, -14], stopEvent: true,
+});
+map.addOverlay(obsPopupOverlay);
+
+function obstructionFeatureStyle(type, obsClass, label) {
+    // Status color: LOS = red, Fresnel-only = green
+    const clr = type === 'los' ? '#ef4444' : '#22c55e';
+    // Icon by obstruction class
+    const icon = obsClass === 'gebouw' ? '🏢'
+        : obsClass === 'vegetatie/bos' ? '🌲'
+        : '⛰';
+
+    return [
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 12,
+                fill: new ol.style.Fill({ color: clr }),
+                stroke: new ol.style.Stroke({ color: '#fff', width: 2.2 }),
+            }),
+            text: new ol.style.Text({
+                text: label,
+                font: 'bold 11px Segoe UI, sans-serif',
+                fill: new ol.style.Fill({ color: '#fff' }),
+            }),
+        }),
+        new ol.style.Style({
+            text: new ol.style.Text({
+                text: icon,
+                font: '13px Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif',
+                offsetY: -18,
+                fill: new ol.style.Fill({ color: '#fff' }),
+                stroke: new ol.style.Stroke({ color: 'rgba(0,0,0,0.55)', width: 2.5 }),
+            }),
+        }),
+    ];
+}
+
+function closeObstructionPopup() {
+    if (!obsPopupEl) return;
+    obsPopupEl.style.display = 'none';
+    obsPopupOverlay.setPosition(undefined);
+}
+
+function getCurrentObstructionSegments() {
+    const a = state.lastAnalysis;
+    if (!a) return [];
+    const { bagMask, dtmCorrected, dsmEnhanced, los, fThDn, profilePoints, distKm } = a;
+    return findObstructionSegments(dsmEnhanced, los, fThDn, profilePoints, bagMask, dtmCorrected, distKm);
+}
+
+function jumpToObstructionDetails(idx) {
+    const el = document.getElementById(`dp-seg-${idx}`);
+    if (!el) return;
+    scrollToSection('details-panel');
+    setTimeout(() => {
+        const clusterDetails = el.closest('details.dp-cluster-details');
+        if (clusterDetails && !clusterDetails.open) clusterDetails.open = true;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('dp-seg-highlight');
+        setTimeout(() => el.classList.remove('dp-seg-highlight'), 1600);
+    }, 260);
+}
+
+function jumpToObstructionGraph(idx) {
+    const seg = getCurrentObstructionSegments()[idx];
+    if (!seg) return;
+    scrollToSection('profile');
+    setTimeout(() => setChartCrosshair(seg.critIdx), 260);
+}
+
+function openObstructionPopup(feature, coordinate) {
+    if (!obsPopupEl || !feature) return;
+    const idx  = feature.get('obsIndex');
+    const type = feature.get('obsType');
+    const lbl  = type === 'los' ? 'LOS geblokkeerd' : 'Fresnel geblokkeerd';
+    const cls  = feature.get('obsClass') || '-';
+    const dS   = feature.get('distStart');
+    const dE   = feature.get('distEnd');
+    const obsH = Number(feature.get('obsH') || 0).toFixed(1);
+    const napH = Number(feature.get('dsmAtCrit') || 0).toFixed(1);
+    obsPopupEl.innerHTML = `
+      <div class="obs-head">
+        <div class="obs-title">Obstructie ${idx + 1} — ${lbl}</div>
+        <button class="obs-close" onclick="closeObstructionPopup()" title="Sluiten">✕</button>
+      </div>
+      <div class="obs-meta">
+        <div><strong>Type:</strong> ${escHtml(cls)}</div>
+        <div><strong>Afstand:</strong> ${dS} – ${dE} km</div>
+        <div><strong>Obstakel:</strong> ${obsH} m</div>
+        <div><strong>NAP:</strong> ${napH} m</div>
+      </div>
+      <div class="obs-links">
+        <button class="obs-link" onclick="jumpToObstructionGraph(${idx});closeObstructionPopup();">Naar grafiekpunt</button>
+        <button class="obs-link" onclick="jumpToObstructionDetails(${idx});closeObstructionPopup();">Naar details</button>
+      </div>`;
+    obsPopupEl.style.display = 'block';
+    obsPopupOverlay.setPosition(coordinate);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// NODE RENDERING
+// ══════════════════════════════════════════════════════════════════════
+
+function nodeStyle(node, idx) {
+    const color = COLORS[idx % COLORS.length];
+    const sel   = state.selAnalysis.includes(node.id);
+    return new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: sel ? 10 : 8,
+            fill: new ol.style.Fill({ color }),
+            stroke: new ol.style.Stroke({
+                color: sel ? '#fff' : 'rgba(255,255,255,.7)', width: sel ? 3 : 2,
+            }),
+        }),
+        text: new ol.style.Text({
+            text: node.name, offsetY: -20,
+            font: '11px Segoe UI, sans-serif',
+            fill: new ol.style.Fill({ color: '#fff' }),
+            stroke: new ol.style.Stroke({ color: '#12151a', width: 3 }),
+        }),
+    });
+}
+
+function renderNodes() {
+    nodeSource.clear();
+    state.nodes.forEach((n, i) => {
+        const f = new ol.Feature({
+            geometry: new ol.geom.Point(n.coord),
+            nodeId: n.id,
+        });
+        f.setStyle(nodeStyle(n, i));
+        nodeSource.addFeature(f);
+    });
+}
+
+function updateNodeList() {
+    const el = document.getElementById('node-list');
+    if (!state.nodes.length) {
+        el.innerHTML = '<div class="no-nodes">Klik "Node plaatsen" en klik op de kaart</div>';
+        updateHeatmapNodeSel();
+        return;
+    }
+    el.innerHTML = state.nodes.map((n, i) => {
+        const ll = ol.proj.toLonLat(n.coord);
+        const sel = state.selAnalysis.includes(n.id);
+        const maaiveld = n.maaiveld !== undefined ? `maaiveld: ${n.maaiveld.toFixed(1)} m NAP` : '';
+        return `
+        <div class="node-item ${sel ? 'selected' : ''}" id="ni-${n.id}"
+             onclick="selectForAnalysis(${n.id})">
+            <div class="node-dot" style="background:${COLORS[i % COLORS.length]}"></div>
+            <div class="node-info">
+                <div style="display:flex;align-items:center;gap:4px;">
+                    <div class="node-name" ondblclick="renameNodeInline(${n.id});event.stopPropagation()"
+                         title="Dubbelklik om te hernoemen">${escHtml(n.name)}</div>
+                    <button class="btn btn-ghost" style="padding:1px 4px;font-size:10px;line-height:1;flex-shrink:0;"
+                            title="Hernoemen" onclick="renameNodeInline(${n.id});event.stopPropagation()">✏️</button>
+                </div>
+                <div class="node-coord">${ll[1].toFixed(5)}°N ${ll[0].toFixed(5)}°E</div>
+                <div class="node-maaiveld">${maaiveld}</div>
+            </div>
+            <input class="node-h" type="number" value="${n.h}" min="0" max="300" step="0.5"
+                   title="Antennehoogte (m boven grond)"
+                   onchange="setNodeH(${n.id},this.value)"
+                   onclick="event.stopPropagation()">
+            <span class="node-h-unit">m</span>
+            <button class="btn btn-ghost" style="padding:3px 5px;"
+                    onclick="removeNode(${n.id});event.stopPropagation()">✕</button>
+        </div>`;
+    }).join('');
+    updateHeatmapNodeSel();
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// NODE MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════
+
+function addNode(coord, opts = {}) {
+    const id   = Date.now() + Math.floor(Math.random() * 1000);
+    const name = (opts.name && String(opts.name).trim()) || `Node ${state.nodes.length + 1}`;
+    const h    = Number.isFinite(Number(opts.h)) ? Number(opts.h) : 0;
+    state.nodes.push({ id, coord, name, h });
+    renderNodes();
+    updateNodeList();
+    updateAnalysisUI();
+    saveNodes();
+    if (!opts.silent) showInfo(`${name} geplaatst — klik opnieuw voor volgende node`);
+    fetchAutoElevation(id);  // async: vult maaiveld in zodra WMS reageert
+    return id;
+}
+
+function removeNode(id) {
+    state.nodes = state.nodes.filter(n => n.id !== id);
+    state.selAnalysis = state.selAnalysis.filter(x => x !== id);
+    analysisSource.clear();
+    renderNodes();
+    updateNodeList();
+    updateAnalysisUI();
+    saveNodes();
+}
+
+function clearNodes() {
+    if (!state.nodes.length) return;
+    if (!confirm('Alle nodes en analyse verwijderen?')) return;
+    state.nodes = [];
+    state.selAnalysis = [];
+    nodeSource.clear();
+    analysisSource.clear();
+    obstructionSource.clear();
+    updateNodeList();
+    updateAnalysisUI();
+    closeProfile();
+    saveNodes();
+}
+
+function setNodeH(id, v) {
+    const n = state.nodes.find(x => x.id === id);
+    if (n) { n.h = parseFloat(v) || 0; saveNodes(); }
+}
+
+function selectForAnalysis(id) {
+    const idx = state.selAnalysis.indexOf(id);
+    if (idx >= 0) {
+        state.selAnalysis.splice(idx, 1);
+    } else if (state.selAnalysis.length < 2) {
+        state.selAnalysis.push(id);
+    } else {
+        state.selAnalysis = [state.selAnalysis[1], id];
+    }
+    renderNodes();
+    updateNodeList();
+    updateAnalysisUI();
+    // Zoom map to selected node(s)
+    const selNodes = state.selAnalysis.map(sid => state.nodes.find(x => x.id === sid)).filter(Boolean);
+    if (selNodes.length === 1) {
+        map.getView().animate({ center: selNodes[0].coord, zoom: 15, duration: 500 });
+    } else if (selNodes.length === 2) {
+        const ext = ol.extent.boundingExtent(selNodes.map(n => n.coord));
+        map.getView().fit(ext, { padding: [80, 80, 80, 80], maxZoom: 15, duration: 500 });
+    }
+}
+
+function updateAnalysisUI() {
+    const sel    = state.selAnalysis;
+    const dis    = document.getElementById('sel-display');
+    const btn    = document.getElementById('btn-analyze');
+    const mhBtn  = document.getElementById('btn-multihop');
+
+    function step(num, name, done, hint) {
+        const bg  = done ? '#3b82f6'   : num === 1 ? 'rgba(239,68,68,.7)'   : 'rgba(245,158,11,.7)';
+        const clr = done ? '#e2e8f0'   : '#94a3b8';
+        const ico = done ? '✓' : num;
+        return `<div style="display:flex;align-items:center;gap:7px;margin:3px 0;">
+          <span style="width:17px;height:17px;border-radius:50%;background:${bg};color:#fff;
+                       font-size:9px;font-weight:700;display:flex;align-items:center;
+                       justify-content:center;flex-shrink:0;">${ico}</span>
+          <span style="color:${clr};">${done ? `<strong>${escHtml(name)}</strong>` : hint}</span>
+        </div>`;
+    }
+
+    const hdr = (txt, clr) =>
+        `<div style="font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+                     color:${clr};margin-bottom:5px;">${txt}</div>`;
+
+    if (!sel.length) {
+        dis.className = 's-empty';
+        dis.innerHTML = hdr('Selecteer 2 nodes voor analyse', '#ef4444')
+            + step(1, null, false, 'Klik een node op de kaart')
+            + step(2, null, false, 'Klik een 2e node op de kaart');
+        btn.disabled = true;
+    } else if (sel.length === 1) {
+        const n = state.nodes.find(x => x.id === sel[0]);
+        dis.className = 's-partial';
+        dis.innerHTML = hdr('Selecteer nog 1 node', '#f59e0b')
+            + step(1, n?.name, true, null)
+            + step(2, null, false, 'Klik een 2e node op de kaart');
+        btn.disabled = true;
+    } else {
+        const a = state.nodes.find(x => x.id === sel[0]);
+        const b = state.nodes.find(x => x.id === sel[1]);
+        dis.className = 's-ready';
+        dis.innerHTML = hdr('Gereed voor analyse ✓', '#22c55e')
+            + step(1, a?.name, true, null)
+            + step(2, b?.name, true, null);
+        btn.disabled = false;
+    }
+    if (mhBtn) mhBtn.disabled = state.nodes.length < 3;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MAP INTERACTION
+// ══════════════════════════════════════════════════════════════════════
+
+const MODE_LABELS = { view: 'Bekijken', add: 'Node plaatsen', select: 'Node selecteren' };
+
+function setMode(m) {
+    state.mode = m;
+    document.getElementById('mode-lbl').textContent = `Modus: ${MODE_LABELS[m] || m}`;
+    document.getElementById('btn-add').classList.toggle('btn-active', m === 'add');
+    map.getTargetElement().style.cursor = m === 'add' ? 'crosshair' : '';
+    if (m === 'add')    showInfo('Klik op de kaart om een node te plaatsen');
+    else if (m === 'select') showInfo('Klik op een node om te selecteren voor analyse');
+    else hideInfo();
+}
+
+map.on('click', e => {
+    if (state.mode === 'add') {
+        addNode(e.coordinate);
+        return;
+    }
+    // Click on obstruction marker → open popup with deep links
+    const obsFeat = map.forEachFeatureAtPixel(e.pixel, f => f, {
+        layerFilter: l => l === obstructionLayer,
+    });
+    if (obsFeat) {
+        openObstructionPopup(obsFeat, e.coordinate);
+        return;
+    }
+    closeObstructionPopup();
+    // Click on node feature
+    const feat = map.forEachFeatureAtPixel(e.pixel, f => f, {
+        layerFilter: l => l === nodeLayer,
+    });
+    if (feat) {
+        selectForAnalysis(feat.get('nodeId'));
+    }
+});
+
+// Hover: tooltip on nodes + obstruction markers
+let hoverTimer = null;
+map.on('pointermove', e => {
+    const obsFeat = map.forEachFeatureAtPixel(e.pixel, f => f, {
+        layerFilter: l => l === obstructionLayer,
+    });
+    if (obsFeat) {
+        const idx     = obsFeat.get('obsIndex');
+        const type    = obsFeat.get('obsType');
+        const lbl     = type === 'los' ? 'LOS geblokkeerd' : 'Fresnel geblokkeerd';
+        const label   = `Obstructie ${idx + 1} — ${lbl}`;
+        tipEl.innerHTML = `<strong>${label}</strong> · klik voor details`;
+        tipEl.style.display = 'block';
+        tipOverlay.setPosition(e.coordinate);
+        map.getTargetElement().style.cursor = 'pointer';
+        return;
+    }
+    const feat = map.forEachFeatureAtPixel(e.pixel, f => f, {
+        layerFilter: l => l === nodeLayer,
+    });
+    if (feat) {
+        const n = state.nodes.find(x => x.id === feat.get('nodeId'));
+        if (n) {
+            tipEl.innerHTML = `<strong>${escHtml(n.name)}</strong> | antenne: ${n.h} m`;
+            tipEl.style.display = 'block';
+            tipOverlay.setPosition(e.coordinate);
+            if (state.mode !== 'add') map.getTargetElement().style.cursor = 'pointer';
+        }
+    } else {
+        tipEl.style.display = 'none';
+        tipOverlay.setPosition(undefined);
+        if (state.mode !== 'add') map.getTargetElement().style.cursor = '';
+    }
+});
+
+function fitNL() {
+    map.getView().animate({ center: ol.proj.fromLonLat([5.29, 52.13]), zoom: 7, duration: 800 });
+}
+
+function locateUser() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(p => {
+        map.getView().animate({
+            center: ol.proj.fromLonLat([p.coords.longitude, p.coords.latitude]),
+            zoom: 14, duration: 800,
+        });
+    });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// LAYER CONTROLS
+// ══════════════════════════════════════════════════════════════════════
+
+const LAYER_MAP = { brt: brtLayer, lucht: luchtLayer, dtm: dtmLayer, dsm: dsmLayer, bag: bagLayer, bgt: bgtLayer };
+
+function toggleLayer(name, vis) {
+    if (LAYER_MAP[name]) LAYER_MAP[name].setVisible(vis);
+}
+
+function setOpacity(name, v) {
+    if (LAYER_MAP[name]) LAYER_MAP[name].setOpacity(v / 100);
+}
+
+function setBrtStyle(style) {
+    brtSource.setUrl(`${BRT_BASE}/${style}/EPSG:3857/{z}/{x}/{y}.png`);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ELEVATION QUERY — WMS GetFeatureInfo
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Query DTM + DSM elevation at a single EPSG:3857 coordinate.
+ * Uses a single WMS request with both layers in QUERY_LAYERS.
+ * Returns { dtm: number|null, dsm: number|null }
+ */
+async function queryElevation(coord3857) {
+    const key = _elevKey(coord3857);
+
+    // Return cached result immediately
+    if (_elevCache.has(key)) return _elevCache.get(key);
+
+    // Deduplicate concurrent requests for the same point
+    if (_inflightElev.has(key)) return _inflightElev.get(key);
+
+    const [x, y] = coord3857;
+    const buf    = 40;  // 40 m half-size bounding box
+    const size   = 5;   // 5×5 pixel image
+    const ci     = Math.floor(size / 2);
+
+    const bbox = `${x - buf},${y - buf},${x + buf},${y + buf}`;
+    const layers = `${AHN_DTM},${AHN_DSM}`;
+    const url = `${AHN_WMS}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo`
+        + `&LAYERS=${layers}&QUERY_LAYERS=${layers}`
+        + `&CRS=EPSG:3857&BBOX=${bbox}`
+        + `&WIDTH=${size}&HEIGHT=${size}&I=${ci}&J=${ci}`
+        + `&INFO_FORMAT=text/plain`;
+
+    const promise = (async () => {
+        try {
+            const r   = await fetch(url, { signal: AbortSignal.timeout(8000) });
+            const txt = await r.text();
+            const result = parseGFI(txt);
+            _elevCache.set(key, result);
+            return result;
+        } catch {
+            return { dtm: null, dsm: null };
+        } finally {
+            _inflightElev.delete(key);
+        }
+    })();
+
+    _inflightElev.set(key, promise);
+    return promise;
+}
+
+/**
+ * Parse WMS GetFeatureInfo text/plain response.
+ * Handles multiple layers; returns object with dtm / dsm values.
+ */
+function parseGFI(txt) {
+    if (!txt) return { dtm: null, dsm: null };
+    const result = { dtm: null, dsm: null };
+
+    // Extract all floating point numbers from the text
+    // Text looks like:
+    //   Layer 'dtm_05m'\nFeature 1:\nGRAY_INDEX = 5.234\nLayer 'dsm_05m'\n...
+    const lines = txt.split('\n');
+    let currentLayer = null;
+
+    for (const line of lines) {
+        const lmatch = line.match(/Layer ['"]?(\S+?)['"]?\s*$/i);
+        if (lmatch) { currentLayer = lmatch[1].toLowerCase(); continue; }
+
+        const vmatch = line.match(/(?:GRAY_INDEX|value_list|value|rastervalue|band_1)\s*[=:]\s*'?(-?\d+\.?\d*(?:e[+-]?\d+)?)'?/i);
+        if (vmatch && currentLayer) {
+            const v = parseFloat(vmatch[1]);
+            if (isValidElev(v)) {
+                if (currentLayer.includes('dtm')) result.dtm = v;
+                if (currentLayer.includes('dsm')) result.dsm = v;
+            }
+            currentLayer = null;
+            continue;
+        }
+
+        // Fallback: bare number on a line (some WMS implementations)
+        if (!vmatch && currentLayer) {
+            const bare = line.trim().match(/^(-?\d+\.?\d*(?:e[+-]?\d+)?)$/);
+            if (bare) {
+                const v = parseFloat(bare[1]);
+                if (isValidElev(v)) {
+                    if (currentLayer.includes('dtm')) result.dtm = v;
+                    if (currentLayer.includes('dsm')) result.dsm = v;
+                }
+                currentLayer = null;
+            }
+        }
+    }
+
+    // If single-layer fallback: one GRAY_INDEX in whole text
+    if (result.dtm === null && result.dsm === null) {
+        const m = txt.match(/(?:GRAY_INDEX|value_list|value)\s*[=:]\s*'?(-?\d+\.?\d*(?:e[+-]?\d+)?)'?/i);
+        if (m) {
+            const v = parseFloat(m[1]);
+            if (isValidElev(v)) result.dtm = v;
+        }
+    }
+    return result;
+}
+
+function isValidElev(v) {
+    return !isNaN(v) && isFinite(v) && v > -500 && v < 5000 && v !== -9999 && v !== -9998;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ELEVATION PROFILE
+// ══════════════════════════════════════════════════════════════════════
+
+function lerp3857(a, b, t) {
+    return [a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])];
+}
+
+function haversineDist(c1, c2) {
+    const [lon1, lat1] = ol.proj.toLonLat(c1).map(d => d * Math.PI / 180);
+    const [lon2, lat2] = ol.proj.toLonLat(c2).map(d => d * Math.PI / 180);
+    const dlat = lat2 - lat1, dlon = lon2 - lon1;
+    const a = Math.sin(dlat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dlon/2)**2;
+    return 2 * 6371000 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function getProfile(c1, c2, nPts) {
+    const key = _profileKey(c1, c2, nPts);
+    if (_profileCache.has(key)) return _profileCache.get(key);
+
+    const points = Array.from({ length: nPts }, (_, i) => lerp3857(c1, c2, i / (nPts - 1)));
+    const BATCH  = 8;   // parallel requests per batch
+    const dtm    = new Array(nPts).fill(null);
+    const dsm    = new Array(nPts).fill(null);
+    const dist   = points.map(p => haversineDist(c1, p));
+
+    for (let i = 0; i < nPts; i += BATCH) {
+        const batch = points.slice(i, i + BATCH);
+        const res = await Promise.all(batch.map(p => queryElevation(p)));
+        res.forEach((r, j) => { dtm[i+j] = r.dtm; dsm[i+j] = r.dsm; });
+    }
+
+    const result = { points, dtm, dsm, dist };
+    // Keep at most 30 profiles; evict oldest when full
+    if (_profileCache.size >= 30) _profileCache.delete(_profileCache.keys().next().value);
+    _profileCache.set(key, result);
+    return result;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// FRESNEL ZONE
+// ══════════════════════════════════════════════════════════════════════
+
+function fresnelR(d1, d2, freq) {
+    const lambda = 3e8 / freq;
+    return Math.sqrt(lambda * d1 * d2 / (d1 + d2 || 1));
+}
+
+function buildLOS(e1, h1, e2, h2, n) {
+    const base1 = (e1 || 0) + h1;
+    const base2 = (e2 || 0) + h2;
+    return Array.from({ length: n }, (_, i) => base1 + (base2 - base1) * i / (n - 1));
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// RF CALCULATIONS
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Free Space Path Loss (Friis) in dB.
+ * FSPL = 20·log₁₀(d) + 20·log₁₀(f) − 147.55   (d in m, f in Hz)
+ */
+function computeFSPL(dist_m, freq_hz) {
+    if (dist_m <= 0) return 0;
+    return 20 * Math.log10(dist_m) + 20 * Math.log10(freq_hz) - 147.55;
+}
+
+/**
+ * Knife-edge diffraction loss via ITU-R P.526 Fresnel–Kirchhoff.
+ * Finds the worst obstacle above LOS; returns extra path loss in dB.
+ * @param {number[]} terrain   - terrain heights (DTM, k-factor corrected)
+ * @param {number[]} los       - LOS heights at each point
+ * @param {number[]} dist_m    - distances from node A in metres
+ * @param {number}   freq_hz
+ * @returns {number} diffraction loss in dB (≥ 0)
+ */
+function knifeEdgeLoss(terrain, los, dist_m, freq_hz) {
+    const lambda = 3e8 / freq_hz;
+    const D = dist_m[dist_m.length - 1];
+    let worstNu = -Infinity;
+    for (let i = 1; i < terrain.length - 1; i++) {
+        if (terrain[i] === null) continue;
+        const h_above = terrain[i] - los[i];   // positive = obstacle above LOS
+        const d1 = dist_m[i];
+        const d2 = D - d1;
+        if (d1 <= 0 || d2 <= 0) continue;
+        const nu = h_above * Math.sqrt(2 * (d1 + d2) / (lambda * d1 * d2));
+        if (nu > worstNu) worstNu = nu;
+    }
+    return fresnelKirchhoffLoss(worstNu);
+}
+
+/**
+ * Fresnel–Kirchhoff diffraction loss from ν parameter.
+ * Approximation from ITU-R P.526 Annex 1.
+ */
+function fresnelKirchhoffLoss(nu) {
+    if (!isFinite(nu) || nu <= -0.7) return 0;
+    if (nu <= 0)   return 20 * Math.log10(0.5 - 0.62 * nu);
+    if (nu <= 1)   return 20 * Math.log10(0.5 * Math.exp(-0.95 * nu));
+    if (nu <= 2.4) return 20 * Math.log10(0.4 - Math.sqrt(Math.max(0, 0.1184 - (0.38 - 0.1 * nu) ** 2)));
+    return 20 * Math.log10(0.225 / nu);
+}
+
+/**
+ * Apply k-factor earth-curvature correction to terrain heights.
+ * Adds d₁·d₂ / (2·k·Rₑ) to each point — the geometric earth bulge
+ * reduced by the effective refraction index (k=4/3 standard atmosphere).
+ * @param {Array}  heights   - original terrain heights (may contain null)
+ * @param {Array}  dist_m    - distances from node A in metres
+ * @param {number} kFactor   - effective earth radius factor (default 4/3)
+ * @returns {Array} corrected heights
+ */
+function applyKFactor(heights, dist_m, kFactor) {
+    const Re = 6371000;
+    const D  = dist_m[dist_m.length - 1];
+    return heights.map((h, i) => {
+        if (h === null) return null;
+        const d1 = dist_m[i];
+        const d2 = D - d1;
+        const bulge = (d1 * d2) / (2 * kFactor * Re);
+        return h + bulge;
+    });
+}
+
+/**
+ * Rain fade estimate (ITU-R P.838-3) in dB.
+ * Specific attenuation: γ = k · R^α  (dB/km)
+ * Only significant for f ≥ 2.4 GHz.
+ */
+function computeRainFade(dist_m, freq_hz, rain_mm_h) {
+    if (rain_mm_h <= 0) return 0;
+    const fGHz = freq_hz / 1e9;
+    // Coefficients for horizontal polarisation (ITU-R P.838-3 Table 1, simplified)
+    let k, alpha;
+    if      (fGHz < 1.5)  { k = 0.000151;  alpha = 0.930; }
+    else if (fGHz < 3)    { k = 0.000443;  alpha = 1.000; }
+    else if (fGHz < 5)    { k = 0.00155;   alpha = 1.265; }
+    else if (fGHz < 8)    { k = 0.00354;   alpha = 1.310; }
+    else if (fGHz < 12)   { k = 0.00691;   alpha = 1.255; }
+    else                  { k = 0.0188;    alpha = 1.217; }
+    const gamma = k * Math.pow(rain_mm_h, alpha); // dB/km
+    return gamma * dist_m / 1000;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// NODE FEATURES — inline rename, auto-elevation, coverage, heatmap
+// ══════════════════════════════════════════════════════════════════════
+
+/** Inline rename: double-click on node name → edit in place */
+function renameNodeInline(id) {
+    const nameEl = document.querySelector(`#ni-${id} .node-name`);
+    if (!nameEl || nameEl.querySelector('input')) return;
+    const n = state.nodes.find(x => x.id === id);
+    if (!n) return;
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = n.name;
+    inp.style.cssText = 'width:100%;background:var(--bg);border:1px solid var(--accent);color:var(--text);border-radius:3px;padding:1px 4px;font-size:11px;font-weight:600;';
+    inp.onclick = e => e.stopPropagation();
+    const save = () => {
+        const newName = inp.value.trim() || n.name;
+        n.name = newName;
+        renderNodes();
+        updateNodeList();
+        saveNodes();
+    };
+    inp.onblur = save;
+    inp.onkeydown = e => {
+        if (e.key === 'Enter') inp.blur();
+        if (e.key === 'Escape') { inp.value = n.name; inp.blur(); }
+        e.stopPropagation();
+    };
+    nameEl.innerHTML = '';
+    nameEl.appendChild(inp);
+    inp.focus();
+    inp.select();
+}
+
+/** Fetch DTM elevation for a node and update its maaiveld field */
+async function fetchAutoElevation(id) {
+    const n = state.nodes.find(x => x.id === id);
+    if (!n) return;
+    const { dtm } = await queryElevation(n.coord);
+    if (dtm !== null) {
+        n.maaiveld = dtm;
+        saveNodes();
+        const el = document.querySelector(`#ni-${id} .node-maaiveld`);
+        if (el) el.textContent = `maaiveld: ${dtm.toFixed(1)} m NAP`;
+    }
+}
+
+/** Helper: convert #rrggbb hex to rgba string */
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/** Estimate typical Meshcore LoRa coverage radius (m) based on antenna height above ground.
+ *  Sharp gain when clearing the Dutch tree canopy (~8-10 m). */
+function coverageRadiusFromHeight(h) {
+    if (h <  5) return Math.max(400, h * 280);          // < 5 m  : up to 1.4 km
+    if (h <  8) return 1400 + (h - 5) * 533;           // 5–8 m  : 1.4 → 3 km
+    if (h < 10) return 3000 + (h - 8) * 1500;          // 8–10 m : 3 → 6 km  (boomgrens!)
+    if (h < 20) return 6000 + (h - 10) * 400;          // 10–20 m: 6 → 10 km
+    return Math.min(10000 + (h - 20) * 200, 20000);    // 20 m+  : max 20 km
+}
+
+/** Draw / redraw dekkingscirkels for all nodes */
+function drawCoverageCircles() {
+    coverageSource.clear();
+    state.nodes.forEach((n, i) => {
+        const r   = coverageRadiusFromHeight(n.h);
+        const hex = COLORS[i % COLORS.length];
+        const f   = new ol.Feature({ geometry: new ol.geom.Circle(n.coord, r) });
+        f.setStyle(new ol.style.Style({
+            stroke: new ol.style.Stroke({ color: hexToRgba(hex, 0.7), width: 1.5, lineDash: [6, 4] }),
+            fill:   new ol.style.Fill({ color: hexToRgba(hex, 0.05) }),
+        }));
+        coverageSource.addFeature(f);
+    });
+}
+function toggleCoverageCircles(checked) {
+    if (checked) drawCoverageCircles(); else coverageSource.clear();
+}
+function redrawCoverageCircles() {
+    if (document.getElementById('ck-coverage')?.checked) drawCoverageCircles();
+}
+
+/** Update heatmap node-selector dropdown */
+function updateHeatmapNodeSel() {
+    const sel = document.getElementById('hm-node-sel');
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Selecteer node —</option>'
+        + state.nodes.map(n => `<option value="${n.id}"${n.id == cur ? ' selected' : ''}>${escHtml(n.name)}</option>`).join('');
+}
+
+/**
+ * Generate FSPL-based signal strength coverage zones from a selected node.
+ * Draws concentric OL Circle features (no terrain correction — purely FSPL).
+ */
+function generateHeatmap() {
+    heatmapSource.clear();
+    const nodeId = +document.getElementById('hm-node-sel')?.value;
+    const node   = state.nodes.find(n => n.id === nodeId);
+    if (!node) { showToast('⚠ Selecteer eerst een node'); return; }
+
+    const txPow = parseFloat(document.getElementById('lb-tx')?.value)    || 20;
+    const gTx   = parseFloat(document.getElementById('lb-gtx')?.value)   || 0;
+    const gRx   = parseFloat(document.getElementById('lb-grx')?.value)   || 0;
+    const cable = parseFloat(document.getElementById('lb-cable')?.value) || 0;
+    const sens  = parseFloat(document.getElementById('lb-sens')?.value)  || -120;
+    const f     = state.freq;
+    const logF  = 20 * Math.log10(f);
+
+    // Distance (m) for a given link margin
+    const distAtMargin = m => {
+        const fspl = txPow + gTx + gRx - cable - sens - m;
+        const d = Math.pow(10, (fspl - logF + 147.55) / 20);
+        return (isFinite(d) && d > 0) ? d : null;
+    };
+
+    // Zones: [margin_dB, fill_rgba, stroke_rgba, label]
+    const zones = [
+        [  0, 'rgba(239,68,68,0.12)',   'rgba(239,68,68,0.55)',   'Grens (0 dB)' ],
+        [ 10, 'rgba(249,115,22,0.10)',  'rgba(249,115,22,0.45)',  '+10 dB' ],
+        [ 20, 'rgba(234,179,8,0.09)',   'rgba(234,179,8,0.35)',   '+20 dB' ],
+        [ 30, 'rgba(34,197,94,0.08)',   'rgba(34,197,94,0.30)',   '+30 dB' ],
+    ];
+
+    // Draw largest zone first (it will be underneath)
+    for (let i = zones.length - 1; i >= 0; i--) {
+        const [margin, fill, stroke] = zones[i];
+        const r = distAtMargin(margin);
+        if (!r || r > 5e6) continue;
+        const f = new ol.Feature({ geometry: new ol.geom.Circle(node.coord, r) });
+        f.setStyle(new ol.style.Style({
+            fill:   new ol.style.Fill({ color: fill }),
+            stroke: new ol.style.Stroke({ color: stroke, width: 1.5, lineDash: [6, 4] }),
+        }));
+        heatmapSource.addFeature(f);
+    }
+    map.getView().fit(heatmapSource.getExtent(), { padding: [40, 40, 40, 40], duration: 600, maxZoom: 14 });
+}
+
+function clearHeatmap() {
+    heatmapSource.clear();
+}
+
+// ── Link Budget presets ───────────────────────────────────────────────
+const LB_PRESETS = {
+    meshtastic:    { tx: 22,  gtx: 2.15, grx: 2.15, cable: 0,   sens: -137 },
+    meshcore_sf7:  { tx: 22,  gtx: 2.15, grx: 2.15, cable: 0,   sens: -126 },
+    helium:        { tx: 27,  gtx: 5.0,  grx: 2.15, cable: 0.5, sens: -130 },
+    generic_lora:  { tx: 14,  gtx: 2.15, grx: 2.15, cable: 0,   sens: -120 },
+    wifi:          { tx: 20,  gtx: 3.0,  grx: 3.0,  cable: 0.5, sens: -90  },
+};
+
+function applyLBPreset(key) {
+    const p = LB_PRESETS[key];
+    if (!p) return;
+    document.getElementById('lb-tx').value    = p.tx;
+    document.getElementById('lb-gtx').value   = p.gtx;
+    document.getElementById('lb-grx').value   = p.grx;
+    document.getElementById('lb-cable').value = p.cable;
+    document.getElementById('lb-sens').value  = p.sens;
+}
+
+/** Frequency select change handler — also shows/hides rain-fade setting */
+function onFreqChange() {
+    state.freq = +document.getElementById('freq-sel').value;
+    const rainSetting = document.getElementById('rain-setting');
+    if (rainSetting) rainSetting.style.display = state.freq >= 2.4e9 ? '' : 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ANALYSIS RUNNER
+// ══════════════════════════════════════════════════════════════════════
+
+async function runAnalysis() {
+    const [id1, id2] = state.selAnalysis;
+    const n1 = state.nodes.find(x => x.id === id1);
+    const n2 = state.nodes.find(x => x.id === id2);
+    if (!n1 || !n2) return;
+
+    const nPtsRaw   = parseInt(document.getElementById('npts-sel').value, 10);
+    const distForPts = haversineDist(n1.coord, n2.coord);
+    const nPts      = nPtsRaw === 0 ? Math.max(50, Math.min(Math.round(distForPts), 2000)) : nPtsRaw;
+    const threshold = parseFloat(document.getElementById('fres-thr').value);
+    const kFactor   = parseFloat(document.getElementById('kfactor-sel').value) || 4/3;
+    const rainRate  = parseInt(document.getElementById('rain-sel')?.value || '0', 10);
+
+    // Draw line on map and zoom to fit both nodes
+    drawLine(n1.coord, n2.coord);
+    const linePts = [n1.coord, n2.coord];
+    const lineExt = ol.extent.boundingExtent(linePts);
+    map.getView().fit(lineExt, { padding: [80, 80, 80, 80], maxZoom: 15, duration: 600 });
+    openProfile();
+
+    const loading = document.getElementById('prof-loading');
+    const errDiv  = document.getElementById('profile-error');
+    loading.style.display = 'flex';
+    errDiv.style.display = 'none';
+
+    try {
+        // Fetch elevation profile and BAG buildings in parallel
+        const [{ points, dtm, dsm, dist }, bagData] = await Promise.all([
+            getProfile(n1.coord, n2.coord, nPts),
+            fetchBAGBuildings(
+                Array.from({ length: nPts }, (_, i) =>
+                    [n1.coord[0] + i/(nPts-1)*(n2.coord[0]-n1.coord[0]),
+                     n1.coord[1] + i/(nPts-1)*(n2.coord[1]-n1.coord[1])])
+            ),
+        ]);
+        state.profilePoints = points;
+        crosshairSource.clear();
+
+        const { mask: bagMask, roofHeights: bagRoofHeights, has3D: bag3D } = buildBAGMask(points, bagData);
+
+        // Enhanced DSM: vervang AHN DSM op gebouwlocaties door exacte 3D BAG dakhoogte (NAP m)
+        // Alleen als 3D BAG beschikbaar was; anders originele AHN DSM.
+        const dsmEnhanced = dsm.map((v, i) =>
+            (bag3D && bagRoofHeights[i] !== null) ? bagRoofHeights[i] : v
+        );
+
+        const totalDist = haversineDist(n1.coord, n2.coord);
+
+        // Apply k-factor earth-curvature correction to terrain heights
+        const dtmCorrected = applyKFactor(dtm, dist, kFactor);
+
+        const e1 = dtmCorrected[0] ?? 0;
+        const e2 = dtmCorrected[nPts - 1] ?? 0;
+        const los = buildLOS(e1, n1.h, e2, n2.h, nPts);
+
+        // Fresnel radii
+        const fR = dist.map(d => {
+            const d2 = totalDist - d;
+            return (d > 0 && d2 > 0) ? fresnelR(d, d2, state.freq) : 0;
+        });
+        const fUp   = los.map((v, i) => v + fR[i]);
+        const fDown = los.map((v, i) => v - fR[i]);
+        const fThUp = los.map((v, i) => v + threshold * fR[i]);
+        const fThDn = los.map((v, i) => v - threshold * fR[i]);
+
+        // Obstruction analysis (uses k-factor corrected terrain + BAG mask + enhanced DSM)
+        const obs = analyzeObs(dtmCorrected, dsmEnhanced, los, fThDn, fR, bagMask);
+
+        // RF calculations
+        const fspl     = computeFSPL(totalDist, state.freq);
+        const diffLoss = knifeEdgeLoss(dtmCorrected, los, dist, state.freq);
+        const rainLoss = computeRainFade(totalDist, state.freq, rainRate);
+
+        // Show results
+        showResults(n1, n2, totalDist, obs, fR, threshold, fspl, diffLoss, rainLoss, bag3D);
+
+        // Profile meta
+        document.getElementById('profile-meta').textContent =
+            `${n1.name} ↔ ${n2.name}  |  ${(totalDist/1000).toFixed(2)} km  |  ${nPts} punten`;
+
+        // Draw chart (use corrected terrain for analysis, enhanced DSM for display)
+        const distKm = dist.map(d => (d / 1000).toFixed(3));
+
+        // Sla analysegegevens op voor de rapportgenerator
+        state.lastAnalysis = {
+            n1, n2, totalDist, obs, fR, threshold, fspl, diffLoss, rainLoss,
+            bag3D, bagMask, dtmCorrected, dsmEnhanced, los, fThDn,
+            profilePoints: [...points], distKm,
+        };
+
+        drawChart(distKm, dtmCorrected, dsmEnhanced, los, fUp, fDown, fThUp, fThDn, bagMask, bag3D);
+        renderDetailsPanel(state.lastAnalysis);
+        renderConclusionPanel(state.lastAnalysis);
+
+    } catch (e) {
+        console.error(e);
+        errDiv.style.display = 'flex';
+    } finally {
+        loading.style.display = 'none';
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// BAG GEBOUWEN (PDOK BAG WFS)
+// Levert exacte gebouwvoetprints ongeacht hoogte.
+// 3D BAG API ondersteunt geen browser-CORS; AHN DSM blijft de hoogtebron.
+// ══════════════════════════════════════════════════════════════════════
+const BAG_WFS_URL = 'https://service.pdok.nl/lv/bag/wfs/v2_0';
+
+async function fetchBAGBuildings(points) {
+    const lls  = points.map(p => ol.proj.toLonLat(p));
+    const lons = lls.map(ll => ll[0]);
+    const lats = lls.map(ll => ll[1]);
+    const buf  = 0.0006;
+    const minLon = Math.min(...lons) - buf, maxLon = Math.max(...lons) + buf;
+    const minLat = Math.min(...lats) - buf, maxLat = Math.max(...lats) + buf;
+
+    const cacheKey = _bagKey(minLon, minLat, maxLon, maxLat);
+    if (_bagCache.has(cacheKey)) return _bagCache.get(cacheKey);
+
+    const bbox = `${minLon.toFixed(7)},${minLat.toFixed(7)},${maxLon.toFixed(7)},${maxLat.toFixed(7)}`;
+    try {
+        const url = `${BAG_WFS_URL}?service=WFS&version=2.0.0&request=GetFeature`
+            + `&typeName=bag:pand&outputFormat=application/json`
+            + `&srsName=EPSG:4326&count=2000`
+            + `&bbox=${bbox},EPSG:4326`;
+        const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        if (r.ok) {
+            const gj = await r.json();
+            const result = { features: gj.features || [], has3D: false };
+            if (_bagCache.size >= 50) _bagCache.delete(_bagCache.keys().next().value);
+            _bagCache.set(cacheKey, result);
+            return result;
+        }
+    } catch {}
+    return { features: [], has3D: false };
+}
+
+/** Ray-casting point-in-polygon (ring = array of [lon, lat]) */
+function pointInRing(px, py, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = ring[i], [xj, yj] = ring[j];
+        if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi)
+            inside = !inside;
+    }
+    return inside;
+}
+
+/** Returns { mask: boolean[], roofHeights: null[], has3D: false } */
+function buildBAGMask(points, { features, has3D }) {
+    const lls        = points.map(p => ol.proj.toLonLat(p));
+    const mask       = new Array(points.length).fill(false);
+    const roofHeights = new Array(points.length).fill(null);
+
+    lls.forEach(([lon, lat], i) => {
+        for (const f of features) {
+            const g = f.geometry;
+            if (!g) continue;
+            const rings = g.type === 'Polygon'      ? g.coordinates
+                        : g.type === 'MultiPolygon' ? g.coordinates.flat(1)
+                        : [];
+            if (rings.some(ring => pointInRing(lon, lat, ring))) {
+                mask[i] = true;
+                break;
+            }
+        }
+    });
+    return { mask, roofHeights, has3D };
+}
+
+// Obstacle height thresholds (DSM − DTM in metres)
+const OBS_LOW_M  = 2;   // < 2 m  → maaiveld variatie, verwaarloosbaar
+const OBS_TREE_M = 15;  // 2–15 m → vegetatie / bomen; ≥15 m → gebouwen / constructies
+
+function classifyObst(h) {
+    if (h < OBS_LOW_M)  return 'maaiveld';
+    if (h < OBS_TREE_M) return 'vegetatie/bos';
+    return 'gebouw';
+}
+
+function analyzeObs(dtm, dsm, los, fThDn, fR, bagMask = null) {
+    let losBlocked = 0, fresnelBlocked = 0, maxPen = 0, critIdx = -1;
+    let maxObsH = 0, buildPts = 0, forestPts = 0, bagBuildPts = 0;
+    const valid = dsm.filter(v => v !== null).length;
+
+    dsm.forEach((v, i) => {
+        if (v === null) return;
+        const obsH   = Math.max(0, v - (dtm[i] ?? v));
+        const isBag  = bagMask ? bagMask[i] : false;
+
+        if (isBag) { bagBuildPts++; buildPts++; }
+        else if (obsH >= OBS_TREE_M) buildPts++;
+        else if (obsH >= OBS_LOW_M)  forestPts++;
+        if (obsH > maxObsH) maxObsH = obsH;
+
+        if (v > los[i]) {
+            losBlocked++;
+            const pen = v - los[i];
+            if (pen > maxPen) { maxPen = pen; critIdx = i; }
+        } else if (v > fThDn[i]) {
+            fresnelBlocked++;
+        }
+    });
+
+    const clear = valid > 0 ? ((valid - losBlocked - fresnelBlocked) / valid * 100) : 100;
+    return { losBlocked, fresnelBlocked, maxPen, critIdx, clear, valid, maxObsH, buildPts, forestPts, bagBuildPts };
+}
+
+function showResults(n1, n2, dist, obs, fR, thr, fspl = 0, diffLoss = 0, rainLoss = 0, bag3D = false) {
+    const mid  = fR[Math.floor(fR.length / 2)] || 0;
+    const req  = mid * thr;
+    let cls, icon, txt;
+    if (obs.losBlocked === 0 && obs.fresnelBlocked === 0) {
+        cls = 'sc-good'; icon = '✅'; txt = 'Uitstekende verbinding verwacht';
+    } else if (obs.losBlocked === 0) {
+        cls = 'sc-warn'; icon = '⚠️'; txt = 'Fresnel zone gedeeltelijk geblokkeerd';
+    } else {
+        cls = 'sc-bad'; icon = '❌'; txt = 'Directe lijnzicht geblokkeerd!';
+    }
+
+    const clearCls = obs.clear > 80 ? 'c-good' : obs.clear > 50 ? 'c-warn' : 'c-bad';
+    const losCls   = obs.losBlocked > 0 ? 'c-bad' : 'c-good';
+    const fresCls  = obs.fresnelBlocked > 0 ? 'c-warn' : 'c-good';
+
+    const hasBuild  = obs.buildPts  > 0;
+    const hasForest = obs.forestPts > 0;
+    const hasBag    = obs.bagBuildPts > 0;
+    const obstIcons = [
+        hasBag    ? `<span style="color:rgba(220,38,38,1)">🏛 ${obs.bagBuildPts} BAG-gebouw-pts</span>` : '',
+        hasBuild && !hasBag
+            ? `<span style="color:var(--red)">🏗 ${obs.buildPts} gebouw-pts</span>` : '',
+        hasForest ? `<span style="color:#14b8a6">🌲 ${obs.forestPts} bos-pts</span>` : '',
+    ].filter(Boolean).join(' &nbsp;') || '<span style="color:var(--dim)">geen</span>';
+
+    // Obstacle attenuation (ITU-R P.833 foliage)
+    const obsLossEst = hasBuild
+        ? obs.maxObsH * 0.5 + 15
+        : hasForest ? obs.maxObsH * 0.3 : 0;
+    const attEst = hasBuild
+        ? `≫ 20 dB (geblokkeerd)`
+        : hasForest ? `~${(obs.maxObsH * 0.2).toFixed(0)}–${(obs.maxObsH * 0.4).toFixed(0)} dB` : 'verwaarloosbaar';
+    const attCls = hasBuild ? 'c-bad' : hasForest ? 'c-warn' : 'c-good';
+
+    // Knife-edge diffraction label
+    const diffCls = diffLoss > 15 ? 'c-bad' : diffLoss > 6 ? 'c-warn' : 'c-good';
+
+    // Rain fade label (only show for ≥ 2.4 GHz)
+    const showRain = state.freq >= 2.4e9 && rainLoss > 0.1;
+    const rainCls  = rainLoss > 10 ? 'c-bad' : rainLoss > 3 ? 'c-warn' : 'c-good';
+
+    // Link budget
+    const txPow = parseFloat(document.getElementById('lb-tx')?.value)    || 20;
+    const gTx   = parseFloat(document.getElementById('lb-gtx')?.value)   || 0;
+    const gRx   = parseFloat(document.getElementById('lb-grx')?.value)   || 0;
+    const cable = parseFloat(document.getElementById('lb-cable')?.value) || 0;
+    const sens  = parseFloat(document.getElementById('lb-sens')?.value)  || -120;
+    const totalLoss = fspl + diffLoss + rainLoss + obsLossEst;
+    const rxPow  = txPow + gTx + gRx - cable - totalLoss;
+    const margin = rxPow - sens;
+    const marginCls = margin > 15 ? 'c-good' : margin > 0 ? 'c-warn' : 'c-bad';
+    const kStr   = parseFloat(document.getElementById('kfactor-sel')?.value || 1.333).toFixed(3);
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').innerHTML = `
+        <div class="status-card ${cls}">
+            <span style="font-size:16px;">${icon}</span>
+            <strong style="font-size:12px;">${txt}</strong>
+        </div>
+        <div style="margin-top:8px;">
+            <div class="metric"><span class="ml">Afstand</span>
+                <span class="mv">${(dist/1000).toFixed(2)} km</span></div>
+            <div class="metric"><span class="ml">Frequentie / Fresnel straal (midden)</span>
+                <span class="mv">${(state.freq/1e6).toFixed(0)} MHz / ${mid.toFixed(1)} m</span></div>
+            <div class="metric"><span class="ml">Vereiste vrije ruimte (${(thr*100).toFixed(0)}%)</span>
+                <span class="mv">${req.toFixed(1)} m</span></div>
+            <div class="metric"><span class="ml">k-factor correctie</span>
+                <span class="mv" style="color:var(--dim)">k = ${kStr}</span></div>
+            <div style="border-top:1px solid var(--border);margin:5px 0 3px;"></div>
+
+            <div class="metric"><span class="ml">FSPL (vrije ruimte)</span>
+                <span class="mv">${fspl.toFixed(1)} dB</span></div>
+            <div class="metric"><span class="ml">Knife-edge diffractie</span>
+                <span class="mv ${diffCls}">${diffLoss.toFixed(1)} dB</span></div>
+            ${showRain ? `<div class="metric"><span class="ml">Regendemping (${(state.freq/1e9).toFixed(1)} GHz)</span>
+                <span class="mv ${rainCls}">${rainLoss.toFixed(1)} dB</span></div>` : ''}
+            <div class="metric"><span class="ml">Signaaldemping obstakels</span>
+                <span class="mv ${attCls}">${attEst}</span></div>
+            <div style="border-top:1px solid var(--border);margin:5px 0 3px;"></div>
+
+            <div class="metric" title="EIRP − FSPL − diffractie − obstakels + RX gain">
+                <span class="ml">Ontvangstvermogen (schatting)</span>
+                <span class="mv ${marginCls}">${rxPow.toFixed(1)} dBm</span></div>
+            <div class="metric"><span class="ml">Link marge (t.o.v. ${sens} dBm)</span>
+                <span class="mv ${marginCls}">${margin >= 0 ? '+' : ''}${margin.toFixed(1)} dB</span></div>
+            <div style="border-top:1px solid var(--border);margin:5px 0 3px;"></div>
+
+            <div class="metric"><span class="ml">Obstakels op traject</span>
+                <span style="font-size:10px;text-align:right;line-height:1.5;">${obstIcons}</span></div>
+            <div class="metric"><span class="ml">Gebouwhoogte databron</span>
+                <span class="mv" style="color:${bag3D ? '#22c55e' : 'var(--dim)'}">
+                    ${bag3D ? '🏛 3D BAG (exact)' : '📡 AHN DSM (schatting)'}
+                </span></div>
+            <div class="metric"><span class="ml">Max. obstakel hoogte</span>
+                <span class="mv ${obs.maxObsH >= OBS_TREE_M ? 'c-bad' : obs.maxObsH >= OBS_LOW_M ? 'c-warn' : ''}"
+                    title="DSM minus DTM op het hoogste punt">
+                    ${obs.maxObsH.toFixed(1)} m
+                    ${obs.maxObsH >= OBS_LOW_M ? '(' + classifyObst(obs.maxObsH) + ')' : ''}
+                </span></div>
+            <div style="border-top:1px solid var(--border);margin:5px 0 3px;"></div>
+            <div class="metric"><span class="ml">LOS geblokkeerd</span>
+                <span class="mv ${losCls}">${obs.losBlocked} van ${obs.valid} punten</span></div>
+            <div class="metric"><span class="ml">Fresnel geblokkeerd</span>
+                <span class="mv ${fresCls}">${obs.fresnelBlocked} van ${obs.valid} punten</span></div>
+            <div class="metric"><span class="ml">Vrij traject</span>
+                <span class="mv ${clearCls}">${obs.clear.toFixed(0)} %</span></div>
+            ${obs.maxPen > 0 ? `<div class="metric"><span class="ml">Max. LOS penetratie</span>
+                <span class="mv c-bad">${obs.maxPen.toFixed(1)} m</span></div>` : ''}
+        </div>
+        <button class="btn btn-primary" onclick="generateReport()"
+                style="width:100%;margin-top:10px;font-size:11px;padding:7px 0;">
+            📄 Rapport opslaan als PDF
+        </button>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PDF RAPPORT GENERATOR
+// ══════════════════════════════════════════════════════════════════════
+
+/** Cluster obstruction segments using BFS connected-components.
+ *  Two segments are neighbours when their critical points are within
+ *  `threshold` metres (EPSG:3857 units = metres). */
+function clusterObstructionPoints(segs, threshold) {
+    const n   = segs.length;
+    const adj = Array.from({length: n}, () => []);
+    for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+            const dx = segs[i].point[0] - segs[j].point[0];
+            const dy = segs[i].point[1] - segs[j].point[1];
+            if (Math.sqrt(dx*dx + dy*dy) < threshold) {
+                adj[i].push(j);
+                adj[j].push(i);
+            }
+        }
+    }
+    const visited = new Set();
+    const clusters = [];
+    for (let i = 0; i < n; i++) {
+        if (visited.has(i)) continue;
+        const group = [], queue = [i];
+        visited.add(i);
+        while (queue.length) {
+            const cur = queue.shift();
+            group.push(cur);
+            for (const nb of adj[cur]) {
+                if (!visited.has(nb)) { visited.add(nb); queue.push(nb); }
+            }
+        }
+        clusters.push(group.sort((a, b) => a - b));
+    }
+    return clusters;
+}
+
+/** Groepeert aaneengesloten geblokkeerde profielpunten tot segmenten */
+function findObstructionSegments(dsm, los, fThDn, profilePoints, bagMask, dtm, distKm) {
+    const segments = [];
+    let inSeg = false, segStart = -1, segType = '';
+    let maxPen = 0, maxPenIdx = -1;
+
+    function pushSeg(s, e) {
+        const ci   = maxPenIdx >= 0 ? maxPenIdx : Math.floor((s + e) / 2);
+        const dsmH = dsm[ci] ?? 0;
+        segments.push({
+            start: s, end: e, type: segType, maxPen, critIdx: ci,
+            obsH:      Math.max(0, dsmH - (dtm[ci] ?? 0)),
+            isBag:     bagMask ? !!bagMask[ci] : false,
+            point:     profilePoints[ci],
+            distStart: distKm[s],
+            distEnd:   distKm[e],
+            distCrit:  distKm[ci],
+            dsmAtCrit: dsmH,
+            losAtCrit: los[ci],
+        });
+    }
+
+    for (let i = 0; i < dsm.length; i++) {
+        const v = dsm[i];
+        if (v === null) continue;
+        const losBlk = v > los[i];
+        const type   = losBlk ? 'los' : v > fThDn[i] ? 'fresnel' : null;
+        if (type && !inSeg)  { inSeg = true; segStart = i; segType = type; maxPen = 0; maxPenIdx = i; }
+        if (losBlk && inSeg) { const pen = v - los[i]; if (pen > maxPen) { maxPen = pen; maxPenIdx = i; } }
+        if (!type && inSeg)  { pushSeg(segStart, i - 1); inSeg = false; maxPenIdx = -1; }
+    }
+    if (inSeg) pushSeg(segStart, dsm.length - 1);
+    return segments;
+}
+
+function makeBrtWmsUrl(minX, minY, maxX, maxY, w, h) {
+    // BRT-A WMS v2_0 is discontinued; use PDOK Luchtfoto RGB WMS instead
+    return 'https://service.pdok.nl/hwh/luchtfotorgb/wms/v1_0'
+        + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=Actueel_orthoHR&STYLES='
+        + `&CRS=EPSG:3857&BBOX=${minX.toFixed(0)},${minY.toFixed(0)},${maxX.toFixed(0)},${maxY.toFixed(0)}`
+        + `&WIDTH=${w}&HEIGHT=${h}&FORMAT=image%2Fpng`;
+}
+
+function makeOsmWmsUrl(minX, minY, maxX, maxY, w, h) {
+    // terrestris OSM WMS — labelled street map with housenumbers & POIs
+    return 'https://ows.terrestris.de/osm/service'
+        + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=OSM-WMS&STYLES='
+        + `&SRS=EPSG:3857&BBOX=${minX.toFixed(0)},${minY.toFixed(0)},${maxX.toFixed(0)},${maxY.toFixed(0)}`
+        + `&WIDTH=${w}&HEIGHT=${h}&FORMAT=image%2Fpng`;
+}
+
+// Fetch a URL and return a base64 data URL (for inline embedding in print HTML)
+async function imgToDataUrl(url) {
+    try {
+        const resp = await fetch(url);
+        if (!resp.ok) return url;
+        const blob = await resp.blob();
+        return await new Promise(res => {
+            const r = new FileReader();
+            r.onload = () => res(r.result);
+            r.onerror = () => res(url);
+            r.readAsDataURL(blob);
+        });
+    } catch { return url; }
+}
+
+function captureCurrentMapDataUrl() {
+        return new Promise(resolve => {
+                let done = false;
+                const finish = (val) => {
+                        if (done) return;
+                        done = true;
+                        resolve(val || '');
+                };
+
+                const fallback = setTimeout(() => finish(''), 3500);
+
+                map.once('rendercomplete', () => {
+                        try {
+                                const mapEl   = map.getViewport();
+                                const mapSize = map.getSize();
+                                const out = document.createElement('canvas');
+                                out.width  = mapSize[0];
+                                out.height = mapSize[1];
+                                const ctx = out.getContext('2d');
+
+                                mapEl.querySelectorAll('.ol-layer canvas').forEach(c => {
+                                        if (!c || c.width === 0 || c.height === 0) return;
+                                        const opacity = c.parentNode?.style?.opacity;
+                                        ctx.globalAlpha = opacity === '' || opacity === undefined ? 1 : Number(opacity);
+
+                                        const tr = c.style.transform;
+                                        if (tr) {
+                                                const m = tr.match(/^matrix\(([^)]*)\)$/);
+                                                if (m) ctx.setTransform(...m[1].split(',').map(Number));
+                                        } else {
+                                                ctx.setTransform(
+                                                        parseFloat(c.style.width) / c.width || 1, 0, 0,
+                                                        parseFloat(c.style.height) / c.height || 1, 0, 0
+                                                );
+                                        }
+                                        ctx.drawImage(c, 0, 0);
+                                });
+
+                                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                                ctx.globalAlpha = 1;
+                                clearTimeout(fallback);
+                                finish(out.toDataURL('image/png'));
+                        } catch {
+                                clearTimeout(fallback);
+                                finish('');
+                        }
+                });
+
+                map.renderSync();
+        });
+}
+
+async function generateReport() {
+    const a = state.lastAnalysis;
+    if (!a) { alert('Voer eerst een analyse uit.'); return; }
+
+        const { n1, n2, totalDist } = a;
+        const mapImg = await captureCurrentMapDataUrl();
+        const chartImg = document.getElementById('profile-canvas')?.toDataURL('image/png') || '';
+
+        // Fallback: build a static overview map if canvas capture is blocked (CORS/tainted canvas).
+        const xs = [n1.coord[0], n2.coord[0]];
+        const ys = [n1.coord[1], n2.coord[1]];
+        const dx = Math.max(Math.max(...xs) - Math.min(...xs), 800);
+        const dy = Math.max(Math.max(...ys) - Math.min(...ys), 800);
+        const minX = Math.min(...xs) - dx * 0.35;
+        const maxX = Math.max(...xs) + dx * 0.35;
+        const minY = Math.min(...ys) - dy * 0.35;
+        const maxY = Math.max(...ys) + dy * 0.35;
+        const staticMapUrl = makeBrtWmsUrl(minX, minY, maxX, maxY, 1600, 700);
+        const staticMapUrlAlt = makeOsmWmsUrl(minX, minY, maxX, maxY, 1600, 700);
+        const staticMapSrc = await imgToDataUrl(staticMapUrl);
+        // Prefer static WMS map for PDF: this avoids rotation/skew artifacts from canvas composition.
+        const reportMapImg = staticMapSrc || mapImg;
+
+        const resultsHtml    = document.getElementById('results')?.innerHTML || '<div class="dp-placeholder">Geen analyseresultaten beschikbaar.</div>';
+        const detailsHtml    = document.getElementById('dp-content')?.innerHTML || '<div class="dp-placeholder">Geen details beschikbaar.</div>';
+        const conclusionHtml = document.getElementById('cp-content')?.innerHTML || '<div class="cp-placeholder">Geen conclusie beschikbaar.</div>';
+        const appStyle       = document.querySelector('style')?.textContent || '';
+
+        // ── Print HTML (zelfde look als hoofdscherm) ─────────────────────
+    const now = new Date().toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const n1lbl = (n1.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const n2lbl = (n2.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const html = `<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<title>LOS Rapport — ${n1lbl} ↔ ${n2lbl}</title>
+<style>
+${appStyle}
+
+body{
+    display:block !important;
+    overflow:visible !important;
+    height:auto !important;
+    min-height:auto !important;
+    background:var(--bg) !important;
+    padding:10mm 12mm !important;
+}
+
+#report-root { width: 100%; }
+.report-head {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+.report-title { font-size: 16px; font-weight: 700; color: var(--accent); }
+.report-meta  { font-size: 11px; color: var(--dim); margin-top: 4px; }
+.report-block {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+}
+.report-h2 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-bottom: 8px;
+}
+.report-map, .report-chart {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: block;
+}
+.report-map-missing {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    color: var(--dim);
+    font-size: 12px;
+}
+.report-note { font-size: 10px; color: var(--dim); margin-top: 6px; }
+
+/* Show only report content in print window */
+#sidebar, #main, #toolbar, #map-wrap, #profile { display:none !important; }
+
+@media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    body { padding: 0 !important; }
+    .report-block { break-inside: avoid; }
+}
+</style></head><body>
+
+<div id="report-root">
+    <div class="report-head">
+        <div class="report-title">Line of Sight Analyse Rapport</div>
+        <div class="report-meta">
+            Datum: <strong>${now}</strong> &nbsp;|&nbsp;
+            Traject: <strong>${n1lbl}</strong> ↔ <strong>${n2lbl}</strong> &nbsp;|&nbsp;
+            Afstand: <strong>${(totalDist / 1000).toFixed(3)} km</strong> &nbsp;|&nbsp;
+            Frequentie: <strong>${(state.freq / 1e6).toFixed(0)} MHz</strong>
+        </div>
+    </div>
+
+    <div class="report-block">
+        <div class="report-h2">Kaart</div>
+        ${reportMapImg
+                ? `<img id="report-map-img" class="report-map" src="${reportMapImg}" data-fallback-src="${staticMapUrlAlt}" alt="" />`
+                : '<div class="dp-placeholder">Kaartweergave niet beschikbaar.</div>'}
+        <div id="report-map-missing" class="report-map-missing">Kaartweergave niet beschikbaar.</div>
+        <div class="report-note">Statische overzichtskaart (noord boven) voor correcte, niet-gedraaide PDF-weergave.</div>
+    </div>
+
+    <div class="report-block">
+        <div class="report-h2">Profiel</div>
+        ${chartImg
+                ? `<img class="report-chart" src="${chartImg}" alt="Hoogteprofiel" />`
+                : '<div class="dp-placeholder">Hoogteprofiel niet beschikbaar.</div>'}
+    </div>
+
+    <div class="report-block">
+        <div class="report-h2">Analyse Resultaten</div>
+        <div id="results" style="display:block;margin-top:2px;">${resultsHtml}</div>
+    </div>
+
+    <div class="report-block">
+        <div id="details-panel" style="padding:0;min-height:auto;border-top:none;background:transparent;">
+            <div id="dp-content" style="display:block;">${detailsHtml}</div>
+        </div>
+    </div>
+
+    <div class="report-block">
+        <div id="conclusion-panel" style="padding:0;min-height:auto;border-top:none;background:transparent;">
+            <div id="cp-content" style="display:block;">${conclusionHtml}</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        const mapImg = document.getElementById('report-map-img');
+        const mapMissing = document.getElementById('report-map-missing');
+
+        if (mapImg) {
+            mapImg.addEventListener('error', () => {
+                const fb = mapImg.getAttribute('data-fallback-src') || '';
+                if (fb && mapImg.getAttribute('src') !== fb) {
+                    mapImg.setAttribute('src', fb);
+                    return;
+                }
+                mapImg.style.display = 'none';
+                if (mapMissing) mapMissing.style.display = 'flex';
+            }, { once: false });
+        }
+
+        const fallback = setTimeout(() => window.print(), 12000);
+
+        const printWhenReady = () => {
+            const imgs = Array.from(document.images || []);
+            const pending = imgs.filter(i => !i.complete || i.naturalWidth === 0);
+
+            if (!pending.length) {
+                clearTimeout(fallback);
+                setTimeout(() => window.print(), 350);
+                return;
+            }
+
+            let left = pending.length;
+            const done = () => {
+                left -= 1;
+                if (left <= 0) {
+                    clearTimeout(fallback);
+                    setTimeout(() => window.print(), 350);
+                }
+            };
+
+            pending.forEach(img => {
+                img.addEventListener('load', done, { once: true });
+                img.addEventListener('error', done, { once: true });
+            });
+        };
+
+        if (document.readyState === 'complete') printWhenReady();
+        else window.addEventListener('load', printWhenReady, { once: true });
+    })();
+<\/script>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) { alert('Sta pop-ups toe om het rapport te genereren.'); return; }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MULTI-HOP ANALYSIS
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Analyse alle nodes als keten in lijstvolgorde: A→B→C→…
+ * Berekent per hop: FSPL, diffractie, obstakelverlies.
+ * Toont totaal linkbudget voor de hele route.
+ */
+async function runMultiHopAnalysis() {
+    if (state.nodes.length < 3) return;
+
+    const nPts      = Math.min(parseInt(document.getElementById('npts-sel').value, 10), 30);
+    const threshold = parseFloat(document.getElementById('fres-thr').value);
+    const kFactor   = parseFloat(document.getElementById('kfactor-sel').value) || 4/3;
+    const rainRate  = parseInt(document.getElementById('rain-sel')?.value || '0', 10);
+
+    const resEl = document.getElementById('multihop-results');
+    resEl.style.display = 'block';
+    resEl.innerHTML = '<div style="color:var(--dim);font-size:11px;padding:6px 0;">Bezig met analyseren…</div>';
+
+    // Draw all hop lines on map
+    analysisSource.clear();
+    for (let i = 0; i < state.nodes.length - 1; i++) {
+        const nA = state.nodes[i], nB = state.nodes[i + 1];
+        const f = new ol.Feature({ geometry: new ol.geom.LineString([nA.coord, nB.coord]) });
+        f.setStyle(new ol.style.Style({
+            stroke: new ol.style.Stroke({ color: 'rgba(168,85,247,.65)', width: 2, lineDash: [8, 4] }),
+        }));
+        analysisSource.addFeature(f);
+    }
+
+    const txPow = parseFloat(document.getElementById('lb-tx')?.value)    || 20;
+    const gTx   = parseFloat(document.getElementById('lb-gtx')?.value)   || 0;
+    const gRx   = parseFloat(document.getElementById('lb-grx')?.value)   || 0;
+    const cable = parseFloat(document.getElementById('lb-cable')?.value) || 0;
+    const sens  = parseFloat(document.getElementById('lb-sens')?.value)  || -120;
+
+    let totalFSPL = 0, totalOther = 0;
+    const hopResults = [];
+
+    for (let i = 0; i < state.nodes.length - 1; i++) {
+        const nA = state.nodes[i], nB = state.nodes[i + 1];
+        try {
+            const { dtm, dsm, dist } = await getProfile(nA.coord, nB.coord, nPts);
+            const totalDist  = haversineDist(nA.coord, nB.coord);
+            const dtmCorr    = applyKFactor(dtm, dist, kFactor);
+            const e1 = dtmCorr[0] ?? 0, e2 = dtmCorr[dtmCorr.length - 1] ?? 0;
+            const los        = buildLOS(e1, nA.h, e2, nB.h, nPts);
+            const fR         = dist.map(d => { const d2 = totalDist - d; return (d > 0 && d2 > 0) ? fresnelR(d, d2, state.freq) : 0; });
+            const fThDn      = los.map((v, j) => v - threshold * fR[j]);
+            const obs        = analyzeObs(dtmCorr, dsm, los, fThDn, fR);
+            const fspl       = computeFSPL(totalDist, state.freq);
+            const diffLoss   = knifeEdgeLoss(dtmCorr, los, dist, state.freq);
+            const rainLoss   = computeRainFade(totalDist, state.freq, rainRate);
+            const obsLoss    = obs.buildPts > 0 ? obs.maxObsH * 0.5 + 15 : obs.forestPts > 0 ? obs.maxObsH * 0.3 : 0;
+
+            totalFSPL  += fspl;
+            totalOther += diffLoss + rainLoss + obsLoss;
+
+            hopResults.push({ from: nA.name, to: nB.name, dist: totalDist, fspl, diffLoss, rainLoss, obsLoss, losOK: obs.losBlocked === 0 });
+        } catch {
+            hopResults.push({ from: nA.name, to: nB.name, error: true });
+        }
+    }
+
+    const rxPow  = txPow + gTx + gRx - cable - totalFSPL - totalOther;
+    const margin = rxPow - sens;
+    const mCls   = margin > 15 ? 'c-good' : margin > 0 ? 'c-warn' : 'c-bad';
+
+    resEl.innerHTML = `
+        <div style="font-weight:600;font-size:11px;color:var(--text);margin-bottom:5px;">
+            🔗 Multi-hop: ${hopResults.length} hops — ${state.nodes.length} nodes
+        </div>
+        ${hopResults.map((h, i) => h.error
+            ? `<div class="hop-item"><div class="hop-head"><span>Hop ${i+1}: ${escHtml(h.from)} → ${escHtml(h.to)}</span>
+               <span class="c-bad">⚠ fout</span></div></div>`
+            : `<div class="hop-item">
+                <div class="hop-head">
+                    <span>Hop ${i+1}: ${escHtml(h.from)} → ${escHtml(h.to)}</span>
+                    <span class="${h.losOK ? 'c-good' : 'c-bad'}">${h.losOK ? '✓ LOS' : '✕ LOS'}</span>
+                </div>
+                <div class="metric"><span class="ml">Afstand</span><span class="mv">${(h.dist/1000).toFixed(2)} km</span></div>
+                <div class="metric"><span class="ml">FSPL</span><span class="mv">${h.fspl.toFixed(1)} dB</span></div>
+                ${h.diffLoss > 0.5 ? `<div class="metric"><span class="ml">Diffractie</span><span class="mv c-warn">${h.diffLoss.toFixed(1)} dB</span></div>` : ''}
+                ${h.obsLoss > 0.5 ? `<div class="metric"><span class="ml">Obstakel</span><span class="mv ${h.obsLoss > 20 ? 'c-bad' : 'c-warn'}">${h.obsLoss.toFixed(1)} dB</span></div>` : ''}
+               </div>`
+        ).join('')}
+        <div style="border-top:1px solid var(--border);margin:4px 0;padding-top:6px;">
+            <div class="metric"><span class="ml">Totaal FSPL</span><span class="mv">${totalFSPL.toFixed(1)} dB</span></div>
+            <div class="metric"><span class="ml">Ontvangstvermogen</span><span class="mv ${mCls}">${rxPow.toFixed(1)} dBm</span></div>
+            <div class="metric"><span class="ml">Link marge</span><span class="mv ${mCls}">${margin >= 0 ? '+' : ''}${margin.toFixed(1)} dB</span></div>
+        </div>`;
+}
+
+function drawLine(c1, c2) {
+    analysisSource.clear();
+    const f = new ol.Feature({ geometry: new ol.geom.LineString([c1, c2]) });
+    f.setStyle(new ol.style.Style({
+        stroke: new ol.style.Stroke({ color: 'rgba(59,130,246,.65)', width: 2, lineDash: [8,4] }),
+    }));
+    analysisSource.addFeature(f);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CHART
+// ══════════════════════════════════════════════════════════════════════
+
+function setChartCrosshair(idx) {
+    crosshairSource.clear();
+    if (!state.profilePoints || idx == null || idx < 0) return;
+    const coord = state.profilePoints[idx];
+    if (!coord) return;
+    const feat = new ol.Feature({ geometry: new ol.geom.Point(coord) });
+    // Three concentric rings: black halo → white ring → yellow core dot
+    feat.setStyle([
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 14,
+                fill: new ol.style.Fill({ color: 'rgba(0,0,0,0.45)' }),
+                stroke: new ol.style.Stroke({ color: 'rgba(0,0,0,0.7)', width: 1 }),
+            }),
+        }),
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 10,
+                fill: new ol.style.Fill({ color: 'rgba(255,255,255,0.9)' }),
+                stroke: new ol.style.Stroke({ color: 'rgba(0,0,0,0.6)', width: 1 }),
+            }),
+        }),
+        new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({ color: '#facc15' }),
+                stroke: new ol.style.Stroke({ color: '#92400e', width: 1.5 }),
+            }),
+        }),
+    ]);
+    crosshairSource.addFeature(feat);
+}
+
+/**
+ * Find local peaks and valleys in a numeric array.
+ * @param {Array}  data      - data values (may contain nulls)
+ * @param {number} minProm   - minimum prominence (metres) to qualify
+ * @param {number} maxCount  - max peaks/valleys to return each
+ * @returns {{ peaks: Array, valleys: Array }}
+ */
+function findExtrema(data, minProm, maxCount) {
+    const n = data.length;
+    const peaks = [], valleys = [];
+
+    for (let i = 1; i < n - 1; i++) {
+        const v = data[i];
+        if (v == null || isNaN(v)) continue;
+        let prev = null, next = null;
+        for (let j = i - 1; j >= 0 && prev == null; j--)
+            if (data[j] != null && !isNaN(data[j])) prev = data[j];
+        for (let j = i + 1; j < n && next == null; j++)
+            if (data[j] != null && !isNaN(data[j])) next = data[j];
+        if (prev == null || next == null) continue;
+        if (v >= prev && v >= next) {
+            const prom = v - Math.max(prev, next);
+            if (prom >= minProm) peaks.push({ idx: i, val: v, prom });
+        }
+        if (v <= prev && v <= next) {
+            const prom = Math.min(prev, next) - v;
+            if (prom >= minProm) valleys.push({ idx: i, val: v, prom });
+        }
+    }
+
+    // Always include global max/min so the chart always has at least one label
+    const valid = data.map((v, i) => ({ v, i })).filter(x => x.v != null && !isNaN(x.v));
+    if (valid.length) {
+        const gMax = valid.reduce((a, b) => a.v > b.v ? a : b);
+        const gMin = valid.reduce((a, b) => a.v < b.v ? a : b);
+        if (!peaks.find(p => p.idx === gMax.i))   peaks.push({ idx: gMax.i, val: gMax.v, prom: Infinity });
+        if (!valleys.find(p => p.idx === gMin.i)) valleys.push({ idx: gMin.i, val: gMin.v, prom: Infinity });
+    }
+
+    // Sort by prominence, deduplicate clustered points (min 4 index spacing)
+    const dedupe = arr => {
+        arr.sort((a, b) => b.prom - a.prom);
+        const out = [];
+        for (const pt of arr) {
+            if (out.every(o => Math.abs(o.idx - pt.idx) > 4)) out.push(pt);
+            if (out.length >= maxCount) break;
+        }
+        return out;
+    };
+    return { peaks: dedupe(peaks), valleys: dedupe(valleys) };
+}
+
+function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], bag3D = false) {
+    const canvas = document.getElementById('profile-canvas');
+    if (state.chart) state.chart.destroy();
+    canvas.onclick = null;
+
+    // ── Classify obstacle zones from DSM − DTM ───────────────────────
+    // vegSurf   : DSM where 2 m ≤ obstH < 15 m  (bos / vegetatie)
+    // buildSurf : DSM where obstH ≥ 15 m         (gebouwen / constructies)
+    // Where class does not apply, value = DTM so fill area = 0
+    const obsHArr = dtm.map((d, i) =>
+        (d !== null && dsm[i] !== null) ? Math.max(0, dsm[i] - d) : 0);
+
+    const vegSurf = dtm.map((d, i) => {
+        if (d === null) return null;
+        const h = obsHArr[i];
+        return (h >= OBS_LOW_M && h < OBS_TREE_M) ? dsm[i] : d;
+    });
+    const buildSurf = dtm.map((d, i) => {
+        if (d === null) return null;
+        return obsHArr[i] >= OBS_TREE_M ? dsm[i] : d;
+    });
+
+    // BAG-bevestigde gebouwen: altijd DSM-hoogte tonen, ongeacht drempel
+    const bagBuildSurf = dtm.map((d, i) => {
+        if (d === null) return null;
+        return bagMask[i] ? (dsm[i] ?? d) : d;
+    });
+
+    const all = [...dtm, ...dsm, ...los, ...fUp, ...fDn].filter(v => v != null && !isNaN(v));
+    const minY = Math.floor(Math.min(...all) - 5);
+    const maxY = Math.ceil(Math.max(...all) + 12);
+
+    // ── Obstruction segments for dot overlay ─────────────────────────
+    const profilePoints = state.lastAnalysis?.profilePoints ?? [];
+    const segs = findObstructionSegments(dsm, los, fThDn, profilePoints, bagMask, dtm, labels);
+    const dotPositions = []; // populated by plugin, read by click/mousemove handler
+    // ── Peak / valley label plugin ────────────────────────────────────
+    const extremaPlugin = {
+        id: 'extremaLabels',
+        afterDatasetsDraw(chart) {
+            const ctx  = chart.ctx;
+            const area = chart.chartArea;
+            const dtmD = chart.data.datasets[4].data;   // DTM terrain
+            const dsmD = chart.data.datasets[8].data;   // DSM full surface
+
+            const dtmEx = findExtrema(dtmD, 1.5, 4);
+            const dsmEx = findExtrema(dsmD, 2.0, 4);
+
+            // Track drawn label x-positions to prevent pixel overlap
+            const drawn = [];
+            const LABEL_W = 42;   // rough half-width in px for overlap check
+
+            function drawLbl(idx, val, yOffset, color, isAbove) {
+                const xPx = chart.scales.x.getPixelForValue(chart.data.labels[idx]);
+                const yPx = chart.scales.y.getPixelForValue(val) + yOffset;
+
+                // Clip to chart area
+                if (xPx < area.left || xPx > area.right) return;
+                if (yPx < area.top  || yPx > area.bottom) return;
+
+                // Skip if too close to an already drawn label
+                if (drawn.some(dx => Math.abs(dx - xPx) < LABEL_W)) return;
+                drawn.push(xPx);
+
+                const txt  = `${val >= 0 ? '' : ''}${val.toFixed(1)} m`;
+                const pad  = 4;
+                ctx.save();
+                ctx.font = 'bold 9.5px sans-serif';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign    = 'center';
+                const tw  = ctx.measureText(txt).width;
+                const bw  = tw + pad * 2;
+                const bh  = 14;
+                const bx  = xPx - bw / 2;
+                const by  = yPx - bh / 2;
+
+                // Background pill
+                ctx.fillStyle = 'rgba(18,21,26,0.88)';
+                if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 4); ctx.fill(); }
+                else { ctx.fillRect(bx, by, bw, bh); }
+
+                // Border
+                ctx.strokeStyle = color;
+                ctx.lineWidth   = 1;
+                if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 4); ctx.stroke(); }
+                else { ctx.strokeRect(bx, by, bw, bh); }
+
+                // Text
+                ctx.fillStyle = color;
+                ctx.fillText(txt, xPx, yPx);
+
+                // Pointer tick
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth   = 1;
+                if (isAbove) {
+                    ctx.moveTo(xPx, by + bh);
+                    ctx.lineTo(xPx, by + bh + 5);
+                } else {
+                    ctx.moveTo(xPx, by);
+                    ctx.lineTo(xPx, by - 5);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.save();
+            // DSM peaks (obstacles) — orange, label above point
+            for (const pt of dsmEx.peaks)
+                drawLbl(pt.idx, pt.val, -18, '#f97316', true);
+            // DSM valleys — light orange, label below
+            for (const pt of dsmEx.valleys)
+                drawLbl(pt.idx, pt.val, +18, '#fed7aa', false);
+            // DTM peaks — green, label above
+            for (const pt of dtmEx.peaks)
+                drawLbl(pt.idx, pt.val, -18, '#22c55e', true);
+            // DTM valleys — teal, label below
+            for (const pt of dtmEx.valleys)
+                drawLbl(pt.idx, pt.val, +18, '#5eead4', false);
+            ctx.restore();
+        },
+    };
+
+    // ── Antenna mast + node label plugin ─────────────────────────────
+    const antennaPlugin = {
+        id: 'antennaDecorations',
+        afterDatasetsDraw(chart) {
+            const ctx    = chart.ctx;
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+            const ds     = chart.data.datasets;
+            const lbls   = chart.data.labels;
+            const a      = state.lastAnalysis;
+            if (!a) return;
+
+            // LOS = index 9, DTM = index 4
+            const losData = ds[9]?.data;
+            const dtmData = ds[4]?.data;
+            if (!losData || !dtmData) return;
+
+            const endpoints = [
+                { idx: 0,                  name: a.n1?.name || 'A', isLeft: true  },
+                { idx: losData.length - 1, name: a.n2?.name || 'B', isLeft: false },
+            ];
+
+            for (const ep of endpoints) {
+                const losH = losData[ep.idx];
+                const dtmH = dtmData[ep.idx];
+                if (losH == null || dtmH == null) continue;
+
+                const xPx    = xScale.getPixelForValue(lbls[ep.idx]);
+                const antYpx = yScale.getPixelForValue(losH);
+                const dtmYpx = yScale.getPixelForValue(dtmH);
+                const antH   = Math.max(0, losH - dtmH);
+
+                ctx.save();
+
+                // Mast — vertical line from ground to antenna
+                ctx.beginPath();
+                ctx.moveTo(xPx, dtmYpx);
+                ctx.lineTo(xPx, antYpx);
+                ctx.strokeStyle = 'rgba(248,250,252,0.9)';
+                ctx.lineWidth   = 2;
+                ctx.setLineDash([]);
+                ctx.stroke();
+
+                // Crossbar at antenna top
+                ctx.beginPath();
+                ctx.moveTo(xPx - 7, antYpx);
+                ctx.lineTo(xPx + 7, antYpx);
+                ctx.strokeStyle = 'rgba(248,250,252,0.9)';
+                ctx.lineWidth   = 2;
+                ctx.stroke();
+
+                // Antenna tip dot
+                ctx.beginPath();
+                ctx.arc(xPx, antYpx, 4.5, 0, Math.PI * 2);
+                ctx.fillStyle   = '#3b82f6';
+                ctx.fill();
+                ctx.strokeStyle = '#bfdbfe';
+                ctx.lineWidth   = 1.5;
+                ctx.stroke();
+
+                // ── Node name label ───────────────────────────────────
+                const gap   = 9;
+                const align = ep.isLeft ? 'left' : 'right';
+                const lx    = ep.isLeft ? xPx + gap : xPx - gap;
+
+                ctx.font         = 'bold 10.5px sans-serif';
+                ctx.textBaseline = 'bottom';
+                ctx.textAlign    = align;
+                const nameW = ctx.measureText(ep.name).width;
+                const bgW   = nameW + 10;
+                const bgH   = 15;
+                const bgX   = ep.isLeft ? lx - 5 : lx - nameW - 5;
+                const bgY   = antYpx - 22;
+                ctx.fillStyle = 'rgba(15,23,42,0.88)';
+                if (ctx.roundRect) {
+                    ctx.beginPath(); ctx.roundRect(bgX, bgY, bgW, bgH, 3); ctx.fill();
+                } else { ctx.fillRect(bgX, bgY, bgW, bgH); }
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillText(ep.name, lx, antYpx - 8);
+
+                // ── Antenna height sub-label ──────────────────────────
+                ctx.font         = '9px sans-serif';
+                ctx.textBaseline = 'top';
+                ctx.textAlign    = align;
+                ctx.fillStyle    = '#93c5fd';
+                ctx.fillText(`↕ ${antH.toFixed(1)} m`, lx, antYpx + 6);
+
+                ctx.restore();
+            }
+        },
+    };
+
+    // ── Obstruction dot overlay plugin ───────────────────────────────
+    const obstructionDotsPlugin = {
+        id: 'obstructionDots',
+        afterDatasetsDraw(chart) {
+            dotPositions.length = 0;
+            if (!segs.length) return;
+            const ctx  = chart.ctx;
+            const area = chart.chartArea;
+            segs.forEach((seg, i) => {
+                const xPx = chart.scales.x.getPixelForValue(chart.data.labels[seg.critIdx]);
+                const yPx = chart.scales.y.getPixelForValue(seg.dsmAtCrit);
+                if (xPx < area.left || xPx > area.right) return;
+                if (yPx < area.top  || yPx > area.bottom) return;
+                dotPositions.push({ xPx, yPx, segIdx: i });
+                const clr = seg.type === 'los' ? '#ef4444' : '#f97316';
+                const num = String(i + 1);
+                ctx.save();
+                // Outer ring
+                ctx.beginPath();
+                ctx.arc(xPx, yPx, 11, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(18,21,26,0.92)';
+                ctx.fill();
+                ctx.strokeStyle = clr;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                // Number
+                ctx.font = 'bold 9px sans-serif';
+                ctx.textAlign    = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = clr;
+                ctx.fillText(num, xPx, yPx);
+                // Tick to DSM surface
+                ctx.beginPath();
+                ctx.moveTo(xPx, yPx + 11);
+                ctx.lineTo(xPx, yPx + 16);
+                ctx.strokeStyle = clr;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.restore();
+            });
+        },
+    };
+
+    state.chart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                // indices 0-3: Fresnel zones
+                {
+                    label: 'Fresnel 100%',
+                    data: fUp,
+                    borderColor: 'rgba(59,130,246,.18)', backgroundColor: 'transparent',
+                    borderWidth: 1, borderDash: [3,3],
+                    pointRadius: 0, fill: false, tension: .3, spanGaps: true, order: 9,
+                },
+                {
+                    label: 'Fresnel 100% (onder)',
+                    data: fDn,
+                    borderColor: 'rgba(59,130,246,.18)', backgroundColor: 'rgba(59,130,246,.05)',
+                    borderWidth: 1, borderDash: [3,3],
+                    pointRadius: 0, fill: '-1', tension: .3, spanGaps: true, order: 9,
+                },
+                {
+                    label: 'Fresnel drempel (boven)',
+                    data: fThUp,
+                    borderColor: 'rgba(59,130,246,.6)', backgroundColor: 'transparent',
+                    borderWidth: 1.5, borderDash: [5,3],
+                    pointRadius: 0, fill: false, tension: .3, spanGaps: true, order: 8,
+                },
+                {
+                    label: 'Fresnel drempel (onder)',
+                    data: fThDn,
+                    borderColor: 'rgba(59,130,246,.6)', backgroundColor: 'rgba(59,130,246,.08)',
+                    borderWidth: 1.5, borderDash: [5,3],
+                    pointRadius: 0, fill: '-1', tension: .3, spanGaps: true, order: 8,
+                },
+                // index 4: DTM terrain base
+                {
+                    label: 'DTM (terrein)',
+                    data: dtm,
+                    borderColor: 'rgba(34,197,94,.9)', backgroundColor: 'rgba(34,197,94,.2)',
+                    borderWidth: 2,
+                    pointRadius: 0, fill: 'origin', tension: .3, spanGaps: true, order: 5,
+                },
+                // index 5: vegetatie/bos zone fills between vegSurf and DTM
+                {
+                    label: '\uD83C\uDF32 Bos / vegetatie (2\u201315 m)',
+                    data: vegSurf,
+                    borderColor: 'rgba(20,184,166,.75)', backgroundColor: 'rgba(20,184,166,.38)',
+                    borderWidth: 1.5,
+                    pointRadius: 0, fill: { target: 4 }, tension: .3, spanGaps: true, order: 4,
+                },
+                // index 6: gebouwen zone fills between buildSurf and DTM
+                {
+                    label: '🏗 Gebouwen / constructies (≥15 m)',
+                    data: buildSurf,
+                    borderColor: 'rgba(239,68,68,.8)', backgroundColor: 'rgba(239,68,68,.4)',
+                    borderWidth: 1.5,
+                    pointRadius: 0, fill: { target: 4 }, tension: .3, spanGaps: true, order: 3,
+                },
+                // index 7: BAG-bevestigde gebouwen (exact — ongeacht hoogte)
+                {
+                    label: '🏛 BAG Gebouwen (bevestigd)',
+                    data: bagBuildSurf,
+                    borderColor: 'rgba(220,38,38,1)', backgroundColor: 'rgba(220,38,38,.55)',
+                    borderWidth: 2,
+                    pointRadius: 0, fill: { target: 4 }, tension: .3, spanGaps: true, order: 2.5,
+                },
+                // index 8: DSM full-surface silhouette (dashed outline only, no fill)
+                {
+                    label: bag3D ? 'DSM + 3D BAG dakhoogte' : 'DSM (volledig oppervlak)',
+                    data: dsm,
+                    borderColor: 'rgba(249,115,22,.55)', backgroundColor: 'transparent',
+                    borderWidth: 1, borderDash: [2,2],
+                    pointRadius: 0, fill: false, tension: .3, spanGaps: true, order: 2,
+                },
+                // index 8: LOS
+                {
+                    label: 'LOS lijn',
+                    data: los,
+                    borderColor: 'rgba(255,255,255,.9)', backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    pointRadius: 0, fill: false, tension: 0, spanGaps: true, order: 1,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            animation: { duration: 300 },
+            plugins: {
+                legend: {
+                    display: true, position: 'top',
+                    labels: {
+                        color: '#64748b', font: { size: 10 }, padding: 8,
+                        boxWidth: 14, boxHeight: 8, usePointStyle: false,
+                        filter: item =>
+                            !item.text.includes('(onder)') &&
+                            !item.text.includes('100%'),
+                    },
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(18,21,26,.95)',
+                    borderColor: '#2d3748', borderWidth: 1,
+                    titleColor: '#e2e8f0', bodyColor: '#94a3b8',
+                    callbacks: {
+                        title: items => `Afstand: ${items[0].label} km`,
+                        label: ctx => {
+                            const v = ctx.raw;
+                            if (v == null) return null;
+                            const lbl = ctx.dataset.label;
+                            // Hide duplicate/internal datasets from tooltip
+                            if (lbl.includes('(onder)') || lbl.includes('100%')) return null;
+                            // For DSM: append obstacle height + type
+                            if (lbl.includes('DSM')) {
+                                const dtmVal = ctx.chart.data.datasets[4].data[ctx.dataIndex];
+                                const oh = dtmVal != null ? Math.max(0, Number(v) - Number(dtmVal)) : null;
+                                const tag = oh != null && oh >= OBS_LOW_M
+                                    ? ` (+${oh.toFixed(1)} m → ${classifyObst(oh)})` : '';
+                                return ` DSM: ${Number(v).toFixed(1)} m${tag}`;
+                            }
+                            return ` ${lbl}: ${Number(v).toFixed(1)} m`;
+                        },
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Afstand (km)', color: '#475569', font: { size: 10 } },
+                    ticks: { color: '#475569', font: { size: 9 }, maxTicksLimit: 10 },
+                    grid: { color: 'rgba(45,55,72,.6)' },
+                },
+                y: {
+                    title: { display: true, text: 'Hoogte (m NAP)', color: '#475569', font: { size: 10 } },
+                    min: minY, max: maxY,
+                    ticks: { color: '#475569', font: { size: 9 } },
+                    grid: { color: 'rgba(45,55,72,.6)' },
+                },
+            },
+        },
+        plugins: [extremaPlugin, antennaPlugin, obstructionDotsPlugin],
+    });
+
+    // Click on chart → obstruction dot → jump to detail; otherwise map crosshair
+    canvas.style.cursor = 'crosshair';
+    canvas.onmousemove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+        canvas.style.cursor = dotPositions.some(d => Math.hypot(d.xPx - mx, d.yPx - my) < 14)
+            ? 'pointer' : 'crosshair';
+    };
+    canvas.onclick = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+        const hit = dotPositions.find(d => Math.hypot(d.xPx - mx, d.yPx - my) < 14);
+        if (hit) {
+            scrollToSection('details-panel');
+            setTimeout(() => {
+                const el = document.getElementById(`dp-seg-${hit.segIdx}`);
+                if (!el) return;
+                // If target is in a collapsed cluster, expand first so scroll can lock onto the exact row.
+                const clusterDetails = el.closest('details.dp-cluster-details');
+                if (clusterDetails && !clusterDetails.open) clusterDetails.open = true;
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('dp-seg-highlight');
+                setTimeout(() => el.classList.remove('dp-seg-highlight'), 1600);
+            }, 380);
+            return;
+        }
+        const els = state.chart.getElementsAtEventForMode(e, 'index', { intersect: false }, true);
+        if (!els.length) { crosshairSource.clear(); return; }
+        setChartCrosshair(els[0].index);
+    };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PROFILE PANEL
+// ══════════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════
+// PROFILE / SECTION NAVIGATION
+// Layout is now a scrollable column: map → profile → details → conclusie
+// ══════════════════════════════════════════════════════════════════════
+
+function scrollToSection(id) {
+    document.getElementById(id === 'map' ? 'map-wrap' : id)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+// Keep these stubs so legacy call-sites don't break
+function openProfile()  { scrollToSection('profile'); map.updateSize(); }
+function closeProfile() { scrollToSection('map'); }
+function toggleProfile() { scrollToSection('profile'); }
+
+// ══════════════════════════════════════════════════════════════════════
+// DETAILS PANEL
+// ══════════════════════════════════════════════════════════════════════
+
+function renderDetailsPanel(a) {
+    const placeholder = document.getElementById('dp-placeholder');
+    const content     = document.getElementById('dp-content');
+    if (!a || !placeholder || !content) return;
+
+    const { n1, n2, obs, bagMask, dtmCorrected, dsmEnhanced, los, fThDn, profilePoints, distKm } = a;
+    const segs     = findObstructionSegments(dsmEnhanced, los, fThDn, profilePoints, bagMask, dtmCorrected, distKm);
+    const clusters = clusterObstructionPoints(segs, 60);
+
+    const statusClr = obs.losBlocked === 0 && obs.fresnelBlocked === 0 ? 'var(--green)'
+        : obs.losBlocked === 0 ? 'var(--orange)' : 'var(--red)';
+    const statusTxt = obs.losBlocked === 0 && obs.fresnelBlocked === 0
+        ? '✅ Uitstekende verbinding'
+        : obs.losBlocked === 0 ? '⚠️ Fresnel gedeeltelijk geblokkeerd'
+        : '❌ LOS geblokkeerd';
+
+    const segsHtml = segs.length === 0
+        ? `<p style="color:var(--green);padding:10px 0;">✅ Geen obstructies gevonden op het traject.</p>`
+        : clusters.map((indices, cIdx) => {
+            if (indices.length === 1) {
+                // ── Single obstruction card ──────────────────────────
+                const idx = indices[0], seg = segs[idx];
+                const padClose = 80, padCtx = 400;
+                const miniUrl = makeBrtWmsUrl(seg.point[0]-padClose, seg.point[1]-padClose, seg.point[0]+padClose, seg.point[1]+padClose, 220, 165);
+                const ctxUrl  = makeOsmWmsUrl(seg.point[0]-padCtx,   seg.point[1]-padCtx,   seg.point[0]+padCtx,   seg.point[1]+padCtx,   220, 165);
+                const [lon, lat] = ol.proj.toLonLat(seg.point).map(v => v.toFixed(5));
+                const typeClr = seg.type === 'los' ? 'var(--red)' : 'var(--orange)';
+                const typeLbl = seg.type === 'los' ? 'LOS geblokkeerd' : 'Fresnel zone geblokkeerd';
+                const penLbl  = seg.type === 'los' ? `+${seg.maxPen.toFixed(1)} m boven zichtlijn` : 'Binnen Fresnel zone';
+                return `<div class="dp-seg-card" id="dp-seg-${idx}">
+  <div class="dp-seg-head"><span>Obstructie ${idx+1}</span><span style="color:${typeClr};">${typeLbl}</span></div>
+  <div class="dp-seg-body">
+    <table class="dp-table">
+      <tr><th>Afstand op traject</th><td>${seg.distStart} – ${seg.distEnd} km</td></tr>
+      <tr><th>Kritisch punt</th><td>${seg.distCrit} km</td></tr>
+      <tr><th>Type obstakel</th><td>${classifyObst(seg.obsH)}</td></tr>
+      <tr><th>Obstakel hoogte (DSM−DTM)</th><td>${seg.obsH.toFixed(1)} m</td></tr>
+      <tr><th>Penetratie t.o.v. LOS</th><td style="color:${typeClr};">${penLbl}</td></tr>
+      <tr><th>Absolute hoogte (NAP)</th><td>${seg.dsmAtCrit.toFixed(1)} m</td></tr>
+      <tr><th>Coördinaat (WGS84)</th><td>${lat}°N, ${lon}°E</td></tr>
+    </table>
+    <div class="dp-maps">
+      <div class="dp-mini"><img src="${miniUrl}" loading="lazy" /><div class="dp-mini-cap">Luchtfoto close-up (~160 m) © PDOK</div></div>
+      <div class="dp-mini"><img src="${ctxUrl}" loading="lazy" /><div class="dp-mini-cap">Omgeving (~800 m) © OpenStreetMap</div></div>
+    </div>
+  </div>
+</div>`;
+            } else {
+                // ── Cluster card ──────────────────────────────────────
+                const worstIdx  = indices.reduce((b, i) => segs[i].obsH > segs[b].obsH ? i : b, indices[0]);
+                const worst     = segs[worstIdx];
+                const distMin   = Math.min(...indices.map(i => parseFloat(segs[i].distStart)));
+                const distMax   = Math.max(...indices.map(i => parseFloat(segs[i].distEnd)));
+                const cx        = indices.reduce((s, i) => s + segs[i].point[0], 0) / indices.length;
+                const cy        = indices.reduce((s, i) => s + segs[i].point[1], 0) / indices.length;
+                const [cLon, cLat] = ol.proj.toLonLat([cx, cy]).map(v => v.toFixed(5));
+                const worstType = indices.some(i => segs[i].type === 'los') ? 'los' : 'fresnel';
+                const typeClr   = worstType === 'los' ? 'var(--red)' : 'var(--orange)';
+                const typeLbl   = worstType === 'los' ? 'LOS geblokkeerd' : 'Fresnel zone geblokkeerd';
+                const types     = [...new Set(indices.map(i => classifyObst(segs[i].obsH)))].join(', ');
+                const padClose  = 80, padCtx = 400;
+                const miniUrl   = makeBrtWmsUrl(cx-padClose, cy-padClose, cx+padClose, cy+padClose, 220, 165);
+                const ctxUrl    = makeOsmWmsUrl(cx-padCtx,   cy-padCtx,   cx+padCtx,   cy+padCtx,   220, 165);
+                const mkMarks = (pad, w, h) => indices.map(i => {
+                    const s = segs[i];
+                    const ix = Math.round((s.point[0] - (cx - pad)) / (2*pad) * w);
+                    const iy = Math.round(((cy + pad) - s.point[1]) / (2*pad) * h);
+                    if (ix < 4 || ix > w-4 || iy < 4 || iy > h-4) return '';
+                    const mc = s.type === 'los' ? '#ef4444' : '#f97316';
+                    return `<circle cx="${ix}" cy="${iy}" r="7" fill="${mc}" stroke="white" stroke-width="1.5" opacity="0.92"/><text x="${ix}" y="${iy+4}" text-anchor="middle" font-size="9" font-weight="bold" fill="white">${i+1}</text>`;
+                }).join('');
+                const svgClose = `<svg style="position:absolute;top:0;left:0;pointer-events:none;" width="220" height="165">${mkMarks(padClose,220,165)}</svg>`;
+                const svgCtx   = `<svg style="position:absolute;top:0;left:0;pointer-events:none;" width="220" height="165">${mkMarks(padCtx,220,165)}</svg>`;
+                const itemsHtml = `<table class="dp-items-table">
+  <thead><tr><th>#</th><th>Type</th><th>Klasse</th><th>Afstand (km)</th><th>Obstakel (m)</th><th>NAP (m)</th><th>Coördinaat</th></tr></thead>
+  <tbody>${indices.map(i => {
+    const s = segs[i];
+    const tc = s.type === 'los' ? 'var(--red)' : 'var(--orange)';
+    const [lon, lat] = ol.proj.toLonLat(s.point).map(v => v.toFixed(5));
+    return `<tr id="dp-seg-${i}"><td><strong>${i+1}</strong></td><td style="color:${tc};font-weight:600;">${s.type === 'los' ? 'LOS' : 'Fresnel'}</td><td>${classifyObst(s.obsH)}</td><td>${s.distStart} – ${s.distEnd}</td><td>${s.obsH.toFixed(1)}</td><td>${s.dsmAtCrit.toFixed(1)}</td><td>${lat}°N, ${lon}°E</td></tr>`;
+  }).join('')}</tbody>
+</table>`;
+                return `<div class="dp-seg-card dp-cluster-card" id="dp-seg-${indices[0]}">
+  <div class="dp-seg-head"><span>⚡ Zone ${cIdx+1} — ${indices.length} obstructies</span><span style="color:${typeClr};">${typeLbl}</span></div>
+  <div class="dp-seg-body">
+    <table class="dp-table">
+      <tr><th>Afstandszone</th><td>${distMin.toFixed(3)} – ${distMax.toFixed(3)} km</td></tr>
+      <tr><th>Obstructies</th><td>${indices.length}× (nrs. ${indices.map(i => i+1).join(', ')})</td></tr>
+      <tr><th>Zwaarste obstakel</th><td>${classifyObst(worst.obsH)} — ${worst.obsH.toFixed(1)} m (NAP: ${worst.dsmAtCrit.toFixed(1)} m)</td></tr>
+      <tr><th>Typen</th><td>${types}</td></tr>
+      <tr><th>Centrum coördinaat</th><td>${cLat}°N, ${cLon}°E</td></tr>
+    </table>
+    <div class="dp-maps">
+      <div class="dp-mini"><div style="position:relative;display:inline-block;"><img src="${miniUrl}" loading="lazy" />${svgClose}</div><div class="dp-mini-cap">Luchtfoto centrum © PDOK</div></div>
+      <div class="dp-mini"><div style="position:relative;display:inline-block;"><img src="${ctxUrl}" loading="lazy" />${svgCtx}</div><div class="dp-mini-cap">Omgeving © OpenStreetMap</div></div>
+    </div>
+    <details class="dp-cluster-details">
+      <summary>Toon alle ${indices.length} obstructies in deze zone ▸</summary>
+      ${itemsHtml}
+    </details>
+  </div>
+</div>`;
+            }
+        }).join('');
+
+
+    content.innerHTML = `
+<div class="dp-header">
+  <h2>Analysedetails — ${escHtml(n1.name)} ↔ ${escHtml(n2.name)}</h2>
+  <span class="dp-status" style="color:${statusClr};">${statusTxt}</span>
+</div>
+<div class="dp-stats">
+  <div class="dp-stat"><span>LOS geblokkeerd</span><strong>${obs.losBlocked} / ${obs.valid} punten</strong></div>
+  <div class="dp-stat"><span>Fresnel geblokkeerd</span><strong>${obs.fresnelBlocked} / ${obs.valid} punten</strong></div>
+  <div class="dp-stat"><span>Vrij traject</span><strong>${obs.clear.toFixed(0)}%</strong></div>
+  <div class="dp-stat"><span>Max obstakel</span><strong>${obs.maxObsH.toFixed(1)} m — ${classifyObst(obs.maxObsH)}</strong></div>
+</div>
+<div class="dp-seg-label">${clusters.length} zone${clusters.length !== 1 ? 's' : ''} (${segs.length} segment${segs.length !== 1 ? 'en' : ''})</div>
+${segsHtml}`;
+
+    placeholder.style.display = 'none';
+    content.style.display     = 'block';
+    // Populate map markers — one per obstruction segment (no clustering)
+    obstructionSource.clear();
+    segs.forEach((seg, idx) => {
+        const feat  = new ol.Feature({ geometry: new ol.geom.Point(seg.point) });
+        feat.set('obsIndex',   idx);
+        feat.set('obsType',    seg.type);
+        feat.set('obsClass',   classifyObst(seg.obsH));
+        feat.set('distStart',  seg.distStart);
+        feat.set('distEnd',    seg.distEnd);
+        feat.set('obsH',       seg.obsH);
+        feat.set('dsmAtCrit',  seg.dsmAtCrit);
+        feat.set('critIdx',    seg.critIdx);
+        feat.setStyle(obstructionFeatureStyle(seg.type, classifyObst(seg.obsH), String(idx + 1)));
+        obstructionSource.addFeature(feat);
+    });
+    // Scroll to details panel after a short delay
+    setTimeout(() => scrollToSection('details-panel'), 300);
+}
+
+function renderConclusionPanel(a) {
+    const placeholder = document.getElementById('cp-placeholder');
+    const content     = document.getElementById('cp-content');
+    if (!a || !placeholder || !content) return;
+
+    const { n1, n2, totalDist, obs, fR, threshold, rainLoss } = a;
+    const distKm = (totalDist / 1000);
+    const midFresnel = (fR && fR.length) ? (fR[Math.floor(fR.length / 2)] || 0) : 0;
+    const reqFree = midFresnel * (threshold || 0.6);
+    const dominant = obs.buildPts > 0 ? 'gebouwen/constructies'
+        : obs.forestPts > 0 ? 'vegetatie/bos' : 'maaiveld';
+
+    const quality = obs.losBlocked === 0 && obs.fresnelBlocked === 0 ? 'goed'
+        : obs.losBlocked === 0 ? 'matig' : 'kritiek';
+    const qualityText = quality === 'goed'
+        ? 'Direct inzetbaar traject'
+        : quality === 'matig' ? 'Werkbaar met optimalisatie' : 'Verbetering nodig voor stabiele link';
+    const qualityClr = quality === 'goed' ? 'var(--green)'
+        : quality === 'matig' ? 'var(--orange)' : 'var(--red)';
+
+    const extraHeight = obs.maxPen > 0
+        ? Math.max(2, Math.ceil((obs.maxPen + 1.0) / 2))
+        : Math.max(1, Math.ceil(reqFree * 0.15));
+    const relocationDist = obs.buildPts > 0 ? '80-250 m' : obs.forestPts > 0 ? '40-140 m' : '20-80 m';
+    const relayHop = Math.max(0.8, distKm / 2).toFixed(1);
+
+    const scenarios = [
+        {
+            title: 'Scenario 1: antennes verhogen',
+            impact: obs.losBlocked > 0 ? 'hoge impact' : 'middel impact',
+            impactClr: obs.losBlocked > 0 ? 'var(--red)' : 'var(--orange)',
+            action: 'Verhoog beide antennes stapsgewijs en heranalyseer op hetzelfde traject.',
+            example: `Voorbeeld: ${escHtml(n1.name)} +${extraHeight} m en ${escHtml(n2.name)} +${extraHeight} m om de kritieke obstructie te overbruggen.`
+        },
+        {
+            title: 'Scenario 2: node licht verplaatsen',
+            impact: 'middel impact',
+            impactClr: 'var(--orange)',
+            action: 'Verplaats bij voorkeur de node met de meeste obstakels in de directe omgeving.',
+            example: `Voorbeeld: verplaats een node ${relocationDist} zijwaarts om ${dominant} buiten de eerste Fresnel-zone te brengen.`
+        },
+        {
+            title: 'Scenario 3: extra relay/multi-hop',
+            impact: obs.losBlocked > 0 || distKm > 6 ? 'hoge impact' : 'laag risico-optie',
+            impactClr: obs.losBlocked > 0 || distKm > 6 ? 'var(--red)' : 'var(--green)',
+            action: 'Splits de verbinding in twee kortere hops met een tussennode op vrij zicht.',
+            example: `Voorbeeld: plaats een relay rond ~${relayHop} km vanaf ${escHtml(n1.name)} op een hoger punt met open zicht op beide uiteinden.`
+        },
+    ];
+
+    const weatherHint = (state.freq >= 2.4e9 && rainLoss > 1)
+        ? `Op ${(state.freq/1e9).toFixed(1)} GHz is extra regenmarge aanbevolen (nu ~${rainLoss.toFixed(1)} dB).`
+        : 'Regenverzwakking is momenteel beperkt; obstakels zijn de dominante factor.';
+
+    const summary = obs.losBlocked === 0 && obs.fresnelBlocked === 0
+        ? `Het pad ${escHtml(n1.name)} ↔ ${escHtml(n2.name)} is vrij (LOS + Fresnel). Focus op robuustheid: hou extra marge voor seizoensvegetatie en uitlijnfouten.`
+        : obs.losBlocked === 0
+            ? 'Het pad heeft vrij LOS, maar de Fresnel-zone is deels geblokkeerd. Kleine hoogte- of locatie-aanpassingen kunnen de link merkbaar stabieler maken.'
+            : 'Het pad heeft LOS-blokkades. Zonder aanpassing is de kans op instabiele verbinding of uitval groot; kies minimaal een hoogteverhoging of relay-oplossing.';
+
+    content.innerHTML = `
+<div class="cp-head">
+  <h2>Conclusie &amp; Advies — ${escHtml(n1.name)} ↔ ${escHtml(n2.name)}</h2>
+  <span class="cp-badge" style="color:${qualityClr};border-color:${qualityClr};">${qualityText}</span>
+</div>
+<div class="cp-summary">
+  <strong>Samenvatting:</strong> ${summary}<br>
+  <strong>Dominant obstakeltype:</strong> ${dominant} ·
+  <strong>Vrij traject:</strong> ${obs.clear.toFixed(0)}% ·
+  <strong>Benodigde vrije Fresnel-ruimte:</strong> ~${reqFree.toFixed(1)} m (middenpad)<br>
+  <strong>Weer/frequentie-opmerking:</strong> ${weatherHint}
+</div>
+<div class="cp-grid">
+  ${scenarios.map(s => `
+  <div class="cp-card">
+    <h4>${s.title}</h4>
+    <div class="cp-impact" style="color:${s.impactClr};">${s.impact}</div>
+    <p>${s.action}</p>
+    <p>${s.example}</p>
+  </div>`).join('')}
+</div>`;
+
+    placeholder.style.display = 'none';
+    content.style.display     = 'block';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════════════════════════════
+
+function toggleCard(id) {
+    const bd   = document.getElementById(`bd-${id}`);
+    const chev = document.getElementById(`chev-${id}`);
+    const vis  = bd.style.display !== 'none';
+    bd.style.display  = vis ? 'none' : '';
+    chev.textContent  = vis ? '▶' : '▼';
+}
+
+function showInfo(txt) {
+    const b = document.getElementById('infobar');
+    b.textContent = txt;
+    b.style.display = 'block';
+}
+function hideInfo() { document.getElementById('infobar').style.display = 'none'; }
+
+// ══════════════════════════════════════════════════════════════════════
+// PERSISTENCE
+// ══════════════════════════════════════════════════════════════════════
+
+function saveNodes() {
+    try {
+        localStorage.setItem('mc-nodes', JSON.stringify(
+            state.nodes.map(n => ({ ...n, coord: n.coord.slice() }))
+        ));
+    } catch { /* storage full or unavailable */ }
+}
+
+function loadNodes() {
+    try {
+        const raw = localStorage.getItem('mc-nodes');
+        if (!raw) return;
+        state.nodes = JSON.parse(raw);
+        renderNodes();
+        updateNodeList();
+        updateAnalysisUI();
+    } catch { /* corrupt data */ }
+}
+
+function exportNodes() {
+    const json = JSON.stringify({ version: 1, nodes: state.nodes }, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: 'meshcore-nodes.json' });
+    a.click(); URL.revokeObjectURL(url);
+}
+
+function importNodes() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                const imported = (data.nodes || data).filter(n => n.id && n.coord && n.name);
+                if (!imported.length) { alert('Geen geldige nodes gevonden.'); return; }
+                state.nodes.push(...imported);
+                renderNodes(); updateNodeList(); saveNodes();
+            } catch { alert('Ongeldig bestand.'); }
+        };
+        reader.readAsText(file);
+    };
+    inp.click();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SCREENSHOT EXPORT
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Export the current map view (+ elevation profile if open) as a PNG.
+ * Uses OpenLayers' rendercomplete event to ensure all tiles are drawn.
+ */
+function exportScreenshot() {
+    showToast('⏳ Screenshot wordt gemaakt…');
+    map.once('rendercomplete', () => {
+        // Composite all OL canvas layers
+        const mapEl    = map.getViewport();
+        const mapSize  = map.getSize();
+        const mapCanvas = document.createElement('canvas');
+        mapCanvas.width  = mapSize[0];
+        mapCanvas.height = mapSize[1];
+        const ctx = mapCanvas.getContext('2d');
+
+        mapEl.querySelectorAll('.ol-layer canvas').forEach(c => {
+            if (c.width === 0) return;
+            const opacity = c.parentNode?.style?.opacity;
+            ctx.globalAlpha = opacity === '' || opacity === undefined ? 1 : Number(opacity);
+            const tr = c.style.transform;
+            if (tr) {
+                const m = tr.match(/^matrix\(([^)]*)\)$/);
+                if (m) { ctx.setTransform(...m[1].split(',').map(Number)); }
+            } else {
+                ctx.setTransform(
+                    parseFloat(c.style.width)  / c.width  || 1, 0, 0,
+                    parseFloat(c.style.height) / c.height || 1, 0, 0
+                );
+            }
+            ctx.drawImage(c, 0, 0);
+        });
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 1;
+
+        // If profile panel is visible, append chart below
+        const profileEl = document.getElementById('profile');
+        const profileVisible = profileEl?.classList.contains('vis');
+        let finalCanvas = mapCanvas;
+
+        if (profileVisible) {
+            const chartCanvas   = document.getElementById('profile-canvas');
+            const profileRect   = profileEl.getBoundingClientRect();
+            const combined      = document.createElement('canvas');
+            combined.width      = mapCanvas.width;
+            combined.height     = mapCanvas.height + profileRect.height;
+            const ctx2 = combined.getContext('2d');
+            ctx2.fillStyle = '#12151a';
+            ctx2.fillRect(0, 0, combined.width, combined.height);
+            ctx2.drawImage(mapCanvas, 0, 0);
+            ctx2.drawImage(chartCanvas, 0, mapCanvas.height, combined.width, profileRect.height);
+            finalCanvas = combined;
+        }
+
+        finalCanvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a   = Object.assign(document.createElement('a'), {
+                href: url, download: `meshcore-kaart-${new Date().toISOString().slice(0, 10)}.png`,
+            });
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✓ Screenshot opgeslagen');
+        });
+    });
+    map.renderSync();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// URL STATE SHARING
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Encode nodes + settings into the URL hash so the link can be shared.
+ * Copies the URL to the clipboard.
+ */
+function shareURL() {
+    const data = {
+        v: 2,
+        nodes: state.nodes.map(n => ({
+            id:   n.id,
+            name: n.name,
+            h:    n.h,
+            ll:   ol.proj.toLonLat(n.coord).map(v => +v.toFixed(7)),
+            maaiveld: n.maaiveld,
+        })),
+        freq: state.freq,
+        sel:  state.selAnalysis,
+    };
+    const hash = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    const url  = `${location.origin}${location.pathname}#${hash}`;
+    navigator.clipboard.writeText(url)
+        .then(() => showToast('✓ Link gekopieerd naar klembord'))
+        .catch(() => {
+            prompt('Kopieer deze link:', url);
+        });
+}
+
+/**
+ * Load state from URL hash. Returns true if nodes were restored.
+ */
+function loadStateFromURL() {
+    if (!location.hash || location.hash.length < 4) return false;
+    try {
+        const raw  = decodeURIComponent(escape(atob(location.hash.slice(1))));
+        const data = JSON.parse(raw);
+        if (!Array.isArray(data.nodes) || !data.nodes.length) return false;
+        state.nodes = data.nodes.map(n => ({
+            id:       n.id,
+            name:     n.name,
+            h:        n.h ?? 0,
+            coord:    ol.proj.fromLonLat(n.ll),
+            maaiveld: n.maaiveld,
+        }));
+        if (data.freq) {
+            state.freq = data.freq;
+            const freqSel = document.getElementById('freq-sel');
+            if (freqSel) freqSel.value = data.freq;
+        }
+        if (Array.isArray(data.sel)) state.selAnalysis = data.sel;
+        renderNodes();
+        updateNodeList();
+        updateAnalysisUI();
+        // Zoom to nodes
+        if (state.nodes.length) {
+            const ext = ol.extent.boundingExtent(state.nodes.map(n => n.coord));
+            map.getView().fit(ext, { padding: [80, 80, 80, 80], maxZoom: 14, duration: 600 });
+        }
+        showToast(`✓ ${state.nodes.length} node(s) geladen via URL`);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** Show a brief toast notification */
+function showToast(msg) {
+    const t = document.getElementById('share-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// NODE WIZARD
+// ══════════════════════════════════════════════════════════════════════
+
+let wizardStep = 1;
+
+function updateWizardStepUI() {
+    document.getElementById('wiz-step-1')?.classList.toggle('active', wizardStep === 1);
+    document.getElementById('wiz-step-2')?.classList.toggle('active', wizardStep === 2);
+    const ind = document.getElementById('wiz-step-ind');
+    if (ind) ind.textContent = `Stap ${wizardStep} van 2`;
+}
+
+function toggleWizardCoordFields(prefix) {
+    const method = document.getElementById(`wiz-${prefix}-method`)?.value;
+    const box = document.getElementById(`wiz-${prefix}-coords`);
+    if (!box) return;
+    box.style.display = method === 'coords' ? 'grid' : 'none';
+}
+
+function openNodeWizard() {
+    closeIntroPopup(false);
+    wizardStep = 1;
+    const el = document.getElementById('wiz-backdrop');
+    if (!el) return;
+    el.classList.add('show');
+    el.setAttribute('aria-hidden', 'false');
+    toggleWizardCoordFields('n1');
+    toggleWizardCoordFields('n2');
+    updateWizardStepUI();
+}
+
+function closeNodeWizard() {
+    const el = document.getElementById('wiz-backdrop');
+    if (!el) return;
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden', 'true');
+}
+
+function wizardNextStep() {
+    wizardStep = 2;
+    updateWizardStepUI();
+}
+
+function wizardPrevStep() {
+    wizardStep = 1;
+    updateWizardStepUI();
+}
+
+function getBrowserLocationCoord() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocatie wordt niet ondersteund door deze browser.'));
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            p => resolve(ol.proj.fromLonLat([p.coords.longitude, p.coords.latitude])),
+            () => reject(new Error('Kon je locatie niet ophalen.')),
+            { enableHighAccuracy: true, timeout: 12000, maximumAge: 120000 }
+        );
+    });
+}
+
+function pickCoordFromMap(label) {
+    return new Promise(resolve => {
+        scrollToSection('map');
+        setMode('view');
+        showInfo(`Wizard: klik op de kaart voor ${label}`);
+        showToast(`Klik op de kaart voor ${label}`);
+        map.once('click', e => {
+            hideInfo();
+            resolve(e.coordinate);
+        });
+    });
+}
+
+function readWizardConfig(prefix) {
+    const name = (document.getElementById(`wiz-${prefix}-name`)?.value || '').trim() || (prefix === 'n1' ? 'Node 1' : 'Node 2');
+    const h = parseFloat(document.getElementById(`wiz-${prefix}-h`)?.value || '0');
+    const method = document.getElementById(`wiz-${prefix}-method`)?.value || 'center';
+    const lon = parseFloat(document.getElementById(`wiz-${prefix}-lon`)?.value || '');
+    const lat = parseFloat(document.getElementById(`wiz-${prefix}-lat`)?.value || '');
+    return { name, h: Number.isFinite(h) ? h : 0, method, lon, lat };
+}
+
+async function resolveWizardCoord(cfg, label) {
+    if (cfg.method === 'center') {
+        const c = map.getView().getCenter();
+        if (!c) throw new Error('Geen kaartcentrum beschikbaar.');
+        return c;
+    }
+    if (cfg.method === 'geoloc') return await getBrowserLocationCoord();
+    if (cfg.method === 'mapclick') return await pickCoordFromMap(label);
+    if (cfg.method === 'coords') {
+        if (!Number.isFinite(cfg.lon) || !Number.isFinite(cfg.lat)) {
+            throw new Error(`Ongeldige coordinaten voor ${label}.`);
+        }
+        if (cfg.lon < -180 || cfg.lon > 180 || cfg.lat < -90 || cfg.lat > 90) {
+            throw new Error(`Coordinaten buiten bereik voor ${label}.`);
+        }
+        return ol.proj.fromLonLat([cfg.lon, cfg.lat]);
+    }
+    throw new Error(`Onbekende methode voor ${label}.`);
+}
+
+async function finishNodeWizard() {
+    const btn = document.querySelector('#wiz-step-2 .btn-primary');
+    if (btn) btn.disabled = true;
+    try {
+        const cfg1 = readWizardConfig('n1');
+        const cfg2 = readWizardConfig('n2');
+
+        closeNodeWizard();
+
+        const coord1 = await resolveWizardCoord(cfg1, 'Node 1');
+        const coord2 = await resolveWizardCoord(cfg2, 'Node 2');
+
+        const id1 = addNode(coord1, { name: cfg1.name, h: cfg1.h, silent: true });
+        const id2 = addNode(coord2, { name: cfg2.name, h: cfg2.h, silent: true });
+
+        state.selAnalysis = [id1, id2];
+        renderNodes();
+        updateNodeList();
+        updateAnalysisUI();
+        saveNodes();
+
+        const n1 = state.nodes.find(n => n.id === id1);
+        const n2 = state.nodes.find(n => n.id === id2);
+        if (n1 && n2) {
+            const ext = ol.extent.boundingExtent([n1.coord, n2.coord]);
+            map.getView().fit(ext, { padding: [90, 90, 90, 90], maxZoom: 15, duration: 550 });
+        }
+
+        showToast('✓ Wizard klaar: 2 nodes toegevoegd');
+        showInfo('Selectie gereed: je kunt direct analyseren');
+    } catch (e) {
+        showToast(`⚠ ${e?.message || 'Wizard afgebroken'}`);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+function initNodeWizard() {
+    const backdrop = document.getElementById('wiz-backdrop');
+    if (!backdrop) return;
+
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeNodeWizard();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop.classList.contains('show')) closeNodeWizard();
+    });
+}
+
+function openIntroPopup(manual = false) {
+    const el = document.getElementById('intro-backdrop');
+    if (!el) return;
+    el.classList.add('show');
+    el.setAttribute('aria-hidden', 'false');
+    if (manual) {
+        const cb = document.getElementById('intro-hide-next');
+        if (cb) cb.checked = false;
+    }
+}
+
+function closeIntroPopup(savePref = false) {
+    const el = document.getElementById('intro-backdrop');
+    if (!el) return;
+
+    if (savePref) {
+        const cb = document.getElementById('intro-hide-next');
+        if (cb?.checked) {
+            try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch { /* storage unavailable */ }
+        }
+    }
+
+    el.classList.remove('show');
+    el.setAttribute('aria-hidden', 'true');
+}
+
+function initIntroPopup() {
+    const backdrop = document.getElementById('intro-backdrop');
+    if (!backdrop) return;
+
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeIntroPopup(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop.classList.contains('show')) closeIntroPopup(false);
+    });
+
+    let seen = false;
+    try { seen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch { /* ignore */ }
+    if (!seen) openIntroPopup(false);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// AHN CAPABILITIES — discover actual layer names
+// ══════════════════════════════════════════════════════════════════════
+
+async function loadAHNCaps() {
+    const statusEl = document.getElementById('ahn-status');
+    const infoEl   = document.getElementById('ahn-layer-info');
+    try {
+        const r   = await fetch(`${AHN_WMS}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities`,
+            { signal: AbortSignal.timeout(10000) });
+        const txt = await r.text();
+        const xml = new DOMParser().parseFromString(txt, 'text/xml');
+
+        // Collect layer names
+        const nameEls = xml.querySelectorAll('Layer > Layer > Name');
+        const names   = Array.from(nameEls).map(el => el.textContent.trim()).filter(Boolean);
+
+        if (!names.length) throw new Error('No layers found');
+
+        // Pick best DTM and DSM
+        // Prefer highest resolution (05m/0.5m), then lower
+        const pref = name => {
+            if (name.includes('05m') || name.includes('0_5m') || name.includes('0.5m')) return 0;
+            if (name.includes('5m'))   return 1;
+            return 2;
+        };
+        const dtms = names.filter(n => n.toLowerCase().includes('dtm')).sort((a,b) => pref(a)-pref(b));
+        const dsms = names.filter(n => n.toLowerCase().includes('dsm')).sort((a,b) => pref(a)-pref(b));
+
+        if (dtms.length) { AHN_DTM = dtms[0]; dtmSrc.updateParams({ LAYERS: AHN_DTM }); }
+        if (dsms.length) { AHN_DSM = dsms[0]; dsmSrc.updateParams({ LAYERS: AHN_DSM }); }
+
+        statusEl.textContent = `AHN: ${AHN_DTM}`;
+        statusEl.style.color = 'var(--green)';
+
+        infoEl.innerHTML = names.map(n =>
+            `<span style="color:${n===AHN_DTM||n===AHN_DSM?'var(--accent)':'inherit'}">${n}</span>`
+        ).join(', ');
+
+        console.info('[AHN] Layers:', names, '| Using DTM:', AHN_DTM, 'DSM:', AHN_DSM);
+
+    } catch (e) {
+        console.warn('[AHN] GetCapabilities failed, using defaults:', e.message);
+        statusEl.textContent = 'AHN: standaard (fallback)';
+        statusEl.style.color = 'var(--orange)';
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════
+
+(async () => {
+    // Restore from URL hash first, then fall back to localStorage
+    const fromURL = loadStateFromURL();
+    if (!fromURL) loadNodes();
+
+    // Sync freq-dependent UI (rain fade visibility)
+    onFreqChange();
+
+    await loadAHNCaps();
+    // Force map resize after profile panel might have changed layout
+    map.updateSize();
+    initIntroPopup();
+    initNodeWizard();
+})();
+
+// ══════════════════════════════════════════════════════════════════════
+// VIEW TABS — active state driven by scroll position
+// ══════════════════════════════════════════════════════════════════════
+(function initViewTabs() {
+    const pairs = [
+        ['map-wrap',       'tab-map'],
+        ['profile',        'tab-profile'],
+        ['details-panel',  'tab-details'],
+        ['conclusion-panel','tab-conclusion'],
+    ];
+    const ratios = {};
+
+    function updateActiveTab() {
+        let bestId = null, bestRatio = -1;
+        pairs.forEach(([id]) => {
+            const r = ratios[id] ?? 0;
+            if (r > bestRatio) { bestRatio = r; bestId = id; }
+        });
+        if (!bestId) return;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+        const pair = pairs.find(p => p[0] === bestId);
+        if (pair) document.getElementById(pair[1])?.classList.add('tab-active');
+    }
+
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { ratios[e.target.id] = e.intersectionRatio; });
+        updateActiveTab();
+    }, { root: document.getElementById('main'), threshold: [0, 0.05, 0.1, 0.25, 0.5, 0.75, 1.0] });
+
+    pairs.forEach(([id]) => {
+        const el = document.getElementById(id);
+        if (el) io.observe(el);
+    });
+
+    // Seed initial state: map is visible on load
+    ratios['map-wrap'] = 1;
+    updateActiveTab();
+})();
+</script>
+</body>
+</html>

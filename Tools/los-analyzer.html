@@ -578,6 +578,12 @@
             color:var(--dim);
             margin:2px 0 7px;
         }
+        .mc-help {
+            font-size:10px;
+            color:var(--dim);
+            margin:0 0 8px;
+            line-height:1.45;
+        }
         .mc-list {
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -1196,11 +1202,13 @@
         <div class="mc-toolbar">
             <input id="mc-search" type="search" placeholder="Zoek op naam, short id of public key" oninput="filterMcRadarList()">
             <label class="mc-height">
-                Hoogte
-                <input id="mc-import-h" type="number" value="2" min="0" max="300" step="0.5">
+                AGL hoogte
+                <input id="mc-import-h" type="number" value="2" min="0" max="300" step="0.5"
+                       title="Antennehoogte in meter boven lokale grond (AGL)">
                 <span>m</span>
             </label>
         </div>
+        <div class="mc-help">Ingevoerde antennehoogte wordt toegepast als meter boven lokale grond (AGL), niet boven NAP.</div>
 
         <div id="mc-status" class="mc-status">Nog niet geladen</div>
         <div id="mc-list" class="mc-list">
@@ -4226,7 +4234,7 @@ function importSelectedMcRadarNodes() {
     if (ids.length) parts.push(`${ids.length} toegevoegd`);
     if (updated) parts.push(`${updated} hoogte bijgewerkt`);
     if (skipped) parts.push(`${skipped} overgeslagen`);
-    const msg = parts.join(', ');
+    const msg = `${parts.join(', ')} | hoogte ${importH} m AGL`;
     showInfo(`MC-Radar import: ${msg}`);
     showToast(`✓ ${msg}`);
     closeMcRadarImport();

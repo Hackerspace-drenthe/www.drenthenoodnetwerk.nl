@@ -677,6 +677,15 @@
     <div id="sb-head">
         <h1>📡 Line of Sight Analyzer</h1>
         <p>Hoogte- &amp; obstakelanalyse via PDOK geodata</p>
+        <a class="btn btn-secondary"
+           href="https://github.com/Hackerspace-drenthe/www.drenthenoodnetwerk.nl/issues/new/choose"
+              onclick="openBugReportIssue(event)"
+           target="_blank"
+           rel="noopener noreferrer"
+           title="Open het GitHub issueformulier"
+           style="margin-top:8px;width:100%;justify-content:center;text-decoration:none;">
+            🐞 Meld een bug
+        </a>
     </div>
 
     <div id="sb-body">
@@ -4795,6 +4804,54 @@ function exportScreenshot() {
 // ══════════════════════════════════════════════════════════════════════
 // URL STATE SHARING
 // ══════════════════════════════════════════════════════════════════════
+
+function openBugReportIssue(ev) {
+    if (ev?.preventDefault) ev.preventDefault();
+
+    const issueBase = 'https://github.com/Hackerspace-drenthe/www.drenthenoodnetwerk.nl/issues/new';
+    const freqMHz = Number.isFinite(state.freq) ? (state.freq / 1e6).toFixed(0) : 'onbekend';
+    const nodeCount = Array.isArray(state.nodes) ? state.nodes.length : 0;
+    const selCount = Array.isArray(state.selAnalysis) ? state.selAnalysis.length : 0;
+    const pair = state.lastAnalysis
+        ? `${state.lastAnalysis?.n1?.name || '?'} ↔ ${state.lastAnalysis?.n2?.name || '?'}`
+        : 'n.v.t.';
+    const nowIso = new Date().toISOString();
+
+    const body = [
+        '## Beschrijving',
+        'Beschrijf kort en duidelijk wat er misgaat.',
+        '',
+        '## Stappen om te reproduceren',
+        '1. ',
+        '2. ',
+        '3. ',
+        '',
+        '## Verwacht gedrag',
+        '',
+        '## Huidig gedrag',
+        '',
+        '## Extra context (automatisch ingevuld)',
+        `- Pagina: ${location.href}`,
+        `- Frequentie: ${freqMHz} MHz`,
+        `- Nodes geladen: ${nodeCount}`,
+        `- Nodes geselecteerd: ${selCount}`,
+        `- Laatste traject: ${pair}`,
+        `- Tijdstip: ${nowIso}`,
+        `- Browser: ${navigator.userAgent}`,
+    ].join('\n');
+
+    const params = new URLSearchParams({
+        title: '[Bug]: LOS Analyzer - korte omschrijving',
+        labels: 'bug',
+        body,
+    });
+    const url = `${issueBase}?${params.toString()}`;
+
+    const win = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!win) {
+        location.href = url;
+    }
+}
 
 /**
  * Encode nodes + settings into the URL hash so the link can be shared.

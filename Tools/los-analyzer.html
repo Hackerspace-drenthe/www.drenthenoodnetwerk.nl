@@ -1504,8 +1504,14 @@ function closeObstructionPopup() {
 function getCurrentObstructionSegments() {
     const a = state.lastAnalysis;
     if (!a) return [];
-    const { bagMask, dtmCorrected, dsmEnhanced, los, fThDn, profilePoints, distKm } = a;
-    return findObstructionSegments(dsmEnhanced, los, fThDn, profilePoints, bagMask, dtmCorrected, distKm);
+    const bagMask = a.bagMask;
+    const los = a.los;
+    const fThDn = a.fThDn;
+    const profilePoints = a.profilePoints;
+    const distKm = a.distKm;
+    const dtmAnalysis = a.dtmCorrected ?? a.dtmRaw ?? [];
+    const dsmAnalysis = a.dsmCorrected ?? a.dsmEnhanced ?? a.dsmEnhancedRaw ?? [];
+    return findObstructionSegments(dsmAnalysis, los, fThDn, profilePoints, bagMask, dtmAnalysis, distKm);
 }
 
 function jumpToObstructionDetails(idx) {
@@ -2521,14 +2527,15 @@ async function runAnalysis() {
 
         // Enhanced DSM: vervang AHN DSM op gebouwlocaties door exacte 3D BAG dakhoogte (NAP m)
         // Alleen als 3D BAG beschikbaar was; anders originele AHN DSM.
-        const dsmEnhanced = dsm.map((v, i) =>
+        const dsmEnhancedRaw = dsm.map((v, i) =>
             (bag3D && bagRoofHeights[i] !== null) ? bagRoofHeights[i] : v
         );
 
         const totalDist = haversineDist(n1.coord, n2.coord);
 
-        // Apply k-factor earth-curvature correction to terrain heights
+        // Keep raw profile for chart display and use k-corrected profiles for RF analysis.
         const dtmCorrected = applyKFactor(dtm, dist, kFactor);
+        const dsmCorrected = applyKFactor(dsmEnhancedRaw, dist, kFactor);
 
         // Anchor LOS endpoints to node ground (maaiveld) when available,
         // so antenna heights remain true AGL at both ends.
@@ -2546,8 +2553,8 @@ async function runAnalysis() {
         const fThUp = los.map((v, i) => v + threshold * fR[i]);
         const fThDn = los.map((v, i) => v - threshold * fR[i]);
 
-        // Obstruction analysis (uses k-factor corrected terrain + BAG mask + enhanced DSM)
-        const obs = analyzeObs(dtmCorrected, dsmEnhanced, los, fThDn, fR, bagMask);
+        // Obstruction analysis (uses k-factor corrected terrain + DSM + BAG mask)
+        const obs = analyzeObs(dtmCorrected, dsmCorrected, los, fThDn, fR, bagMask);
 
         // RF calculations
         const fspl     = computeFSPL(totalDist, state.freq);
@@ -2561,17 +2568,24 @@ async function runAnalysis() {
         document.getElementById('profile-meta').textContent =
             `${n1.name} ↔ ${n2.name}  |  ${(totalDist/1000).toFixed(2)} km  |  ${nPts} punten`;
 
-        // Draw chart (use corrected terrain for analysis, enhanced DSM for display)
+        // Draw chart with raw heights (clear visual profile), while analysis uses k-corrected arrays.
         const distKm = dist.map(d => (d / 1000).toFixed(3));
 
         // Sla analysegegevens op voor de rapportgenerator
         state.lastAnalysis = {
             n1, n2, totalDist, obs, fR, threshold, fspl, diffLoss, rainLoss,
-            bag3D, bagMask, dtmCorrected, dsmEnhanced, los, fThDn,
+            bag3D, bagMask,
+            dtmRaw: dtm,
+            dsmEnhancedRaw,
+            dtmCorrected,
+            dsmCorrected,
+            // Legacy alias used by details helpers
+            dsmEnhanced: dsmCorrected,
+            los, fThDn,
             profilePoints: [...points], distKm,
         };
 
-        drawChart(distKm, dtmCorrected, dsmEnhanced, los, fUp, fDown, fThUp, fThDn, bagMask, bag3D);
+        drawChart(distKm, dtm, dsmEnhancedRaw, los, fUp, fDown, fThUp, fThDn, bagMask, bag3D, dtmCorrected, dsmCorrected);
         renderDetailsPanel(state.lastAnalysis);
         renderConclusionPanel(state.lastAnalysis);
 
@@ -3207,12 +3221,13 @@ async function runMultiHopAnalysis() {
             const { dtm, dsm, dist } = await getProfile(nA.coord, nB.coord, nPts);
             const totalDist  = haversineDist(nA.coord, nB.coord);
             const dtmCorr    = applyKFactor(dtm, dist, kFactor);
+            const dsmCorr    = applyKFactor(dsm, dist, kFactor);
             const e1 = Number.isFinite(Number(nA.maaiveld)) ? Number(nA.maaiveld) : (dtmCorr[0] ?? 0);
             const e2 = Number.isFinite(Number(nB.maaiveld)) ? Number(nB.maaiveld) : (dtmCorr[dtmCorr.length - 1] ?? 0);
             const los        = buildLOS(e1, nA.h, e2, nB.h, nPts);
             const fR         = dist.map(d => { const d2 = totalDist - d; return (d > 0 && d2 > 0) ? fresnelR(d, d2, state.freq) : 0; });
             const fThDn      = los.map((v, j) => v - threshold * fR[j]);
-            const obs        = analyzeObs(dtmCorr, dsm, los, fThDn, fR);
+            const obs        = analyzeObs(dtmCorr, dsmCorr, los, fThDn, fR);
             const fspl       = computeFSPL(totalDist, state.freq);
             const diffLoss   = knifeEdgeLoss(dtmCorr, los, dist, state.freq);
             const rainLoss   = computeRainFade(totalDist, state.freq, rainRate);
@@ -3354,7 +3369,7 @@ function findExtrema(data, minProm, maxCount) {
     return { peaks: dedupe(peaks), valleys: dedupe(valleys) };
 }
 
-function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], bag3D = false) {
+function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], bag3D = false, dtmAnalysis = dtm, dsmAnalysis = dsm) {
     const canvas = document.getElementById('profile-canvas');
     if (state.chart) state.chart.destroy();
     canvas.onclick = null;
@@ -3388,7 +3403,7 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
 
     // ── Obstruction segments for dot overlay ─────────────────────────
     const profilePoints = state.lastAnalysis?.profilePoints ?? [];
-    const segs = findObstructionSegments(dsm, los, fThDn, profilePoints, bagMask, dtm, labels);
+    const segs = findObstructionSegments(dsmAnalysis, los, fThDn, profilePoints, bagMask, dtmAnalysis, labels);
     const dotPositions = []; // populated by plugin, read by click/mousemove handler
     // ── Peak / valley label plugin ────────────────────────────────────
     const extremaPlugin = {
@@ -3579,7 +3594,8 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
             const area = chart.chartArea;
             segs.forEach((seg, i) => {
                 const xPx = chart.scales.x.getPixelForValue(chart.data.labels[seg.critIdx]);
-                const yPx = chart.scales.y.getPixelForValue(seg.dsmAtCrit);
+                const yVal = dsm[seg.critIdx] ?? seg.dsmAtCrit;
+                const yPx = chart.scales.y.getPixelForValue(yVal);
                 if (xPx < area.left || xPx > area.right) return;
                 if (yPx < area.top  || yPx > area.bottom) return;
                 dotPositions.push({ xPx, yPx, segIdx: i });
@@ -3855,8 +3871,10 @@ function renderDetailsPanel(a) {
     const content     = document.getElementById('dp-content');
     if (!a || !placeholder || !content) return;
 
-    const { n1, n2, obs, bagMask, dtmCorrected, dsmEnhanced, los, fThDn, profilePoints, distKm } = a;
-    const segs     = findObstructionSegments(dsmEnhanced, los, fThDn, profilePoints, bagMask, dtmCorrected, distKm);
+    const { n1, n2, obs, bagMask, los, fThDn, profilePoints, distKm } = a;
+    const dtmAnalysis = a.dtmCorrected ?? a.dtmRaw ?? [];
+    const dsmAnalysis = a.dsmCorrected ?? a.dsmEnhanced ?? a.dsmEnhancedRaw ?? [];
+    const segs     = findObstructionSegments(dsmAnalysis, los, fThDn, profilePoints, bagMask, dtmAnalysis, distKm);
     const clusters = clusterObstructionPoints(segs, 60);
 
     const statusClr = obs.losBlocked === 0 && obs.fresnelBlocked === 0 ? 'var(--green)'

@@ -98,8 +98,34 @@
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
+        .sb-head-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
         #sb-head h1 { font-size: 15px; font-weight: 700; color: var(--accent); }
         #sb-head p  { font-size: 11px; color: var(--dim); margin-top: 3px; }
+        .sb-brand-logo-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            padding: 2px;
+            transition: background .15s ease, transform .15s ease;
+        }
+        .sb-brand-logo-link:hover {
+            background: rgba(255,255,255,.08);
+            transform: translateY(-1px);
+        }
+        .sb-brand-logo {
+            height: 28px;
+            width: auto;
+            max-width: 110px;
+            display: block;
+            filter: invert(1) brightness(1.35) contrast(1.08);
+            opacity: .9;
+        }
 
         #sb-body {
             flex: 1;
@@ -675,7 +701,19 @@
 <!-- ════════════════════════════ SIDEBAR ════════════════════════════ -->
 <div id="sidebar">
     <div id="sb-head">
-        <h1>📡 Line of Sight Analyzer</h1>
+        <div class="sb-head-top">
+            <h1>📡 Line of Sight Analyzer</h1>
+            <a class="sb-brand-logo-link"
+               href="https://www.hackerspace-drenthe.nl/"
+               target="_blank"
+               rel="noopener noreferrer"
+               title="Hackerspace Drenthe logo - LOS Analyzer door Rein Velt"
+               aria-label="Hackerspace Drenthe - auteur Rein Velt">
+                <img class="sb-brand-logo"
+                     src="https://www.hackerspace-drenthe.nl/wp-content/uploads/2021/11/cropped-cropped-4018_Hackerspace-Drenthe_01_small.png"
+                     alt="Hackerspace Drenthe logo">
+            </a>
+        </div>
         <p>Hoogte- &amp; obstakelanalyse via PDOK geodata</p>
         <a class="btn btn-secondary"
            href="https://github.com/Hackerspace-drenthe/www.drenthenoodnetwerk.nl/issues/new/choose"
@@ -823,8 +861,11 @@
                 </div>
 
                 <div class="setting">
-                    <span class="setting-lbl">Profiel punten</span>
-                    <select id="npts-sel">
+                    <span class="setting-lbl"
+                          title="Maximaal 5.000 samplepunten over het volledige traject. Tot circa 5 km is de detailweergave meestal zeer nauwkeurig. Bij grotere afstanden daalt de ruimtelijke resolutie en kunnen kleine obstakels minder zichtbaar zijn. Verbeteringen zijn in ontwikkeling.">
+                        Profiel punten ⓘ
+                    </span>
+                    <select id="npts-sel" onchange="updateAnalysisUI()">
                         <option value="0" selected>Auto (1 pt/m, max 5000)</option>
                         <option value="100">100</option>
                         <option value="200">200</option>
@@ -1509,8 +1550,8 @@ function getCurrentObstructionSegments() {
     const fThDn = a.fThDn;
     const profilePoints = a.profilePoints;
     const distKm = a.distKm;
-    const dtmAnalysis = a.dtmCorrected ?? a.dtmRaw ?? [];
-    const dsmAnalysis = a.dsmCorrected ?? a.dsmEnhanced ?? a.dsmEnhancedRaw ?? [];
+    const dtmAnalysis = a.dtmRaw ?? a.dtmCorrected ?? [];
+    const dsmAnalysis = a.dsmEnhancedRaw ?? a.dsmCorrected ?? a.dsmEnhanced ?? [];
     return findObstructionSegments(dsmAnalysis, los, fThDn, profilePoints, bagMask, dtmAnalysis, distKm);
 }
 
@@ -1750,6 +1791,34 @@ function selectForAnalysis(id) {
     }
 }
 
+function resolveProfilePointCount(distForPts, nPtsRaw = parseInt(document.getElementById('npts-sel')?.value || '0', 10)) {
+    return nPtsRaw === 0
+        ? Math.max(PROFILE_POINTS_MIN, Math.min(Math.round(distForPts), PROFILE_POINTS_MAX))
+        : Math.min(Math.max(nPtsRaw || PROFILE_POINTS_MIN, PROFILE_POINTS_MIN), PROFILE_POINTS_MAX);
+}
+
+function buildSamplingWarningHtml(nodeA, nodeB) {
+    if (!nodeA || !nodeB) return '';
+    const distM = haversineDist(nodeA.coord, nodeB.coord);
+    const distKm = distM / 1000;
+    if (distKm <= 5) return '';
+
+    const nPtsRaw = parseInt(document.getElementById('npts-sel')?.value || '0', 10);
+    const nPts = resolveProfilePointCount(distM, nPtsRaw);
+    const spacingM = distM / Math.max(1, nPts - 1);
+    const severe = distKm > 20 || spacingM > 4;
+    const color = severe ? '#ef4444' : '#f59e0b';
+    const border = severe ? 'rgba(239,68,68,.45)' : 'rgba(245,158,11,.45)';
+    const bg = severe ? 'rgba(239,68,68,.06)' : 'rgba(245,158,11,.06)';
+    const modeTxt = nPtsRaw === 0 ? 'auto' : 'handmatig';
+
+    return `<div style="margin-top:7px;padding:7px 8px;border:1px solid ${border};background:${bg};border-radius:6px;line-height:1.45;">
+      <strong style="color:${color};">⚠ Sampling-waarschuwing</strong><br>
+      Afstand: ${distKm.toFixed(2)} km · punten: ${nPts.toLocaleString('nl-NL')} (${modeTxt}) · resolutie: ~${spacingM.toFixed(2)} m/sample.<br>
+      Boven circa 5 km wordt de grafiek minder fijnmazig; kleine obstakels kunnen in de presentatie minder zichtbaar zijn.
+    </div>`;
+}
+
 function updateAnalysisUI() {
     const sel    = state.selAnalysis;
     const dis    = document.getElementById('sel-display');
@@ -1788,10 +1857,12 @@ function updateAnalysisUI() {
     } else {
         const a = state.nodes.find(x => x.id === sel[0]);
         const b = state.nodes.find(x => x.id === sel[1]);
+        const samplingWarn = buildSamplingWarningHtml(a, b);
         dis.className = 's-ready';
         dis.innerHTML = hdr('Gereed voor analyse ✓', '#22c55e')
             + step(1, a?.name, true, null)
-            + step(2, b?.name, true, null);
+            + step(2, b?.name, true, null)
+            + samplingWarn;
         btn.disabled = false;
     }
     if (mhBtn) mhBtn.disabled = state.nodes.length < 3;
@@ -2488,11 +2559,9 @@ async function runAnalysis() {
     const n2 = state.nodes.find(x => x.id === id2);
     if (!n1 || !n2) return;
 
-    const nPtsRaw    = parseInt(document.getElementById('npts-sel').value, 10);
     const distForPts = haversineDist(n1.coord, n2.coord);
-    const nPts       = nPtsRaw === 0
-        ? Math.max(PROFILE_POINTS_MIN, Math.min(Math.round(distForPts), PROFILE_POINTS_MAX))
-        : Math.min(Math.max(nPtsRaw || PROFILE_POINTS_MIN, PROFILE_POINTS_MIN), PROFILE_POINTS_MAX);
+    const nPtsRaw    = parseInt(document.getElementById('npts-sel').value, 10);
+    const nPts       = resolveProfilePointCount(distForPts, nPtsRaw);
     const threshold = parseFloat(document.getElementById('fres-thr').value);
     const kFactor   = parseFloat(document.getElementById('kfactor-sel').value) || 4/3;
     const rainRate  = parseInt(document.getElementById('rain-sel')?.value || '0', 10);
@@ -2553,8 +2622,10 @@ async function runAnalysis() {
         const fThUp = los.map((v, i) => v + threshold * fR[i]);
         const fThDn = los.map((v, i) => v - threshold * fR[i]);
 
-        // Obstruction analysis (uses k-factor corrected terrain + DSM + BAG mask)
-        const obs = analyzeObs(dtmCorrected, dsmCorrected, los, fThDn, fR, bagMask);
+        // Obstacle stats for UI should match the displayed profile (raw DTM/DSM).
+        const obs = analyzeObs(dtm, dsmEnhancedRaw, los, fThDn, fR, bagMask);
+        // Keep a k-corrected obstacle model available for advanced diagnostics/RF context.
+        const obsK = analyzeObs(dtmCorrected, dsmCorrected, los, fThDn, fR, bagMask);
 
         // RF calculations
         const fspl     = computeFSPL(totalDist, state.freq);
@@ -2579,13 +2650,14 @@ async function runAnalysis() {
             dsmEnhancedRaw,
             dtmCorrected,
             dsmCorrected,
+            obsCorrected: obsK,
             // Legacy alias used by details helpers
-            dsmEnhanced: dsmCorrected,
+            dsmEnhanced: dsmEnhancedRaw,
             los, fThDn,
             profilePoints: [...points], distKm,
         };
 
-        drawChart(distKm, dtm, dsmEnhancedRaw, los, fUp, fDown, fThUp, fThDn, bagMask, bag3D, dtmCorrected, dsmCorrected);
+        drawChart(distKm, dtm, dsmEnhancedRaw, los, fUp, fDown, fThUp, fThDn, bagMask, bag3D, dtm, dsmEnhancedRaw);
         renderDetailsPanel(state.lastAnalysis);
         renderConclusionPanel(state.lastAnalysis);
 
@@ -3404,6 +3476,13 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
     // ── Obstruction segments for dot overlay ─────────────────────────
     const profilePoints = state.lastAnalysis?.profilePoints ?? [];
     const segs = findObstructionSegments(dsmAnalysis, los, fThDn, profilePoints, bagMask, dtmAnalysis, labels);
+    const blockedSamples = [];
+    for (let i = 0; i < dsmAnalysis.length; i++) {
+        const v = dsmAnalysis[i];
+        if (v == null) continue;
+        if (v > los[i]) blockedSamples.push({ idx: i, type: 'los' });
+        else if (v > fThDn[i]) blockedSamples.push({ idx: i, type: 'fresnel' });
+    }
     const dotPositions = []; // populated by plugin, read by click/mousemove handler
     // ── Peak / valley label plugin ────────────────────────────────────
     const extremaPlugin = {
@@ -3589,9 +3668,47 @@ function drawChart(labels, dtm, dsm, los, fUp, fDn, fThUp, fThDn, bagMask = [], 
         id: 'obstructionDots',
         afterDatasetsDraw(chart) {
             dotPositions.length = 0;
-            if (!segs.length) return;
             const ctx  = chart.ctx;
             const area = chart.chartArea;
+
+            // Visual bands show all obstructed ranges, not just one marker per segment.
+            if (segs.length) {
+                ctx.save();
+                segs.forEach(seg => {
+                    const x1 = chart.scales.x.getPixelForValue(chart.data.labels[seg.start]);
+                    const x2 = chart.scales.x.getPixelForValue(chart.data.labels[seg.end]);
+                    if (!Number.isFinite(x1) || !Number.isFinite(x2)) return;
+                    const left = Math.max(area.left, Math.min(x1, x2));
+                    const right = Math.min(area.right, Math.max(x1, x2));
+                    const w = right - left;
+                    if (w <= 0.5) return;
+                    ctx.fillStyle = seg.type === 'los' ? 'rgba(239,68,68,0.08)' : 'rgba(249,115,22,0.06)';
+                    ctx.fillRect(left, area.top, w, area.bottom - area.top);
+                });
+                ctx.restore();
+            }
+
+            // Draw a compact obstacle density strip at the bottom for long-distance paths.
+            if (blockedSamples.length) {
+                ctx.save();
+                const painted = new Set();
+                blockedSamples.forEach(s => {
+                    const xPx = chart.scales.x.getPixelForValue(chart.data.labels[s.idx]);
+                    if (xPx < area.left || xPx > area.right) return;
+                    const xi = Math.round(xPx);
+                    if (painted.has(xi)) return;
+                    painted.add(xi);
+                    ctx.strokeStyle = s.type === 'los' ? 'rgba(239,68,68,0.55)' : 'rgba(249,115,22,0.45)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xi + 0.5, area.bottom - 5);
+                    ctx.lineTo(xi + 0.5, area.bottom - 1);
+                    ctx.stroke();
+                });
+                ctx.restore();
+            }
+
+            if (!segs.length) return;
             segs.forEach((seg, i) => {
                 const xPx = chart.scales.x.getPixelForValue(chart.data.labels[seg.critIdx]);
                 const yVal = dsm[seg.critIdx] ?? seg.dsmAtCrit;
@@ -3872,8 +3989,8 @@ function renderDetailsPanel(a) {
     if (!a || !placeholder || !content) return;
 
     const { n1, n2, obs, bagMask, los, fThDn, profilePoints, distKm } = a;
-    const dtmAnalysis = a.dtmCorrected ?? a.dtmRaw ?? [];
-    const dsmAnalysis = a.dsmCorrected ?? a.dsmEnhanced ?? a.dsmEnhancedRaw ?? [];
+    const dtmAnalysis = a.dtmRaw ?? a.dtmCorrected ?? [];
+    const dsmAnalysis = a.dsmEnhancedRaw ?? a.dsmCorrected ?? a.dsmEnhanced ?? [];
     const segs     = findObstructionSegments(dsmAnalysis, los, fThDn, profilePoints, bagMask, dtmAnalysis, distKm);
     const clusters = clusterObstructionPoints(segs, 60);
 
@@ -3892,6 +4009,17 @@ function renderDetailsPanel(a) {
                 const idx = indices[0], seg = segs[idx];
                 const padClose = 80, padCtx = 400;
                 const miniUrl = makeBrtWmsUrl(seg.point[0]-padClose, seg.point[1]-padClose, seg.point[0]+padClose, seg.point[1]+padClose, 220, 165);
+                const mkSingleMark = (pad, w, h) => {
+                    const ix = Math.round((seg.point[0] - (seg.point[0] - pad)) / (2 * pad) * w);
+                    const iy = Math.round(((seg.point[1] + pad) - seg.point[1]) / (2 * pad) * h);
+                    const mc = seg.type === 'los' ? '#ef4444' : '#f97316';
+                    return `<svg style="position:absolute;top:0;left:0;pointer-events:none;" width="${w}" height="${h}">
+  <circle cx="${ix}" cy="${iy}" r="7" fill="${mc}" stroke="white" stroke-width="1.5" opacity="0.92"/>
+  <text x="${ix}" y="${iy+4}" text-anchor="middle" font-size="9" font-weight="bold" fill="white">${idx+1}</text>
+</svg>`;
+                };
+                const svgClose = mkSingleMark(padClose, 220, 165);
+                const svgCtx = mkSingleMark(padCtx, 220, 165);
                 const [lon, lat] = ol.proj.toLonLat(seg.point).map(v => v.toFixed(5));
                 const typeClr = seg.type === 'los' ? 'var(--red)' : 'var(--orange)';
                 const typeLbl = seg.type === 'los' ? 'LOS geblokkeerd' : 'Fresnel zone geblokkeerd';
@@ -3909,13 +4037,13 @@ function renderDetailsPanel(a) {
       <tr><th>Coördinaat (WGS84)</th><td>${lat}°N, ${lon}°E</td></tr>
     </table>
     <div class="dp-maps">
-      <div class="dp-mini"><img src="${miniUrl}" loading="lazy" /><div class="dp-mini-cap">Luchtfoto close-up (~160 m) © PDOK</div></div>
+            <div class="dp-mini"><div style="position:relative;display:inline-block;"><img src="${miniUrl}" loading="lazy" />${svgClose}</div><div class="dp-mini-cap">Luchtfoto close-up (~160 m) © PDOK</div></div>
             <div class="dp-mini">
-                <div class="dp-mini-map"
+                                <div style="position:relative;display:inline-block;"><div class="dp-mini-map"
                          data-minx="${(seg.point[0]-padCtx).toFixed(2)}"
                          data-miny="${(seg.point[1]-padCtx).toFixed(2)}"
                          data-maxx="${(seg.point[0]+padCtx).toFixed(2)}"
-                         data-maxy="${(seg.point[1]+padCtx).toFixed(2)}"></div>
+                                                 data-maxy="${(seg.point[1]+padCtx).toFixed(2)}"></div>${svgCtx}</div>
                 <div class="dp-mini-cap">Omgeving (~800 m) © OpenStreetMap (OpenLayers OSM)</div>
             </div>
     </div>

@@ -327,6 +327,15 @@
         .dp-maps { display: flex; gap: 10px; flex-shrink: 0; }
         .dp-mini { text-align: center; }
         .dp-mini img { width: 220px; height: 165px; border-radius: 5px; border: 1px solid var(--border); display: block; }
+        .dp-mini-map {
+            width: 220px;
+            height: 165px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            display: block;
+            overflow: hidden;
+            background: var(--surface);
+        }
         .dp-mini-cap { font-size: 9px; color: var(--dim); margin-top: 3px; }
         .dp-cluster-card { border-left: 3px solid var(--orange); }
         .dp-cluster-details { flex-basis: 100%; margin-top: 0; }
@@ -1336,6 +1345,7 @@ const state = {
     freq: 868e6,
     chart: null,
     profilePoints: null,  // EPSG:3857 coords along the current profile
+    detailsMiniMaps: [],
 };
 
 // ══════════════════════════════════════════════════════════════════════
@@ -2868,14 +2878,6 @@ function makeBrtWmsUrl(minX, minY, maxX, maxY, w, h) {
         + `&WIDTH=${w}&HEIGHT=${h}&FORMAT=image%2Fpng`;
 }
 
-function makeOsmWmsUrl(minX, minY, maxX, maxY, w, h) {
-    // terrestris OSM WMS — labelled street map with housenumbers & POIs
-    return 'https://ows.terrestris.de/osm/service'
-        + '?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=OSM-WMS&STYLES='
-        + `&SRS=EPSG:3857&BBOX=${minX.toFixed(0)},${minY.toFixed(0)},${maxX.toFixed(0)},${maxY.toFixed(0)}`
-        + `&WIDTH=${w}&HEIGHT=${h}&FORMAT=image%2Fpng`;
-}
-
 // Fetch a URL and return a base64 data URL (for inline embedding in print HTML)
 async function imgToDataUrl(url) {
     try {
@@ -2961,7 +2963,6 @@ async function generateReport() {
         const minY = Math.min(...ys) - dy * 0.35;
         const maxY = Math.max(...ys) + dy * 0.35;
         const staticMapUrl = makeBrtWmsUrl(minX, minY, maxX, maxY, 1600, 700);
-        const staticMapUrlAlt = makeOsmWmsUrl(minX, minY, maxX, maxY, 1600, 700);
         const staticMapSrc = await imgToDataUrl(staticMapUrl);
         // Prefer static WMS map for PDF: this avoids rotation/skew artifacts from canvas composition.
         const reportMapImg = staticMapSrc || mapImg;
@@ -3059,7 +3060,7 @@ body{
     <div class="report-block">
         <div class="report-h2">Kaart</div>
         ${reportMapImg
-                ? `<img id="report-map-img" class="report-map" src="${reportMapImg}" data-fallback-src="${staticMapUrlAlt}" alt="" />`
+                ? `<img id="report-map-img" class="report-map" src="${reportMapImg}" data-fallback-src="${staticMapUrl}" alt="" />`
                 : '<div class="dp-placeholder">Kaartweergave niet beschikbaar.</div>'}
         <div id="report-map-missing" class="report-map-missing">Kaartweergave niet beschikbaar.</div>
         <div class="report-note">Statische overzichtskaart (noord boven) voor correcte, niet-gedraaide PDF-weergave.</div>
@@ -3794,6 +3795,57 @@ function openProfile()  { scrollToSection('profile'); map.updateSize(); }
 function closeProfile() { scrollToSection('map'); }
 function toggleProfile() { scrollToSection('profile'); }
 
+function resetDetailsMiniMaps() {
+    state.detailsMiniMaps.forEach(m => {
+        try { m.setTarget(null); } catch { /* no-op */ }
+    });
+    state.detailsMiniMaps = [];
+}
+
+function initDetailsMiniMaps(rootEl) {
+    resetDetailsMiniMaps();
+    if (!rootEl) return;
+
+    rootEl.querySelectorAll('.dp-mini-map').forEach(el => {
+        const minX = Number(el.dataset.minx);
+        const minY = Number(el.dataset.miny);
+        const maxX = Number(el.dataset.maxx);
+        const maxY = Number(el.dataset.maxy);
+
+        if (![minX, minY, maxX, maxY].every(Number.isFinite)) return;
+        if (maxX <= minX || maxY <= minY) return;
+
+        const view = new ol.View({ projection: 'EPSG:3857' });
+        const miniMap = new ol.Map({
+            target: el,
+            layers: [
+                new ol.layer.Tile({ source: new ol.source.OSM({ crossOrigin: 'anonymous' }) }),
+            ],
+            controls: ol.control.defaults({ attribution: false, zoom: false, rotate: false }),
+            interactions: ol.interaction.defaults({
+                altShiftDragRotate: false,
+                doubleClickZoom: false,
+                dragPan: false,
+                pinchRotate: false,
+                pinchZoom: false,
+                keyboard: false,
+                mouseWheelZoom: false,
+                shiftDragZoom: false,
+            }),
+            view,
+            pixelRatio: 1,
+        });
+
+        const width = el.clientWidth || 220;
+        const height = el.clientHeight || 165;
+        const resolution = Math.max((maxX - minX) / width, (maxY - minY) / height);
+        view.setCenter([(minX + maxX) / 2, (minY + maxY) / 2]);
+        view.setResolution(resolution);
+
+        state.detailsMiniMaps.push(miniMap);
+    });
+}
+
 // ══════════════════════════════════════════════════════════════════════
 // DETAILS PANEL
 // ══════════════════════════════════════════════════════════════════════
@@ -3822,7 +3874,6 @@ function renderDetailsPanel(a) {
                 const idx = indices[0], seg = segs[idx];
                 const padClose = 80, padCtx = 400;
                 const miniUrl = makeBrtWmsUrl(seg.point[0]-padClose, seg.point[1]-padClose, seg.point[0]+padClose, seg.point[1]+padClose, 220, 165);
-                const ctxUrl  = makeOsmWmsUrl(seg.point[0]-padCtx,   seg.point[1]-padCtx,   seg.point[0]+padCtx,   seg.point[1]+padCtx,   220, 165);
                 const [lon, lat] = ol.proj.toLonLat(seg.point).map(v => v.toFixed(5));
                 const typeClr = seg.type === 'los' ? 'var(--red)' : 'var(--orange)';
                 const typeLbl = seg.type === 'los' ? 'LOS geblokkeerd' : 'Fresnel zone geblokkeerd';
@@ -3841,7 +3892,14 @@ function renderDetailsPanel(a) {
     </table>
     <div class="dp-maps">
       <div class="dp-mini"><img src="${miniUrl}" loading="lazy" /><div class="dp-mini-cap">Luchtfoto close-up (~160 m) © PDOK</div></div>
-      <div class="dp-mini"><img src="${ctxUrl}" loading="lazy" /><div class="dp-mini-cap">Omgeving (~800 m) © OpenStreetMap</div></div>
+            <div class="dp-mini">
+                <div class="dp-mini-map"
+                         data-minx="${(seg.point[0]-padCtx).toFixed(2)}"
+                         data-miny="${(seg.point[1]-padCtx).toFixed(2)}"
+                         data-maxx="${(seg.point[0]+padCtx).toFixed(2)}"
+                         data-maxy="${(seg.point[1]+padCtx).toFixed(2)}"></div>
+                <div class="dp-mini-cap">Omgeving (~800 m) © OpenStreetMap (OpenLayers OSM)</div>
+            </div>
     </div>
   </div>
 </div>`;
@@ -3860,7 +3918,6 @@ function renderDetailsPanel(a) {
                 const types     = [...new Set(indices.map(i => classifyObst(segs[i].obsH)))].join(', ');
                 const padClose  = 80, padCtx = 400;
                 const miniUrl   = makeBrtWmsUrl(cx-padClose, cy-padClose, cx+padClose, cy+padClose, 220, 165);
-                const ctxUrl    = makeOsmWmsUrl(cx-padCtx,   cy-padCtx,   cx+padCtx,   cy+padCtx,   220, 165);
                 const mkMarks = (pad, w, h) => indices.map(i => {
                     const s = segs[i];
                     const ix = Math.round((s.point[0] - (cx - pad)) / (2*pad) * w);
@@ -3892,7 +3949,11 @@ function renderDetailsPanel(a) {
     </table>
     <div class="dp-maps">
       <div class="dp-mini"><div style="position:relative;display:inline-block;"><img src="${miniUrl}" loading="lazy" />${svgClose}</div><div class="dp-mini-cap">Luchtfoto centrum © PDOK</div></div>
-      <div class="dp-mini"><div style="position:relative;display:inline-block;"><img src="${ctxUrl}" loading="lazy" />${svgCtx}</div><div class="dp-mini-cap">Omgeving © OpenStreetMap</div></div>
+            <div class="dp-mini"><div style="position:relative;display:inline-block;"><div class="dp-mini-map"
+                         data-minx="${(cx-padCtx).toFixed(2)}"
+                         data-miny="${(cy-padCtx).toFixed(2)}"
+                         data-maxx="${(cx+padCtx).toFixed(2)}"
+                         data-maxy="${(cy+padCtx).toFixed(2)}"></div>${svgCtx}</div><div class="dp-mini-cap">Omgeving © OpenStreetMap (OpenLayers OSM)</div></div>
     </div>
     <details class="dp-cluster-details">
       <summary>Toon alle ${indices.length} obstructies in deze zone ▸</summary>
@@ -3920,6 +3981,8 @@ ${segsHtml}`;
 
     placeholder.style.display = 'none';
     content.style.display     = 'block';
+    initDetailsMiniMaps(content);
+
     // Populate map markers — one per obstruction segment (no clustering)
     obstructionSource.clear();
     segs.forEach((seg, idx) => {

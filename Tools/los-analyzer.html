@@ -3939,59 +3939,257 @@ ${segsHtml}`;
     setTimeout(() => scrollToSection('details-panel'), 300);
 }
 
+function hashString32(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+}
+
+function pickSeededVariant(variants, seed, fallback = '') {
+    if (!Array.isArray(variants) || variants.length === 0) return fallback;
+    const idx = hashString32(String(seed || 'seed')) % variants.length;
+    return variants[idx];
+}
+
+function adviceImpactFromScore(score) {
+    if (score >= 85) return { label: 'zeer relevant', color: 'var(--red)' };
+    if (score >= 65) return { label: 'hoge relevantie', color: 'var(--orange)' };
+    if (score >= 45) return { label: 'aanbevolen', color: 'var(--orange)' };
+    return { label: 'optionele optimalisatie', color: 'var(--green)' };
+}
+
+function computeConclusionBudget(fspl, diffLoss, rainLoss, obsLossEst) {
+    const txPow = parseFloat(document.getElementById('lb-tx')?.value)    || 20;
+    const gTx   = parseFloat(document.getElementById('lb-gtx')?.value)   || 0;
+    const gRx   = parseFloat(document.getElementById('lb-grx')?.value)   || 0;
+    const cable = parseFloat(document.getElementById('lb-cable')?.value) || 0;
+    const sens  = parseFloat(document.getElementById('lb-sens')?.value)  || -120;
+
+    const totalLoss = fspl + diffLoss + rainLoss + obsLossEst;
+    const rxPow = txPow + gTx + gRx - cable - totalLoss;
+    const margin = rxPow - sens;
+
+    return { txPow, gTx, gRx, cable, sens, totalLoss, rxPow, margin };
+}
+
+function buildTailoredAdviceCards(a, ctx) {
+    const { n1, n2, obs } = a;
+    const n1Name = escHtml(n1.name);
+    const n2Name = escHtml(n2.name);
+
+    const candidates = [
+        {
+            id: 'height',
+            title: 'Antennehoogte optimaliseren (AGL)',
+            score: () => (obs.losBlocked > 0 ? 78 : 18)
+                + (obs.fresnelBlocked > 0 ? 16 : 0)
+                + Math.min(24, Math.round(obs.maxPen * 4)),
+            reason: () => obs.losBlocked > 0
+                ? `LOS is ${obs.losBlocked}x geblokkeerd met piekpenetratie ${obs.maxPen.toFixed(1)} m.`
+                : `Fresnel-zone heeft ${obs.fresnelBlocked} blokkadepunten en profiteert van extra hoogte.`,
+            actions: [
+                'Verhoog beide antennes in stappen van 1-2 m en heranalyseer na elke stap.',
+                'Start met de kant waar de meeste obstructies liggen en verhoog daarna pas de andere zijde.',
+                'Houd de AGL-waarden symmetrisch en fine-tune daarna op basis van het profiel.',
+            ],
+            examples: [
+                `Starttest: ${n1Name} +${ctx.extraHeight} m en ${n2Name} +${ctx.extraHeight} m.`,
+                `Praktisch: eerst +${Math.max(1, ctx.extraHeight - 1)} m aan beide zijden, daarna op 1 zijde +1 m bijregelen.`,
+                `Als maar 1 mast omhoog kan: richt op +${Math.max(2, ctx.extraHeight + 1)} m op de kritieke zijde.`,
+            ],
+        },
+        {
+            id: 'relocate',
+            title: 'Nodepositie lokaal verplaatsen',
+            score: () => (obs.buildPts > 0 ? 52 : 0)
+                + (obs.forestPts > 0 ? 42 : 0)
+                + (obs.losBlocked > 0 ? 18 : 4),
+            reason: () => `Dominante obstructie is ${ctx.dominant}; kleine verplaatsing geeft vaak direct winst in Fresnel-vrijheid.`,
+            actions: [
+                'Verplaats 1 node zijwaarts naar een opener zichtlijn, met gelijkblijvende antennehoogte.',
+                'Zoek een positie met vrij zicht over de eerste kilometers, niet alleen exact op eindpunt.',
+                'Test 2-3 alternatieve plekken in een straal rond de huidige node en vergelijk profielpercentages.',
+            ],
+            examples: [
+                `Proef: verplaats ${n2Name} ${ctx.relocationDist} zijwaarts om de hoofdobstructie buiten de Fresnel-zone te krijgen.`,
+                `Begin met een test op ~${ctx.relocationDist} afstand en hou de AGL-hoogte identiek voor eerlijke vergelijking.`,
+                `Verplaats vooral de node met meeste lokale blokkadepunten (${ctx.dominant}) en herhaal dezelfde analyse.`,
+            ],
+        },
+        {
+            id: 'relay',
+            title: 'Multi-hop of relay toevoegen',
+            score: () => (ctx.distKm > 6 ? Math.min(44, Math.round((ctx.distKm - 6) * 8) + 16) : 0)
+                + (obs.losBlocked > 0 ? 34 : 0)
+                + (ctx.margin < 0 ? 24 : 0),
+            reason: () => ctx.distKm > 6
+                ? `Trajectlengte (${ctx.distKm.toFixed(2)} km) vergroot padverlies; opsplitsen verlaagt risico op uitval.`
+                : 'Een tussennode kan LOS-blokkades ontwijken zonder extreme mastverhoging.',
+            actions: [
+                'Splits het pad in 2 kortere hops en optimaliseer elk hop apart op LOS en Fresnel.',
+                'Kies relay-locatie op hoogte met vrij zicht naar beide uiteinden.',
+                'Gebruik eerst tijdelijke relay om de winst te valideren voordat je permanent monteert.',
+            ],
+            examples: [
+                `Plaats een relay rond ${ctx.relayHop} km vanaf ${n1Name} met open zicht op ${n1Name} en ${n2Name}.`,
+                `Richt op 2 hops van vergelijkbare lengte voor stabielere marge dan 1 lange hop.`,
+                `Test relay op dak of hoog terrein waar de kritieke obstructie niet meer in het hoofdpad valt.`,
+            ],
+        },
+        {
+            id: 'budget',
+            title: 'RF-linkbudget verbeteren',
+            score: () => (ctx.margin < 0 ? 84 : ctx.margin < 8 ? 68 : ctx.margin < 15 ? 48 : 20)
+                + (ctx.distKm > 8 ? 8 : 0),
+            reason: () => ctx.margin < 0
+                ? `Linkmarge is negatief (${ctx.margin.toFixed(1)} dB), dus budgetverbetering is noodzakelijk.`
+                : `Linkmarge is ${ctx.margin.toFixed(1)} dB; extra budget verhoogt robuustheid bij storingen.`,
+            actions: [
+                'Verlaag kabellosses en verhoog antennewinst waar mogelijk binnen regelgeving.',
+                'Controleer connectoren/kabels op extra demping en vervang lange coaxtrajecten.',
+                'Optimaliseer TX, RX gain en gevoeligheidsinstellingen als set, niet los van elkaar.',
+            ],
+            examples: [
+                `Streef naar >= 10 dB extra marge boven huidige ${ctx.margin.toFixed(1)} dB voor betrouwbare werking.`,
+                'Kortere coax + betere antennes leveren vaak meer op dan alleen TX-power verhogen.',
+                `Hercheck na tuning of ontvangstvermogen duidelijk boven ${ctx.sens.toFixed(0)} dBm blijft.`,
+            ],
+        },
+        {
+            id: 'frequency',
+            title: 'Frequentiekeuze tegen obstakels afwegen',
+            score: () => (state.freq >= 2.4e9 ? 48 : state.freq >= 868e6 ? 26 : 8)
+                + (obs.forestPts > 0 ? 28 : 0)
+                + (obs.fresnelBlocked > 0 ? 14 : 0),
+            reason: () => `Op ${(state.freq / 1e6).toFixed(0)} MHz is obstakeldemping ${obs.forestPts > 0 ? 'extra relevant door vegetatie' : 'merkbaar bij krappe Fresnel-ruimte'}.`,
+            actions: [
+                'Vergelijk hetzelfde pad op een lagere band om penetratie en marge te verbeteren.',
+                'Kies band op basis van obstakeltype: vegetatie vraagt vaak om lagere frequenties.',
+                'Optimaliseer kanaalbreedte en datarate tegelijk met frequentiekeuze.',
+            ],
+            examples: [
+                `Vergelijk de huidige ${ctx.freqMHz} MHz setup met een lager profiel (binnen lokale regelgeving).`,
+                'Voer dezelfde analyse uit met alternatieve frequentie en vergelijk vrij-traject en linkmarge.',
+                `Gebruik lagere band als ${ctx.dominant} dominant blijft na hoogte-optimalisatie.`,
+            ],
+        },
+        {
+            id: 'rain',
+            title: 'Regen- en fade-marge verhogen',
+            score: () => (state.freq >= 2.4e9 && ctx.rainLoss > 0.7)
+                ? Math.min(82, Math.round(ctx.rainLoss * 10) + (ctx.margin < 10 ? 14 : 0))
+                : 0,
+            reason: () => `Ingeschatte regendemping is ${ctx.rainLoss.toFixed(1)} dB; extra fade-marge voorkomt seizoensuitval.`,
+            actions: [
+                'Ontwerp op extra fade-marge voor nat weer en piekneerslag.',
+                'Combineer hogere marge met nette uitlijning en stabiele montage.',
+                'Plan periodieke check op RSSI/SNR tijdens slechtweerperiodes.',
+            ],
+            examples: [
+                `Reserveer minimaal +${Math.max(3, Math.ceil(ctx.rainLoss + 2))} dB extra marge boven de huidige setpoint-waarde.`,
+                'Verifieer bij regen of de linkmarge voldoende positief blijft onder praktijkcondities.',
+                `Bij GHz-links: combineer regenmarge met gain-optimalisatie voor stabielere uptime.`,
+            ],
+        },
+        {
+            id: 'robustness',
+            title: 'Operationele robuustheid borgen',
+            score: () => (obs.losBlocked === 0 && obs.fresnelBlocked === 0) ? 46 : 28,
+            reason: () => 'Ook bij een goed profiel blijft periodieke validatie nodig voor vegetatiegroei en uitlijnfouten.',
+            actions: [
+                'Leg een baseline vast (RSSI/SNR/marge) en monitor afwijkingen over tijd.',
+                'Plan heranalyse na seizoenswissel of na wijzigingen in de omgeving.',
+                'Documenteer gekozen hoogte, azimut en montage om tuning reproduceerbaar te houden.',
+            ],
+            examples: [
+                'Meet op vaste momenten en trek trendlijnen om verslechtering vroeg te detecteren.',
+                'Herhaal deze LOS-analyse na bladgroei of na bouwactiviteiten in de zichtlijn.',
+                'Bewaak minimaal 1 reserve-optie (relocatie of relay) voor incidenten.',
+            ],
+        },
+    ];
+
+    const scored = candidates
+        .map(c => ({ ...c, scoreValue: Math.max(0, Math.round(c.score())) }))
+        .filter(c => c.scoreValue > 0)
+        .sort((a, b) => b.scoreValue - a.scoreValue);
+
+    const chosen = scored.slice(0, Math.min(4, scored.length));
+    const seedBase = `${n1.name}|${n2.name}|${Math.round(ctx.distKm * 100)}|${obs.losBlocked}|${obs.fresnelBlocked}|${Math.round(ctx.margin)}|${Math.round(state.freq)}`;
+
+    return chosen.map((c, idx) => {
+        const impact = adviceImpactFromScore(c.scoreValue);
+        return {
+            rank: idx + 1,
+            title: c.title,
+            reason: c.reason(),
+            action: pickSeededVariant(c.actions, `${seedBase}|${c.id}|action`, c.actions[0] || ''),
+            example: pickSeededVariant(c.examples, `${seedBase}|${c.id}|example`, c.examples[0] || ''),
+            impact: impact.label,
+            impactClr: impact.color,
+            score: c.scoreValue,
+        };
+    });
+}
+
 function renderConclusionPanel(a) {
     const placeholder = document.getElementById('cp-placeholder');
     const content     = document.getElementById('cp-content');
     if (!a || !placeholder || !content) return;
 
-    const { n1, n2, totalDist, obs, fR, threshold, rainLoss } = a;
-    const distKm = (totalDist / 1000);
+    const { n1, n2, totalDist, obs, fR, threshold, rainLoss, fspl = 0, diffLoss = 0 } = a;
+    const distKm = totalDist / 1000;
     const midFresnel = (fR && fR.length) ? (fR[Math.floor(fR.length / 2)] || 0) : 0;
     const reqFree = midFresnel * (threshold || 0.6);
     const dominant = obs.buildPts > 0 ? 'gebouwen/constructies'
         : obs.forestPts > 0 ? 'vegetatie/bos' : 'maaiveld';
 
-    const quality = obs.losBlocked === 0 && obs.fresnelBlocked === 0 ? 'goed'
-        : obs.losBlocked === 0 ? 'matig' : 'kritiek';
-    const qualityText = quality === 'goed'
-        ? 'Direct inzetbaar traject'
-        : quality === 'matig' ? 'Werkbaar met optimalisatie' : 'Verbetering nodig voor stabiele link';
-    const qualityClr = quality === 'goed' ? 'var(--green)'
-        : quality === 'matig' ? 'var(--orange)' : 'var(--red)';
+    const obsLossEst = obs.buildPts > 0
+        ? obs.maxObsH * 0.5 + 15
+        : obs.forestPts > 0 ? obs.maxObsH * 0.3 : 0;
+    const budget = computeConclusionBudget(fspl, diffLoss, rainLoss || 0, obsLossEst);
 
     const extraHeight = obs.maxPen > 0
         ? Math.max(2, Math.ceil((obs.maxPen + 1.0) / 2))
         : Math.max(1, Math.ceil(reqFree * 0.15));
     const relocationDist = obs.buildPts > 0 ? '80-250 m' : obs.forestPts > 0 ? '40-140 m' : '20-80 m';
     const relayHop = Math.max(0.8, distKm / 2).toFixed(1);
+    const freqMHz = (state.freq / 1e6).toFixed(0);
 
-    const scenarios = [
-        {
-            title: 'Scenario 1: antennes verhogen',
-            impact: obs.losBlocked > 0 ? 'hoge impact' : 'middel impact',
-            impactClr: obs.losBlocked > 0 ? 'var(--red)' : 'var(--orange)',
-            action: 'Verhoog beide antennes stapsgewijs en heranalyseer op hetzelfde traject.',
-            example: `Voorbeeld: ${escHtml(n1.name)} +${extraHeight} m en ${escHtml(n2.name)} +${extraHeight} m om de kritieke obstructie te overbruggen.`
-        },
-        {
-            title: 'Scenario 2: node licht verplaatsen',
-            impact: 'middel impact',
-            impactClr: 'var(--orange)',
-            action: 'Verplaats bij voorkeur de node met de meeste obstakels in de directe omgeving.',
-            example: `Voorbeeld: verplaats een node ${relocationDist} zijwaarts om ${dominant} buiten de eerste Fresnel-zone te brengen.`
-        },
-        {
-            title: 'Scenario 3: extra relay/multi-hop',
-            impact: obs.losBlocked > 0 || distKm > 6 ? 'hoge impact' : 'laag risico-optie',
-            impactClr: obs.losBlocked > 0 || distKm > 6 ? 'var(--red)' : 'var(--green)',
-            action: 'Splits de verbinding in twee kortere hops met een tussennode op vrij zicht.',
-            example: `Voorbeeld: plaats een relay rond ~${relayHop} km vanaf ${escHtml(n1.name)} op een hoger punt met open zicht op beide uiteinden.`
-        },
-    ];
+    const quality = (obs.losBlocked > 0 || budget.margin < 0) ? 'kritiek'
+        : (obs.fresnelBlocked > 0 || budget.margin < 10) ? 'matig' : 'goed';
+    const qualityText = quality === 'goed'
+        ? 'Direct inzetbaar traject'
+        : quality === 'matig' ? 'Werkbaar met optimalisatie' : 'Verbetering nodig voor stabiele link';
+    const qualityClr = quality === 'goed' ? 'var(--green)'
+        : quality === 'matig' ? 'var(--orange)' : 'var(--red)';
+
+    const scenarios = buildTailoredAdviceCards(a, {
+        distKm,
+        reqFree,
+        dominant,
+        extraHeight,
+        relocationDist,
+        relayHop,
+        margin: budget.margin,
+        sens: budget.sens,
+        rainLoss: rainLoss || 0,
+        freqMHz,
+    });
+    const topAdvice = scenarios[0] || null;
 
     const weatherHint = (state.freq >= 2.4e9 && rainLoss > 1)
         ? `Op ${(state.freq/1e9).toFixed(1)} GHz is extra regenmarge aanbevolen (nu ~${rainLoss.toFixed(1)} dB).`
         : 'Regenverzwakking is momenteel beperkt; obstakels zijn de dominante factor.';
+
+    const marginHint = budget.margin < 0
+        ? `Linkmarge is negatief (${budget.margin.toFixed(1)} dB), daarom is budgetverbetering prioriteit.`
+        : budget.margin < 10
+            ? `Linkmarge is krap (${budget.margin.toFixed(1)} dB); reserveer extra marge voor robuustheid.`
+            : `Linkmarge is bruikbaar (${budget.margin.toFixed(1)} dB), focus op stabiliteit op lange termijn.`;
 
     const summary = obs.losBlocked === 0 && obs.fresnelBlocked === 0
         ? `Het pad ${escHtml(n1.name)} ↔ ${escHtml(n2.name)} is vrij (LOS + Fresnel). Focus op robuustheid: hou extra marge voor seizoensvegetatie en uitlijnfouten.`
@@ -4008,16 +4206,20 @@ function renderConclusionPanel(a) {
   <strong>Samenvatting:</strong> ${summary}<br>
   <strong>Dominant obstakeltype:</strong> ${dominant} ·
   <strong>Vrij traject:</strong> ${obs.clear.toFixed(0)}% ·
-  <strong>Benodigde vrije Fresnel-ruimte:</strong> ~${reqFree.toFixed(1)} m (middenpad)<br>
-  <strong>Weer/frequentie-opmerking:</strong> ${weatherHint}
+  <strong>Benodigde vrije Fresnel-ruimte:</strong> ~${reqFree.toFixed(1)} m (middenpad) ·
+  <strong>Linkmarge:</strong> ${budget.margin.toFixed(1)} dB<br>
+  <strong>Beste match nu:</strong> ${topAdvice ? topAdvice.title : 'n.v.t.'}<br>
+  <strong>Marge-opmerking:</strong> ${marginHint}<br>
+  <strong>Weer/frequentie-opmerking:</strong> ${weatherHint}<br>
+  <strong>Advies-set:</strong> ${scenarios.length} varianten, gerangschikt op relevantie.
 </div>
 <div class="cp-grid">
   ${scenarios.map(s => `
   <div class="cp-card">
-    <h4>${s.title}</h4>
-    <div class="cp-impact" style="color:${s.impactClr};">${s.impact}</div>
-    <p>${s.action}</p>
-    <p>${s.example}</p>
+    <h4>${s.rank === 1 ? 'Beste match: ' : `${s.rank}. `}${s.title}</h4>
+    <div class="cp-impact" style="color:${s.impactClr};">${s.impact} · score ${s.score}</div>
+    <p><strong>Waarom nu:</strong> ${s.reason}<br><strong>Aanpak:</strong> ${s.action}</p>
+    <p><strong>Voorbeeld:</strong> ${s.example}</p>
   </div>`).join('')}
 </div>`;
 

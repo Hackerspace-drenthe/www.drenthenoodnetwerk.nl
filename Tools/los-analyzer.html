@@ -3821,17 +3821,8 @@ function initDetailsMiniMaps(rootEl) {
             layers: [
                 new ol.layer.Tile({ source: new ol.source.OSM({ crossOrigin: 'anonymous' }) }),
             ],
-            controls: ol.control.defaults({ attribution: false, zoom: false, rotate: false }),
-            interactions: ol.interaction.defaults({
-                altShiftDragRotate: false,
-                doubleClickZoom: false,
-                dragPan: false,
-                pinchRotate: false,
-                pinchZoom: false,
-                keyboard: false,
-                mouseWheelZoom: false,
-                shiftDragZoom: false,
-            }),
+            controls: [],
+            interactions: [],
             view,
             pixelRatio: 1,
         });

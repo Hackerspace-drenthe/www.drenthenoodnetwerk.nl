@@ -131,11 +131,11 @@
       attributionControl: true
     });
 
-    // Dark tile layer matching site theme
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a> | Data: <a href="https://mc-radar.woodwar.com">mc-radar</a>',
-      subdomains: 'abcd',
-      maxZoom: 18
+    // Dark tile layer matching site theme: gratis OSM-tiles met CSS invert-filter (geen API key)
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | Data: <a href="https://mc-radar.woodwar.com">mc-radar</a>',
+      className: 'tiles-dark',
+      maxZoom: 19
     }).addTo(map);
 
     // Layer groups

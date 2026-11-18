@@ -1090,3 +1090,15 @@ input[type="range"]::-moz-range-thumb:hover {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ========== Basiskaart-filters (gratis OSM-tiles, geen API key) ========== */
+
+/* Donker thema: inverteer standaard OSM-tiles */
+.tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.5);
+}
+
+/* Licht thema: rustige grijze achtergrond (Positron-stijl) */
+.tiles-light {
+  filter: grayscale(0.85) brightness(1.05) contrast(0.95);
+}

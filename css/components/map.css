@@ -228,3 +228,8 @@
 .radar-filter-control input[type="checkbox"] {
   accent-color: var(--color-primary, #74c69d);
 }
+
+/* Donker thema voor gratis OSM-tiles (geen API key): inverteer de standaard tiles */
+.tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.5);
+}

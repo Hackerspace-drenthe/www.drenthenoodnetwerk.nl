@@ -18,6 +18,23 @@
 
 export const newsData = [
   {
+    id: 7,
+    date: '2026-11-18',
+    category: 'voortgang',
+    title: 'Nieuw: volg de groei van het Drenthe Noodnetwerk op de kaart',
+    summary: 'Speel de tijdlijn af en zie wanneer repeaters voor het eerst op mc-radar verschenen. Het voortgangsrapport laat ook zien waar een veldmeting nuttig kan zijn.',
+    content: `
+      <p>Hoe heeft het MeshCore-netwerk in Drenthe zich ontwikkeld? Op de nieuwe interactieve kaart kun je de tijdlijn afspelen of zelf een datum kiezen. Nieuwe registraties lichten op. Met de bereiklaag zie je hoe het geschatte bereik zich over de provincie heeft uitgebreid.</p>
+
+      <p>Bij de start telde het project <strong>35 repeaters in Drenthe</strong>. In de beschikbare mc-radar-snapshots van 16 april tot en met 18 november 2026 kwamen <strong>274 unieke repeater-ID's</strong> minstens één keer voor met coördinaten binnen de CBS-provinciegrens. Daar zitten ook registraties bij die later niet meer in de data voorkomen. Het is dus geen telling van bevestigde installaties of van repeaters die nu actief zijn.</p>
+
+      <p>Het rapport zet de radartellingen per maand op een rij en geeft aan welke plaatsen volgens het bereikmodel buiten bereik liggen. Dat zijn aanknopingspunten voor veldmetingen: een bereikcirkel op de kaart garandeert geen ontvangst.</p>
+    `,
+    tags: ['netwerkkaart', 'mc-radar', 'netwerkdekking', 'voortgang'],
+    link: 'Map/groei.html',
+    featured: true
+  },
+  {
     id: 6,
     date: '2026-05-21',
     category: 'voortgang',

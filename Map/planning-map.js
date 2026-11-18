@@ -107,26 +107,22 @@
       source: new ol.source.OSM()
     });
 
-    // CartoDB Dark (default)
-    const cartoDarkLayer = new ol.layer.Tile({
+    // Dark (default) — OSM tiles with CSS invert filter (geen API key nodig)
+    const darkLayer = new ol.layer.Tile({
       title: 'Dark',
       type: 'base',
       visible: true,
-      source: new ol.source.XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-        attributions: '© OpenStreetMap contributors © CARTO'
-      })
+      className: 'tiles-dark',
+      source: new ol.source.OSM()
     });
 
-    // CartoDB Positron - light background with places
-    const positronLayer = new ol.layer.Tile({
+    // Light — OSM tiles with grayscale filter voor rustige achtergrond
+    const lightLayer = new ol.layer.Tile({
       title: 'Light',
       type: 'base',
       visible: false,
-      source: new ol.source.XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        attributions: '© OpenStreetMap contributors, © CartoDB'
-      })
+      className: 'tiles-light',
+      source: new ol.source.OSM()
     });
 
     // OpenTopoMap
@@ -173,8 +169,8 @@
       })
     });
 
-    map.addLayer(cartoDarkLayer);
-    map.addLayer(positronLayer);
+    map.addLayer(darkLayer);
+    map.addLayer(lightLayer);
     map.addLayer(osmLayer);
     map.addLayer(topoLayer);
     map.addLayer(hotLayer);
@@ -183,8 +179,8 @@
 
     // Add layer switcher control
     const layerSwitcher = createLayerSwitcher([
-      { title: 'Dark', layer: cartoDarkLayer },
-      { title: 'Light', layer: positronLayer },
+      { title: 'Dark', layer: darkLayer },
+      { title: 'Light', layer: lightLayer },
       { title: 'OpenStreetMap', layer: osmLayer },
       { title: 'Topografisch', layer: topoLayer },
       { title: 'Humanitair', layer: hotLayer },

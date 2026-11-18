@@ -344,25 +344,22 @@
         const startCov = coveragePct[0];
         const endCov = coveragePct[lastIdx];
 
-        // Per plaats: afstand tot dichtstbijzijnde repeater-locatie en of de
-        // plaats gedekt is (ooit gezien = gedekt; VRD-repeaters 10 km bereik)
+        // Gebruik ook locaties van repeaters die niet meer in mc-radar staan.
         settlements.forEach((s) => {
-          let dNow = Infinity, covNow = false;
+          let nearestKm = Infinity, inModelRange = false;
           timeline.repeaters.forEach((r) => {
             const d = distKm(s.lat, s.lon, r.lat, r.lon);
-            if (d < dNow) dNow = d;
-            if (d <= repRangeKm(r.name)) covNow = true;
+            if (d < nearestKm) nearestKm = d;
+            if (d <= repRangeKm(r.name)) inModelRange = true;
           });
-          s.distNow = dNow;
-          s.covNow = covNow;
+          s.nearestKm = nearestKm;
+          s.inModelRange = inModelRange;
         });
 
-        const totalPop = settlements.reduce((a, s) => a + s.population, 0);
-        const coveredNow = settlements.filter((s) => s.covNow);
-        const popNow = coveredNow.reduce((a, s) => a + s.population, 0);
         const uncovered = settlements
-          .filter((s) => !s.covNow)
+          .filter((s) => !s.inModelRange)
           .sort((a, b) => b.population - a.population);
+        const coveredCount = settlements.length - uncovered.length;
 
         /* --- Kerncijfers --- */
         el('rp-periode').textContent =
@@ -377,17 +374,17 @@
         el('rp-ever-note').textContent =
           'Historisch totaal over ' + timeline.snapshot_count.toLocaleString('nl-NL') +
           ' snapshots: elke repeater-ID telt één keer zodra die ooit met coördinaten binnen Drenthe is vermeld. ' +
-          'Ook later verdwenen registraties tellen mee. Het totaal bewijst niet dat alle repeaters fysiek geïnstalleerd of actief waren.';
+          'Ook registraties die later niet meer in mc-radar staan tellen mee. Het totaal bewijst niet dat alle repeaters fysiek geïnstalleerd of actief waren.';
         el('rp-coverage').textContent = startCov.toFixed(0) + '% → ' + endCov.toFixed(0) + '%';
-        el('rp-pop-coverage').textContent =
-          Math.round((popNow / totalPop) * 100) + '%';
+        el('rp-settlement-coverage').textContent = coveredCount + ' van ' + settlements.length;
 
         /* --- Wat hebben we bereikt --- */
         el('rp-bereikt-tekst').innerHTML =
-          'Het bereikmodel komt op <strong>' + endCov.toFixed(0) + '%</strong> van Drenthe als alle ooit ' +
-          'geregistreerde locaties meetellen. De centra van <strong>' + coveredNow.length + ' van de ' +
-          settlements.length + '</strong> onderzochte Drentse kernen liggen volgens dit model binnen bereik. ' +
-          'Dit is geen meting van ontvangst of van de huidige beschikbaarheid van het netwerk.';
+          'De kaart laat zien hoe het mogelijke bereik zich uitbreidt: van <strong>' + startCov.toFixed(0) +
+          '%</strong> op de eerste meetdag naar <strong>' + endCov.toFixed(0) + '%</strong> van Drenthe in het cumulatieve model. ' +
+          'Daarmee liggen <strong>' + coveredCount + ' van de ' + settlements.length +
+          ' onderzochte kerncentra</strong> binnen geschat bereik. Een mooi vertrekpunt voor veldmetingen; ' +
+          'de cijfers zijn geen meting van ontvangst of actuele beschikbaarheid.';
 
         // Maandtabel
         const perMaand = {};
@@ -408,17 +405,17 @@
         el('rp-maand-tabel').innerHTML = rows.join('');
 
         /* --- Welke plekken moeten nog --- */
-        el('rp-ontbrekend-tekst').innerHTML =
-          '<strong>' + uncovered.length + '</strong> van de ' + settlements.length +
-          ' onderzochte kernen liggen volgens het model buiten het aangenomen bereik (' + COVERAGE_KM +
-          ' km, VRD-repeaters ' + COVERAGE_KM_VRD + ' km) rond een (ooit geziene) repeater-locatie. ' +
-          'Dit zijn kandidaten voor een veldmeting, gerangschikt op inwonersaantal.';
+        el('rp-ontbrekend-tekst').innerHTML = uncovered.length
+          ? 'We hebben een concrete plek om te beginnen: meet eerst bij de <strong>' + uncovered.length +
+            ' van de ' + settlements.length + '</strong> onderzochte kerncentra die volgens het model buiten bereik liggen. ' +
+            'De lijst staat op volgorde van inwoneraantal.'
+          : 'Geen van de onderzochte kerncentra valt buiten het geschatte bereik. Met veldmetingen kunnen we toetsen waar de kaart overeenkomt met de praktijk.';
         el('rp-ontbrekend-tabel').innerHTML = uncovered.slice(0, 25).map((s) =>
           '<tr><td>' + s.name + '</td>' +
           '<td><span class="badge">' + s.type + '</span></td>' +
           '<td>' + s.municipality + '</td>' +
           '<td class="num">' + s.population.toLocaleString('nl-NL') + '</td>' +
-          '<td class="num">' + (s.distNow === Infinity ? '—' : s.distNow.toFixed(1) + ' km') + '</td></tr>'
+          '<td class="num">' + (s.nearestKm === Infinity ? '—' : s.nearestKm.toFixed(1) + ' km') + '</td></tr>'
         ).join('') + (uncovered.length > 25
           ? '<tr><td colspan="5" style="color:#9898a8">… en nog ' + (uncovered.length - 25) + ' kleinere kernen</td></tr>'
           : '');
@@ -426,11 +423,12 @@
         /* --- Evaluatie --- */
         const topUncovered = uncovered.slice(0, 3).map((s) => s.name).join(', ');
         el('rp-evaluatie').innerHTML =
-          '<p><strong>Voortgang.</strong> De projectstarttelling en de radartellingen komen uit verschillende bronnen. ' +
-          'Zonder gecontroleerde eindtelling kunnen we de netto groei van het project niet vaststellen.</p>' +
-          '<p><strong>Volgende stappen.</strong> Controleer de geregistreerde locaties en meet het bereik in het veld. ' +
-          (topUncovered ? 'Begin bijvoorbeeld bij <strong>' + topUncovered + '</strong>. ' : '') +
-          'Gebruik de <a href="index.html" style="color:#74c69d">planningtool</a> om kandidaat-locaties te bepalen.</p>';
+          '<p><strong>De volgende stap: buiten testen.</strong> Probeer een bericht over meerdere repeaters te sturen ' +
+          'en leg vast waar het aankomt. ' +
+          (topUncovered ? '<strong>' + topUncovered + '</strong> zijn logische plekken om te beginnen. ' : '') +
+          'De <a href="index.html">planningtool</a> helpt om mogelijke locaties voor een extra repeater te vinden.</p>' +
+          '<p class="periode">De projectstarttelling en de radartellingen komen uit verschillende bronnen. ' +
+          'Een gecontroleerde eindtelling blijft nodig om de netto groei vast te stellen.</p>';
       });
   }
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voortgangsrapport Netwerk Groei — Drenthe Noodnetwerk</title>
-  <meta name="description" content="Voortgangsrapport van het Meshcore Drenthe noodnetwerk: groei-animatie, bereikte resultaten, dekking en plekken die nog aandacht nodig hebben">
+  <meta name="description" content="Bekijk hoe het Drenthe Noodnetwerk groeit: speel de kaart af, ontdek het geschatte bereik en zie waar veldmetingen het meeste kunnen opleveren.">
 
   <!-- Base styles -->
   <link rel="stylesheet" href="../css/reset.css">
@@ -18,41 +18,102 @@
 
   <style>
     body {
-      display: flex;
-      flex-direction: column;
+      --groei-accent: #8eddb7;
+      --groei-muted: #aab9b6;
+      --groei-border: #2c413f;
+      --groei-panel: #172321;
       min-height: 100vh;
-      background: #14141c;
+      background: #101917;
+      color: #e8f3ef;
+    }
+
+    .groei-header, .groei-content {
+      width: min(76rem, 100%);
+      margin-inline: auto;
+      padding-inline: clamp(1rem, 3vw, 2rem);
     }
 
     .groei-header {
-      padding: var(--space-sm, 0.75rem) var(--space-md, 1rem);
-      background: #1a1a26;
-      border-bottom: 1px solid #2a2a3a;
+      padding-block: 1.25rem clamp(1.75rem, 4vw, 3rem);
+      background: radial-gradient(ellipse at top right, #1d3831, transparent 70%);
     }
 
-    .groei-header h1 {
-      font-size: 1.1rem;
-      color: #e8e8f0;
-      margin: 0;
+    .groei-kicker {
+      margin: 0 0 0.45rem;
+      color: var(--groei-accent);
+      font-size: 0.75rem;
+      font-weight: 750;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
     }
 
-    .groei-header h1 a {
-      color: var(--color-accent, #74c69d);
+    .groei-home {
+      display: inline-block;
+      margin-bottom: clamp(1.25rem, 3vw, 2.5rem);
+      color: var(--groei-accent);
       text-decoration: none;
     }
 
-    .groei-header h1 a:hover { text-decoration: underline; }
+    .groei-header h1 {
+      font-size: clamp(2.15rem, 6vw, 4rem);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      color: #f0faf6;
+      margin: 0;
+    }
+
+    .groei-intro {
+      max-width: 62ch;
+      margin: 1rem 0;
+      color: #c5d6d1;
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+    }
+
+    .groei-jump {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .groei-jump a {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--groei-border);
+      border-radius: 100px;
+      color: var(--groei-accent);
+      font-size: 0.875rem;
+      text-decoration: none;
+    }
+
+    .groei-home:hover, .groei-jump a:hover { text-decoration: underline; }
+
+    .groei-explorer {
+      background: var(--groei-panel);
+      border: 1px solid var(--groei-border);
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .groei-explorer__header {
+      padding: 1rem 1.25rem;
+    }
+
+    .groei-explorer__header h2 {
+      color: #f0faf6;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .groei-explorer__header p {
+      color: var(--groei-muted);
+      margin: 0.25rem 0 0;
+    }
 
     .groei-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
       position: relative;
     }
 
     #groei-map {
-      height: calc(100vh - 310px);
-      min-height: 380px;
+      height: clamp(25rem, 64vh, 42rem);
       background: #14141c;
     }
 
@@ -75,9 +136,9 @@
       top: 0.75rem;
       right: 0.75rem;
       z-index: 10;
-      background: rgba(20, 20, 30, 0.8);
-      border: 1px solid #2a2a3a;
-      border-radius: 6px;
+      background: rgba(16, 25, 23, 0.9);
+      border: 1px solid var(--groei-border);
+      border-radius: 0.65rem;
       padding: 0.4rem 0.7rem;
       text-align: right;
       color: #e8e8f0;
@@ -138,14 +199,14 @@
       align-items: center;
       gap: 1rem;
       padding: 0.75rem 1rem;
-      background: #1a1a26;
-      border-top: 1px solid #2a2a3a;
+      background: var(--groei-panel);
+      border-top: 1px solid var(--groei-border);
       color: #e8e8f0;
       flex-wrap: wrap;
     }
 
     .groei-controls button {
-      background: var(--color-accent, #74c69d);
+      background: var(--groei-accent);
       color: #14141c;
       border: none;
       border-radius: 6px;
@@ -161,13 +222,13 @@
     .groei-controls input[type="range"] {
       flex: 1;
       min-width: 10rem;
-      accent-color: var(--color-accent, #74c69d);
+      accent-color: var(--groei-accent);
     }
 
     .groei-controls select {
-      background: #22222e;
+      background: #23322f;
       color: #e8e8f0;
-      border: 1px solid #2a2a3a;
+      border: 1px solid var(--groei-border);
       border-radius: 6px;
       padding: 0.4rem 0.5rem;
     }
@@ -183,8 +244,30 @@
     /* Cumulatieve groei-grafiek */
     .groei-chart-wrap {
       padding: 0 1rem 0.75rem;
-      background: #1a1a26;
+      background: var(--groei-panel);
     }
+
+    .groei-chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem 1rem;
+      margin: 0 0 0.25rem;
+      font-size: 0.8rem;
+      color: var(--groei-muted);
+    }
+
+    .groei-chart-legend span::before {
+      content: '';
+      display: inline-block;
+      vertical-align: middle;
+      width: 0.85rem;
+      height: 0.2rem;
+      margin-inline-end: 0.35rem;
+      border-radius: 100px;
+      background: #74c69d;
+    }
+
+    .groei-chart-legend span + span::before { background: #e8a855; }
 
     #groei-chart {
       display: block;
@@ -193,63 +276,77 @@
     }
 
     .groei-uitleg {
-      padding: 0.5rem 1rem 1rem;
-      background: #1a1a26;
-      color: #9898a8;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--groei-border);
+      color: var(--groei-muted);
       font-size: 0.85rem;
+      overflow-wrap: anywhere;
     }
+
+    .groei-uitleg p { max-width: 80ch; margin: 0.6rem 0; }
+    .groei-uitleg summary { cursor: pointer; color: var(--groei-accent); font-weight: 650; }
+    .groei-uitleg a, .rapport a { color: var(--groei-accent); }
 
     @media (max-width: 640px) {
       .groei-controls { gap: 0.5rem; }
+      .groei-controls input[type="range"] { flex-basis: calc(100% - 8rem); min-width: 0; }
       .groei-hud__date { font-size: 1.1rem; }
     }
 
     /* ========== Rapport ========== */
 
     .rapport {
-      max-width: 60rem;
-      margin: 0 auto;
-      padding: 1.5rem 1rem 3rem;
-      color: #d8d8e4;
+      display: grid;
+      gap: 1rem;
+      padding: 1rem 0 3rem;
+      color: #d9e8e3;
       line-height: 1.6;
     }
 
-    .rapport h2 {
-      color: #74c69d;
-      font-size: 1.4rem;
-      margin: 2.2rem 0 0.8rem;
-      border-bottom: 1px solid #2a2a3a;
-      padding-bottom: 0.4rem;
+    .rapport-section {
+      min-width: 0;
+      padding: clamp(0.9rem, 3vw, 1.65rem);
+      border: 1px solid var(--groei-border);
+      border-radius: 1rem;
+      background: var(--groei-panel);
     }
 
-    .rapport h2:first-child { margin-top: 0.5rem; }
+    .rapport h2 {
+      color: #f0faf6;
+      font-size: clamp(1.35rem, 3vw, 1.8rem);
+      margin: 0 0 0.25rem;
+    }
 
-    .rapport p { margin: 0.6rem 0; }
+    .rapport p:not(.groei-kicker) { margin: 0.6rem 0; }
 
     .rapport .periode {
-      color: #9898a8;
+      color: var(--groei-muted);
       font-size: 0.9rem;
     }
 
     .stat-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr));
       gap: 0.8rem;
       margin: 1rem 0;
     }
 
     .stat-card {
-      background: #1a1a26;
-      border: 1px solid #2a2a3a;
-      border-radius: 8px;
-      padding: 0.9rem 1rem;
-      text-align: center;
+      background: #1d2c29;
+      border: 1px solid var(--groei-border);
+      border-radius: 0.75rem;
+      padding: 0.8rem 1rem 1rem;
+    }
+
+    .stat-card--highlight {
+      background: #233b32;
+      border-color: #426d5d;
     }
 
     .stat-card__value {
-      font-size: 1.7rem;
+      font-size: clamp(1.55rem, 3vw, 1.95rem);
       font-weight: 700;
-      color: #74c69d;
+      color: var(--groei-accent);
       font-variant-numeric: tabular-nums;
     }
 
@@ -257,36 +354,41 @@
 
     .stat-card__label {
       font-size: 0.82rem;
-      color: #9898a8;
+      color: #b5c7c1;
       margin-top: 0.2rem;
+    }
+
+    .rapport-table {
+      margin: 0.8rem 0 0;
+      overflow-x: auto;
+      border: 1px solid var(--groei-border);
+      border-radius: 0.65rem;
     }
 
     .rapport table {
       width: 100%;
+      min-width: 32rem;
       border-collapse: collapse;
-      margin: 0.8rem 0;
       font-size: 0.9rem;
       font-variant-numeric: tabular-nums;
     }
 
     .rapport th, .rapport td {
       text-align: left;
-      padding: 0.4rem 0.6rem;
-      border-bottom: 1px solid #2a2a3a;
+      padding: 0.55rem 0.75rem;
     }
 
-    .rapport th { color: #9898a8; font-weight: 600; }
+    .rapport th { color: #c3d5cf; background: #23322f; font-weight: 600; }
     .rapport td.num, .rapport th.num { text-align: right; }
-
-    .rapport tr.positief td:nth-child(3) { color: #74c69d; }
+    .rapport tbody tr:nth-child(even) { background: #1d2c29; }
 
     .badge {
       display: inline-block;
       padding: 0.1rem 0.5rem;
       border-radius: 99px;
       font-size: 0.75rem;
-      background: #2a2a3a;
-      color: #b8b8c8;
+      background: #2a3c36;
+      color: #c3d5cf;
     }
 
     .rapport .eval p { margin: 0.8rem 0; }
@@ -297,12 +399,23 @@
   <a href="#groei-map" class="skip-link">Spring naar kaart</a>
 
   <header class="groei-header">
-    <h1><a href="../index.html">← Drenthe Noodnetwerk</a> / Voortgangsrapport Netwerk Groei
-      <span style="font-weight:400;color:#9898a8">— van start tot nu</span>
-    </h1>
+    <a class="groei-home" href="../index.html">← Drenthe Noodnetwerk</a>
+    <p class="groei-kicker">Voortgangsrapport · MeshCore Drenthe</p>
+    <h1>Zo groeit ons noodnetwerk</h1>
+    <p class="groei-intro">Van 35 repeaters bij de projectstart naar een kaart vol waarnemingen. Bekijk hoe het geschatte bereik zich uitbreidt en waar een veldmeting ons verder kan helpen.</p>
+    <nav class="groei-jump" aria-label="Op deze pagina">
+      <a href="#tijdlijn">Bekijk de groeikaart ↓</a>
+      <a href="#rapport">Naar de kerncijfers ↓</a>
+    </nav>
   </header>
 
-  <main class="groei-main">
+  <main class="groei-content">
+  <section class="groei-explorer" id="tijdlijn" aria-labelledby="tijdlijn-titel">
+    <header class="groei-explorer__header">
+      <h2 id="tijdlijn-titel">Bekijk de groei op de kaart</h2>
+      <p>Speel de tijdlijn af of schuif naar een datum om te zien welke registraties erbij kwamen.</p>
+    </header>
+  <div class="groei-main">
     <div id="groei-map" aria-label="Kaart met groei van het Meshcore netwerk"></div>
 
     <div class="groei-hud" aria-live="off">
@@ -316,7 +429,7 @@
         <span>oud</span>
       </div>
     </div>
-  </main>
+  </div>
 
   <div class="groei-controls">
     <button id="btn-play" aria-label="Afspelen of pauzeren">▶ Afspelen</button>
@@ -341,10 +454,13 @@
   </div>
 
   <div class="groei-chart-wrap">
+    <p class="groei-chart-legend"><span>Radarregistraties</span><span>Geschat bereik in Drenthe</span></p>
     <canvas id="groei-chart" height="64" aria-label="Grafiek van radarregistraties en geschatte cumulatieve dekking"></canvas>
   </div>
 
-  <p class="groei-uitleg">
+  <details class="groei-uitleg">
+    <summary>Zo lees je de kaart en de cijfers</summary>
+    <p>
     Gereconstrueerd uit de git-historie van
     <a href="https://mc-radar.woodwar.com" rel="noopener noreferrer" style="color:#74c69d">mc-radar</a>-data
     (laatste snapshot per dag voor de animatie en grafiek). De kleur geeft aan hoelang een repeater in de data staat:
@@ -352,22 +468,33 @@
     <strong style="color:hsl(120, 75%, 50%)">groen</strong> = middeloud,
     <strong style="color:hsl(240, 75%, 65%)">blauw</strong> = oudste repeaters.
     Grijze punten zijn eerder door mc-radar vermeld, maar komen later niet meer in de data voor.
-    Nieuwe registraties faden geleidelijk in. Groene vlakken tonen de geschatte cumulatieve dekking
-    (aanname: ±5 km bereik, VRD-repeaters ±10 km) — eenmaal gezien blijft een locatie als gedekt tellen,
-    ook als de repeater later verdwijnt; het oranje percentage is het gedekte
+    Nieuwe registraties verschijnen geleidelijk. Groene vlakken tonen de geschatte cumulatieve dekking
+    (aanname: ±5 km bereik, VRD-repeaters ±10 km). Eenmaal waargenomen repeaters blijven meetellen,
+    ook als mc-radar ze niet meer hoort: kleine repeaters die zelf weinig uitzenden, kunnen nog lokaal
+    berichten doorsturen. Dat bewijst niet dat een specifieke repeater nog werkt. Het oranje percentage is het gedekte
     deel van de provincie volgens het model. De kaart gebruikt de laatst bekende locatie per registratie;
     ook locaties buiten Drenthe kunnen binnen de provincie bereik hebben. De teller en de groene grafieklijn
     toetsen de coördinaten uit iedere dagsnapshot aan de
     <a href="https://cartomap.github.io/nl/wgs84/provincie_2025.geojson" style="color:#74c69d">gegeneraliseerde CBS-provinciegrens 2025</a>.
     De kaart en het bereikmodel kunnen foutieve locaties bevatten en zijn niet gebaseerd op de 35 startregistraties.
     Data vernieuwen: <code>python3 scripts/generate-repeater-timeline.py</code>
-  </p>
+    </p>
+    <p id="rp-start-note"></p>
+    <p id="rp-ever-note"></p>
+  </details>
+  </section>
 
   <!-- ========== Voortgangsrapport ========== -->
   <article class="rapport" id="rapport">
-    <h2>Kerncijfers</h2>
+    <section class="rapport-section">
+    <p class="groei-kicker">01 · Stand van zaken</p>
+    <h2>De voortgang in cijfers</h2>
     <p class="periode">Radarperiode: <span id="rp-periode">—</span></p>
     <div class="stat-cards">
+      <div class="stat-card stat-card--highlight">
+        <div class="stat-card__value" id="rp-settlement-coverage">—</div>
+        <div class="stat-card__label">Drentse kerncentra binnen geschat bereik</div>
+      </div>
       <div class="stat-card">
         <div class="stat-card__value" id="rp-start-count">35</div>
         <div class="stat-card__label">Drentse repeaters bij de start (projecttelling)</div>
@@ -384,17 +511,15 @@
         <div class="stat-card__value stat-card__value--accent" id="rp-coverage">—</div>
         <div class="stat-card__label">Cumulatieve modeldekking van Drenthe (eerste → laatste meetdag)</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-card__value stat-card__value--accent" id="rp-pop-coverage">—</div>
-        <div class="stat-card__label">Inwoners van onderzochte kernen waarvan het centrum volgens het model binnen bereik ligt</div>
-      </div>
     </div>
+    <p class="periode">Het bereikmodel telt eerder waargenomen repeaters mee, ook als mc-radar ze nu niet meer hoort. Kerncentra zijn geen meting van ontvangst per adres.</p>
+    </section>
 
-    <p class="periode" id="rp-start-note"></p>
-    <p class="periode" id="rp-ever-note"></p>
-
-    <h2>Wat hebben we bereikt</h2>
+    <section class="rapport-section">
+    <p class="groei-kicker">02 · De ontwikkeling</p>
+    <h2>Wat we al hebben bereikt</h2>
     <p id="rp-bereikt-tekst">—</p>
+    <div class="rapport-table" role="region" aria-label="Radarcijfers per maand" tabindex="0">
     <table aria-label="Laatste radarsnapshot per maand">
       <thead>
         <tr>
@@ -406,9 +531,14 @@
       </thead>
       <tbody id="rp-maand-tabel"></tbody>
     </table>
+    </div>
+    </section>
 
-    <h2>Welke plekken moeten nog</h2>
+    <section class="rapport-section">
+    <p class="groei-kicker">03 · Kansen voor veldmetingen</p>
+    <h2>Waar kunnen we verder bouwen?</h2>
     <p id="rp-ontbrekend-tekst">—</p>
+    <div class="rapport-table" role="region" aria-label="Locaties voor veldmetingen" tabindex="0">
     <table aria-label="Plaatsen buiten het gemodelleerde bereik">
       <thead>
         <tr>
@@ -421,10 +551,16 @@
       </thead>
       <tbody id="rp-ontbrekend-tabel"></tbody>
     </table>
+    </div>
+    </section>
 
-    <h2>Evaluatie van het project</h2>
-    <div class="eval" id="rp-evaluatie">—</div>
+    <section class="rapport-section">
+      <p class="groei-kicker">04 · Blik vooruit</p>
+      <h2>Van kaart naar praktijk</h2>
+      <div class="eval" id="rp-evaluatie">—</div>
+    </section>
   </article>
+  </main>
 
   <!-- OpenLayers -->
   <script src="https://cdn.jsdelivr.net/npm/ol@v10.3.1/dist/ol.js"></script>

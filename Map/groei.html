@@ -114,20 +114,7 @@
 
     #groei-map {
       height: clamp(25rem, 64vh, 42rem);
-      background: #14141c;
-    }
-
-    /* Donker thema voor gratis OSM-tiles (geen API key) */
-    .tiles-dark {
-      filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.5);
-    }
-
-    /* OL geeft custom layer-classes geen afmetingen; zonder deze regel
-       clipt de filter hierboven de tiles naar een 0px-hoge box */
-    #groei-map .ol-layers > div {
-      position: absolute;
-      width: 100%;
-      height: 100%;
+      background: #e7f0e9;
     }
 
     /* Overlay: datum + teller (compact, rechtsboven) */
@@ -136,12 +123,13 @@
       top: 0.75rem;
       right: 0.75rem;
       z-index: 10;
-      background: rgba(16, 25, 23, 0.9);
-      border: 1px solid var(--groei-border);
+      background: rgba(250, 255, 252, 0.95);
+      border: 1px solid #bfd4c7;
       border-radius: 0.65rem;
+      box-shadow: 0 3px 14px rgba(29, 65, 49, 0.14);
       padding: 0.4rem 0.7rem;
       text-align: right;
-      color: #e8e8f0;
+      color: #1c3b2e;
       pointer-events: none;
       backdrop-filter: blur(4px);
       font-size: 0.8rem;
@@ -155,19 +143,19 @@
 
     .groei-hud__count {
       font-size: 0.8rem;
-      color: #74c69d;
+      color: #196047;
       font-variant-numeric: tabular-nums;
     }
 
     .groei-hud__coverage {
       font-size: 0.75rem;
-      color: #e8a855;
+      color: #784b18;
       font-variant-numeric: tabular-nums;
     }
 
     .groei-hud__growth {
       font-size: 0.7rem;
-      color: #9898a8;
+      color: #50665d;
       font-variant-numeric: tabular-nums;
       margin-top: 0.1rem;
     }
@@ -179,7 +167,7 @@
       gap: 0.35rem;
       margin-top: 0.25rem;
       font-size: 0.68rem;
-      color: #9898a8;
+      color: #50665d;
     }
 
     .groei-hud__gradient {
@@ -267,7 +255,18 @@
       background: #74c69d;
     }
 
-    .groei-chart-legend span + span::before { background: #e8a855; }
+    .groei-chart-legend .groei-chart-legend__coverage::before { background: #e8a855; }
+    .groei-chart-legend .groei-chart-legend__forecast::before,
+    .groei-chart-legend .groei-chart-legend__coverage-forecast::before {
+      background: none;
+      border-top: 2px dashed #b1aeff;
+    }
+    .groei-chart-legend .groei-chart-legend__coverage-forecast::before {
+      border-color: #e8a855;
+    }
+
+    .groei-hud__forecast { color: #5146a0; font-weight: 700; }
+    .groei-chart-note { font-size: 0.8rem; color: var(--groei-muted); }
 
     #groei-chart {
       display: block;
@@ -413,15 +412,17 @@
   <section class="groei-explorer" id="tijdlijn" aria-labelledby="tijdlijn-titel">
     <header class="groei-explorer__header">
       <h2 id="tijdlijn-titel">Bekijk de groei op de kaart</h2>
-      <p>Speel de tijdlijn af of schuif naar een datum om te zien welke registraties erbij kwamen.</p>
+      <p>Speel de tijdlijn af om de waarnemingen te volgen. Aan het eind loopt de animatie twee maanden door met een prognose van de radartelling en de modeldekking.</p>
     </header>
   <div class="groei-main">
     <div id="groei-map" aria-label="Kaart met groei van het Meshcore netwerk"></div>
 
     <div class="groei-hud" aria-live="off">
+      <div class="groei-hud__forecast" id="hud-forecast" hidden>Prognose · geen meting</div>
       <div class="groei-hud__date" id="hud-date">—</div>
       <div class="groei-hud__count" id="hud-count">— radarregistraties in Drenthe</div>
       <div class="groei-hud__coverage" id="hud-coverage"></div>
+      <div class="groei-hud__growth" id="hud-map-date"></div>
       <div class="groei-hud__growth" id="hud-growth"></div>
       <div class="groei-hud__legend">
         <span>nieuw</span>
@@ -432,9 +433,9 @@
   </div>
 
   <div class="groei-controls">
-    <button id="btn-play" aria-label="Afspelen of pauzeren">▶ Afspelen</button>
+    <button id="btn-play" aria-label="Afspelen of pauzeren" disabled>▶ Afspelen</button>
     <input type="range" id="time-slider" min="0" max="100" value="0" step="1"
-           aria-label="Tijdlijn">
+           aria-label="Tijdlijn" disabled>
     <label>Snelheid
       <select id="speed-select" aria-label="Afspeelsnelheid">
         <option value="0.5">0.5×</option>
@@ -454,8 +455,14 @@
   </div>
 
   <div class="groei-chart-wrap">
-    <p class="groei-chart-legend"><span>Radarregistraties</span><span>Geschat bereik in Drenthe</span></p>
-    <canvas id="groei-chart" height="64" aria-label="Grafiek van radarregistraties en geschatte cumulatieve dekking"></canvas>
+    <p class="groei-chart-legend">
+      <span>Radarregistraties</span>
+      <span class="groei-chart-legend__coverage">Geschat bereik in Drenthe</span>
+      <span class="groei-chart-legend__forecast" id="forecast-legend" hidden>Prognose radartelling</span>
+      <span class="groei-chart-legend__coverage-forecast" id="forecast-coverage-legend" hidden>Prognose modeldekking</span>
+    </p>
+    <p class="groei-chart-note" id="forecast-unavailable" hidden>Onvoldoende recente gegevens voor een prognose.</p>
+    <canvas id="groei-chart" height="64" aria-label="Grafiek van radarregistraties, geschatte cumulatieve dekking en prognose"></canvas>
   </div>
 
   <details class="groei-uitleg">
@@ -479,6 +486,7 @@
     De kaart en het bereikmodel kunnen foutieve locaties bevatten en zijn niet gebaseerd op de 35 startregistraties.
     Data vernieuwen: <code>python3 scripts/generate-repeater-timeline.py</code>
     </p>
+    <p>De prognose trekt de trends van de laatste 30 dagen twee kalendermaanden door. Voor de radartelling tellen dagen zonder snapshot of met een nultelling niet mee; er zijn minstens zeven bruikbare tellingen nodig. De cumulatieve modeldekking kan in deze prognose alleen gelijk blijven of stijgen, tot maximaal 100%. Dat is geen voorspelling van ontvangst: de kaart en de bereikcirkels blijven op de laatst bekende stand.</p>
     <p id="rp-start-note"></p>
     <p id="rp-ever-note"></p>
   </details>

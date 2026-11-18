@@ -13,8 +13,11 @@
   const MAP_ZOOM = 9.6;
   const DAYS_PER_SECOND = 8;   // bij snelheid 1×
   const FADE_DAYS = 6;         // fade-in duur van een nieuwe repeater (in dagen)
+  const COVERAGE_FADE_DAYS = 2;
   const COVERAGE_KM = 5;       // aangenomen bereik per repeater (km)
   const COVERAGE_KM_VRD = 10;  // modelaanname voor VRD-repeaters
+  const FORECAST_TREND_DAYS = 30;
+  const FORECAST_MONTHS = 2;
 
   /** Aangenomen bereik in km voor een repeater op basis van de naam. */
   function repRangeKm(name) {
@@ -25,9 +28,11 @@
   let timeline = null;         // geladen JSON
   let dayList = [];            // 'YYYY-MM-DD' per stap
   let radarCounts = [];        // Drentse radartelling per snapshotdag
+  let forecast = [];           // uitsluitend voor afspelen en grafiek
   let drentheBoundary = [];
   let currentDay = 0;
   let playing = false;
+  let animationFrame = 0;
   let lastTick = 0;
   let dayFraction = 0;
   let showGone = true;
@@ -47,11 +52,11 @@
 
   const el = (id) => document.getElementById(id);
 
-  function dateToDayIndex(dates, start) {
+  function dateToDayIndex(start, endDate) {
     // Maakt een doorlopende daglijst van start t/m einde
     const out = [];
     const d = new Date(start + 'T00:00:00Z');
-    const end = new Date(dates[dates.length - 1] + 'T00:00:00Z');
+    const end = new Date(endDate + 'T00:00:00Z');
     while (d <= end) {
       out.push(d.toISOString().slice(0, 10));
       d.setUTCDate(d.getUTCDate() + 1);
@@ -59,9 +64,45 @@
     return out;
   }
 
+  function recentSlope(values, isUsable) {
+    const points = values.slice(-FORECAST_TREND_DAYS).flatMap((value, day) =>
+      isUsable(value) ? [{ day, value }] : []
+    );
+    if (points.length < 7) return null;
+
+    const meanDay = points.reduce((sum, p) => sum + p.day, 0) / points.length;
+    const meanValue = points.reduce((sum, p) => sum + p.value, 0) / points.length;
+    return points.reduce((sum, p) => sum + (p.day - meanDay) * (p.value - meanValue), 0) /
+      points.reduce((sum, p) => sum + (p.day - meanDay) ** 2, 0);
+  }
+
+  function buildForecast(endDate, counts, coverage) {
+    const lastCount = counts[counts.length - 1];
+    const countSlope = recentSlope(counts, (count) => count > 0);
+    if (!(lastCount > 0) || countSlope === null) return [];
+
+    const lastCoverage = coverage[coverage.length - 1];
+    const coverageSlope = recentSlope(coverage, Number.isFinite);
+    const hasCoverage = Number.isFinite(lastCoverage) && coverageSlope !== null;
+
+    const end = new Date(endDate + 'T00:00:00Z');
+    const target = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + FORECAST_MONTHS + 1, 0));
+    target.setUTCDate(Math.min(end.getUTCDate(), target.getUTCDate()));
+    return dateToDayIndex(endDate, target.toISOString().slice(0, 10)).slice(1).map((date, i) => ({
+      date,
+      count: Math.max(0, lastCount + countSlope * (i + 1)),
+      coverage: hasCoverage
+        ? Math.min(100, lastCoverage + Math.max(0, coverageSlope) * (i + 1))
+        : null
+    }));
+  }
+
+  function lastPlaybackDay() {
+    return dayList.length + forecast.length - 1;
+  }
+
   function initMap() {
     const baseLayer = new ol.layer.Tile({
-      className: 'tiles-dark',
       source: new ol.source.OSM()
     });
 
@@ -75,7 +116,7 @@
     coverageLayer = new ol.layer.Vector({
       source: coverageSource,
       style: styleCoverage,
-      opacity: 0.55
+      opacity: 0.65
     });
 
     map = new ol.Map({
@@ -110,15 +151,16 @@
 
   function styleCoverage(feature) {
     const day = feature.get('dayIndex');
-    const now = currentDay + dayFraction;
+    const now = Math.min(currentDay + dayFraction, dayList.length - 1);
     if (day > now) return null; // dekking blijft: eenmaal gezien = gedekt
     const age = now - day;
-    const fade = playing ? Math.round(Math.min(age / FADE_DAYS, 1) * 10) / 10 : 1;
+    const fade = playing && now < dayList.length - 1
+      ? Math.round(Math.min(age / COVERAGE_FADE_DAYS, 1) * 10) / 10 : 1;
     if (fade <= 0) return null;
     if (!coverageStyleCache[fade]) {
       coverageStyleCache[fade] = new ol.style.Style({
-        fill: new ol.style.Fill({ color: 'rgba(116, 198, 157, ' + (0.10 * fade) + ')' }),
-        stroke: new ol.style.Stroke({ color: 'rgba(116, 198, 157, ' + (0.25 * fade) + ')', width: 1 })
+        fill: new ol.style.Fill({ color: 'rgba(26, 169, 105, ' + (0.12 * fade) + ')' }),
+        stroke: new ol.style.Stroke({ color: 'rgba(23, 124, 81, ' + (0.32 * fade) + ')', width: 1 })
       });
     }
     return coverageStyleCache[fade];
@@ -126,7 +168,7 @@
 
   function styleFeature(feature) {
     const day = feature.get('dayIndex');
-    const now = currentDay + dayFraction;
+    const now = Math.min(currentDay + dayFraction, dayList.length - 1);
     if (day > now) return null;                 // nog niet toegevoegd
     const lastDay = feature.get('lastDay');
 
@@ -138,14 +180,14 @@
 
     const age = now - day;
     // Fade-in tijdens afspelen: opaciteit 0 → vol in FADE_DAYS dagen (gekwantiseerd voor stijlcache)
-    const fade = playing ? Math.round(Math.min(age / FADE_DAYS, 1) * 20) / 20 : 1;
+    const fade = playing && now < dayList.length - 1 ? Math.round(Math.min(age / FADE_DAYS, 1) * 20) / 20 : 1;
     if (fade <= 0) return null;
 
     // Kleurverloop op ouderdom: nieuw = rood (hue 0), middel = groen (120), oud = blauw (240)
     const t = Math.min(age / Math.max(now, 1), 1);
     const hue = Math.round((t * 240) / 6) * 6;  // kwantiseer voor stijlcache
     return makeStyle(4.5, 'hsla(' + hue + ', 75%, 55%, ' + (0.85 * fade) + ')',
-      'hsla(' + hue + ', 75%, 75%, ' + (0.9 * fade) + ')', 1);
+      'hsla(' + hue + ', 65%, 28%, ' + (0.9 * fade) + ')', 1);
   }
 
   function loadData() {
@@ -157,7 +199,7 @@
       .then((data) => {
         timeline = data;
         drentheBoundary = data.drenthe_boundary;
-        dayList = dateToDayIndex([data.start, data.end], data.start);
+        dayList = dateToDayIndex(data.start, data.end);
         const dayIdx = {};
         dayList.forEach((d, i) => { dayIdx[d] = i; });
 
@@ -185,10 +227,15 @@
         coverageSource.addFeatures(circles);
 
         coveragePct = computeCoverage(data.repeaters, dayIdx, dayList.length);
+        forecast = buildForecast(data.end, radarCounts, coveragePct);
+        el('forecast-legend').hidden = !forecast.length;
+        el('forecast-coverage-legend').hidden = !Number.isFinite(forecast[0]?.coverage);
+        el('forecast-unavailable').hidden = Boolean(forecast.length);
 
         const slider = el('time-slider');
-        slider.max = String(dayList.length - 1);
-        slider.value = '0';
+        slider.max = String(lastPlaybackDay());
+        slider.disabled = false;
+        el('btn-play').disabled = false;
 
         const startN = radarCounts[0];
         const endN = radarCounts[radarCounts.length - 1];
@@ -251,16 +298,32 @@
   }
 
   function setDay(day) {
-    currentDay = Math.max(0, Math.min(day, dayList.length - 1));
-    el('time-slider').value = String(currentDay);
-    el('hud-date').textContent = formatDate(dayList[currentDay]);
+    currentDay = Math.max(0, Math.min(day, lastPlaybackDay()));
+    const projection = forecast[currentDay - dayList.length];
+    const slider = el('time-slider');
+    slider.value = String(currentDay);
+    const dateLabel = formatDate(projection ? projection.date : dayList[currentDay]);
+    slider.setAttribute('aria-valuetext', projection ? 'Prognose: ' + dateLabel : dateLabel);
+    el('hud-date').textContent = dateLabel;
+    el('hud-forecast').hidden = !projection;
     const count = radarCounts[currentDay];
-    el('hud-count').textContent = count === null
+    el('hud-count').textContent = projection
+      ? 'Circa ' + Math.round(projection.count) + ' radarregistraties in Drenthe'
+      : count === null
       ? 'Geen radarsnapshot op deze dag'
       : count + ' radarregistraties in Drenthe';
-    el('hud-coverage').textContent = coveragePct.length
+    el('hud-coverage').textContent = projection
+      ? projection.coverage === null
+        ? 'Modeldekking: geen prognose beschikbaar'
+        : 'Modeldekking: circa ' + projection.coverage.toLocaleString('nl-NL', {
+          minimumFractionDigits: 1, maximumFractionDigits: 1
+        }) + '% van Drenthe'
+      : coveragePct.length
       ? 'modeldekking: ' + coveragePct[currentDay].toFixed(1) + '% van Drenthe'
       : '';
+    el('hud-map-date').textContent = projection
+      ? 'Kaart: stand van ' + formatDate(dayList[dayList.length - 1]) : '';
+    el('hud-growth').hidden = Boolean(projection);
     vectorLayer.changed();
     coverageLayer.changed();
     drawChart();
@@ -280,28 +343,31 @@
       const advance = Math.floor(dayFraction);
       dayFraction -= advance;
       const next = currentDay + advance;
-      if (next >= dayList.length - 1) {
-        setDay(dayList.length - 1);
+      if (next >= lastPlaybackDay()) {
+        setDay(lastPlaybackDay());
         setPlaying(false);
         return;
       }
       setDay(next);
-    } else {
+    } else if (currentDay < dayList.length - 1) {
       vectorLayer.changed(); // vloeiende fade-in tussen dagstappen
       coverageLayer.changed();
     }
-    requestAnimationFrame(tick);
+    animationFrame = requestAnimationFrame(tick);
   }
 
   function setPlaying(on) {
     playing = on;
     lastTick = 0;
-    if (!on) dayFraction = 0;
+    if (!on) {
+      cancelAnimationFrame(animationFrame);
+      dayFraction = 0;
+    }
     el('btn-play').textContent = on ? '⏸ Pauze' : '▶ Afspelen';
     if (on) {
       // Opnieuw starten als de film aan het einde is
-      if (currentDay >= dayList.length - 1) setDay(0);
-      requestAnimationFrame(tick);
+      if (currentDay >= lastPlaybackDay()) setDay(0);
+      animationFrame = requestAnimationFrame(tick);
     }
   }
 
@@ -444,10 +510,24 @@
     ctx.clearRect(0, 0, canvas.width, h);
     if (!radarCounts.length) return;
 
-    const maxV = Math.max(1, ...radarCounts.filter((count) => count !== null));
     const n = radarCounts.length;
-    const x = (i) => (i / Math.max(1, n - 1)) * canvas.width;
+    const radarMax = Math.max(1, ...radarCounts.filter((count) => count !== null));
+    const maxV = Math.max(radarMax, ...forecast.map((p) => p.count));
+    const x = (i) => (i / Math.max(1, lastPlaybackDay())) * canvas.width;
     const y = (v) => h - 4 - (v / maxV) * (h - 10);
+
+    if (forecast.length) {
+      ctx.fillStyle = 'rgba(177, 174, 255, 0.1)';
+      ctx.fillRect(x(n - 1), 0, canvas.width - x(n - 1), h);
+      ctx.beginPath();
+      ctx.moveTo(x(n - 1), y(radarCounts[n - 1]));
+      forecast.forEach((p, i) => ctx.lineTo(x(n + i), y(p.count)));
+      ctx.strokeStyle = '#b1aeff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     ctx.beginPath();
     for (let i = 0; i < n; i++) {
@@ -469,6 +549,14 @@
       ctx.strokeStyle = '#e8a855';
       ctx.lineWidth = 1.5;
       ctx.stroke();
+      if (Number.isFinite(forecast[0]?.coverage)) {
+        ctx.beginPath();
+        ctx.moveTo(x(n - 1), yPct(coveragePct[n - 1]));
+        forecast.forEach((p, i) => ctx.lineTo(x(n + i), yPct(p.coverage)));
+        ctx.setLineDash([5, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
 
     // Positie-indicator
@@ -483,7 +571,7 @@
     ctx.fillStyle = '#e8e8f0';
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText('radar max. ' + maxV, canvas.width - 4, 12);
+    ctx.fillText('radar max. ' + radarMax, canvas.width - 4, 12);
     if (coveragePct.length) {
       ctx.fillStyle = '#e8a855';
       ctx.fillText('model ' + coveragePct[coveragePct.length - 1].toFixed(0) + '%', canvas.width - 4, 26);

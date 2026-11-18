@@ -464,7 +464,7 @@ function injectNav(currentPage, currentPath, pathPrefix) {
   logo.className = 'site-nav__logo';
   logo.setAttribute('aria-label', 'Drenthe Noodnetwerk - Home');
   logo.innerHTML = `
-    <img src="https://www.hackerspace-drenthe.nl/wp-content/uploads/2021/11/cropped-cropped-4018_Hackerspace-Drenthe_01_small.png" alt="Hackerspace Drenthe logo" width="40" height="40" loading="lazy" decoding="async">
+    <img src="${withPrefix('assets/images/hackermakerspacelogo.svg', pathPrefix)}" alt="Hackerspace Drenthe logo" width="40" height="40" loading="lazy" decoding="async">
     <span class="site-nav__logo-text">
       <span class="site-nav__logo-title">Drenthe Noodnetwerk</span>
       <span class="site-nav__logo-subtitle">een project van Hackerspace Drenthe</span>

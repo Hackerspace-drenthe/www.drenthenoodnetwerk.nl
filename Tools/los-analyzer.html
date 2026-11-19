@@ -27,8 +27,8 @@
              https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0
     - BAG  : Basisregistratie Adressen en Gebouwen — panden WMS
              https://service.pdok.nl/lv/bag/wms/v2_0
-    - BGT  : Basisregistratie Grootschalige Topografie — begroeid terreindeel WMS
-             https://service.pdok.nl/lv/bgt/wms/v1_0
+    - BGT  : Basisregistratie Grootschalige Topografie — openbare detailkaart WMTS
+             https://service.pdok.nl/kadaster/bgt/wmts/v1_0
 
   Bibliotheken:
     - OpenLayers 9.2.4  https://openlayers.org/  (BSD-2-Clause)
@@ -738,13 +738,14 @@
                 <div class="layer-row">
                     <label>
                         <input type="checkbox" id="ck-brt" checked onchange="toggleLayer('brt',this.checked)">
-                        BRT Achtergrondkaart
+                        Achtergrondkaart
                     </label>
                     <select id="brt-style" onchange="setBrtStyle(this.value)" style="font-size:10px;padding:2px 4px;">
                         <option value="standaard">Standaard</option>
                         <option value="grijs">Grijs</option>
                         <option value="pastel">Pastel</option>
                         <option value="water">Water</option>
+                        <option value="osm">OpenStreetMap</option>
                     </select>
                 </div>
 
@@ -787,7 +788,7 @@
                         <label>
                             <input type="checkbox" id="ck-bgt" onchange="toggleLayer('bgt',this.checked)">
                             <span style="display:inline-block;width:10px;height:10px;background:rgba(20,184,166,.8);border-radius:2px;"></span>
-                            BGT Vegetatie / Bossen
+                            BGT Detailkaart
                         </label>
                         <input type="range" id="op-bgt" min="0" max="100" value="65" oninput="setOpacity('bgt',this.value)">
                     </div>
@@ -1123,7 +1124,7 @@
                     • AHN (PDOK/RWS): DTM/DSM hoogtegegevens<br>
                     • BRT-A (PDOK/Kadaster): topografische kaart<br>
                     • Luchtfoto RGB (PDOK): recente orthofoto<br>
-                    • BAG/BGT (PDOK): gebouwen en vegetatiecontext
+                    • BAG/BGT (PDOK): gebouwen en topografische details
                 </div>
             </div>
             <div class="im-card">
@@ -1313,7 +1314,7 @@
  *     BRT-A — topografische achtergrondkaart
  *     Luchtfoto RGB 2023 (25 cm ortho)
  *     BAG  — gebouwvoetafdrukken (Pand)
- *     BGT  — begroeid terreindeel (bos, vegetatie)
+ *     BGT  — topografische detailkaart
  *
  *   Signaalanalyse:
  *     - Lijn-van-zicht (LOS) berekening over het AHN DTM/DSM
@@ -1408,10 +1409,11 @@ const brtSource = new ol.source.XYZ({
     maxZoom: 19,
 });
 const brtLayer = new ol.layer.Tile({ source: brtSource, name: 'brt', visible: true });
+const osmSource = new ol.source.OSM();
 
 const luchtLayer = new ol.layer.Tile({
     source: new ol.source.XYZ({
-        url: `${LUCHT_BASE}/2023_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg`,
+        url: `${LUCHT_BASE}/Actueel_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg`,
         attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> Luchtfoto',
         maxZoom: 19,
     }),
@@ -1442,14 +1444,14 @@ const bagSrc = new ol.source.ImageWMS({
 });
 const bagLayer = new ol.layer.Image({ source: bagSrc, name: 'bag', visible: false, opacity: 0.7, zIndex: 6 });
 
-// BGT Begroeid terreindeel WMS (bossen, parken, grasland)
-const bgtSrc = new ol.source.ImageWMS({
-    url: 'https://service.pdok.nl/lv/bgt/wms/v1_0',
-    params: { LAYERS: 'begroeidterreindeel', FORMAT: 'image/png', TRANSPARENT: true },
-    ratio: 1, serverType: 'geoserver',
+const bgtSrc = new ol.source.XYZ({
+    tileUrlFunction: ([z, x, y]) =>
+        `https://service.pdok.nl/kadaster/bgt/wmts/v1_0/standaardvisualisatie/EPSG:3857/${String(z).padStart(2, '0')}/${x}/${y}.png`,
+    maxZoom: 24,
+    wrapX: false,
     attributions: '© <a href="https://www.pdok.nl" target="_blank">PDOK</a> BGT',
 });
-const bgtLayer = new ol.layer.Image({ source: bgtSrc, name: 'bgt', visible: false, opacity: 0.65, zIndex: 5 });
+const bgtLayer = new ol.layer.Tile({ source: bgtSrc, name: 'bgt', visible: false, opacity: 0.65, zIndex: 5 });
 
 // Vector: analysis line
 const obstructionSource = new ol.source.Vector();
@@ -1971,7 +1973,8 @@ function setOpacity(name, v) {
 }
 
 function setBrtStyle(style) {
-    brtSource.setUrl(`${BRT_BASE}/${style}/EPSG:3857/{z}/{x}/{y}.png`);
+    if (style !== 'osm') brtSource.setUrl(`${BRT_BASE}/${style}/EPSG:3857/{z}/{x}/{y}.png`);
+    brtLayer.setSource(style === 'osm' ? osmSource : brtSource);
 }
 
 // ══════════════════════════════════════════════════════════════════════

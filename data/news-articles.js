@@ -18,6 +18,45 @@
 
 export const newsData = [
   {
+    id: 8,
+    date: '2026-11-19',
+    category: 'aankondiging',
+    title: 'Oproep: Samen bouwen aan de Landelijke MeshCore &amp; Noodnetwerk Maand (Mei 2027)',
+    summary: 'Help mee om in mei 2027 door heel Nederland activiteiten rond MeshCore, noodnetwerken en off-grid communicatie te organiseren. Dit is een open uitnodiging: er ligt nog geen landelijk programma.',
+    content: `
+      <figure class="news-article__media">
+        <img src="assets/images/news/landelijke-meshcore-maand-2027.png" alt="Poster voor mei 2027: bouw mee aan de Landelijke MeshCore &amp; Noodnetwerk Maand, met een kaart van Nederland en mensen die samen aan radioapparatuur werken." width="1024" height="572" loading="lazy" decoding="async">
+        <figcaption>Oproep om mee te denken en mee te bouwen aan een landelijke MeshCore Maand in mei 2027.</figcaption>
+      </figure>
+
+      <p>In mei 2026 organiseerden we vanuit <a href="https://hackerspace-drenthe.nl/">Hackerspace Drenthe</a> en <a href="https://drenthenoodnetwerk.nl/">Drenthe Noodnetwerk</a> de MeshCore Maand. We hebben er veel plezier aan beleefd en wat ons betreft was het een groot succes. Dat smaakt naar meer. In mei 2027 organiseren we weer een MeshCore Maand in Drenthe. Hoe mooi zou het zijn als er die maand in heel Nederland wordt gebouwd, getest en geleerd?</p>
+
+      <h3>Het idee: heel Nederland verbonden</h3>
+      <p>Door lokale en landelijke initiatieven samen te brengen, kunnen we van mei dé maand maken voor off-grid communicatie, noodnetwerken en mesh-technologie. Als we de activiteiten samen plannen, kunnen we:</p>
+      <ul>
+        <li>Op verschillende plekken in Nederland activiteiten organiseren waar nieuwsgierige beginners en ervaren bouwers samen kunnen knutselen, testen en leren.</li>
+        <li>Samen meer mensen bereiken en meer media-aandacht krijgen dan ieder voor zich.</li>
+        <li>Laten zien wat burgerinitiatieven kunnen bijdragen aan communicatie als reguliere verbindingen uitvallen.</li>
+      </ul>
+
+      <h3>Wie zoeken we?</h3>
+      <ul>
+        <li>Hackerspaces in heel Nederland</li>
+        <li>Bestaande MeshCore-initiatieven</li>
+        <li>Lokale en regionale noodnetwerkinitiatieven</li>
+        <li>Veiligheidsregio’s</li>
+        <li>Lokale VERON-afdelingen en andere zendamateurverenigingen</li>
+      </ul>
+
+      <h3>Doe je mee? Meedenkers gezocht!</h3>
+      <p><strong>Voor de landelijke editie is nog niets geregeld.</strong> Er ligt nog geen vast plan of programma. Dit is een idee en een open uitnodiging om samen te bepalen wat mogelijk is.</p>
+      <p>Wil je meedenken, een activiteit in jouw regio organiseren of helpen met de landelijke coördinatie en PR? Mail Rein via <a href="mailto:rein@hackerspace-drenthe.nl?subject=Landelijke%20MeshCore%20Maand%20mei%202027">rein@hackerspace-drenthe.nl</a>. Vertel ons uit welke regio je komt en wat je graag zou willen doen/waar jullie goed in zijn.</p>
+    `,
+    tags: ['meshcore-maand', 'mei-2027', 'noodnetwerk', 'samenwerking'],
+    link: 'meshcore-maand-2027.html',
+    featured: true
+  },
+  {
     id: 7,
     date: '2026-11-18',
     category: 'voortgang',

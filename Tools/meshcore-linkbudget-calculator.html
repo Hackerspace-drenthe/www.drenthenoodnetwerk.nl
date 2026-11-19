@@ -584,6 +584,7 @@
 			</div>
 			<div id="map"></div>
 			<div class="status" id="mapStatus">Click map to place TX marker. Then place RX marker to auto-fill distance.</div>
+			<div class="status" id="mapTileStatus" role="status" hidden></div>
 			<div class="small-note">
 				Tip: drag markers to fine tune route distance. When both markers exist, map distance overrides manual distance input.
 			</div>
@@ -939,10 +940,20 @@
 				}
 
 				map = L.map("map", { zoomControl: true }).setView([52.93, 6.64], 8);
-				L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+				var tileStatus = byId("mapTileStatus");
+				L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
 					maxZoom: 19,
-					attribution: "&copy; OpenStreetMap contributors"
-				}).addTo(map);
+					attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+				})
+					.on("loading", function () {
+						tileStatus.hidden = true;
+						tileStatus.textContent = "";
+					})
+					.on("tileerror", function () {
+						tileStatus.hidden = false;
+						tileStatus.textContent = "Some map tiles could not load. You can still enter the distance manually.";
+					})
+					.addTo(map);
 
 				map.on("click", function (ev) {
 					if (setMode === "tx") {

@@ -464,7 +464,7 @@ function injectNav(currentPage, currentPath, pathPrefix) {
   logo.className = 'site-nav__logo';
   logo.setAttribute('aria-label', 'Drenthe Noodnetwerk - Home');
   logo.innerHTML = `
-    <img src="${withPrefix('assets/images/hackermakerspacelogo.svg', pathPrefix)}" alt="Hackerspace Drenthe logo" width="40" height="40" loading="lazy" decoding="async">
+    <img src="https://www.hackerspace-drenthe.nl/user/images/logos/hackermakerspacelogo.svg" alt="Hackerspace Drenthe logo" width="40" height="40" loading="lazy" decoding="async">
     <span class="site-nav__logo-text">
       <span class="site-nav__logo-title">Drenthe Noodnetwerk</span>
       <span class="site-nav__logo-subtitle">een project van Hackerspace Drenthe</span>

@@ -51,6 +51,7 @@ export const newsData = [
       <h3>Doe je mee? Meedenkers gezocht!</h3>
       <p><strong>Voor de landelijke editie is nog niets geregeld.</strong> Er ligt nog geen vast plan of programma. Dit is een idee en een open uitnodiging om samen te bepalen wat mogelijk is.</p>
       <p>Wil je meedenken, een activiteit in jouw regio organiseren of helpen met de landelijke coördinatie en PR? Mail Rein via <a href="mailto:rein@hackerspace-drenthe.nl?subject=Landelijke%20MeshCore%20Maand%20mei%202027">rein@hackerspace-drenthe.nl</a>. Vertel ons uit welke regio je komt en wat je graag zou willen doen/waar jullie goed in zijn.</p>
+      <p>Praat mee en deel jouw idee in de <a href="https://web.telegram.org/a/#-1004365640774_127" target="_blank" rel="noopener noreferrer">Telegramgroep voor de landelijke MeshCore Maand</a>.</p>
     `,
     tags: ['meshcore-maand', 'mei-2027', 'noodnetwerk', 'samenwerking'],
     link: 'meshcore-maand-2027.html',
